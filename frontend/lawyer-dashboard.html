@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal / Lawyer Dashboard - MAK DC Investment Company</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #b5a642;
+            --primary-dark: #8a7d2f;
+            --primary-light: #c9b855;
+            --primary-lighter: #d9ca6e;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --orange: #f59e0b;
+            --teal: #14b8a6;
+            --pink: #ec4899;
+            --indigo: #6366f1;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--gray-50);
+            display: flex;
+            flex-direction: row;
+        }
+
+        /* ================================================================
+           SIDEBAR — Mini mode with tooltips (Sawa na Finance/Sales/CEO/Manager/Engineer)
+           ================================================================ */
+        .sidebar {
+            width: 290px; min-width: 290px; height: 100vh;
+            background: linear-gradient(180deg, #b5a642 0%, #8a7d2f 100%);
+            color: white; padding: 20px 16px;
+            display: flex; flex-direction: column; flex-shrink: 0;
+            position: sticky; top: 0;
+            overflow-y: auto; overflow-x: visible;
+            z-index: 9000;
+            transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease;
+            border-right: 3px solid var(--gold);
+        }
+
+        .sidebar.collapsed {
+            width: 78px; min-width: 78px; padding: 20px 8px;
+            overflow: visible !important;
+        }
+
+        .sidebar.collapsed .brand-name,
+        .sidebar.collapsed .brand-motto,
+        .sidebar.collapsed .sidebar-label,
+        .sidebar.collapsed .sidebar-rule,
+        .sidebar.collapsed .sidebar-user .user-info,
+        .sidebar.collapsed .sidebar-bottom,
+        .sidebar.collapsed .nav-badge,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .nav-num,
+        .sidebar.collapsed .sidebar-portal { display: none !important; }
+
+        .sidebar.collapsed .sidebar-brand { padding: 0 0 16px 0; border: none; }
+        .sidebar.collapsed .sidebar-brand .logo-img { width: 50px; height: 50px; border-width: 2px; padding: 2px; margin: 0 auto; }
+        .sidebar.collapsed .sidebar-nav { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .sidebar.collapsed .sidebar-nav a {
+            width: 52px; height: 52px; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; border-left: none;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 24px; line-height: 1; margin: 0;
+            position: relative; overflow: visible;
+        }
+        .sidebar.collapsed .sidebar-nav a:hover,
+        .sidebar.collapsed .sidebar-nav a.active { background: rgba(255, 255, 255, 0.2); border-left: none; }
+        .sidebar.collapsed .sidebar-user { display: flex; justify-content: center; padding: 8px 0; background: transparent; border: none; margin-top: 10px; }
+        .sidebar.collapsed .sidebar-user .user-avatar { width: 46px; height: 46px; font-size: 15px; }
+
+        /* TOOLTIP */
+        .sidebar.collapsed .sidebar-nav a::after {
+            content: attr(data-tooltip);
+            position: fixed;
+            left: 90px;
+            margin-top: 0;
+            transform: translateY(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.15s, visibility 0.15s, margin-left 0.15s;
+            z-index: 99999;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0;
+        }
+        .sidebar.collapsed .sidebar-nav a::before {
+            content: '';
+            position: fixed;
+            left: 78px;
+            transform: translateY(-50%);
+            border: 7px solid transparent;
+            border-right-color: #1e293b;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s, visibility 0.15s;
+            z-index: 99999;
+        }
+        .sidebar.collapsed .sidebar-nav a:hover::after,
+        .sidebar.collapsed .sidebar-nav a:hover::before { opacity: 1; visibility: visible; }
+
+        .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 8000; opacity: 0; transition: opacity 0.3s ease; }
+        .sidebar-backdrop.show { display: block; opacity: 1; }
+
+        .sidebar-toggle {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: var(--gold); width: 40px; height: 40px;
+            border-radius: 8px; font-size: 20px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease; flex-shrink: 0; font-family: inherit;
+        }
+        .sidebar-toggle:hover { background: rgba(245, 158, 11, 0.25); border-color: var(--gold); transform: scale(1.05); }
+
+        .sidebar-brand { text-align: center; padding: 4px 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.15); }
+        .sidebar-brand .logo-img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); padding: 3px; background: white; margin: 0 auto 6px auto; display: block; transition: all 0.3s ease; }
+        .sidebar-brand .brand-name { font-size: 15px; font-weight: 700; color: white; letter-spacing: 1px; }
+        .sidebar-brand .brand-name span { color: #fff5cc; }
+        .sidebar-brand .brand-motto { font-size: 10px; color: rgba(255,255,255,0.6); font-style: italic; }
+        .sidebar-rule { border-top: 1px solid rgba(255,255,255,0.15); margin: 12px 0 10px 0; }
+        .sidebar-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-weight: 600; }
+
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            color: rgba(255,255,255,0.85); text-decoration: none;
+            border-left: 3px solid transparent; transition: all 0.2s;
+            font-size: 13px; border-radius: 0 6px 6px 0; margin-bottom: 3px;
+            cursor: pointer; position: relative; justify-content: space-between; font-weight: 500;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active { color: white; background: rgba(255,255,255,0.15); border-left-color: white; }
+        .sidebar-nav a .nav-num { color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700; min-width: 24px; }
+        .sidebar-nav a.active .nav-num { color: white; }
+        .sidebar-nav a .nav-badge { background: white; color: #8a7d2f; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; min-width: 22px; text-align: center; margin-left: auto; animation: pulseBadge 2s ease-in-out infinite; }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+        }
+
+        .sidebar-user {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; background: rgba(255,255,255,0.1);
+            border-radius: 10px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-user .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: #8a7d2f;
+            flex-shrink: 0; overflow: hidden;
+        }
+        .sidebar-user .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .sidebar-user .user-info .user-name { font-size: 13px; font-weight: 600; color: white; }
+        .sidebar-user .user-info .user-role { font-size: 10px; color: #fff5cc; font-weight: 500; }
+        .sidebar-bottom { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .sidebar-bottom span { display: block; font-weight: 600; font-size: 11px; color: rgba(255,255,255,0.7); }
+        .sidebar-bottom small { color: rgba(255,255,255,0.4); font-size: 10px; }
+
+        .sidebar-portal {
+            display: block; margin-top: 10px; padding: 10px 14px;
+            background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px; color: #fecaca; text-decoration: none;
+            font-size: 13px; transition: all 0.2s; text-align: center;
+        }
+        .sidebar-portal:hover { background: rgba(239, 68, 68, 0.3); color: white; }
+
+        /* PAGE CONTENT */
+        .page-content { flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%);
+            padding: 12px 36px; border-bottom: 3px solid var(--gold);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .dashboard-header .header-left { display: flex; align-items: center; gap: 12px; }
+        .dashboard-header .logo-small { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid white; padding: 2px; background: white; }
+        .dashboard-header .header-title { font-size: 16px; font-weight: 700; color: white; }
+        .dashboard-header .header-title span { color: #fff5cc; }
+        .dashboard-header .header-right { display: flex; align-items: center; gap: 16px; }
+
+        /* USER DROPDOWN */
+        .user-dropdown-wrap { position: relative; }
+        .user-dropdown-trigger {
+            background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3);
+            border-radius: 30px; padding: 5px 14px 5px 6px; color: white;
+            cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 10px;
+            transition: all 0.25s ease;
+        }
+        .user-dropdown-trigger:hover { background: rgba(255,255,255,0.25); border-color: white; }
+        .ud-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: white;
+            border: 2px solid rgba(255,255,255,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 800; color: #8a7d2f;
+            overflow: hidden; flex-shrink: 0;
+        }
+        .ud-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .ud-info { text-align: left; line-height: 1.2; }
+        .ud-name { font-size: 13px; font-weight: 700; color: white; }
+        .ud-role { font-size: 10px; color: #fff5cc; font-weight: 600; margin-top: 1px; }
+        .ud-arrow { font-size: 10px; color: rgba(255,255,255,0.6); transition: transform 0.25s; }
+        .user-dropdown-wrap.open .ud-arrow { transform: rotate(180deg); }
+        .user-dropdown-panel {
+            position: absolute; top: calc(100% + 12px); right: 0; width: 340px;
+            background: white; border-radius: 16px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25); overflow: hidden;
+            opacity: 0; visibility: hidden; transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200; border: 1px solid var(--gray-200);
+        }
+        .user-dropdown-wrap.open .user-dropdown-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+        .udp-header { background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%); padding: 22px 20px; color: white; display: flex; align-items: center; gap: 14px; }
+        .udp-pic {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: white;
+            border: 3px solid rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 800; color: #8a7d2f;
+            overflow: hidden; flex-shrink: 0;
+        }
+        .udp-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .udp-name { font-size: 16px; font-weight: 800; color: white; margin-bottom: 3px; }
+        .udp-role { font-size: 12px; color: #fff5cc; font-weight: 600; }
+        .udp-info { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--gray-100); }
+        .udp-info-item { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: var(--gray-50); border-radius: 8px; border-left: 3px solid #b5a642; }
+        .udp-ic { font-size: 16px; flex-shrink: 0; }
+        .udp-info-label { font-size: 9px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .udp-info-value { font-size: 12px; font-weight: 600; color: var(--gray-800); }
+        .udp-actions { padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--gray-50); }
+        .udp-btn { padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .udp-btn.edit { background: linear-gradient(135deg, #b5a642, #8a7d2f); color: white; }
+        .udp-btn.edit:hover { transform: translateY(-2px); }
+        .udp-btn.logout { background: rgba(239,68,68,0.1); color: #dc2626; border: 1.5px solid rgba(239,68,68,0.2); }
+        .udp-btn.logout:hover { background: rgba(239,68,68,0.2); }
+
+        .dashboard-content { padding: 28px 36px 40px; flex: 1; }
+
+        /* STATS */
+        .dashboard-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px; }
+        .stat-card { background: white; border-radius: 12px; padding: 18px 22px; border: 1px solid var(--gray-200); transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .stat-card .stat-icon { font-size: 26px; margin-bottom: 4px; }
+        .stat-card .stat-number { font-size: 26px; font-weight: 800; color: var(--primary-dark); }
+        .stat-card .stat-label { font-size: 13px; color: var(--gray-500); font-weight: 500; }
+
+        /* QUICK LINKS */
+        .quick-links { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .quick-link-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid var(--gray-200); text-align: center; cursor: pointer; transition: all 0.3s ease; }
+        .quick-link-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: var(--shadow-lg); }
+        .quick-link-card .ql-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        .quick-link-card .ql-title { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+        .quick-link-card .ql-desc { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+        /* TABS */
+        .tabs-container { margin-bottom: 28px; }
+        .tabs-header { display: flex; gap: 4px; background: white; border-radius: 12px; padding: 6px; border: 1px solid var(--gray-200); box-shadow: var(--shadow-lg); flex-wrap: wrap; }
+        .tabs-header .tab-btn { flex: 1; padding: 10px 16px; border: none; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 600; color: var(--gray-500); cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 100px; font-family: inherit; }
+        .tabs-header .tab-btn:hover { background: var(--gray-50); color: var(--gray-700); }
+        .tabs-header .tab-btn.active { background: var(--primary-dark); color: white; box-shadow: 0 4px 12px rgba(138, 125, 47, 0.3); }
+        .tabs-header .tab-btn .badge { background: var(--primary); color: white; font-size: 10px; font-weight: 700; padding: 1px 10px; border-radius: 12px; }
+        .tabs-header .tab-btn.active .badge { background: var(--gold); color: var(--primary-dark); }
+        .tab-content { display: none; margin-top: 20px; }
+        .tab-content.active { display: block; }
+
+        /* LEGAL SECTIONS */
+        .legal-section { background: white; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 20px; }
+        .legal-section .legal-header { background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .legal-section .legal-header h2 { color: white; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .legal-section .legal-header .legal-badge { background: white; color: #8a7d2f; padding: 2px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .legal-section .legal-body { padding: 16px 24px 20px; }
+
+        .legal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .legal-card { background: var(--gray-50); border-radius: 12px; padding: 16px 18px; border: 1px solid var(--gray-200); transition: all 0.3s ease; }
+        .legal-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+        .legal-card .legal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .legal-card .legal-top .legal-id { font-weight: 700; color: var(--primary-dark); font-family: 'Courier New', monospace; }
+        .legal-card .legal-top .legal-status { font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; text-transform: uppercase; }
+        .legal-status.draft { background: rgba(245, 158, 11, 0.1); color: var(--orange); }
+        .legal-status.pending-review { background: rgba(99, 102, 241, 0.1); color: var(--indigo); }
+        .legal-status.approved { background: rgba(34, 197, 94, 0.1); color: var(--green); }
+        .legal-status.rejected { background: rgba(239, 68, 68, 0.1); color: var(--red); }
+        .legal-status.signed { background: rgba(20, 184, 166, 0.1); color: var(--teal); }
+        .legal-card .legal-details { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 13px; color: var(--gray-600); margin: 4px 0; }
+        .legal-card .legal-actions { display: flex; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--gray-200); flex-wrap: wrap; }
+        .legal-card .legal-actions .action-btn { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .legal-card .legal-actions .action-btn:hover { transform: translateY(-1px); }
+
+        .action-btn.primary { background: var(--primary-dark); color: white; }
+        .action-btn.primary:hover { background: #6e6330; }
+        .action-btn.gold { background: var(--gold); color: white; }
+        .action-btn.gold:hover { background: #d97706; }
+        .action-btn.green { background: var(--green); color: white; }
+        .action-btn.green:hover { background: #16a34a; }
+        .action-btn.blue { background: var(--blue); color: white; }
+        .action-btn.blue:hover { background: #2563eb; }
+        .action-btn.purple { background: var(--purple); color: white; }
+        .action-btn.purple:hover { background: #7c3aed; }
+        .action-btn.red { background: var(--red); color: white; }
+        .action-btn.red:hover { background: #dc2626; }
+
+        /* FORM STYLES */
+        .legal-form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .legal-form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .legal-form-grid-3 > div label,
+        .legal-form-grid-2 > div label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+        .legal-form-grid-3 input,
+        .legal-form-grid-3 select,
+        .legal-form-grid-2 input,
+        .legal-form-grid-2 select { width: 100%; padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; font-family: inherit; background: white; }
+        .legal-form-grid-3 input:focus,
+        .legal-form-grid-3 select:focus,
+        .legal-form-grid-2 input:focus,
+        .legal-form-grid-2 select:focus { outline: none; border-color: var(--primary); }
+        .legal-form-section { margin-bottom: 12px; }
+        .legal-form-section label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+        .legal-form-section textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 60px; background: white; }
+        .legal-form-section textarea:focus { outline: none; border-color: var(--primary); }
+
+        /* TASK SECTION */
+        .task-section { background: white; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 20px; }
+        .task-section .task-header { background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .task-section .task-header h2 { color: white; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .task-section .task-body { padding: 16px 24px 20px; }
+        .task-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .task-card { background: var(--gray-50); border-radius: 10px; padding: 14px 16px; border: 1px solid var(--gray-200); transition: all 0.3s ease; }
+        .task-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+        .task-card .task-icon { font-size: 22px; margin-bottom: 4px; }
+        .task-card .task-title { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+        .task-card .task-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .task-card .task-status { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); color: var(--orange); letter-spacing: 0.5px; text-transform: uppercase; }
+        .task-card .task-actions { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--gray-200); display: flex; gap: 6px; flex-wrap: wrap; }
+        .task-card .task-actions .action-btn { padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .task-card .task-actions .action-btn:hover { transform: translateY(-1px); }
+
+        /* MODAL */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: white; border-radius: 16px; max-width: 600px; width: 100%; padding: 28px 32px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3); animation: modalIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-box .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-box .modal-header h3 { font-size: 18px; color: var(--primary-dark); display: flex; align-items: center; gap: 8px; }
+        .modal-box .modal-header .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray-400); transition: color 0.3s; }
+        .modal-box .modal-header .modal-close:hover { color: var(--red); }
+        .modal-box .modal-body { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
+        .modal-box .modal-body .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; gap: 10px; }
+        .modal-box .modal-body .info-row .label { color: var(--gray-500); }
+        .modal-box .modal-body .info-row .value { font-weight: 600; color: var(--gray-700); text-align: right; }
+        .modal-box .modal-body textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; margin-top: 4px; }
+        .modal-box .modal-body textarea:focus { outline: none; border-color: var(--primary); }
+        .modal-box .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+        .modal-box .modal-footer .btn-submit { padding: 8px 24px; background: var(--primary-dark); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-family: inherit; }
+        .modal-box .modal-footer .btn-submit:hover { background: #6e6330; transform: translateY(-2px); }
+        .modal-box .modal-footer .btn-submit.green { background: var(--green); }
+        .modal-box .modal-footer .btn-submit.green:hover { background: #16a34a; }
+        .modal-box .modal-footer .btn-submit.red { background: var(--red); }
+        .modal-box .modal-footer .btn-submit.red:hover { background: #dc2626; }
+        .modal-box .modal-footer .btn-cancel { padding: 8px 24px; background: var(--gray-100); color: var(--gray-600); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: inherit; }
+        .modal-box .modal-footer .btn-cancel:hover { background: var(--gray-200); }
+        .modal-box .modal-body .status-msg { padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-top: 8px; display: none; }
+        .modal-box .modal-body .status-msg.success { display: block; background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.15); }
+        .modal-box .modal-body .status-msg.error { display: block; background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.15); }
+        .status-msg { padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-top: 8px; display: none; }
+        .status-msg.success { display: block; background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.15); }
+        .status-msg.error { display: block; background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.15); }
+
+        /* CONFIRM DIALOG */
+        .confirm-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); z-index: 20000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .confirm-overlay.show { opacity: 1; visibility: visible; }
+        .confirm-box { background: white; border-radius: 20px; max-width: 440px; width: 100%; padding: 32px 28px 24px; text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35); transform: scale(0.85) translateY(20px); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .confirm-overlay.show .confirm-box { transform: scale(1) translateY(0); }
+        .confirm-icon { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 18px; }
+        .confirm-icon.green { background: rgba(34, 197, 94, 0.12); border: 2px solid rgba(34, 197, 94, 0.3); color: var(--green); }
+        .confirm-icon.red { background: rgba(239, 68, 68, 0.12); border: 2px solid rgba(239, 68, 68, 0.3); color: var(--red); }
+        .confirm-icon.gold { background: rgba(181, 166, 66, 0.12); border: 2px solid rgba(181, 166, 66, 0.3); color: var(--primary-dark); }
+        .confirm-icon.purple { background: rgba(139, 92, 246, 0.12); border: 2px solid rgba(139, 92, 246, 0.3); color: var(--purple); }
+        .confirm-title { font-size: 20px; font-weight: 800; color: var(--primary-dark); margin-bottom: 10px; }
+        .confirm-message { font-size: 14px; color: var(--gray-500); line-height: 1.6; margin-bottom: 24px; }
+        .confirm-message strong { color: var(--primary-dark); font-weight: 700; font-family: 'Courier New', monospace; background: var(--gray-100); padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+        .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+        .confirm-actions button { flex: 1; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.25s; font-family: inherit; border: none; }
+        .confirm-actions .btn-confirm { background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%); color: white; }
+        .confirm-actions .btn-confirm.danger { background: linear-gradient(135deg, var(--red) 0%, #dc2626 100%); }
+        .confirm-actions .btn-cancel { background: var(--gray-100); color: var(--gray-700); border: 1.5px solid var(--gray-200); }
+        .confirm-actions .btn-cancel:hover { background: var(--gray-200); }
+
+        /* EDIT PROFILE MODAL */
+        .edit-profile-modal-box { max-width: 560px; padding: 0; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column; }
+        .edit-profile-header { background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%); padding: 22px 28px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .edit-profile-header .header-info { display: flex; align-items: center; gap: 14px; }
+        .edit-profile-header .header-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .edit-profile-header .header-text h3 { font-size: 18px; font-weight: 800; color: white; margin: 0 0 2px 0; }
+        .edit-profile-header .header-text p { font-size: 12px; color: rgba(255, 255, 255, 0.8); margin: 0; }
+        .edit-profile-header .modal-close { background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+        .edit-profile-body { padding: 24px 28px; overflow-y: auto; flex: 1; }
+        .edit-profile-footer { padding: 16px 28px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; gap: 12px; justify-content: flex-end; flex-shrink: 0; }
+        .edit-profile-footer button { padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: inherit; }
+        .edit-profile-footer .btn-cancel { background: var(--gray-200); color: var(--gray-700); }
+        .edit-profile-footer .btn-submit { background: linear-gradient(135deg, #b5a642 0%, #8a7d2f 100%); color: white; }
+        .edit-pic-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        .edit-pic-wrap { position: relative; width: 110px; height: 110px; margin-bottom: 10px; }
+        .edit-pic-preview { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #b5a642; background: white; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; color: #8a7d2f; overflow: hidden; }
+        .edit-pic-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .edit-pic-upload-btn { position: absolute; bottom: 4px; right: 4px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #b5a642, #8a7d2f); border: 3px solid white; color: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); transition: all 0.25s; padding: 0; }
+        .edit-pic-upload-btn:hover { transform: scale(1.1); }
+        .edit-pic-hint { font-size: 11px; color: var(--gray-500); text-align: center; line-height: 1.5; }
+        .edit-pic-hint strong { color: #8a7d2f; }
+        #profilePicInput { display: none; }
+        .company-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .company-form-section { display: flex; flex-direction: column; gap: 4px; }
+        .company-form-section .form-label { font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px; }
+        .company-form-section .form-label .required { color: var(--red); }
+        .company-form-section input { padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; font-family: inherit; background: var(--gray-50); width: 100%; transition: all 0.2s; }
+        .company-form-section input:focus { outline: none; border-color: var(--primary); background: white; }
+        .company-form-section input.readonly-field { background: var(--gray-100); color: var(--gray-500); cursor: not-allowed; border-color: var(--gray-200); opacity: 0.85; }
+        .readonly-badge { display: inline-block; font-size: 9px; font-weight: 800; color: var(--gray-500); background: var(--gray-200); padding: 2px 6px; border-radius: 4px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .readonly-notice { background: rgba(181, 166, 66, 0.08); border: 1.5px solid rgba(181, 166, 66, 0.25); border-left: 4px solid var(--primary); border-radius: 10px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--gray-700); font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+        .readonly-notice .notice-icon { font-size: 18px; flex-shrink: 0; }
+        .readonly-notice strong { color: var(--primary-dark); }
+
+        /* FOOTER */
+        .site-footer { background: #8a7d2f; color: white; padding: 16px 44px 12px; text-align: center; margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .site-footer p { font-size: 13px; color: rgba(255, 255, 255, 0.5); }
+        .site-footer small { color: rgba(255, 255, 255, 0.3); font-size: 11px; }
+
+        /* TOAST */
+        #toastContainer { position: fixed; top: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 14px 22px; border-radius: 12px; font-size: 14px; font-weight: 600; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25); display: flex; align-items: center; gap: 10px; min-width: 260px; transform: translateX(400px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); font-family: 'Inter', sans-serif; }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .toast.info { background: linear-gradient(135deg, #b5a642, #8a7d2f); }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+            .quick-links { grid-template-columns: repeat(2, 1fr); }
+            .legal-grid { grid-template-columns: 1fr; }
+            .task-grid { grid-template-columns: 1fr; }
+            .legal-form-grid-3 { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 0; left: 0; z-index: 250; width: 290px; height: 100vh; box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5); transform: translateX(0); padding: 20px 16px; }
+            .sidebar.collapsed { transform: translateX(-100%); width: 290px; padding: 20px 16px; }
+            .sidebar.collapsed .brand-name,
+            .sidebar.collapsed .brand-motto,
+            .sidebar.collapsed .sidebar-label,
+            .sidebar.collapsed .sidebar-rule,
+            .sidebar.collapsed .sidebar-user .user-info,
+            .sidebar.collapsed .sidebar-bottom,
+            .sidebar.collapsed .nav-badge,
+            .sidebar.collapsed .nav-text,
+            .sidebar.collapsed .nav-num,
+            .sidebar.collapsed .sidebar-portal { display: block !important; }
+            .sidebar.collapsed .sidebar-nav a { justify-content: space-between; padding: 10px 12px; font-size: 13px; gap: 10px; width: auto; height: auto; background: transparent; border-radius: 0 6px 6px 0; }
+            .sidebar.collapsed .sidebar-nav a::after,
+            .sidebar.collapsed .sidebar-nav a::before { display: none; }
+            .sidebar.collapsed .sidebar-brand .logo-img { width: 72px; height: 72px; border-width: 3px; padding: 3px; }
+            .sidebar.collapsed .sidebar-user { justify-content: flex-start; padding: 10px 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+            .sidebar.collapsed .sidebar-user .user-avatar { width: 40px; height: 40px; font-size: 15px; }
+            .sidebar-backdrop.show { display: block; }
+            .dashboard-header { padding: 10px 16px; flex-wrap: wrap; gap: 6px; }
+            .dashboard-header .header-title { font-size: 13px; }
+            .dashboard-content { padding: 16px 14px 24px; }
+            .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card .stat-number { font-size: 20px; }
+            .quick-links { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .tabs-header { flex-direction: column; gap: 4px; }
+            .tabs-header .tab-btn { padding: 10px; font-size: 13px; min-width: auto; }
+            .site-footer { padding: 14px 16px; }
+            .legal-form-grid-3 { grid-template-columns: 1fr; }
+            .legal-form-grid-2 { grid-template-columns: 1fr; }
+            .user-dropdown-panel { width: 300px; right: -10px; }
+            .ud-info { display: none; }
+            .user-dropdown-trigger { padding: 4px; border-radius: 50%; }
+            .ud-arrow { display: none; }
+            .company-form-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .dashboard-stats { grid-template-columns: 1fr; }
+            .quick-links { grid-template-columns: 1fr; }
+            .dashboard-header .header-title { font-size: 11px; }
+            .user-dropdown-panel { width: calc(100vw - 32px); right: -60px; }
+        }
+        @media (min-width: 769px) { .sidebar-backdrop { display: none !important; } }
+    </style>
+</head>
+<body data-roles="Lawyer">
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img class="logo-img" src="assets/makdc-logo.jpg" alt="MAK DC Logo"
+                 onerror="this.src='https://via.placeholder.com/80x80/b5a642/ffffff?text=MAK'">
+            <div class="brand-name">MAK DC Investment <span>Company LTD</span></div>
+            <div class="brand-motto">"Quality service is our priority."</div>
+        </div>
+        <div class="sidebar-rule"></div>
+
+        <p class="sidebar-label">⚖️ Legal</p>
+        <nav class="sidebar-nav">
+            <a class="active" href="#" onclick="switchTab('tab1'); return false;" data-tooltip="Contracts">
+                <span style="font-size:18px;">📄</span><span class="nav-text">Contracts</span>
+                <span class="nav-num">01</span>
+                <span class="nav-badge" id="navContractsBadge">0</span>
+            </a>
+            <a href="#" onclick="switchTab('tab2'); return false;" data-tooltip="Procurement Contracts">
+                <span style="font-size:18px;">🛒</span><span class="nav-text">Procurement</span>
+                <span class="nav-num">02</span>
+                <span class="nav-badge" id="navProcBadge">0</span>
+            </a>
+            <a href="#" onclick="switchTab('tab3'); return false;" data-tooltip="Sales Contracts">
+                <span style="font-size:18px;">📦</span><span class="nav-text">Sales Contracts</span>
+                <span class="nav-num">03</span>
+            </a>
+            <a href="#" onclick="switchTab('tab4'); return false;" data-tooltip="Finance Legal Review">
+                <span style="font-size:18px;">💰</span><span class="nav-text">Finance Review</span>
+                <span class="nav-num">04</span>
+            </a>
+            <a href="#" onclick="switchTab('tab5'); return false;" data-tooltip="Compliance">
+                <span style="font-size:18px;">📋</span><span class="nav-text">Compliance</span>
+                <span class="nav-num">05</span>
+            </a>
+            <a href="#" onclick="switchTab('tab6'); return false;" data-tooltip="Reports">
+                <span style="font-size:18px;">📈</span><span class="nav-text">Reports</span>
+                <span class="nav-num">06</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-rule"></div>
+
+        <p class="sidebar-label">⚡ Quick Actions</p>
+        <nav class="sidebar-nav">
+            <a href="#" onclick="refreshAll(); return false;" data-tooltip="Refresh All">
+                <span style="font-size:18px;">🔄</span><span class="nav-text">Refresh All</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarUserAvatar">LC</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebarUserName">Legal Counsel</div>
+                <div class="user-role">⚖️ Legal / Lawyer</div>
+            </div>
+        </div>
+
+        <a class="sidebar-portal" href="#" onclick="handleLogoutClick(event)">🔌 Logout</a>
+
+        <div class="sidebar-bottom">
+            <span>MAKETE DISTRICT COUNCIL SPV</span>
+            <small>Quality service is our priority.</small>
+        </div>
+    </aside>
+
+    <!-- ===== PAGE CONTENT ===== -->
+    <div class="page-content">
+
+        <header class="dashboard-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+                <img class="logo-small" src="assets/makdc-logo.jpg" alt="MAK DC Logo"
+                     onerror="this.src='https://via.placeholder.com/36x36/b5a642/ffffff?text=M'">
+                <div class="header-title">MAK DC Investment <span>Company LTD </span> | Legal Department</div>
+            </div>
+            <div class="header-right">
+                <div class="user-dropdown-wrap" id="userDropdownWrap">
+                    <button class="user-dropdown-trigger" onclick="toggleUserDropdown(event)">
+                        <div class="ud-avatar" id="udAvatar"><span id="udInitials">LC</span></div>
+                        <div class="ud-info">
+                            <div class="ud-name" id="udName">Legal Counsel</div>
+                            <div class="ud-role" id="udRole">⚖️ Legal / Lawyer</div>
+                        </div>
+                        <span class="ud-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown-panel" id="userDropdownPanel">
+                        <div class="udp-header">
+                            <div class="udp-pic" id="udpPic"><span id="udpInitials">LC</span></div>
+                            <div class="udp-user-info">
+                                <div class="udp-name" id="udpName">Legal Counsel</div>
+                                <div class="udp-role" id="udpRole">⚖️ Legal / Lawyer</div>
+                            </div>
+                        </div>
+                        <div class="udp-info">
+                            <div class="udp-info-item"><span class="udp-ic">📧</span><div class="udp-info-text"><div class="udp-info-label">Email</div><div class="udp-info-value" id="udpEmail">legal@makdc.co.tz</div></div></div>
+                            <div class="udp-info-item"><span class="udp-ic">📞</span><div class="udp-info-text"><div class="udp-info-label">Phone</div><div class="udp-info-value" id="udpPhone">+255 754 123 456</div></div></div>
+                            <div class="udp-info-item"><span class="udp-ic">🏢</span><div class="udp-info-text"><div class="udp-info-label">Department</div><div class="udp-info-value" id="udpDepartment">Legal Department</div></div></div>
+                            <div class="udp-info-item"><span class="udp-ic">🆔</span><div class="udp-info-text"><div class="udp-info-label">Employee ID</div><div class="udp-info-value" id="udpEmployeeId">EMP-006</div></div></div>
+                        </div>
+                        <div class="udp-actions">
+                            <button class="udp-btn edit" onclick="openEditProfileModal(); closeUserDropdown();">🖋️ Edit Profile</button>
+                            <button class="udp-btn logout" onclick="handleLogoutClick(event)">🔌 Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+
+            <!-- ===== STATS ===== -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <span class="stat-icon">📄</span>
+                    <div class="stat-number" id="statTotalContracts">0</div>
+                    <div class="stat-label">Total Contracts</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⏳</span>
+                    <div class="stat-number" id="statPendingReview">0</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">✅</span>
+                    <div class="stat-number" id="statApproved">0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">📋</span>
+                    <div class="stat-number" id="statSigned">0</div>
+                    <div class="stat-label">Signed</div>
+                </div>
+            </div>
+
+            <!-- ===== QUICK LINKS ===== -->
+            <div class="quick-links">
+                <div class="quick-link-card" onclick="viewProcurementContracts()">
+                    <span class="ql-icon">🛒</span>
+                    <div class="ql-title">Procurement</div>
+                    <div class="ql-desc">View &amp; create contracts</div>
+                </div>
+                <div class="quick-link-card" onclick="viewSalesContracts()">
+                    <span class="ql-icon">📦</span>
+                    <div class="ql-title">Sales Orders</div>
+                    <div class="ql-desc">Large orders &amp; contracts</div>
+                </div>
+                <div class="quick-link-card" onclick="viewFinanceLegal()">
+                    <span class="ql-icon">💰</span>
+                    <div class="ql-title">Finance</div>
+                    <div class="ql-desc">Large payments review</div>
+                </div>
+                <div class="quick-link-card" onclick="viewComplianceStatus()">
+                    <span class="ql-icon">📋</span>
+                    <div class="ql-title">Compliance</div>
+                    <div class="ql-desc">Status overview</div>
+                </div>
+            </div>
+
+            <!-- ===== TABS ===== -->
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="tab1" onclick="switchTab('tab1')">📄 Contracts <span class="badge" id="contractsBadge">0</span></button>
+                    <button class="tab-btn" data-tab="tab2" onclick="switchTab('tab2')">🛒 Procurement <span class="badge" id="procBadge">0</span></button>
+                    <button class="tab-btn" data-tab="tab3" onclick="switchTab('tab3')">📦 Sales Contracts</button>
+                    <button class="tab-btn" data-tab="tab4" onclick="switchTab('tab4')">💰 Finance Review</button>
+                    <button class="tab-btn" data-tab="tab5" onclick="switchTab('tab5')">📋 Compliance</button>
+                    <button class="tab-btn" data-tab="tab6" onclick="switchTab('tab6')">📈 Reports</button>
+                </div>
+
+                <!-- ===== TAB 1: ALL CONTRACTS ===== -->
+                <div class="tab-content active" id="tab1">
+                    <div class="legal-section">
+                        <div class="legal-header">
+                            <h2>📝 Draft New Contract</h2>
+                            <span style="color:rgba(255,255,255,0.7);font-size:13px;">Create any type</span>
+                        </div>
+                        <div class="legal-body">
+                            <div class="legal-form-grid-3">
+                                <div>
+                                    <label>Contract Type <span style="color:var(--red);">*</span></label>
+                                    <select id="contractType">
+                                        <option value="Procurement Contract">Procurement Contract</option>
+                                        <option value="Sales Contract">Sales Contract</option>
+                                        <option value="Service Agreement">Service Agreement</option>
+                                        <option value="Employment Contract">Employment Contract</option>
+                                        <option value="Partnership Agreement">Partnership Agreement</option>
+                                        <option value="NDA">NDA (Non-Disclosure Agreement)</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Party Name <span style="color:var(--red);">*</span></label>
+                                    <input type="text" id="contractParty" placeholder="Enter party name">
+                                </div>
+                                <div>
+                                    <label>Value (TSh)</label>
+                                    <input type="number" id="contractValue" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="legal-form-grid-2">
+                                <div>
+                                    <label>Start Date</label>
+                                    <input type="date" id="contractStart">
+                                </div>
+                                <div>
+                                    <label>End Date</label>
+                                    <input type="date" id="contractEnd">
+                                </div>
+                            </div>
+                            <div class="legal-form-section">
+                                <label>Contract Details</label>
+                                <textarea id="contractDetails" placeholder="Enter contract details and terms..."></textarea>
+                            </div>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                <button class="action-btn primary" onclick="submitContract()" style="padding:10px 32px;font-size:14px;">📤 Submit for Review</button>
+                                <button class="action-btn gold" onclick="clearContractForm()" style="padding:10px 24px;font-size:14px;">🗑️ Clear</button>
+                            </div>
+                            <div id="contractFormStatus" class="status-msg"></div>
+                        </div>
+                    </div>
+
+                    <div class="legal-section">
+                        <div class="legal-header">
+                            <h2>📋 All Contracts <span class="legal-badge" id="contractListBadge">0</span></h2>
+                            <span style="color:rgba(255,255,255,0.7);font-size:13px;">All contracts in the system</span>
+                        </div>
+                        <div class="legal-body">
+                            <div id="contractsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TAB 2: PROCUREMENT CONTRACTS ===== -->
+                <div class="tab-content" id="tab2">
+                    <div class="legal-section">
+                        <div class="legal-header">
+                            <h2>🛒 Procurement Contracts</h2>
+                            <span class="legal-badge">From Procurement</span>
+                        </div>
+                        <div class="legal-body">
+                            <div id="procurementContractsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TAB 3: SALES CONTRACTS ===== -->
+                <div class="tab-content" id="tab3">
+                    <div class="legal-section">
+                        <div class="legal-header">
+                            <h2>📦 Sales Contracts</h2>
+                            <span class="legal-badge">From Sales</span>
+                        </div>
+                        <div class="legal-body">
+                            <div id="salesContractsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TAB 4: FINANCE LEGAL REVIEW ===== -->
+                <div class="tab-content" id="tab4">
+                    <div class="legal-section">
+                        <div class="legal-header">
+                            <h2>💰 Finance Legal Review</h2>
+                            <span class="legal-badge">Large Payments</span>
+                        </div>
+                        <div class="legal-body">
+                            <div id="financeLegalContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TAB 5: COMPLIANCE ===== -->
+                <div class="tab-content" id="tab5">
+                    <div class="legal-section">
+                        <div class="legal-header">
+                            <h2>📋 Compliance &amp; Regulatory</h2>
+                            <span style="color:rgba(255,255,255,0.7);font-size:13px;">Ensure legal compliance</span>
+                        </div>
+                        <div class="legal-body">
+                            <div class="legal-form-grid-2">
+                                <div>
+                                    <label>Compliance Check</label>
+                                    <select id="complianceType">
+                                        <option value="Tax Compliance">Tax Compliance</option>
+                                        <option value="Labor Law">Labor Law</option>
+                                        <option value="Environmental">Environmental</option>
+                                        <option value="Contract Compliance">Contract Compliance</option>
+                                        <option value="Data Protection">Data Protection</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Status</label>
+                                    <select id="complianceStatus">
+                                        <option value="Pending">Pending</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Compliant">Compliant</option>
+                                        <option value="Non-Compliant">Non-Compliant</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="legal-form-section">
+                                <label>Notes</label>
+                                <textarea id="complianceNotes" placeholder="Enter compliance notes..."></textarea>
+                            </div>
+                            <div style="display:flex;gap:10px;">
+                                <button class="action-btn green" onclick="submitComplianceCheck()" style="padding:10px 32px;font-size:14px;">✅ Submit Compliance Check</button>
+                            </div>
+                            <div id="complianceFormStatus" class="status-msg"></div>
+                            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-200);">
+                                <h4 style="font-size:14px;color:var(--gray-700);margin-bottom:8px;">📋 Compliance Records</h4>
+                                <div id="complianceRecordsContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TAB 6: REPORTS ===== -->
+                <div class="tab-content" id="tab6">
+                    <div class="task-section">
+                        <div class="task-header">
+                            <h2>📈 Legal Department Reports</h2>
+                            <span style="color:rgba(255,255,255,0.7);font-size:13px;">Weekly, Monthly, Quarterly, Annual</span>
+                        </div>
+                        <div class="task-body">
+                            <div class="task-grid">
+                                <div class="task-card">
+                                    <div class="task-icon">📅</div>
+                                    <div class="task-title">Weekly Legal Report</div>
+                                    <div class="task-desc">Prepare weekly legal activities report.</div>
+                                    <span class="task-status">Due Soon</span>
+                                    <div class="task-actions">
+                                        <button class="action-btn primary" onclick="openLegalReportModal('Weekly')">📝 Prepare</button>
+                                        <button class="action-btn gold" onclick="viewLegalTask('Weekly')">📄 View</button>
+                                    </div>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-icon">📆</div>
+                                    <div class="task-title">Monthly Legal Report</div>
+                                    <div class="task-desc">Prepare monthly legal activities report.</div>
+                                    <span class="task-status">In Progress</span>
+                                    <div class="task-actions">
+                                        <button class="action-btn primary" onclick="openLegalReportModal('Monthly')">📝 Prepare</button>
+                                        <button class="action-btn gold" onclick="viewLegalTask('Monthly')">📄 View</button>
+                                    </div>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-icon">📊</div>
+                                    <div class="task-title">Quarterly Legal Report</div>
+                                    <div class="task-desc">Prepare quarterly legal activities report.</div>
+                                    <span class="task-status">Pending</span>
+                                    <div class="task-actions">
+                                        <button class="action-btn primary" onclick="openLegalReportModal('Quarterly')">📝 Prepare</button>
+                                        <button class="action-btn gold" onclick="viewLegalTask('Quarterly')">📄 View</button>
+                                    </div>
+                                </div>
+                                <div class="task-card">
+                                    <div class="task-icon">📈</div>
+                                    <div class="task-title">Annual Legal Report</div>
+                                    <div class="task-desc">Prepare annual legal activities report.</div>
+                                    <span class="task-status">Pending</span>
+                                    <div class="task-actions">
+                                        <button class="action-btn primary" onclick="openLegalReportModal('Annual')">📝 Prepare</button>
+                                        <button class="action-btn gold" onclick="viewLegalTask('Annual')">📄 View</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <footer class="site-footer">
+            <p>MAK DC Investment Company — Legal / Lawyer Dashboard</p>
+            <small>© 2026 All rights reserved.</small>
+        </footer>
+
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Contract Review Modal -->
+    <div class="modal-overlay" id="contractReviewModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="reviewModalTitle">⚖️ Review Contract</h3>
+                <button class="modal-close" onclick="closeModal('contractReviewModal')">✕</button>
+            </div>
+            <div class="modal-body" id="contractReviewBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('contractReviewModal')">Cancel</button>
+                <button class="btn-submit red" onclick="rejectContract()">❌ Reject</button>
+                <button class="btn-submit green" onclick="approveContract()">✅ Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Contract Modal -->
+    <div class="modal-overlay" id="viewContractModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="viewContractTitle">📋 Contract Details</h3>
+                <button class="modal-close" onclick="closeModal('viewContractModal')">✕</button>
+            </div>
+            <div class="modal-body" id="viewContractBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('viewContractModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal Report Modal -->
+    <div class="modal-overlay" id="legalReportModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="legalReportTitle">📈 Report</h3>
+                <button class="modal-close" onclick="closeModal('legalReportModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-row"><span class="label">Report Period</span><span class="value" id="legalReportPeriod">—</span></div>
+                <div style="margin-top:10px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Report Content</label>
+                    <textarea id="legalReportText" placeholder="Write your report here..."></textarea>
+                </div>
+                <div id="legalReportStatus" class="status-msg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('legalReportModal')">Cancel</button>
+                <button class="btn-submit" onclick="submitLegalReport()">📤 Submit Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Legal Report Modal -->
+    <div class="modal-overlay" id="viewLegalReportModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="viewLegalReportTitle">📄 Reports</h3>
+                <button class="modal-close" onclick="closeModal('viewLegalReportModal')">✕</button>
+            </div>
+            <div class="modal-body" id="viewLegalReportBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('viewLegalReportModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Contract Modal -->
+    <div class="modal-overlay" id="rejectContractModal">
+        <div class="modal-box" style="max-width:480px;">
+            <div class="modal-header">
+                <h3 style="color:var(--red);">❌ Reject Contract</h3>
+                <button class="modal-close" onclick="closeModal('rejectContractModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--gray-500);margin-bottom:8px;">Please provide a clear reason for rejection.</p>
+                <textarea id="rejectContractReason" placeholder="Enter rejection reason..." style="min-height:100px;"></textarea>
+                <div id="rejectContractStatus" class="status-msg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('rejectContractModal')">Cancel</button>
+                <button class="btn-submit red" onclick="confirmRejectContract()">❌ Reject</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- ===== EDIT PROFILE MODAL (Premium) ===== -->
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-box" style="max-width: 650px; padding: 0; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0a1929 0%, #0f2942 100%); padding: 24px 32px; color: white; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(46, 204, 113, 0.2) 0%, transparent 70%); border-radius: 50%;"></div>
+                <div style="display:flex; align-items:center; gap:16px; z-index: 1;">
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:26px;">
+                        👤
+                    </div>
+                    <div>
+                        <h3 style="font-size: 20px; font-weight: 800; color: white; margin: 0 0 4px 0;">Profile Settings</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin: 0;">Manage your account information and security</p>
+                    </div>
+                </div>
+                <button class="modal-close" style="color:white; background: rgba(255,255,255,0.15); border-radius: 50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; opacity:1; cursor:pointer; border:none; font-size:18px; z-index: 1;" onclick="closeModal('editProfileModal')" onmouseover="this.style.background='rgba(239,68,68,0.8)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+            </div>
+            
+            <!-- Body -->
+            <div style="padding: 32px; max-height: 70vh; overflow-y: auto;">
+                
+                <!-- Avatar Section -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 28px;">
+                    <div style="position: relative;">
+                        <div class="edit-pic-preview" id="editPicPreview" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #1a7f5a; background: linear-gradient(135deg, #2ecc71 0%, #1a7f5a 100%); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: white; overflow: hidden; box-shadow: 0 8px 24px rgba(26, 127, 90, 0.3);">
+                            <span id="editPicInitials">EN</span>
+                        </div>
+                        <button class="edit-pic-upload-btn" onclick="document.getElementById('profilePicInput').click()" style="position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; border-radius: 50%; background: #1a7f5a; border: 3px solid white; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" title="Upload Photo">📷</button>
+                        <input type="file" id="profilePicInput" accept="image/*" onchange="handleProfilePicUpload(event)" style="display: none;">
+                    </div>
+                    <div style="font-size: 11px; color: var(--gray-500); margin-top: 10px;">Click the camera icon to update your photo</div>
+                </div>
+
+                <!-- Info Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Full Name</label>
+                        <input type="text" id="editProfileName" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Title / Position</label>
+                        <input type="text" id="editProfileTitle" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Email Address</label>
+                        <input type="email" id="editProfileEmail" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Phone Number <span style="color:var(--red);">*</span></label>
+                        <input type="tel" id="editProfilePhone" placeholder="+255 XXX XXX XXX" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 14px; background: white; color: var(--gray-800);">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Department</label>
+                        <input type="text" id="editProfileDepartment" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Employee ID</label>
+                        <input type="text" id="editProfileEmployeeId" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div id="editProfileStatus" class="status-msg"></div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="padding: 20px 32px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn-action" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700); padding: 10px 24px; font-weight: 700;" onclick="closeModal('editProfileModal')">Cancel</button>
+                <button class="btn-action primary" style="padding: 10px 28px; font-weight: 700; background: linear-gradient(135deg, #1a7f5a, #0f2942);" onclick="saveUserProfile()">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+        <!-- ===== CONFIRM LOGOUT DIALOG ===== -->
+        <div class="confirm-overlay" id="logoutConfirmModal">
+        <div class="confirm-box">
+            <div class="confirm-icon red">🔌</div>
+            <h3 class="confirm-title">Logout?</h3>
+            <p class="confirm-message">
+                Are you sure you want to logout?<br>
+                <small style="color:var(--gray-400);">You will need to sign in again to access your Mak Dc Investiment Company Limited Staff Portal.</small>
+            </p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeLogoutDialog()">Stay Logged In</button>
+                <button class="btn-confirm danger" onclick="confirmLogout()">Yes, Logout</button>
+            </div>
+        </div>
+    </div>
+
+        <div id="toastContainer"></div>
+
+        <script src="assets/js/core/config.js"></script>
+        <script src="assets/js/core/auth.js"></script>
+        <script src="assets/js/core/auth-guard.js"></script>
+        <script src="assets/js/core/api.js"></script>
+        <script src="assets/js/ui/toast.js"></script>
+        <script src="assets/js/ui/dashboard-common.js"></script>
+        <script src="assets/js/dashboards/lawyer.js"></script>
+
+</body>
+</html>

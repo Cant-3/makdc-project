@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukwega Agrovet — Portal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --void: #04140D;
+    --mid: #0A2417;
+    --deep: #061A10;
+    --card: #0E2E1E;
+    --card-border: #1B4E35;
+    --primary: #00C853;
+    --accent: #00E676;
+    --glow: #69F0AE;
+    --text-white: #FFFFFF;
+    --text-muted: #8DA497;
+    --text-dim: #537060;
+    --danger: #EF4444;
+    --warning: #FBBF24;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: linear-gradient(180deg, var(--void) 0%, var(--mid) 50%, var(--deep) 100%);
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 0 8px #1a1a1a, 0 0 0 10px #333;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    z-index: 10;
+    position: relative;
+  }
+  
+  .screen {
+    position: absolute;
+    inset: 44px 0 0 0;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .screen.active {
+    display: flex;
+    animation: fadeIn 0.4s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* ═══════════════════════════════════════════
+     SPLASH
+     ═══════════════════════════════════════════ */
+  
+  .splash {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .splash::before {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.2) 0%, transparent 65%);
+    animation: pulse 3s ease-in-out infinite;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  }
+  
+  .logo-container {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 32px;
+  }
+  
+  .logo-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00A843 0%, #00E676 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+      0 0 60px rgba(0, 230, 118, 0.6),
+      0 0 120px rgba(0, 230, 118, 0.3),
+      inset 0 0 30px rgba(255, 255, 255, 0.2);
+    position: relative;
+    animation: logoFloat 3s ease-in-out infinite;
+  }
+  
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  
+  .logo-circle::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 2px dashed var(--glow);
+    opacity: 0.4;
+    animation: rotate 20s linear infinite;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .logo-circle::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid var(--glow);
+    opacity: 0.6;
+    animation: ringExpand 2s ease-out infinite;
+  }
+  
+  @keyframes ringExpand {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  
+  .logo-emoji {
+    font-size: 64px;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    animation: emojiPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes emojiPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  
+  .app-name {
+    position: relative;
+    z-index: 2;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, #FFFFFF 0%, #69F0AE 50%, #00E676 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+  }
+  
+  .app-tagline {
+    position: relative;
+    z-index: 2;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  
+  /* ═══ VOICE BANNER (hidden by default, only shown if needed) ═══ */
+  
+  .voice-banner {
+    position: relative;
+    z-index: 2;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding: 10px 18px;
+    background: rgba(0, 200, 83, 0.1);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.4s ease;
+    max-width: 300px;
+  }
+  
+  .voice-banner.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .voice-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 230, 118, 0.4);
+  }
+  
+  .voice-icon.playing {
+    animation: voicePlaying 0.8s ease-in-out infinite;
+  }
+  
+  @keyframes voicePlaying {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  
+  .voice-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .voice-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--glow);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  
+  .voice-message {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-white);
+    line-height: 1.3;
+  }
+  
+  .sound-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+  }
+  
+  .wave {
+    width: 3px;
+    height: 8px;
+    background: var(--glow);
+    border-radius: 3px;
+    animation: waveAnim 1s ease-in-out infinite;
+  }
+  
+  .wave:nth-child(1) { animation-delay: 0s; }
+  .wave:nth-child(2) { animation-delay: 0.15s; }
+  .wave:nth-child(3) { animation-delay: 0.3s; }
+  .wave:nth-child(4) { animation-delay: 0.15s; }
+  .wave:nth-child(5) { animation-delay: 0s; }
+  
+  @keyframes waveAnim {
+    0%, 100% { height: 8px; opacity: 0.4; }
+    50% { height: 18px; opacity: 1; }
+  }
+  
+  /* ═══ LOADING ═══ */
+  
+  .loading-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .loading-dots {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .loading-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--glow);
+    box-shadow: 0 0 12px var(--glow);
+    animation: dotBounce 1.4s ease-in-out infinite;
+  }
+  
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: scale(0.5); opacity: 0.4; }
+    40% { transform: scale(1.3); opacity: 1; }
+  }
+  
+  .progress-container {
+    position: relative;
+    z-index: 2;
+    width: 200px;
+    height: 3px;
+    background: rgba(105, 240, 174, 0.15);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00A843, #69F0AE);
+    border-radius: 3px;
+    box-shadow: 0 0 12px var(--glow);
+    transition: width 0.3s ease;
+  }
+  
+  .loading-text {
+    position: relative;
+    z-index: 2;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-align: center;
+    min-height: 20px;
+    transition: opacity 0.3s;
+  }
+  
+  .splash-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 2;
+  }
+  
+  .footer-company {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  
+  .footer-version {
+    font-size: 10px;
+    color: var(--text-dim);
+    opacity: 0.7;
+    font-family: monospace;
+  }
+  
+  .decor {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--glow);
+    opacity: 0.3;
+    animation: floatDeco 6s ease-in-out infinite;
+  }
+  
+  .decor-1 { width: 6px; height: 6px; top: 20%; left: 15%; animation-delay: 0s; }
+  .decor-2 { width: 4px; height: 4px; top: 35%; right: 20%; animation-delay: 1s; }
+  .decor-3 { width: 8px; height: 8px; bottom: 30%; left: 20%; animation-delay: 2s; }
+  .decor-4 { width: 5px; height: 5px; bottom: 25%; right: 15%; animation-delay: 3s; }
+  
+  @keyframes floatDeco {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { transform: translateY(-20px) scale(1.5); opacity: 0.6; }
+  }
+  
+  /* ═══════════════════════════════════════════
+     SHIFT SCREEN
+     ═══════════════════════════════════════════ */
+  
+  .shift-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .shift-screen::-webkit-scrollbar { display: none; }
+  
+  .shift-hero {
+    padding: 16px 24px 24px;
+    background: linear-gradient(180deg, rgba(0, 200, 83, 0.12) 0%, transparent 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shift-hero::after {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.15), transparent 70%);
+    pointer-events: none;
+  }
+  
+  .shift-greeting {
+    font-size: 11px;
+    color: var(--glow);
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  
+  .shift-name {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text-white);
+    line-height: 1.15;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .shift-name span {
+    background: linear-gradient(90deg, #00E676, #69F0AE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .shift-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 260px;
+  }
+  
+  .floating-avatar {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border: 3px solid var(--glow);
+    box-shadow: 0 8px 24px rgba(0, 230, 118, 0.4);
+    animation: avatarFloat 4s ease-in-out infinite;
+    z-index: 1;
+  }
+  
+  @keyframes avatarFloat {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+  }
+  
+  .shift-body {
+    flex: 1;
+    padding: 0 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  .section-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .time-picker {
+    background: var(--card);
+    border: 1.5px solid var(--accent);
+    border-radius: 20px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .time-picker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--glow));
+  }
+  
+  .time-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .time-picker-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--glow);
+    letter-spacing: 0.5px;
+  }
+  
+  .time-picker-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  
+  .now-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(0, 200, 83, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--glow);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+  
+  .now-btn:active { transform: scale(0.95); }
+  
+  .time-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 12px 0;
+  }
+  
+  .time-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .time-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-weight: 800;
+    letter-spacing: 1.5px;
+  }
+  
+  .time-value {
+    background: var(--void);
+    border: 1.5px solid var(--card-border);
+    border-radius: 16px;
+    padding: 12px 22px;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--text-white);
+    font-family: 'Courier New', monospace;
+    min-width: 100px;
+    text-align: center;
+    letter-spacing: 3px;
+    transition: all 0.2s;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  }
+  
+  .time-value.focused {
+    border-color: var(--glow);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(0, 230, 118, 0.3);
+  }
+  
+  .time-separator {
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--glow);
+    padding-top: 20px;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  
+  .time-btn-row {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .time-btn {
+    width: 36px;
+    height: 30px;
+    border-radius: 10px;
+    background: var(--void);
+    border: 1px solid var(--card-border);
+    color: var(--glow);
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  
+  .time-btn:active {
+    background: rgba(0, 200, 83, 0.2);
+    transform: scale(0.95);
+  }
+  
+  .period-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(0, 200, 83, 0.15);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--glow);
+    letter-spacing: 1px;
+  }
+  
+  .active-shift-card {
+    background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 230, 118, 0.03));
+    border: 1.5px solid var(--glow);
+    border-radius: 20px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .active-shift-card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.2), transparent 70%);
+    animation: pulse 3s infinite;
+  }
+  
+  .active-shift-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .live-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--glow);
+    box-shadow: 0 0 10px var(--glow);
+    animation: livePulse 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  
+  .active-shift-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--glow);
+    letter-spacing: 1px;
+  }
+  
+  .active-shift-stats {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .active-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(105, 240, 174, 0.15);
+  }
+  
+  .active-stat:last-child { border-bottom: none; }
+  
+  .active-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .active-stat-value {
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--text-white);
+    font-family: 'Courier New', monospace;
+  }
+  
+  .active-stat-value.green { color: var(--glow); }
+  .active-stat-value.large { font-size: 18px; }
+  
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .info-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--glow), var(--primary));
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(27, 78, 53, 0.4);
+  }
+  
+  .info-row:last-child { border-bottom: none; }
+  
+  .info-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .info-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-white);
+    text-align: right;
+  }
+  
+  .info-value.green { color: var(--glow); }
+  .info-value.mono { font-family: monospace; }
+  
+  .alert-banner {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .alert-banner-icon {
+    font-size: 20px;
+    animation: shake 2s ease-in-out infinite;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: rotate(0); }
+    10%, 30%, 50% { transform: rotate(-8deg); }
+    20%, 40%, 60% { transform: rotate(8deg); }
+  }
+  
+  .alert-banner-text {
+    flex: 1;
+    font-size: 12px;
+    color: var(--danger);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  
+  .button-area {
+    padding: 0 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .primary-btn {
+    width: 100%;
+    height: 60px;
+    border-radius: 18px;
+    background: linear-gradient(90deg, #00A843 0%, #00E676 100%);
+    border: 2px solid var(--glow);
+    color: var(--void);
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0, 230, 118, 0.4);
+    transition: transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .primary-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2.5s infinite;
+  }
+  
+  @keyframes shimmer { 100% { left: 100%; } }
+  
+  .primary-btn:active { transform: scale(0.97); }
+  
+  .secondary-btn {
+    width: 100%;
+    height: 50px;
+    border-radius: 16px;
+    background: transparent;
+    border: 1.5px solid var(--card-border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+  }
+  
+  .secondary-btn:active { transform: scale(0.97); }
+  
+  .success-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--void) 0%, var(--mid) 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    z-index: 150;
+  }
+  
+  .success-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .success-check {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 55px;
+    margin-bottom: 24px;
+    box-shadow: 0 0 60px rgba(0, 230, 118, 0.6);
+    animation: scaleIn 0.5s ease-out;
+  }
+  
+  @keyframes scaleIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  
+  .success-title {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text-white);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .success-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+    max-width: 280px;
+  }
+  
+  .success-subtitle strong {
+    color: var(--glow);
+    font-weight: 800;
+    font-family: monospace;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(105, 240, 174, 0.2);
+    border-top-color: var(--glow);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-top: 24px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .replay-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.9);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: var(--glow);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  
+  .replay-btn:hover { background: var(--card); }
+  .replay-btn:active { transform: scale(0.95); }
+  
+  .toast {
+    position: absolute;
+    bottom: 100px;
+    left: 20px;
+    right: 20px;
+    background: var(--glow);
+    color: var(--void);
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 200;
+  }
+  
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<button class="replay-btn" onclick="replay()">
+  🔄 Replay
+</button>
+
+<div class="phone">
+  
+  <div class="status-bar">
+    <span id="clock">9:41</span>
+    <span>📶 📡 🔋</span>
+  </div>
+  
+  <!-- ═══════════════════════════════════════════
+       SPLASH
+       ═══════════════════════════════════════════ -->
+  <div class="screen active" id="splashScreen">
+    <div class="splash">
+      
+      <div class="decor decor-1"></div>
+      <div class="decor decor-2"></div>
+      <div class="decor decor-3"></div>
+      <div class="decor decor-4"></div>
+      
+      <div class="logo-container">
+        <div class="logo-circle">
+          <span class="logo-emoji">🌾</span>
+        </div>
+      </div>
+      
+      <div class="app-name">Lukwega Agrovet</div>
+      <div class="app-tagline">Seller Portal</div>
+      
+      <!-- Voice banner — inaonekana tu wakati sauti inasema -->
+      <div class="voice-banner" id="voiceBanner">
+        <div class="voice-icon" id="voiceIcon">🔊</div>
+        <div class="voice-text">
+          <div class="voice-label">Now Playing</div>
+          <div class="voice-message">Welcome to the Portal</div>
+        </div>
+        <div class="sound-waves" id="soundWaves">
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+        </div>
+      </div>
+      
+      <div class="loading-container">
+        <div class="loading-dots">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="loading-text" id="loadingText">Verifying account...</div>
+      </div>
+      
+      <div class="splash-footer">
+        <div class="footer-company">© 2026 LUKWEGA AGROVET LTD</div>
+        <div class="footer-version">v2.4.0 • Dar es Salaam</div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <!-- ═══════════════════════════════════════════
+       SHIFT SCREEN
+       ═══════════════════════════════════════════ -->
+  <div class="screen" id="shiftScreen">
+    
+    <div class="shift-screen">
+      
+      <div class="shift-hero">
+        <div class="shift-greeting" id="greeting">🌅 Good Morning</div>
+        <div class="shift-name">Welcome, <span>Juma!</span></div>
+        <div class="shift-subtitle" id="shiftSubtitle">
+          Ready to start your shift?<br>Set your start time below.
+        </div>
+        <div class="floating-avatar">👤</div>
+      </div>
+      
+      <div class="shift-body">
+        
+        <div class="active-shift-card" id="activeShiftCard" style="display: none;">
+          <div class="active-shift-header">
+            <div class="live-dot"></div>
+            <div class="active-shift-title">SHIFT IN PROGRESS</div>
+          </div>
+          <div class="active-shift-stats">
+            <div class="active-stat">
+              <span class="active-stat-label">⏱️ Started</span>
+              <span class="active-stat-value" id="activeStartTime">08:00 AM</span>
+            </div>
+            <div class="active-stat">
+              <span class="active-stat-label">⏳ Duration</span>
+              <span class="active-stat-value green" id="activeDuration">2h 15m</span>
+            </div>
+            <div class="active-stat">
+              <span class="active-stat-label">💰 Sales</span>
+              <span class="active-stat-value green large" id="activeSales">TZS 45,000</span>
+            </div>
+            <div class="active-stat">
+              <span class="active-stat-label">🧾 Invoices</span>
+              <span class="active-stat-value" id="activeInvoices">3</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="timePickerContainer">
+          <div class="section-label">⏰ Shift Start Time</div>
+          <div class="time-picker">
+            <div class="time-picker-header">
+              <div>
+                <div class="time-picker-title">SET YOUR START TIME</div>
+                <div class="time-picker-sub">Set actual time you began work</div>
+              </div>
+              <button class="now-btn" onclick="useCurrentTime()">
+                🕐 Now
+              </button>
+            </div>
+            
+            <div class="time-display">
+              <div class="time-column">
+                <span class="time-label">HOUR</span>
+                <div class="time-value focused" id="hourDisplay">08</div>
+                <div class="time-btn-row">
+                  <button class="time-btn" onclick="adjustTime(1, 0)">▲</button>
+                  <button class="time-btn" onclick="adjustTime(-1, 0)">▼</button>
+                </div>
+              </div>
+              
+              <div class="time-separator">:</div>
+              
+              <div class="time-column">
+                <span class="time-label">MINUTE</span>
+                <div class="time-value focused" id="minuteDisplay">15</div>
+                <div class="time-btn-row">
+                  <button class="time-btn" onclick="adjustTime(0, 5)">▲</button>
+                  <button class="time-btn" onclick="adjustTime(0, -5)">▼</button>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align: center;">
+              <div class="period-badge" id="periodBadge">🌅 MORNING SHIFT</div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div class="section-label">📋 Shift Details</div>
+          <div class="info-card">
+            <div class="info-row">
+              <span class="info-label">🏪 Store</span>
+              <span class="info-value">Lukwega Agrovet</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">🔑 Code</span>
+              <span class="info-value mono">PDL-90-9865</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">📅 Date</span>
+              <span class="info-value" id="todayDate">—</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">👔 Role</span>
+              <span class="info-value">Cashier</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="alert-banner">
+          <div class="alert-banner-icon">⚠️</div>
+          <div class="alert-banner-text">
+            2 products have low stock. Check Stock tab.
+          </div>
+        </div>
+        
+      </div>
+      
+      <div class="button-area">
+        <button class="primary-btn" id="startBtn" onclick="startShift()">
+          <span style="font-size: 22px;">🚀</span>
+          <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <span style="font-size: 16px; font-weight: 900; line-height: 1.1;">START WORK</span>
+            <span style="font-size: 10px; font-weight: 600; opacity: 0.75;">Open sales dashboard</span>
+          </div>
+        </button>
+        
+        <button class="primary-btn" id="continueBtn" onclick="goToHome()" style="display: none; background: linear-gradient(90deg, #00E676, #69F0AE);">
+          <span style="font-size: 22px;">▶️</span>
+          <div style="display: flex; flex-direction: column; align-items: flex-start;">
+            <span style="font-size: 16px; font-weight: 900; line-height: 1.1;">CONTINUE SHIFT</span>
+            <span style="font-size: 10px; font-weight: 600; opacity: 0.75;">Return to dashboard</span>
+          </div>
+        </button>
+        
+        <button class="secondary-btn" id="closeShiftBtn" onclick="closeShift()" style="display: none;">
+          🔒 Close Shift Now
+        </button>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-check">✓</div>
+    <div class="success-title" id="successTitle">Shift Started!</div>
+    <div class="success-subtitle">
+      <span id="successMessage">Start time: <strong>08:15 AM</strong></span><br><br>
+      <span style="color: var(--text-dim);">Redirecting to dashboard...</span>
+    </div>
+    <div class="spinner"></div>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+</div>
+
+<script>
+  // ═══════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════
+  
+  const state = {
+    hasActiveShift: false,
+    shiftStartHour: 8,
+    shiftStartMinute: 15,
+    shiftStartDate: null,
+    currentHour: 8,
+    currentMinute: 15,
+    todaySales: 45000,
+    todayInvoices: 3
+  };
+  
+  // ═══════════════════════════════════════════
+  // VOICE — MALE AFRICAN, NATURAL
+  // ═══════════════════════════════════════════
+  
+  let speechSupported = 'speechSynthesis' in window;
+  let voicesLoaded = false;
+  let allVoices = [];
+  
+  /**
+   * Load voices (async — browsers load them lazily).
+   */
+  function loadVoices() {
+    if (!speechSupported) return;
+    allVoices = window.speechSynthesis.getVoices();
+    voicesLoaded = allVoices.length > 0;
+    if (voicesLoaded) {
+      console.log('📢 Available voices:', allVoices.map(v => `${v.name} (${v.lang})`).join(', '));
+    }
+  }
+  
+  loadVoices();
+  if (speechSupported) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+  
+  /**
+   * Pick the BEST male African voice available.
+   * Priority order:
+   *   1. Male African English voice (en-ZA, en-NG, en-KE, en-GH)
+   *   2. Any African accent voice (en-ZA, en-NG, etc.)
+   *   3. Male English voice with low pitch
+   *   4. Any English voice
+   */
+  function pickAfricanMaleVoice() {
+    if (!allVoices.length) return null;
+    
+    // African locale codes
+    const africanLangs = ['en-ZA', 'en-NG', 'en-KE', 'en-GH', 'en-TZ', 'en-UG'];
+    
+    // Male voice name hints
+    const maleHints = ['male', 'man', 'david', 'james', 'daniel', 'george',
+                       'alex', 'fred', 'thomas', 'guy', 'eric', 'mark',
+                       'rishi', 'ravi', 'arthur', 'oliver'];
+    
+    // 1. African + male
+    let voice = allVoices.find(v =>
+      africanLangs.some(lang => v.lang.toLowerCase().startsWith(lang.toLowerCase().substring(0, 5)))
+      && maleHints.some(hint => v.name.toLowerCase().includes(hint))
+    );
+    if (voice) {
+      console.log('✅ Selected African male voice:', voice.name, voice.lang);
+      return voice;
+    }
+    
+    // 2. African (any)
+    voice = allVoices.find(v =>
+      africanLangs.some(lang => v.lang.toLowerCase().startsWith(lang.toLowerCase().substring(0, 5)))
+    );
+    if (voice) {
+      console.log('✅ Selected African voice:', voice.name, voice.lang);
+      return voice;
+    }
+    
+    // 3. Male English
+    voice = allVoices.find(v =>
+      v.lang.toLowerCase().startsWith('en')
+      && maleHints.some(hint => v.name.toLowerCase().includes(hint))
+    );
+    if (voice) {
+      console.log('✅ Selected male English voice:', voice.name, voice.lang);
+      return voice;
+    }
+    
+    // 4. Any English
+    voice = allVoices.find(v => v.lang.toLowerCase().startsWith('en'));
+    if (voice) {
+      console.log('✅ Selected English voice:', voice.name, voice.lang);
+      return voice;
+    }
+    
+    // 5. Default
+    return allVoices[0];
+  }
+  
+  /**
+   * Speak "Welcome to the Portal" with male African voice.
+   * Slower rate + lower pitch = natural, not robotic.
+   */
+  function speakWelcome() {
+    const banner = document.getElementById('voiceBanner');
+    const icon = document.getElementById('voiceIcon');
+    
+    // Show banner visually
+    banner.classList.add('active');
+    icon.classList.add('playing');
+    
+    if (!speechSupported) {
+      console.warn('Speech API not supported');
+      setTimeout(() => {
+        banner.classList.remove('active');
+        icon.classList.remove('playing');
+      }, 3000);
+      return;
+    }
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    // Create utterance
+    const text = "Welcome to the Portal";
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // ═══ NATURAL MALE AFRICAN SETTINGS ═══
+    utterance.rate = 0.85;      // Slower — clearer, more natural
+    utterance.pitch = 0.7;      // Lower — deeper male voice
+    utterance.volume = 1.0;     // Max volume
+    utterance.lang = 'en-ZA';   // South African English (African English)
+    
+    // Try to select the best voice
+    const selectedVoice = pickAfricanMaleVoice();
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      // If we picked a voice, respect its language
+      utterance.lang = selectedVoice.lang;
+    }
+    
+    // Events
+    utterance.onstart = () => {
+      console.log('🔊 Speaking: ' + text);
+      icon.classList.add('playing');
+    };
+    
+    utterance.onend = () => {
+      console.log('🔇 Speech finished');
+      icon.classList.remove('playing');
+      setTimeout(() => banner.classList.remove('active'), 500);
+    };
+    
+    utterance.onerror = (e) => {
+      console.warn('Speech error:', e.error);
+      icon.classList.remove('playing');
+      setTimeout(() => banner.classList.remove('active'), 500);
+    };
+    
+    // Speak
+    window.speechSynthesis.speak(utterance);
+  }
+  
+  // ═══════════════════════════════════════════
+  // SPLASH LOADING
+  // ═══════════════════════════════════════════
+  
+  const steps = [
+    { text: "Verifying account...", progress: 20 },
+    { text: "Checking shift status...", progress: 40 },
+    { text: "Loading store products...", progress: 60 },
+    { text: "Connecting to network...", progress: 80 },
+    { text: "Welcome! 🎉", progress: 100 }
+  ];
+  
+  let currentStep = 0;
+  let intervalId;
+  
+  function runSplash() {
+    currentStep = 0;
+    document.getElementById('voiceBanner').classList.remove('active');
+    document.getElementById('voiceIcon').classList.remove('playing');
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('loadingText').textContent = steps[0].text;
+    document.getElementById('loadingText').style.opacity = '1';
+    
+    // Trigger voice after 1000ms
+    setTimeout(() => {
+      // Ensure voices loaded
+      if (!voicesLoaded) loadVoices();
+      speakWelcome();
+    }, 1000);
+    
+    intervalId = setInterval(() => {
+      if (currentStep < steps.length) {
+        const step = steps[currentStep];
+        document.getElementById('progressBar').style.width = step.progress + '%';
+        
+        const textEl = document.getElementById('loadingText');
+        textEl.style.opacity = '0';
+        setTimeout(() => {
+          textEl.textContent = step.text;
+          textEl.style.opacity = '1';
+        }, 150);
+        
+        currentStep++;
+      } else {
+        clearInterval(intervalId);
+        setTimeout(() => showShiftScreen(), 800);
+      }
+    }, 700);
+  }
+  
+  // ═══════════════════════════════════════════
+  // SCREEN NAVIGATION
+  // ═══════════════════════════════════════════
+  
+  function showShiftScreen() {
+    document.getElementById('splashScreen').classList.remove('active');
+    document.getElementById('shiftScreen').classList.add('active');
+    updateGreeting();
+    updateTimeDisplay();
+    updateShiftUI();
+  }
+  
+  function updateShiftUI() {
+    const activeCard = document.getElementById('activeShiftCard');
+    const timePicker = document.getElementById('timePickerContainer');
+    const startBtn = document.getElementById('startBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const closeBtn = document.getElementById('closeShiftBtn');
+    const subtitle = document.getElementById('shiftSubtitle');
+    
+    if (state.hasActiveShift) {
+      activeCard.style.display = 'block';
+      timePicker.style.display = 'none';
+      startBtn.style.display = 'none';
+      continueBtn.style.display = 'flex';
+      closeBtn.style.display = 'flex';
+      subtitle.innerHTML = 'Your shift is in progress.<br>Continue or close it below.';
+      
+      const startStr = formatTime(state.shiftStartHour, state.shiftStartMinute);
+      document.getElementById('activeStartTime').textContent = startStr;
+      updateDuration();
+      document.getElementById('activeSales').textContent = 'TZS ' + state.todaySales.toLocaleString();
+      document.getElementById('activeInvoices').textContent = state.todayInvoices;
+    } else {
+      activeCard.style.display = 'none';
+      timePicker.style.display = 'block';
+      startBtn.style.display = 'flex';
+      continueBtn.style.display = 'none';
+      closeBtn.style.display = 'none';
+      subtitle.innerHTML = 'Ready to start your shift?<br>Set your start time below.';
+    }
+  }
+  
+  function updateDuration() {
+    if (!state.shiftStartDate) return;
+    const now = new Date();
+    const diff = now - state.shiftStartDate;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    document.getElementById('activeDuration').textContent = `${hours}h ${mins}m`;
+  }
+  
+  function updateGreeting() {
+    const h = new Date().getHours();
+    let greeting = '🌅 Good Morning';
+    if (h >= 12 && h < 17) greeting = '☀️ Good Afternoon';
+    else if (h >= 17 && h < 21) greeting = '🌆 Good Evening';
+    else if (h >= 21 || h < 5) greeting = '🌙 Good Night';
+    document.getElementById('greeting').textContent = greeting;
+    
+    const today = new Date();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('todayDate').textContent = 
+      `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+  }
+  
+  function useCurrentTime() {
+    const now = new Date();
+    state.currentHour = now.getHours();
+    state.currentMinute = now.getMinutes();
+    updateTimeDisplay();
+    toast('🕐 Current time set');
+  }
+  
+  function adjustTime(dh, dm) {
+    state.currentHour = (state.currentHour + dh + 24) % 24;
+    state.currentMinute = (state.currentMinute + dm + 60) % 60;
+    updateTimeDisplay();
+  }
+  
+  function updateTimeDisplay() {
+    document.getElementById('hourDisplay').textContent = String(state.currentHour).padStart(2, '0');
+    document.getElementById('minuteDisplay').textContent = String(state.currentMinute).padStart(2, '0');
+    
+    let period, emoji;
+    if (state.currentHour < 12) { period = 'MORNING SHIFT'; emoji = '🌅'; }
+    else if (state.currentHour < 17) { period = 'AFTERNOON SHIFT'; emoji = '☀️'; }
+    else if (state.currentHour < 21) { period = 'EVENING SHIFT'; emoji = '🌆'; }
+    else { period = 'NIGHT SHIFT'; emoji = '🌙'; }
+    
+    document.getElementById('periodBadge').textContent = `${emoji} ${period}`;
+  }
+  
+  function formatTime(h, m) {
+    const period = h < 12 ? 'AM' : 'PM';
+    const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${String(displayH).padStart(2,'0')}:${String(m).padStart(2,'0')} ${period}`;
+  }
+  
+  function startShift() {
+    state.shiftStartHour = state.currentHour;
+    state.shiftStartMinute = state.currentMinute;
+    state.shiftStartDate = new Date();
+    state.shiftStartDate.setHours(state.currentHour, state.currentMinute, 0, 0);
+    state.hasActiveShift = true;
+    
+    const timeStr = formatTime(state.currentHour, state.currentMinute);
+    document.getElementById('successTitle').textContent = 'Shift Started!';
+    document.getElementById('successMessage').innerHTML = `Start time: <strong>${timeStr}</strong>`;
+    document.getElementById('successOverlay').classList.add('active');
+    
+    setTimeout(() => {
+      document.getElementById('successOverlay').classList.remove('active');
+      updateShiftUI();
+      toast('✅ Shift started successfully');
+    }, 2000);
+  }
+  
+  function goToHome() { toast('▶️ Opening dashboard...'); }
+  
+  function closeShift() {
+    if (!confirm('Close your shift now?')) return;
+    state.hasActiveShift = false;
+    state.shiftStartDate = null;
+    updateShiftUI();
+    toast('🔒 Shift closed. Report sent.');
+  }
+  
+  function replay() {
+    if (speechSupported) window.speechSynthesis.cancel();
+    clearInterval(intervalId);
+    document.getElementById('splashScreen').classList.add('active');
+    document.getElementById('shiftScreen').classList.remove('active');
+    document.getElementById('successOverlay').classList.remove('active');
+    state.hasActiveShift = false;
+    state.shiftStartDate = null;
+    runSplash();
+  }
+  
+  let toastTimer;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+  
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${h}:${m}`;
+  }
+  
+  setInterval(updateClock, 1000);
+  updateClock();
+  
+  const now = new Date();
+  state.currentHour = now.getHours();
+  state.currentMinute = now.getMinutes();
+  
+  runSplash();
+</script>
+
+</body>
+</html>

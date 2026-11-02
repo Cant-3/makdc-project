@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Detail - MAK DC Investment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f8faf9; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            color: #1a1f0a;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.6;
+        }
+        
+        :root {
+            --brand-darkest: #1f2405;
+            --brand-dark: #2a3007;
+            --brand-primary: #39400a;
+            --brand-medium: #4a5410;
+            --brand-light: #6b7818;
+            --gold: #c6a12a;
+            --gold-light: #d4b544;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --red-500: #ef4444;
+        }
+
+        /* ===== HEADER ===== */
+        .site-header {
+            background: linear-gradient(135deg, #1f2405 0%, #2a3007 100%);
+            padding: 12px 40px;
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-top { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 20px;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+        .header-logo { 
+            width: 48px; height: 48px; border-radius: 50%; 
+            object-fit: cover; border: 2px solid var(--gold); 
+            padding: 2px; background: white; 
+        }
+        .header-brand { display: flex; flex-direction: column; }
+        .header-company { 
+            font-size: 16px; font-weight: 800; color: white; 
+            letter-spacing: 1px; line-height: 1.2;
+        }
+        .header-company span { color: var(--gold); }
+        .header-motto {
+            font-size: 10px; color: rgba(255, 255, 255, 0.5);
+            font-style: italic; letter-spacing: 0.5px;
+        }
+        .header-back { 
+            background: transparent; color: var(--gold); 
+            border: 1.5px solid var(--gold); padding: 8px 20px; 
+            border-radius: 30px; font-size: 12px; font-weight: 700; 
+            text-decoration: none; display: inline-flex; 
+            align-items: center; gap: 6px; transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .header-back:hover { 
+            background: var(--gold); 
+            color: var(--brand-darkest); 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(198, 161, 42, 0.3);
+        }
+
+        /* ===== CONTAINER ===== */
+        .news-container { 
+            max-width: 920px; 
+            margin: 0 auto; 
+            padding: 40px 24px 60px; 
+            flex: 1; 
+            width: 100%; 
+        }
+
+        /* ===== ARTICLE ===== */
+        .news-article { 
+            background: white; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 20px 60px rgba(57, 64, 10, 0.08);
+            border: 1px solid rgba(57, 64, 10, 0.05);
+        }
+        
+        /* ===== HERO IMAGE ===== */
+        .news-hero-img { 
+            width: 100%; 
+            height: 440px; 
+            background-size: cover; 
+            background-position: center; 
+            position: relative; 
+        }
+        .news-hero-img::after { 
+            content: ''; 
+            position: absolute; 
+            inset: 0; 
+            background: linear-gradient(180deg, rgba(31, 36, 5, 0.3) 0%, transparent 30%, rgba(31, 36, 5, 0.85) 100%); 
+        }
+        
+        .news-hero-overlay { 
+            position: absolute; 
+            bottom: 0; left: 0; right: 0; 
+            padding: 48px 48px 36px; 
+            z-index: 2; 
+            color: white; 
+        }
+        .news-cat-badge { 
+            display: inline-block; 
+            padding: 6px 16px; 
+            background: var(--gold); 
+            color: var(--brand-darkest); 
+            font-size: 10px; 
+            font-weight: 900; 
+            letter-spacing: 1.5px; 
+            text-transform: uppercase; 
+            border-radius: 20px; 
+            margin-bottom: 14px;
+            box-shadow: 0 4px 12px rgba(198, 161, 42, 0.4);
+        }
+        .news-hero-title { 
+            font-family: 'Space Grotesk', sans-serif; 
+            font-size: 40px; 
+            font-weight: 800; 
+            line-height: 1.15; 
+            color: white; 
+            margin-bottom: 16px; 
+            letter-spacing: -0.8px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+        .news-meta { 
+            display: flex; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            font-size: 13px; 
+            color: rgba(255, 255, 255, 0.9); 
+            font-weight: 500; 
+        }
+        .news-meta span { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== CONTENT ===== */
+        .news-content-wrap { 
+            padding: 44px 48px 48px; 
+        }
+        .news-excerpt { 
+            font-size: 18px; 
+            color: var(--brand-dark); 
+            line-height: 1.7; 
+            font-weight: 500; 
+            font-style: italic; 
+            padding: 22px 26px; 
+            background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+            border-left: 4px solid var(--gold); 
+            border-radius: 0 12px 12px 0; 
+            margin-bottom: 36px;
+            position: relative;
+        }
+        .news-excerpt::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            font-size: 60px;
+            color: var(--gold);
+            font-family: Georgia, serif;
+            opacity: 0.3;
+            line-height: 1;
+        }
+        .news-body-text { 
+            font-size: 16px; 
+            color: var(--gray-700); 
+            line-height: 1.9; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+        }
+        .news-body-text p { 
+            margin-bottom: 18px; 
+        }
+        .news-body-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ===== ATTACHMENT BOX ===== */
+        .news-attachment-box { 
+            margin-top: 40px; 
+            padding: 24px 28px; 
+            background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+            border: 2px solid var(--gold); 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 16px; 
+            flex-wrap: wrap; 
+        }
+        .news-attachment-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            flex: 1; 
+            min-width: 200px; 
+        }
+        .news-attachment-icon { 
+            width: 56px; 
+            height: 56px; 
+            border-radius: 14px; 
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--brand-darkest); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 26px; 
+            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(198, 161, 42, 0.35);
+        }
+        .news-attachment-label { 
+            font-size: 10px; 
+            color: var(--brand-medium); 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            margin-bottom: 4px; 
+        }
+        .news-attachment-name { 
+            font-size: 14px; 
+            color: var(--brand-dark); 
+            font-weight: 700; 
+            word-break: break-all; 
+        }
+        .news-attachment-btn { 
+            padding: 13px 28px; 
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-dark) 100%);
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            font-family: inherit; 
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.3s;
+            box-shadow: 0 6px 16px rgba(57, 64, 10, 0.3);
+        }
+        .news-attachment-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 28px rgba(57, 64, 10, 0.4); 
+        }
+
+        /* ===== FOOTER ACTIONS ===== */
+        .news-footer-actions { 
+            margin-top: 40px; 
+            padding-top: 28px; 
+            border-top: 2px dashed var(--gray-200); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 16px; 
+        }
+        .news-footer-actions .share-label {
+            font-size: 13px; 
+            color: var(--gray-500);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .news-share-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .news-share-btn { 
+            padding: 11px 22px; 
+            background: #25D366; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-family: inherit; 
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.25s;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+        .news-share-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 24px rgba(37, 211, 102, 0.45); 
+        }
+        .news-share-btn.copy {
+            background: var(--brand-primary);
+            box-shadow: 0 4px 12px rgba(57, 64, 10, 0.3);
+        }
+        .news-share-btn.copy:hover {
+            box-shadow: 0 10px 24px rgba(57, 64, 10, 0.45);
+        }
+
+        /* ===== FOOTER ===== */
+        .site-footer { 
+            background: linear-gradient(180deg, var(--brand-dark) 0%, var(--brand-darkest) 100%);
+            color: white; 
+            padding: 40px 44px 30px; 
+            text-align: center; 
+            border-top: 3px solid var(--gold);
+            margin-top: auto;
+        }
+        .site-footer .footer-brand { 
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px; 
+            font-weight: 800; 
+            color: var(--gold); 
+            text-decoration: none; 
+            display: block; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+        }
+        .site-footer .footer-motto {
+            font-size: 13px;
+            color: var(--gold-light);
+            font-style: italic;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+        .site-footer p { 
+            font-size: 12px; 
+            color: rgba(255, 255, 255, 0.4); 
+            margin-bottom: 4px;
+        }
+        .site-footer small { 
+            color: rgba(255, 255, 255, 0.25); 
+            font-size: 11px; 
+        }
+
+        /* ===== LOADING STATE ===== */
+        .news-loading { 
+            text-align: center; 
+            padding: 100px 20px; 
+        }
+        .news-spinner { 
+            display: inline-block; 
+            width: 52px; 
+            height: 52px; 
+            border: 4px solid #e5e7eb; 
+            border-top-color: var(--brand-primary); 
+            border-radius: 50%; 
+            animation: spin 0.8s linear infinite; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== ERROR / NOT FOUND ===== */
+        .news-not-found {
+            background: white;
+            border-radius: 20px;
+            padding: 80px 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(57, 64, 10, 0.08);
+        }
+        .news-not-found .nf-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .news-not-found h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 26px;
+            color: var(--brand-dark);
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .news-not-found p {
+            color: var(--gray-500);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .news-not-found a {
+            display: inline-block;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--gold) 0%, #a8851f 100%);
+            color: var(--brand-darkest);
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .news-not-found a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(198, 161, 42, 0.4);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .site-header { padding: 12px 16px; }
+            .header-company { font-size: 13px; letter-spacing: 0.5px; }
+            .header-motto { font-size: 9px; }
+            .header-logo { width: 40px; height: 40px; }
+            .header-back { padding: 6px 14px; font-size: 11px; }
+            .news-container { padding: 24px 16px 40px; }
+            .news-hero-img { height: 280px; }
+            .news-hero-overlay { padding: 28px 24px 22px; }
+            .news-hero-title { font-size: 24px; letter-spacing: -0.3px; }
+            .news-cat-badge { font-size: 9px; padding: 5px 12px; }
+            .news-meta { font-size: 11px; gap: 10px; }
+            .news-meta span { padding: 5px 10px; }
+            .news-content-wrap { padding: 28px 24px 32px; }
+            .news-excerpt { font-size: 15px; padding: 18px 20px; margin-bottom: 26px; }
+            .news-excerpt::before { font-size: 48px; }
+            .news-body-text { font-size: 15px; line-height: 1.8; }
+            .news-attachment-box { flex-direction: column; align-items: stretch; padding: 20px; }
+            .news-attachment-btn { width: 100%; justify-content: center; }
+            .news-footer-actions { flex-direction: column; align-items: flex-start; }
+            .news-share-group { width: 100%; }
+            .news-share-btn { flex: 1; justify-content: center; }
+            .site-footer { padding: 30px 24px 24px; }
+            .site-footer .footer-brand { font-size: 18px; }
+        }
+        @media (max-width: 480px) {
+            .header-company { font-size: 11px; }
+            .news-hero-title { font-size: 20px; }
+            .news-hero-img { height: 220px; }
+            .news-hero-overlay { padding: 20px 18px 18px; }
+            .news-content-wrap { padding: 24px 18px 28px; }
+            .news-excerpt { font-size: 14px; padding: 16px 18px; }
+            .news-body-text { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-top">
+            <div class="header-left">
+                <img src="assets/makdc-logo.jpg" alt="MAK DC Logo" class="header-logo" 
+                     onerror="this.outerHTML='<div style=&quot;width:48px;height:48px;border-radius:50%;background:white;border:2px solid #c6a12a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#39400a;&quot;>MAK</div>'">
+                <div class="header-brand">
+                    <div class="header-company">MAK DC Investment <span>Company LTD</span></div>
+                    <div class="header-motto">"Quality service is our priority."</div>
+                </div>
+            </div>
+            <a href="index.html" class="header-back">← Back to Home</a>
+        </div>
+    </header>
+
+    <!-- CONTAINER -->
+    <div class="news-container" id="newsContainer">
+        <div class="news-loading">
+            <div class="news-spinner"></div>
+            <div style="margin-top: 20px; color: var(--gray-500); font-weight: 600;">⏳ Loading news...</div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <a class="footer-brand" href="index.html">MAK DC</a>
+        <p class="footer-motto">"Quality service is our priority."</p>
+        <p>MAK DC Investment Company Limited</p>
+        <small>© 2026 All rights reserved.</small>
+    </footer>
+
+    <script>
+        // ============================================================
+        // LOAD NEWS DETAIL FROM API
+        // ============================================================
+        (async function loadNewsDetail() {
+            const container = document.getElementById('newsContainer');
+            const urlParams = new URLSearchParams(window.location.search);
+            const newsId = urlParams.get('id');
+
+            if (!newsId) {
+                container.innerHTML = `
+                    <div class="news-not-found">
+                        <span class="nf-icon">📰</span>
+                        <h2>News Not Found</h2>
+                        <p>The news you're looking for doesn't exist or has been removed.</p>
+                        <a href="index.html">← Back to Home</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/news/slug/${newsId}`);
+                if (!response.ok) throw new Error('News not found');
+
+                const news = await response.json();
+                renderNewsDetail(news);
+
+            } catch (err) {
+                console.error('Load news error:', err);
+                container.innerHTML = `
+                    <div class="news-not-found">
+                        <span class="nf-icon">❌</span>
+                        <h2>News Not Found</h2>
+                        <p>${escapeHtml(err.message)}. Please check the link and try again.</p>
+                        <a href="index.html">← Back to Home</a>
+                    </div>
+                `;
+            }
+        })();
+
+        function renderNewsDetail(news) {
+            const container = document.getElementById('newsContainer');
+            const dateStr = news.publishedAt 
+                ? new Date(news.publishedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+                : '';
+
+            const catColors = {
+                'News': '#c6a12a',
+                'Offer': '#ef4444',
+                'Update': '#3b82f6',
+                'Announcement': '#8b5cf6'
+            };
+            const catColor = catColors[news.category] || '#c6a12a';
+
+            const heroImage = news.image || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80';
+
+            // Format content — split by newlines
+            const contentHtml = (news.content || '').split('\n').map(p => p.trim() ? `<p>${escapeHtml(p)}</p>` : '').join('');
+
+            // Attachment box
+            let attachmentHtml = '';
+            if (news.attachment) {
+                attachmentHtml = `
+                    <div class="news-attachment-box">
+                        <div class="news-attachment-info">
+                            <div class="news-attachment-icon">📎</div>
+                            <div>
+                                <div class="news-attachment-label">Attachment</div>
+                                <div class="news-attachment-name">${escapeHtml(news.attachmentName || 'Download Document')}</div>
+                            </div>
+                        </div>
+                        <a href="${news.attachment}" download="${escapeHtml(news.attachmentName || 'document')}" class="news-attachment-btn" target="_blank">
+                            📥 Download
+                        </a>
+                    </div>
+                `;
+            }
+
+            // Share text
+            const shareText = encodeURIComponent(`📰 ${news.title}\n\n${news.excerpt || ''}\n\nRead more: ${window.location.href}`);
+            const shareUrl = `https://wa.me/?text=${shareText}`;
+
+            // HAKUNA news-back-btn hapa — header back button inatosha
+            container.innerHTML = `
+                <article class="news-article">
+                    <div class="news-hero-img" style="background-image: url('${heroImage}');">
+                        <div class="news-hero-overlay">
+                            <span class="news-cat-badge" style="background:${catColor}; color: white;">${escapeHtml(news.category || 'News')}</span>
+                            <h1 class="news-hero-title">${escapeHtml(news.title)}</h1>
+                            <div class="news-meta">
+                                ${dateStr ? `<span>📅 ${dateStr}</span>` : ''}
+                                ${news.author ? `<span>✍️ ${escapeHtml(news.author)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="news-content-wrap">
+                        ${news.excerpt ? `<div class="news-excerpt">${escapeHtml(news.excerpt)}</div>` : ''}
+                        <div class="news-body-text">${contentHtml}</div>
+                        ${attachmentHtml}
+
+                        <div class="news-footer-actions">
+                            <div class="share-label">Share this news:</div>
+                            <div class="news-share-group">
+                                <a href="${shareUrl}" target="_blank" class="news-share-btn">📱 WhatsApp</a>
+                                <button class="news-share-btn copy" onclick="copyNewsLink()">🔗 Copy Link</button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function copyNewsLink() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    const btns = document.querySelectorAll('.news-share-btn.copy');
+                    btns.forEach(btn => {
+                        const original = btn.innerHTML;
+                        btn.innerHTML = '✅ Copied!';
+                        setTimeout(() => { btn.innerHTML = original; }, 2000);
+                    });
+                })
+                .catch(() => {
+                    alert('Failed to copy link. Please copy manually:\n' + window.location.href);
+                });
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+    </script>
+
+</body>
+</html>

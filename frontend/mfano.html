@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Butcher Inspection — Makete DC</title>
+<style>
+/* ============================================================
+   BUTCHER INSPECTION FORM — Makete District Council
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, -apple-system, sans-serif; }
+
+:root {
+  --green: #1B5E20;
+  --green-dark: #0D3310;
+  --green-soft: #E8F5E9;
+  --green-bg: #F9FBF9;
+  --green-border: #C8E6C9;
+  --gold: #FFD54F;
+  --red: #C62828;
+  --orange: #EF6C00;
+  --blue: #1565C0;
+  --purple: #6A1B9A;
+  --grey: #888;
+  --dark-grey: #333;
+  --border: #e0e0e0;
+}
+
+html, body { min-height: 100%; }
+body {
+  background: var(--green-bg);
+  color: #1d1d1d;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* ================= HEADER ================= */
+.header {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+  background: var(--green);
+}
+.header img.bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.header .overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(27,94,32,0.5),
+    var(--green));
+}
+.header .content {
+  position: relative; z-index: 2;
+  padding: 14px 16px;
+  display: flex; flex-direction: column;
+  height: 100%; justify-content: space-between;
+}
+.header .row1 {
+  display: flex; align-items: center; gap: 12px;
+}
+.back-btn {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%; border: none;
+  color: #fff; font-size: 20px;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.back-btn:hover { background: rgba(255,255,255,0.35); }
+.header .titles { flex: 1; text-align: center; }
+.header .titles h1 {
+  font-size: 15px; font-weight: 900;
+  color: #fff; letter-spacing: 1px;
+}
+.header .titles p {
+  font-size: 9px; color: rgba(255,255,255,0.75);
+  font-weight: 700; margin-top: 2px;
+}
+
+/* ================= TABS ================= */
+.tabs {
+  display: flex; gap: 0; overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1; min-width: 80px;
+  padding: 10px 8px;
+  background: none; border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; position: relative;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.tab.active { color: #fff; font-weight: 900; }
+.tab.active::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 15%; right: 15%; height: 3px;
+  background: #fff; border-radius: 2px;
+}
+
+/* ================= CONTENT ================= */
+.content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* ================= SECTION CARD ================= */
+.section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid var(--green-soft);
+}
+.section-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-head .icon-box {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.section-head h2 {
+  font-size: 13px; font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+/* ================= FORM FIELDS ================= */
+.field-group { display: flex; flex-direction: column; gap: 10px; }
+.field-row { display: flex; gap: 8px; }
+.field-row > * { flex: 1; min-width: 0; }
+
+.field {
+  display: flex; flex-direction: column;
+  gap: 4px; flex: 1;
+}
+.field label {
+  font-size: 11px; font-weight: 700;
+  color: var(--dark-grey);
+  padding-left: 4px;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 11px 12px;
+  background: #F0F4F0;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 13px; color: #1d1d1d;
+  outline: none; transition: border-color 0.15s, background 0.15s;
+  font-family: inherit;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--green);
+  background: #fff;
+}
+.field textarea { resize: vertical; min-height: 80px; }
+
+/* ================= TOGGLE (Registered / Manual) ================= */
+.toggle-group {
+  display: flex; gap: 4px;
+  background: #F0F4F0;
+  border-radius: 12px; padding: 4px;
+  margin-bottom: 4px;
+}
+.toggle-btn {
+  flex: 1; padding: 10px;
+  background: none; border: none;
+  border-radius: 8px;
+  font-size: 11px; font-weight: 700;
+  color: var(--grey); cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.toggle-btn.active {
+  background: var(--green); color: #fff;
+}
+
+/* ================= CHECK ROW (YES / NO) ================= */
+.check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.check-row:last-child { border-bottom: none; }
+.check-row .label {
+  flex: 1; font-size: 12px;
+  font-weight: 500; color: var(--dark-grey);
+  line-height: 1.3;
+}
+.check-row.highlight {
+  background: #F1F8E9; border-radius: 10px;
+  padding: 10px; margin-top: 4px;
+  border: 1px solid var(--green-border);
+}
+.check-row.highlight .label {
+  font-weight: 800; color: #1d1d1d; font-size: 13px;
+}
+
+/* ================= YES / NO TOGGLE ================= */
+.yn-group {
+  display: flex; gap: 2px;
+  background: #F0F4F0;
+  border-radius: 8px; padding: 2px;
+  flex-shrink: 0;
+}
+.yn-btn {
+  padding: 6px 10px;
+  background: none; border: none;
+  border-radius: 6px;
+  font-size: 10px; font-weight: 800;
+  color: var(--grey); cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  min-width: 38px;
+}
+.yn-btn.yes.active { background: #2E7D32; color: #fff; }
+.yn-btn.no.active  { background: var(--red); color: #fff; }
+
+/* ================= DEFICIENCY CARD ================= */
+.deficiency-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 12px;
+  background: #FCFCFC;
+}
+.deficiency-head {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.deficiency-head b { font-size: 12px; }
+.delete-btn {
+  background: none; border: none;
+  color: var(--red); cursor: pointer;
+  font-size: 16px; padding: 2px 6px;
+  border-radius: 6px; transition: background 0.15s;
+}
+.delete-btn:hover { background: #FFEBEE; }
+
+.add-btn {
+  width: 100%; padding: 12px;
+  background: rgba(239,108,0,0.1);
+  color: var(--orange);
+  border: none; border-radius: 12px;
+  font-size: 12px; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+}
+.add-btn:hover { background: rgba(239,108,0,0.2); }
+
+/* ================= SIGNATURE PAD ================= */
+.sig-pad {
+  width: 100%;
+  height: 150px;
+  background: #FCFCFC;
+  border: 1.5px dashed #bbb;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+}
+.sig-pad canvas {
+  width: 100%; height: 100%;
+  display: block;
+}
+.sig-pad .clear-btn {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(198,40,40,0.9);
+  color: #fff; border: none;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 10px; font-weight: 700;
+  cursor: pointer;
+}
+.sig-pad .placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #ccc; font-size: 12px;
+  font-weight: 700; pointer-events: none;
+}
+
+/* ================= STATEMENT BOX ================= */
+.statement {
+  background: #FFF9C4;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px 0;
+}
+.statement h4 {
+  font-size: 10px; font-weight: 900;
+  color: #000; letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+.statement p {
+  font-size: 11px; color: #444;
+  line-height: 1.5;
+}
+
+/* ================= NAVIGATION BUTTONS ================= */
+.nav-buttons {
+  display: flex; gap: 12px;
+  margin: 8px 0;
+}
+.nav-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 13px; font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px;
+}
+.nav-btn:active { transform: scale(0.98); }
+.nav-btn.prev {
+  background: transparent; color: var(--dark-grey);
+  border: 1.5px solid rgba(0,0,0,0.2);
+}
+.nav-btn.next {
+  background: var(--green); color: #fff; border: none;
+}
+.save-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--green);
+  color: #fff;
+  border: none; border-radius: 16px;
+  font-size: 14px; font-weight: 900;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(27,94,32,0.3);
+  transition: transform 0.1s, opacity 0.15s;
+  margin-top: 8px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+}
+.save-btn:active { transform: scale(0.98); }
+.save-btn:disabled {
+  background: #aaa; cursor: not-allowed;
+  box-shadow: none; opacity: 0.6;
+}
+
+/* ================= ALERT MODAL ================= */
+.alert-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; z-index: 100;
+}
+.alert-modal.hidden { display: none; }
+.alert-box {
+  background: #fff; border-radius: 24px;
+  padding: 24px; max-width: 400px; width: 100%;
+  text-align: center;
+}
+.alert-box .a-icon { font-size: 40px; margin-bottom: 12px; }
+.alert-box h3 { font-size: 18px; margin-bottom: 8px; }
+.alert-box p { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+.alert-box button {
+  width: 100%; padding: 12px;
+  background: var(--green); color: #fff;
+  border: none; border-radius: 12px;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer;
+}
+
+/* ================= UTIL ================= */
+.hidden { display: none !important; }
+.tab-panel { display: none; flex-direction: column; gap: 16px; }
+.tab-panel.active { display: flex; }
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="header">
+  <img class="bg" src="assets/cows.jpg" alt="" />
+  <div class="overlay"></div>
+  <div class="content">
+    <div class="row1">
+      <button class="back-btn" onclick="history.back()">←</button>
+      <div class="titles">
+        <h1>BUTCHER INSPECTION FORM</h1>
+        <p>MAKETE DISTRICT COUNCIL</p>
+      </div>
+      <div style="width: 40px;"></div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="0">General</button>
+      <button class="tab" data-tab="1">Building</button>
+      <button class="tab" data-tab="2">Meat & Staff</button>
+      <button class="tab" data-tab="3">Summary</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= CONTENT ================= -->
+<main class="content">
+
+  <!-- ================= TAB 0: GENERAL ================= -->
+  <section class="tab-panel active" data-panel="0">
+
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(27,94,32,0.1);color:#1B5E20;">ℹ️</div>
+        <h2 style="color:#1B5E20;">A. TAARIFA ZA BUCHA / BUTCHER INFO</h2>
+      </div>
+
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-entry="registered">REGISTERED</button>
+        <button class="toggle-btn" data-entry="manual">MANUAL ENTRY</button>
+      </div>
+
+      <div class="field-group">
+        <div class="field" id="facilityField">
+          <label>Select Registered Facility</label>
+          <input type="text" id="facilitySearch" placeholder="Search facility..." />
+          <div id="facilityDropdown" class="hidden" style="background:#fff; border:1px solid #ddd; border-radius:10px; max-height:200px; overflow-y:auto; margin-top:4px;"></div>
+        </div>
+
+        <div class="field">
+          <label>Bucha Name (Jina la Bucha) *</label>
+          <input type="text" id="butcherName" required />
+        </div>
+
+        <div class="field">
+          <label>Owner Name (Jina la mmiliki) *</label>
+          <input type="text" id="ownerName" required />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Grade (Daraja)</label>
+            <select id="butcherGrade">
+              <option value="">Select Grade</option>
+              <option>Standard Butcher</option>
+              <option>Premier Butcher</option>
+              <option>Super Butcher</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Phone (Namba ya simu)</label>
+            <input type="tel" id="phoneNumber" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Ward (Kata)</label>
+            <input type="text" id="ward" />
+          </div>
+          <div class="field">
+            <label>Village (Kijiji)</label>
+            <input type="text" id="village" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Inspection Date</label>
+          <input type="date" id="inspectionDate" />
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(46,125,50,0.1);color:#2E7D32;">📋</div>
+        <h2 style="color:#2E7D32;">B. NYARAKA NA USAJILI / DOCUMENTS</h2>
+      </div>
+      <div class="field-group" id="sectionB"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn next" data-next="1">NEXT: BUILDING ›</button>
+    </div>
+  </section>
+
+  <!-- ================= TAB 1: BUILDING ================= -->
+  <section class="tab-panel" data-panel="1">
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(21,101,192,0.1);color:#1565C0;">🏢</div>
+        <h2 style="color:#1565C0;">C. JENGO NA MAZINGIRA / BUILDING</h2>
+      </div>
+      <div class="field-group" id="sectionC"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn prev" data-prev="0">‹ BACK</button>
+      <button class="nav-btn next" data-next="2">NEXT: HYGIENE ›</button>
+    </div>
+  </section>
+
+  <!-- ================= TAB 2: MEAT & PERSONNEL ================= -->
+  <section class="tab-panel" data-panel="2">
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(198,40,40,0.1);color:#C62828;">🍖</div>
+        <h2 style="color:#C62828;">D. USAFI WA NYAMA / MEAT HYGIENE</h2>
+      </div>
+      <div class="field-group" id="sectionD"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(106,27,154,0.1);color:#6A1B9A;">👤</div>
+        <h2 style="color:#6A1B9A;">E. USAFI WA MUHUDUMU / PERSONNEL</h2>
+      </div>
+      <div class="field-group" id="sectionE"></div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn prev" data-prev="1">‹ BACK</button>
+      <button class="nav-btn next" data-next="3">NEXT: SUMMARY ›</button>
+    </div>
+  </section>
+
+  <!-- ================= TAB 3: SUMMARY ================= -->
+  <section class="tab-panel" data-panel="3">
+
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(239,108,0,0.1);color:#EF6C00;">⚠️</div>
+        <h2 style="color:#EF6C00;">F. MAPUNGUFU / DEFICIENCIES</h2>
+      </div>
+      <div id="deficiencyList"></div>
+      <button class="add-btn" id="addDeficiency">+ ADD DEFICIENCY (Ongeza Upungufu)</button>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(27,94,32,0.1);color:#1B5E20;">📝</div>
+        <h2 style="color:#1B5E20;">G. MAELEKEZO YA MKAGUZI / INSTRUCTIONS</h2>
+      </div>
+      <div class="field">
+        <label>Instructions (Maelekezo)</label>
+        <textarea id="inspectorInstructions" rows="4"></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="icon-box" style="background:rgba(27,94,32,0.1);color:#1B5E20;">✅</div>
+        <h2 style="color:#1B5E20;">H. UTHIBITISHO / CONFIRMATION</h2>
+      </div>
+
+      <div class="field-group">
+        <p style="font-size:11px; font-weight:900; color:#1B5E20; letter-spacing:0.4px;">MKUSANYA TAARIFA (DATA COLLECTOR / INSPECTOR)</p>
+
+        <div class="field">
+          <label>Inspector Name (Jina la Mkaguzi)</label>
+          <input type="text" id="inspectorName" />
+        </div>
+        <div class="field">
+          <label>Professional Title (Cheo)</label>
+          <input type="text" id="inspectorTitle" />
+        </div>
+
+        <label style="font-size:11px; font-weight:700; padding-left:4px;">Signature (Sahihi ya Mkaguzi):</label>
+        <div class="sig-pad" id="sigPadInspector">
+          <canvas></canvas>
+          <div class="placeholder">Sign here (Weka sahihi hapa)</div>
+          <button class="clear-btn" data-clear="inspector">Clear</button>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #eee; margin:12px 0;" />
+
+        <p style="font-size:11px; font-weight:900; color:#E65100; letter-spacing:0.4px;">MMILIKI / MWAKILISHI (OWNER / REPRESENTATIVE)</p>
+
+        <div class="field">
+          <label>Full Name (Jina Kamili)</label>
+          <input type="text" id="ownerRepName" />
+        </div>
+        <div class="field">
+          <label>Owner Comments (Maoni ya Mwenye Bucha)</label>
+          <textarea id="ownerComments" rows="3"></textarea>
+        </div>
+
+        <div class="statement">
+          <h4>TAMKO LA UTHIBITISHO / CONFIRMATION STATEMENT</h4>
+          <p>
+            Nathibitisha kwamba ukaguzi wa bucha umefanyika mbele yangu na nimepewa maelezo kuhusu
+            matokeo ya ukaguzi, mapungufu yaliyobainika pamoja na maelekezo ya marekebisho yaliyotolewa.
+            Ninaelewa kwamba kuweka sahihi yangu hapa hakumaanishi kwamba nimekubaliana na kila
+            matokeo au hitimisho la ukaguzi, bali ni uthibitisho kwamba ukaguzi umefanyika na
+            taarifa zake zimewasilishwa kwangu.
+          </p>
+        </div>
+
+        <label style="font-size:11px; font-weight:700; padding-left:4px;">Signature (Sahihi ya Mwenye Bucha):</label>
+        <div class="sig-pad" id="sigPadOwner">
+          <canvas></canvas>
+          <div class="placeholder">Sign here (Weka sahihi hapa)</div>
+          <button class="clear-btn" data-clear="owner">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn prev" data-prev="2">‹ BACK</button>
+    </div>
+
+    <button class="save-btn" id="saveInspection" disabled>
+      💾 SAVE INSPECTION
+    </button>
+  </section>
+
+</main>
+
+<!-- ================= ALERT MODAL ================= -->
+<div id="alertModal" class="alert-modal hidden">
+  <div class="alert-box">
+    <div class="a-icon" id="alertIcon">✅</div>
+    <h3 id="alertTitle">Success</h3>
+    <p id="alertMessage">Saved.</p>
+    <button id="alertClose">SAWA</button>
+  </div>
+</div>
+
+<script type="module" src="inspection.js"></script>
+</body>
+</html>

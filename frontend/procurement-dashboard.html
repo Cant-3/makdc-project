@@ -1,0 +1,2932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procurement & Store Dashboard - MAK DC Investment Company</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* ===== KIJANI KILICHOKOLEA ===== */
+            --primary: #022908;
+            --primary-dark: #011a05;
+            --primary-mid: #034d13;
+            --primary-light: #0a7a24;
+            --primary-hover: #0d8f2c;
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --orange: #f59e0b;
+            --teal: #14b8a6;
+            --pink: #ec4899;
+            --indigo: #6366f1;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--gray-50);
+            display: flex;
+            flex-direction: row;
+        }
+
+        /* ================================================================
+           SIDEBAR — KIJANI KILICHOKOLEA
+           ================================================================ */
+        .sidebar {
+            width: 280px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #022908 0%, #011a05 100%);
+            color: white;
+            padding: 24px 18px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 200;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.3s ease, padding 0.35s ease;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+            width: 0;
+            padding: 0;
+            margin: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 190;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-backdrop.show { display: block; opacity: 1; }
+
+        .sidebar-toggle {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: var(--gold);
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            font-size: 20px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            font-family: inherit; line-height: 1;
+        }
+        .sidebar-toggle:hover {
+            background: rgba(245, 158, 11, 0.25);
+            border-color: var(--gold);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        .sidebar-toggle:active { transform: scale(0.95); }
+
+        .sidebar-brand {
+            text-align: center;
+            padding: 6px 0 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-brand .logo-img {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gold);
+            padding: 3px;
+            background: white;
+            margin: 0 auto 6px auto;
+            display: block;
+        }
+        .sidebar-brand .brand-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+        }
+        .sidebar-brand .brand-name span { color: var(--gold); }
+        .sidebar-brand .brand-motto {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+            font-style: italic;
+        }
+
+        .sidebar-rule {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 14px 0 12px 0;
+        }
+        .sidebar-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.25);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            font-size: 14px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 2px;
+            cursor: pointer;
+        }
+        .sidebar-nav a span {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 28px;
+        }
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--gold);
+        }
+        .sidebar-nav a.active span { color: var(--gold); }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .sidebar-user .user-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-dark);
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .sidebar-user .user-avatar img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .sidebar-user .user-info .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        .sidebar-user .user-info .user-role {
+            font-size: 11px;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .sidebar-portal {
+            display: block;
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            border-radius: 6px;
+            color: #fca5a5;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-align: center;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
+        }
+        .sidebar-portal:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: white;
+        }
+
+        .sidebar-contact {
+            margin-top: 10px;
+            padding: 14px 16px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .sidebar-contact:hover {
+            background: rgba(245, 158, 11, 0.15);
+        }
+        .sidebar-contact a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--gold);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .sidebar-bottom span {
+            display: block;
+            font-weight: 600;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .sidebar-bottom small {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
+        }
+
+        /* ================================================================
+           PAGE CONTENT
+           ================================================================ */
+        .page-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ================================================================
+           HEADER — KIJANI KILICHOKOLEA
+           ================================================================ */
+        .dashboard-header {
+            background: linear-gradient(135deg, #022908 0%, #034d13 100%);
+            padding: 12px 36px;
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .dashboard-header .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .dashboard-header .header-left .logo-small {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+            padding: 2px;
+            background: white;
+        }
+        .dashboard-header .header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+        }
+        .dashboard-header .header-title span { color: var(--gold); }
+        .dashboard-header .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* ================================================================
+           USER PROFILE DROPDOWN
+           ================================================================ */
+        .user-dropdown-wrap { position: relative; }
+        .user-dropdown-trigger {
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 5px 14px 5px 6px;
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+        }
+        .user-dropdown-trigger:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: var(--gold);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+        .ud-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border: 2px solid rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .ud-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .ud-avatar span {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+        }
+        .ud-info { text-align: left; line-height: 1.2; min-width: 0; flex: 1; }
+        .ud-name {
+            font-size: 13px; font-weight: 700; color: white;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+        }
+        .ud-role {
+            font-size: 10px; color: var(--gold); font-weight: 600; margin-top: 1px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+        }
+        .ud-arrow {
+            font-size: 10px; color: rgba(255,255,255,0.5);
+            transition: transform 0.25s; margin-left: 4px;
+        }
+        .user-dropdown-wrap.open .ud-arrow { transform: rotate(180deg); }
+
+        .user-dropdown-panel {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 340px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200;
+            border: 1px solid var(--gray-200);
+        }
+        .user-dropdown-wrap.open .user-dropdown-panel {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .udp-header {
+            background: linear-gradient(135deg, #022908 0%, #034d13 100%);
+            padding: 22px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .udp-pic {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border: 3px solid rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 800; color: var(--primary-dark);
+            overflow: hidden; flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .udp-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .udp-pic span {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+        }
+        .udp-user-info { flex: 1; min-width: 0; }
+        .udp-name {
+            font-size: 16px; font-weight: 800; color: white; margin-bottom: 3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .udp-role {
+            font-size: 12px; color: var(--gold-light); font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .udp-info {
+            padding: 16px 18px;
+            display: flex; flex-direction: column; gap: 10px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .udp-info-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 10px; background: var(--gray-50);
+            border-radius: 8px; border-left: 3px solid #022908;
+            transition: all 0.2s;
+        }
+        .udp-info-item:hover { background: rgba(2,41,8,0.08); border-left-color: var(--gold); }
+        .udp-ic { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+        .udp-info-text { flex: 1; min-width: 0; }
+        .udp-info-label {
+            font-size: 9px; font-weight: 800; color: var(--gray-400);
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;
+        }
+        .udp-info-value {
+            font-size: 12px; font-weight: 600; color: var(--gray-800);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .udp-actions {
+            padding: 14px 18px;
+            display: flex; flex-direction: column; gap: 8px;
+            background: var(--gray-50);
+        }
+        .udp-btn {
+            padding: 10px 16px; border-radius: 10px;
+            font-size: 13px; font-weight: 700;
+            border: none; cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .udp-btn.edit {
+            background: linear-gradient(135deg, #022908, #034d13);
+            color: white;
+            box-shadow: 0 4px 12px rgba(2,41,8,0.3);
+        }
+        .udp-btn.edit:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(2,41,8,0.5); }
+        .udp-btn.logout {
+            background: rgba(239,68,68,0.1);
+            color: #dc2626;
+            border: 1.5px solid rgba(239,68,68,0.2);
+        }
+        .udp-btn.logout:hover { background: rgba(239,68,68,0.2); transform: translateY(-2px); }
+
+        @media (max-width: 768px) {
+            .user-dropdown-panel { width: 300px; right: -10px; }
+            .ud-info { display: none; }
+            .user-dropdown-trigger { padding: 4px; border-radius: 50%; }
+            .ud-arrow { display: none; }
+        }
+        @media (max-width: 480px) {
+            .user-dropdown-panel { width: calc(100vw - 32px); right: -60px; }
+        }
+
+        /* ================================================================
+           DASHBOARD CONTENT
+           ================================================================ */
+        .dashboard-content {
+            padding: 28px 36px 40px;
+            flex: 1;
+        }
+
+        /* ===== STATS ===== */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 22px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--gold);
+        }
+        .stat-card .stat-icon { font-size: 26px; margin-bottom: 4px; }
+        .stat-card .stat-number {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        /* ================================================================
+           TABS — KIJANI KILICHOKOLEA
+           ================================================================ */
+        .tabs-container { margin-bottom: 28px; }
+        .tabs-header {
+            display: flex;
+            gap: 4px;
+            background: white;
+            border-radius: 12px;
+            padding: 6px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-lg);
+            flex-wrap: wrap;
+        }
+        .tabs-header .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-width: 100px;
+            font-family: inherit;
+        }
+        .tabs-header .tab-btn:hover { background: var(--gray-50); color: var(--gray-700); }
+        .tabs-header .tab-btn.active {
+            background: linear-gradient(135deg, #022908, #034d13);
+            color: white;
+            box-shadow: 0 4px 12px rgba(2,41,8,0.35);
+        }
+        .tabs-header .tab-btn .badge {
+            background: var(--gold);
+            color: var(--primary-dark);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 10px;
+            border-radius: 12px;
+        }
+        .tabs-header .tab-btn.active .badge {
+            background: var(--gold-light);
+            color: var(--primary-dark);
+        }
+        .tab-content { display: none; margin-top: 20px; }
+        .tab-content.active { display: block; }
+
+        /* ================================================================
+           SECTION CARDS — KIJANI KILICHOKOLEA
+           ================================================================ */
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 20px;
+        }
+        .section-card .section-header {
+            background: linear-gradient(135deg, #022908 0%, #034d13 100%);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .section-card .section-header h2 {
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-card .section-header .badge {
+            background: var(--gold);
+            color: var(--primary-dark);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .section-card .section-body {
+            padding: 16px 24px 20px;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table thead { background: var(--gray-50); }
+        .data-table th {
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-600);
+            border-bottom: 2px solid var(--gray-200);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+        }
+        .data-table tr:hover { background: var(--gray-50); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-badge.pending { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .status-badge.approved { background: rgba(34,197,94,0.1); color: var(--green); }
+        .status-badge.rejected { background: rgba(239,68,68,0.1); color: var(--red); }
+        .status-badge.in-progress { background: rgba(59,130,246,0.1); color: var(--blue); }
+        .status-badge.completed { background: rgba(34,197,94,0.15); color: var(--green); }
+        .status-badge.pending-approval { background: rgba(99,102,241,0.1); color: var(--indigo); }
+
+        .action-btn {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 4px;
+            font-family: inherit;
+        }
+        .action-btn:hover { transform: translateY(-1px); }
+        .action-btn.gold { background: var(--gold); color: var(--primary-dark); }
+        .action-btn.gold:hover { background: #d97706; }
+        .action-btn.green { background: var(--green); color: white; }
+        .action-btn.green:hover { background: #16a34a; }
+        .action-btn.blue { background: var(--blue); color: white; }
+        .action-btn.blue:hover { background: #2563eb; }
+        .action-btn.purple { background: var(--purple); color: white; }
+        .action-btn.purple:hover { background: #7c3aed; }
+        .action-btn.red { background: var(--red); color: white; }
+        .action-btn.red:hover { background: #dc2626; }
+        .action-btn.teal { background: var(--teal); color: white; }
+        .action-btn.teal:hover { background: #0d9488; }
+
+        /* ================================================================
+           TASK CARDS
+           ================================================================ */
+        .task-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .task-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+        .task-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .task-card .task-icon { font-size: 22px; margin-bottom: 4px; }
+        .task-card .task-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        .task-card .task-desc {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+        .task-card .task-status {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: rgba(245,158,11,0.1);
+            color: var(--orange);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .task-card .task-actions {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* ================================================================
+           MODAL
+           ================================================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            padding: 28px 32px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: modalIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-box .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-box .modal-header h3 { font-size: 18px; color: var(--primary); }
+        .modal-box .modal-header .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-400);
+            transition: color 0.3s;
+        }
+        .modal-box .modal-header .modal-close:hover { color: var(--red); }
+        .modal-box .modal-body { font-size: 14px; color: var(--gray-600); line-height: 1.7; }
+        .modal-box .modal-body .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 13px;
+            gap: 10px;
+        }
+        .modal-box .modal-body .info-row .label { color: var(--gray-500); }
+        .modal-box .modal-body .info-row .value { font-weight: 600; color: var(--gray-700); text-align: right; }
+        .modal-box .modal-body textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            margin-top: 6px;
+        }
+        .modal-box .modal-body textarea:focus { outline: none; border-color: var(--gold); }
+        .modal-box .modal-body input[type="text"],
+        .modal-box .modal-body input[type="number"],
+        .modal-box .modal-body input[type="date"],
+        .modal-box .modal-body input[type="tel"],
+        .modal-box .modal-body input[type="email"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+        .modal-box .modal-body input:focus { outline: none; border-color: var(--gold); }
+        .modal-box .modal-body select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-top: 4px;
+            background: white;
+        }
+        .modal-box .modal-body select:focus { outline: none; border-color: var(--gold); }
+        .modal-box .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .modal-box .modal-footer .btn-submit {
+            padding: 8px 24px;
+            background: var(--gold);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .modal-box .modal-footer .btn-submit:hover { background: #d97706; transform: translateY(-2px); }
+        .modal-box .modal-footer .btn-submit.green { background: var(--green); color: white; }
+        .modal-box .modal-footer .btn-submit.green:hover { background: #16a34a; }
+        .modal-box .modal-footer .btn-submit.purple { background: var(--purple); color: white; }
+        .modal-box .modal-footer .btn-submit.purple:hover { background: #7c3aed; }
+        .modal-box .modal-footer .btn-submit.blue { background: var(--blue); color: white; }
+        .modal-box .modal-footer .btn-submit.blue:hover { background: #2563eb; }
+        .modal-box .modal-footer .btn-cancel {
+            padding: 8px 24px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .modal-box .modal-footer .btn-cancel:hover { background: var(--gray-200); }
+        .modal-box .modal-body .status-msg {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+        .modal-box .modal-body .status-msg.success {
+            display: block;
+            background: rgba(34,197,94,0.1);
+            color: var(--green);
+            border: 1px solid rgba(34,197,94,0.15);
+        }
+        .modal-box .modal-body .status-msg.error {
+            display: block;
+            background: rgba(239,68,68,0.1);
+            color: var(--red);
+            border: 1px solid rgba(239,68,68,0.15);
+        }
+
+        /* ================================================================
+           EDIT PROFILE MODAL
+           ================================================================ */
+        .edit-profile-modal-box {
+            max-width: 560px;
+            padding: 0;
+            overflow: hidden;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .edit-profile-header {
+            background: linear-gradient(135deg, #022908 0%, #034d13 100%);
+            padding: 22px 28px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .edit-profile-header .header-info {
+            display: flex; align-items: center; gap: 14px;
+        }
+        .edit-profile-header .header-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .edit-profile-header .header-text h3 {
+            font-size: 18px; font-weight: 800; color: white;
+            margin: 0 0 2px 0;
+        }
+        .edit-profile-header .header-text p {
+            font-size: 12px; color: rgba(255,255,255,0.8); margin: 0;
+        }
+        .edit-profile-header .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none; color: white;
+            width: 34px; height: 34px;
+            border-radius: 50%; font-size: 18px;
+            cursor: pointer;
+        }
+        .edit-profile-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .edit-profile-footer {
+            padding: 16px 28px;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            display: flex; gap: 12px; justify-content: flex-end;
+            flex-shrink: 0;
+        }
+        .edit-profile-footer button {
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 14px; font-weight: 700;
+            border: none; cursor: pointer; font-family: inherit;
+        }
+        .edit-profile-footer .btn-cancel {
+            background: var(--gray-200); color: var(--gray-700);
+        }
+        .edit-profile-footer .btn-submit {
+            background: linear-gradient(135deg, #022908 0%, #034d13 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(2,41,8,0.35);
+        }
+
+        .edit-pic-area {
+            display: flex; flex-direction: column; align-items: center;
+            margin-bottom: 20px;
+        }
+        .edit-pic-wrap {
+            position: relative;
+            width: 110px; height: 110px; margin-bottom: 10px;
+        }
+        .edit-pic-preview {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            border: 4px solid #022908;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 42px; font-weight: 800;
+            color: var(--primary-dark);
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(2,41,8,0.25);
+        }
+        .edit-pic-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .edit-pic-upload-btn {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #022908, #034d13);
+            border: 3px solid white;
+            color: white; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.25s;
+            padding: 0;
+        }
+        .edit-pic-upload-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 18px rgba(2,41,8,0.5);
+        }
+        .edit-pic-hint {
+            font-size: 11px; color: var(--gray-500);
+            text-align: center; line-height: 1.5;
+        }
+        .edit-pic-hint strong { color: #022908; }
+        #profilePicInput { display: none; }
+
+        .company-form-section { margin-bottom: 16px; }
+        .company-form-section .form-label {
+            display: block;
+            font-size: 11px; font-weight: 800;
+            color: var(--gray-700);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .company-form-section .form-label .required { color: var(--red); }
+        .company-form-section input,
+        .company-form-section select,
+        .company-form-section textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--gray-50);
+            transition: all 0.2s;
+        }
+        .company-form-section textarea { resize: vertical; min-height: 70px; }
+        .company-form-section input:focus,
+        .company-form-section select:focus,
+        .company-form-section textarea:focus {
+            outline: none;
+            border-color: #022908;
+            background: white;
+        }
+        .company-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .company-form-section .readonly-badge {
+            display: inline-block;
+            font-size: 9px; font-weight: 800;
+            color: var(--gray-500);
+            background: var(--gray-200);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .company-form-section input.readonly-field,
+        .company-form-section select.readonly-field {
+            background: var(--gray-100);
+            color: var(--gray-500);
+            cursor: not-allowed;
+            border-color: var(--gray-200);
+            opacity: 0.85;
+        }
+        .company-form-section input.readonly-field:focus,
+        .company-form-section select.readonly-field:focus {
+            border-color: var(--gray-200);
+            background: var(--gray-100);
+        }
+
+        .readonly-notice {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1.5px solid rgba(245, 158, 11, 0.25);
+            border-left: 4px solid var(--gold);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--gray-700);
+            font-weight: 500;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+        .readonly-notice .notice-icon { font-size: 18px; flex-shrink: 0; }
+        .readonly-notice strong { color: var(--primary); }
+
+        /* ================================================================
+           CONFIRM DIALOG
+           ================================================================ */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .confirm-overlay.show { opacity: 1; visibility: visible; }
+        .confirm-box {
+            background: white;
+            border-radius: 20px;
+            max-width: 440px;
+            width: 100%;
+            padding: 32px 28px 24px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+            transform: scale(0.85) translateY(20px);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .confirm-overlay.show .confirm-box { transform: scale(1) translateY(0); }
+        .confirm-icon {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 18px;
+        }
+        .confirm-icon.green { background: rgba(34, 197, 94, 0.12); border: 2px solid rgba(34, 197, 94, 0.3); color: var(--green); }
+        .confirm-icon.red { background: rgba(239, 68, 68, 0.12); border: 2px solid rgba(239, 68, 68, 0.3); color: var(--red); }
+        .confirm-icon.gold { background: rgba(245, 158, 11, 0.12); border: 2px solid rgba(245, 158, 11, 0.3); color: var(--gold); }
+        .confirm-icon.teal { background: rgba(2, 41, 8, 0.12); border: 2px solid rgba(2, 41, 8, 0.3); color: var(--primary); }
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        .confirm-message {
+            font-size: 14px;
+            color: var(--gray-500);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .confirm-message strong {
+            color: var(--primary);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            background: var(--gray-100);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+        .confirm-actions button {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+            border: none;
+        }
+        .confirm-actions .btn-confirm {
+            background: linear-gradient(135deg, #022908 0%, #034d13 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(2, 41, 8, 0.3);
+        }
+        .confirm-actions .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(2, 41, 8, 0.45); }
+        .confirm-actions .btn-confirm.danger {
+            background: linear-gradient(135deg, var(--red) 0%, #dc2626 100%);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+        }
+        .confirm-actions .btn-cancel {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1.5px solid var(--gray-200);
+        }
+        .confirm-actions .btn-cancel:hover { background: var(--gray-200); }
+
+        /* ================================================================
+           TOAST
+           ================================================================ */
+        #toastContainer {
+            position: fixed;
+            top: 24px; right: 24px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 260px;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            font-family: 'Inter', sans-serif;
+        }
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .toast.info { background: linear-gradient(135deg, #022908, #034d13); }
+
+        /* ================================================================
+           STOCK CARDS
+           ================================================================ */
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+        .stock-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-200);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .stock-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+        .stock-card .stock-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-800);
+        }
+        .stock-card .stock-qty {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 4px 0;
+        }
+        .stock-card .stock-unit {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        .stock-card .stock-status {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .stock-card .stock-status.in-stock { background: rgba(34,197,94,0.1); color: var(--green); }
+        .stock-card .stock-status.low-stock { background: rgba(245,158,11,0.1); color: var(--orange); }
+        .stock-card .stock-status.out-of-stock { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        /* ================================================================
+           FOOTER
+           ================================================================ */
+        .site-footer {
+            background: var(--primary-dark);
+            color: white;
+            padding: 16px 44px 12px;
+            text-align: center;
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .site-footer p { font-size: 13px; color: rgba(255,255,255,0.35); }
+        .site-footer small { color: rgba(255,255,255,0.15); font-size: 11px; }
+
+        /* ================================================================
+           RESPONSIVE
+           ================================================================ */
+        @media (max-width: 1024px) {
+            .dashboard-stats { grid-template-columns: repeat(2,1fr); }
+            .task-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0; left: 0;
+                z-index: 250;
+                width: 280px;
+                height: 100vh;
+                box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+            }
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            .sidebar-backdrop.show { display: block; }
+            .dashboard-header { padding: 10px 16px; flex-wrap: wrap; gap: 6px; }
+            .dashboard-header .header-title { font-size: 13px; }
+            .dashboard-content { padding: 16px 14px 24px; }
+            .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card .stat-number { font-size: 20px; }
+            .tabs-header { flex-direction: column; gap: 4px; }
+            .tabs-header .tab-btn { padding: 10px; font-size: 13px; min-width: auto; }
+            .stock-grid { grid-template-columns: 1fr 1fr; }
+            .site-footer { padding: 14px 16px; }
+        }
+        @media (max-width: 480px) {
+            .dashboard-stats { grid-template-columns: 1fr; }
+            .stock-grid { grid-template-columns: 1fr; }
+            .dashboard-header .header-title { font-size: 11px; }
+        }
+
+        /* ================================================================
+           PRINT
+           ================================================================ */
+        @media print {
+            .sidebar, .dashboard-header, .tabs-header,
+            .modal-close, .modal-footer, .action-btn,
+            #toastContainer, .site-footer {
+                display: none !important;
+            }
+            .modal-overlay { position: static; background: white; }
+            .modal-box {
+                box-shadow: none; border-radius: 0;
+                max-width: 100%; padding: 0; max-height: none;
+            }
+            body { background: white; }
+        }
+        /* ===== SIDEBAR DROPDOWN ===== */
+            .sidebar-nav-group { display: flex; flex-direction: column; gap: 2px; }
+            .sidebar-nav-parent {
+                display: flex; align-items: center; gap: 12px;
+                padding: 11px 14px; color: rgba(255, 255, 255, 0.75);
+                text-decoration: none; border-left: 3px solid transparent;
+                transition: all 0.25s ease; font-size: 13.5px;
+                border-radius: 0 8px 8px 0; cursor: pointer;
+                font-weight: 500; user-select: none;
+            }
+            .sidebar-nav-parent:hover,
+            .sidebar-nav-parent.open {
+                color: white; background: rgba(255, 255, 255, 0.06);
+                border-left-color: var(--gold);
+            }
+            .sidebar-nav-parent > span:first-child {
+                font-size: 18px; width: 24px; text-align: center; flex-shrink: 0;
+            }
+            .sidebar-nav-parent .nav-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .sidebar-nav-parent .nav-arrow {
+                font-size: 10px; color: rgba(255, 255, 255, 0.5);
+                transition: transform 0.3s ease;
+            }
+            .sidebar-nav-parent.open .nav-arrow { transform: rotate(180deg); color: var(--gold); }
+            .sidebar-submenu {
+                max-height: 0; overflow: hidden;
+                transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                display: flex; flex-direction: column; gap: 2px;
+                background: rgba(0, 0, 0, 0.15); border-radius: 0 0 8px 0;
+            }
+            .sidebar-submenu.open { max-height: 500px; padding: 6px 0; }
+            .sidebar-submenu a {
+                display: flex; align-items: center; gap: 10px;
+                padding: 9px 14px 9px 48px; color: rgba(255, 255, 255, 0.65);
+                text-decoration: none; font-size: 12.5px; font-weight: 500;
+                transition: all 0.2s ease; border-left: 3px solid transparent;
+                cursor: pointer; position: relative;
+            }
+            .sidebar-submenu a::before {
+                content: ''; position: absolute; left: 26px; top: 50%;
+                transform: translateY(-50%); width: 6px; height: 6px;
+                border-radius: 50%; background: rgba(255, 255, 255, 0.2);
+                transition: all 0.2s;
+            }
+            .sidebar-submenu a:hover {
+                color: white; background: rgba(255, 255, 255, 0.05);
+                border-left-color: var(--gold); padding-left: 52px;
+            }
+            .sidebar-submenu a:hover::before { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+            .sidebar-submenu a.active {
+                color: white;
+                background: linear-gradient(90deg, rgba(245, 158, 11, 0.20) 0%, rgba(245, 158, 11, 0.03) 100%);
+                border-left-color: var(--gold); font-weight: 700;
+            }
+            .sidebar-submenu a.active::before {
+                background: var(--gold); box-shadow: 0 0 10px var(--gold);
+                width: 8px; height: 8px;
+            }
+            button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+            transform: none !important;
+            }
+            /* ===== CHAT NOTIFICATION BADGE & TOAST ===== */
+        .msg-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: linear-gradient(135deg,#dc2626,#991b1b);
+            color: white;
+            font-size: 10px;
+            font-weight: 900;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            box-shadow: 0 2px 6px rgba(220,38,38,0.4);
+            border: 2px solid white;
+            animation: badgePulse 1.5s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .new-msg-toast {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: linear-gradient(135deg,#2a3d2a,#3d5a3d);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 99999;
+            cursor: pointer;
+            min-width: 320px;
+            max-width: 400px;
+            border-left: 4px solid #c9a227;
+            animation: slideInRight 0.4s cubic-bezier(0.16,1,0.3,1);
+            transition: all 0.3s;
+        }
+        .new-msg-toast:hover { transform: translateX(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+
+        .new-msg-toast .nmt-icon {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#c9a227,#e0b93a);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #2a3d2a;
+            flex-shrink: 0;
+        }
+        .new-msg-toast .nmt-content { flex: 1; min-width: 0; }
+        .new-msg-toast .nmt-title { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+        .new-msg-toast .nmt-text { font-size: 12px; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .new-msg-toast .nmt-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 18px; cursor: pointer; padding: 0 4px; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        /* ================================================================
+        CHAT SYSTEM — BUBBLES, STATUS, TYPING (Kutoka Sales)
+        ================================================================ */
+        .chat-msg-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            align-items: flex-end;
+            animation: chatFadeIn 0.3s ease;
+            width: 100%;
+        }
+        .chat-msg-row.mine { flex-direction: row-reverse; }
+
+        @keyframes chatFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 12px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border: 2px solid white;
+        }
+        .chat-avatar.mine { background: linear-gradient(135deg,#c9a227,#e0b93a); color:#2a3d2a; }
+        .chat-avatar.other { background: linear-gradient(135deg,#3d5a3d,#2a3d2a); }
+
+        .chat-bubble-wrap {
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .chat-msg-row.mine .chat-bubble-wrap { align-items: flex-end; }
+
+        .chat-bubble {
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.45;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .chat-bubble.mine {
+            background: linear-gradient(135deg,#3d5a3d 0%,#2a3d2a 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-bubble.other {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-subject {
+            font-weight: 800;
+            font-size: 11px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .chat-bubble.other .chat-subject {
+            border-bottom-color: #e2e8f0;
+            color: #2a3d2a;
+        }
+
+        .chat-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10.5px;
+            color: #94a3b8;
+            padding: 0 4px;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+        .chat-msg-row.mine .chat-meta { justify-content: flex-end; }
+        .chat-meta strong { color: #64748b; font-weight: 800; }
+
+        .msg-status {
+            display: inline-flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-left: 2px;
+        }
+        .msg-status.sent { color: #94a3b8; }
+        .msg-status.read { color: #22c55e; }
+
+        .chat-date-sep {
+            text-align: center;
+            margin: 16px 0 12px;
+            position: relative;
+        }
+        .chat-date-sep::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            height: 1px; background: #dde1d6;
+        }
+        .chat-date-sep span {
+            background: #eef0ea;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+        /* === ACTION DROPDOWN (Vidoti Vitatu - Fixed Position) ===== */
+        .action-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .action-dropdown-btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .action-dropdown-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        /* Tunatumia fixed ili isikatwe na table overflow */
+        .action-dropdown-content {
+            display: none;
+            position: fixed; /* 🆕 Badilisha kutoka absolute kwenda fixed */
+            background: white;
+            min-width: 160px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            z-index: 99999;
+            overflow: hidden;
+        }
+
+        .action-dropdown.open .action-dropdown-content {
+            display: block;
+            animation: dropFadeIn 0.2s ease;
+        }
+
+        @keyframes dropFadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-dropdown-content button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            background: none;
+            text-align: left;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+
+        .action-dropdown-content button:hover {
+            background: #f8fafc;
+            color: #022908;
+        }
+
+        .action-dropdown-content button.text-red { color: #dc2626; }
+        .action-dropdown-content button.text-red:hover { background: #fef2f2;}
+        /* MODERN CONFIRM */
+        .modern-confirm-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(8px); z-index:35000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; visibility:hidden; transition:all 0.3s cubic-bezier(0.16,1,0.3,1); }
+        .modern-confirm-overlay.show { opacity:1; visibility:visible; }
+        .modern-confirm-box { background:white; border-radius:24px; max-width:460px; width:100%; padding:0; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.35); transform:scale(0.9) translateY(20px); transition:all 0.35s cubic-bezier(0.16,1,0.3,1); }
+        .modern-confirm-overlay.show .modern-confirm-box { transform:scale(1) translateY(0); }
+        .modern-confirm-banner { height:6px; background:linear-gradient(90deg,#384b67,#5a7290,#f59e0b); }
+        .modern-confirm-banner.danger { background:linear-gradient(90deg,#7f1d1d,#dc2626,#f87171); }
+        .modern-confirm-banner.success { background:linear-gradient(90deg,#14532d,#22c55e,#86efac); }
+        .modern-confirm-banner.warning { background:linear-gradient(90deg,#78350f,#f59e0b,#fcd34d); }
+        .modern-confirm-icon-wrap { display:flex; justify-content:center; padding:32px 24px 12px; }
+        .modern-confirm-icon { width:88px; height:88px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:42px; position:relative; box-shadow:0 12px 32px rgba(0,0,0,0.12); animation:modalIconPop 0.5s cubic-bezier(0.16,1,0.3,1); }
+        @keyframes modalIconPop { 0%{transform:scale(0.3);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
+        .modern-confirm-icon.primary { background:linear-gradient(135deg,#384b67,#4a6080); color:white; }
+        .modern-confirm-icon.danger { background:linear-gradient(135deg,#dc2626,#f87171); color:white; }
+        .modern-confirm-icon.success { background:linear-gradient(135deg,#16a34a,#4ade80); color:white; }
+        .modern-confirm-icon.warning { background:linear-gradient(135deg,#d97706,#fbbf24); color:white; }
+        .modern-confirm-icon .modal-icon-pulse { position:absolute; inset:-8px; border-radius:50%; border:2px solid currentColor; opacity:0.3; animation:modalIconPulse 2s ease-out infinite; }
+        @keyframes modalIconPulse { 0%{transform:scale(1);opacity:0.4;} 100%{transform:scale(1.4);opacity:0;} }
+        .modern-confirm-content { padding:8px 32px 24px; text-align:center; }
+        .modern-confirm-title { font-size:21px; font-weight:800; color:#384b67; margin-bottom:10px; }
+        .modern-confirm-msg { font-size:14px; color:#64748b; line-height:1.65; margin-bottom:6px; }
+        .modern-confirm-detail { display:inline-block; margin-top:14px; padding:12px 18px; background:#f8fafc; border-radius:12px; border-left:4px solid #384b67; font-size:13px; color:#334155; text-align:left; max-width:100%; }
+        .modern-confirm-detail .cd-label { font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; display:block; }
+        .modern-confirm-detail .cd-value { font-weight:800; color:#384b67; font-family:'Courier New',monospace; font-size:15px; }
+        .modern-confirm-actions { display:flex; gap:10px; padding:0 24px 24px; }
+        .modern-confirm-actions button { flex:1; padding:14px 20px; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; border:none; transition:all 0.2s; }
+        .modern-confirm-actions button:hover { transform:translateY(-2px); }
+        .modern-confirm-actions .btn-confirm-cancel { background:#f1f5f9; color:#475569; border:1.5px solid #e2e8f0 !important; }
+        .modern-confirm-actions .btn-confirm-primary { background:linear-gradient(135deg,#384b67,#2a3850); color:white; box-shadow:0 6px 20px rgba(56,75,103,0.3); }
+        .modern-confirm-actions .btn-confirm-danger { background:linear-gradient(135deg,#dc2626,#b91c1c); color:white; box-shadow:0 6px 20px rgba(220,38,38,0.3); }
+        .modern-confirm-actions .btn-confirm-success { background:linear-gradient(135deg,#16a34a,#15803d); color:white; box-shadow:0 6px 20px rgba(22,163,74,0.3); }
+        .modern-confirm-form { text-align:left; margin-top:14px; }
+        .modern-confirm-form label { display:block; font-size:11px; font-weight:800; color:#334155; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+        .modern-confirm-form textarea { width:100%; padding:12px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13.5px; font-family:inherit; background:#f8fafc; color:#1e293b; min-height:90px; resize:vertical; }
+        .modern-confirm-form textarea:focus { outline:none; border-color:#dc2626; background:white; box-shadow:0 0 0 3px rgba(220,38,38,0.12); }
+
+        /* MODERN TOAST */
+        .modern-toast-container { position:fixed; top:24px; right:24px; z-index:40000; display:flex; flex-direction:column; gap:12px; pointer-events:none; }
+        .modern-toast { min-width:300px; max-width:420px; padding:16px 20px; background:white; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05); display:flex; align-items:center; gap:14px; transform:translateX(450px); opacity:0; transition:all 0.4s cubic-bezier(0.16,1,0.3,1); pointer-events:auto; position:relative; overflow:hidden; border-left:5px solid #384b67; }
+        .modern-toast.show { transform:translateX(0); opacity:1; }
+        .modern-toast.success { border-left-color:#22c55e; }
+        .modern-toast.error { border-left-color:#ef4444; }
+        .modern-toast.warning { border-left-color:#f59e0b; }
+        .modern-toast.info { border-left-color:#5a7290; }
+        .modern-toast-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+        .modern-toast.success .modern-toast-icon { background:rgba(34,197,94,0.15); }
+        .modern-toast.error .modern-toast-icon { background:rgba(239,68,68,0.15); }
+        .modern-toast.warning .modern-toast-icon { background:rgba(245,158,11,0.15); }
+        .modern-toast.info .modern-toast-icon { background:rgba(56,75,103,0.15); }
+        .modern-toast-content { flex:1; }
+        .modern-toast-title { font-size:14px; font-weight:800; color:#1e293b; margin-bottom:2px; }
+        .modern-toast-msg { font-size:12.5px; color:#64748b; line-height:1.4; }
+        .modern-toast-close { width:26px; height:26px; border-radius:50%; background:#f1f5f9; border:none; color:#64748b; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .modern-toast-close:hover { background:#e2e8f0; }
+        .modern-toast-progress { position:absolute; bottom:0; left:0; height:3px; animation:modernToastProgress 4s linear forwards; width:100%; }
+        .modern-toast.success .modern-toast-progress { background:#22c55e; }
+        .modern-toast.error .modern-toast-progress { background:#ef4444; }
+        .modern-toast.warning .modern-toast-progress { background:#f59e0b; }
+        .modern-toast.info .modern-toast-progress { background:#5a7290; }
+        @keyframes modernToastProgress { from{width:100%;} to{width:0%;} } 
+        .asset-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+        .asset-stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+        .asset-stats-grid { grid-template-columns: 1fr; }
+        }
+    
+    </style>
+
+</head>
+<body data-roles="Procurement">
+    <!-- ===== SIDEBAR BACKDROP (Mobile) ===== -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img class="logo-img" src="assets/makdc-logo.jpg" alt="MAK DC Logo"
+                 onerror="this.src='https://via.placeholder.com/80x80/022908/ffffff?text=MAK'">
+            <div class="brand-name">MAK DC Investment <span>Company LTD</span></div>
+            <div class="brand-motto">"Quality service is our priority."</div>
+        </div>
+
+        <div class="sidebar-rule"></div>
+        <p class="sidebar-label">Main navigation</p>
+
+        <nav class="sidebar-nav" style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+    
+    <!-- 1. DASHBOARD -->
+    <a class="active" href="#" onclick="switchSidebarTab('tab-dashboard', event); return false;">
+        <span>🏠</span> Dashboard
+    </a>
+
+    <!-- 2. PROCUREMENTS -->
+    <div class="sidebar-nav-group">
+        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+            <span>📦</span>
+            <span class="nav-text">Procurements</span>
+            <span class="nav-arrow">▼</span>
+        </div>
+        <div class="sidebar-submenu">
+            <a onclick="switchSidebarTab('sub-all-requests', event)">📋 All Requests</a>
+            <a onclick="switchSidebarTab('sub-incoming', event)">📥 Incoming Requests</a>
+            <a onclick="switchSidebarTab('sub-remedial', event)">🔄 Remedial Requests</a>
+            <a onclick="switchSidebarTab('sub-pending', event)">⏳ Pending Requests</a>
+            <a onclick="switchSidebarTab('sub-approved', event)">✅ Approved Requests</a>
+            <a onclick="switchSidebarTab('sub-paid', event)">💰 Paid Procurements</a>
+            <a onclick="openCreateRequestModal()">➕ Create Your Request</a>
+        </div>
+    </div>
+
+    <!-- 3. STORE / STOCK -->
+    <div class="sidebar-nav-group">
+        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+            <span>🏪</span>
+            <span class="nav-text">Store / Stock</span>
+            <span class="nav-arrow">▼</span>
+        </div>
+        <div class="sidebar-submenu">
+            <a onclick="switchSidebarTab('sub-all-stock', event)">📦 All Stock Items</a>
+            <a onclick="switchSidebarTab('sub-add-stock', event)">➕ Add Stock</a>
+            <a onclick="switchSidebarTab('sub-stock-out', event)">📤 Stock Out</a>
+            <a onclick="switchSidebarTab('sub-stock-trans', event)">📊 Transactions History</a>
+        </div>
+    </div>
+
+    <!-- 4. ASSETS -->
+    <div class="sidebar-nav-group">
+        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+            <span>🏷️</span>
+            <span class="nav-text">Assets</span>
+            <span class="nav-arrow">▼</span>
+        </div>
+        <div class="sidebar-submenu">
+            <a onclick="switchSidebarTab('sub-all-assets', event)">📋 All Assets</a>
+            <a onclick="switchSidebarTab('sub-add-asset', event)">➕ Add Asset</a>
+            <a onclick="switchSidebarTab('sub-maintenance', event)">🔧 Maintenance Log</a>
+        </div>
+    </div>
+
+    <!-- 5. TENDERS -->
+    <div class="sidebar-nav-group">
+        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+            <span>📄</span>
+            <span class="nav-text">Tenders</span>
+            <span class="nav-arrow">▼</span>
+        </div>
+        <div class="sidebar-submenu">
+            <a onclick="switchSidebarTab('sub-all-tenders', event)">📄 All Tenders</a>
+            <a onclick="switchSidebarTab('sub-apply-tender', event)">➕ Apply Tender</a>
+        </div>
+    </div>
+
+    <!-- 6. PRICING -->
+    <div class="sidebar-nav-group">
+        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+            <span>💰</span>
+            <span class="nav-text">Pricing</span>
+            <span class="nav-arrow">▼</span>
+        </div>
+        <div class="sidebar-submenu">
+            <a onclick="switchSidebarTab('sub-price-monitor', event)">📊 Price Monitor</a>
+            <a onclick="switchSidebarTab('sub-price-control', event)">⚖️ Price Control</a>
+        </div>
+    </div>
+
+    <!-- 7. REPORTS -->
+    <div class="sidebar-nav-group">
+        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+            <span>📈</span>
+            <span class="nav-text">Reports</span>
+            <span class="nav-arrow">▼</span>
+        </div>
+        <div class="sidebar-submenu">
+            <a onclick="switchSidebarTab('sub-report-weekly', event)">📅 Weekly Report</a>
+            <a onclick="switchSidebarTab('sub-report-monthly', event)">📆 Monthly Report</a>
+            <a onclick="switchSidebarTab('sub-report-quarterly', event)">📊 Quarterly Report</a>
+            <a onclick="switchSidebarTab('sub-report-annual', event)">📈 Annual Report</a>
+        </div>
+    </div>
+  </nav>
+
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarUserAvatar">PO</div>
+            <div class="user-info">
+                <div class="user-name" id="sidebarUserName">Procurement Officer</div>
+                <div class="user-role" id="sidebarUserRole">📦 Procurement &amp; Store</div>
+            </div>
+        </div>
+
+        <button class="sidebar-portal" onclick="handleLogoutClick(event)">🔌 Logout</button>
+
+        <div class="sidebar-contact">
+            <a href="index.html#contact">
+                <span>📞</span>
+                Contact Support
+            </a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <span>MAKETE DISTRICT COUNCIL SPV</span>
+            <small>Quality service is our priority.</small>
+        </div>
+    </aside>
+    <!-- ================================================================
+    PAGE CONTENT
+    ================================================================ -->
+    <div class="page-content">
+
+            <!-- ===== HEADER ===== -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+                    <img class="logo-small" src="assets/makdc-logo.jpg" alt="MAK DC Logo"
+                        onerror="this.src='https://via.placeholder.com/36x36/022908/ffffff?text=M'">
+                    <div class="header-title">MAK DC Investment <span>Company LTD </span>  | Procurement &amp; Store Department</div>
+                </div>
+                <div class="header-right">
+
+                    <!-- ===== USER PROFILE DROPDOWN ===== -->
+                    <div class="user-dropdown-wrap" id="userDropdownWrap">
+                        <button class="user-dropdown-trigger" onclick="toggleUserDropdown(event)">
+                            <div class="ud-avatar" id="udAvatar">
+                                <span id="udInitials">PO</span>
+                            </div>
+                            <div class="ud-info">
+                                <div class="ud-name" id="udName">Procurement Officer</div>
+                                <div class="ud-role" id="udRole">📦 Procurement &amp; Store</div>
+                            </div>
+                            <span class="ud-arrow">▼</span>
+                        </button>
+
+                        <!-- Dropdown Panel -->
+                        <div class="user-dropdown-panel" id="userDropdownPanel">
+                            <div class="udp-header">
+                                <div class="udp-pic" id="udpPic">
+                                    <span id="udpInitials">PO</span>
+                                </div>
+                                <div class="udp-user-info">
+                                    <div class="udp-name" id="udpName">Procurement Officer</div>
+                                    <div class="udp-role" id="udpRole">📦 Procurement &amp; Store</div>
+                                </div>
+                            </div>
+
+                            <div class="udp-info">
+                                <div class="udp-info-item">
+                                    <span class="udp-ic">📧</span>
+                                    <div class="udp-info-text">
+                                        <div class="udp-info-label">Email</div>
+                                        <div class="udp-info-value" id="udpEmail">procurement@makdc.co.tz</div>
+                                    </div>
+                                </div>
+                                <div class="udp-info-item">
+                                    <span class="udp-ic">📞</span>
+                                    <div class="udp-info-text">
+                                        <div class="udp-info-label">Phone</div>
+                                        <div class="udp-info-value" id="udpPhone">+255 754 123 456</div>
+                                    </div>
+                                </div>
+                                <div class="udp-info-item">
+                                    <span class="udp-ic">🏢</span>
+                                    <div class="udp-info-text">
+                                        <div class="udp-info-label">Department</div>
+                                        <div class="udp-info-value" id="udpDepartment">Procurement & Store</div>
+                                    </div>
+                                </div>
+                                <div class="udp-info-item">
+                                    <span class="udp-ic">🆔</span>
+                                    <div class="udp-info-text">
+                                        <div class="udp-info-label">Employee ID</div>
+                                        <div class="udp-info-value" id="udpEmployeeId">EMP-003</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="udp-actions">
+                                <button class="udp-btn edit" onclick="openEditProfileModal(); closeUserDropdown();">🖋️ Edit Profile</button>
+                                <!-- 🆕 Ongeza kitufe hiki -->
+                                <button class="udp-btn edit" style="background: rgba(220, 38, 38, 0.1); color: #dc2626;" onclick="openChangePasswordModal(); closeUserDropdown();">🔐 Change Password</button>
+                                <button class="udp-btn logout" onclick="handleLogoutClick(event)">🔌 Logout</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+        <!-- ===== DASHBOARD CONTENT ===== -->
+        <div class="dashboard-content">
+    <!-- ===== TAB 1: DASHBOARD ===== -->
+    <div class="tab-content active" id="tab-dashboard">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📊 Procurement Overview</h2>
+            </div>
+            <div class="section-body">
+                <p style="color:var(--gray-600);font-size:14px;">Karibu kwenye Dashboard ya Procurement. Tumia Sidebar upande wa kushoto kufikia sehemu mbalimbali.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUB-TAB: ALL REQUESTS ===== -->
+    <div class="tab-content" id="sub-all-requests">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📋 All Requests <span class="badge" id="allRequestsCount">0</span></h2>
+            </div>
+            <div class="section-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Department</th>
+                            <th>Requested By</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allRequestsTableBody">
+                        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUB-TAB: INCOMING REQUESTS ===== -->
+    <div class="tab-content" id="sub-incoming">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📥 Incoming Requests <span class="badge" id="incomingRequestsCount">0</span></h2>
+            </div>
+            <div class="section-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Department</th>
+                            <th>Requested By</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incomingRequestsTableBody">
+                        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUB-TAB: REMEDIAL REQUESTS ===== -->
+    <div class="tab-content" id="sub-remedial">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>🔄 Remedial Requests <span class="badge" id="remedialRequestsCount">0</span></h2>
+            </div>
+            <div class="section-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Department</th>
+                            <th>Requested By</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="remedialRequestsTableBody">
+                        <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUB-TAB: PENDING REQUESTS ===== -->
+    <div class="tab-content" id="sub-pending">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>⏳ Pending Requests <span class="badge" id="pendingRequestsCount">0</span></h2>
+            </div>
+            <div class="section-body">
+                <!-- Filter Buttons -->
+                <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                    <button class="action-btn blue" onclick="filterPendingByStage('manager')">👔 Manager</button>
+                    <button class="action-btn blue" onclick="filterPendingByStage('ceo')">🏢 CEO</button>
+                    <button class="action-btn blue" onclick="filterPendingByStage('finance')">💰 Finance</button>
+                    <button class="action-btn teal" onclick="filterPendingByStage('')">📊 All Pending</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Department</th>
+                            <th>Requested By</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingRequestsTableBody">
+                        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUB-TAB: APPROVED REQUESTS ===== -->
+    <div class="tab-content" id="sub-approved">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>✅ Approved Requests <span class="badge" id="approvedRequestsCount">0</span></h2>
+            </div>
+            <div class="section-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Department</th>
+                            <th>Requested By</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvedRequestsTableBody">
+                        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUB-TAB: PAID PROCUREMENTS ===== -->
+    <div class="tab-content" id="sub-paid">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>💰 Paid Procurements <span class="badge" id="paidProcurementsCount">0</span></h2>
+            </div>
+            <div class="section-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Request #</th>
+                            <th>Department</th>
+                            <th>Requested By</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paidProcurementsTableBody">
+                        <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+        <!-- ===== SUB-TAB: ALL ASSETS ===== -->
+    <div class="tab-content" id="sub-all-assets">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>🏷️ Asset Register <span class="badge" id="assetsCount">0</span></h2>
+                <button class="action-btn gold" onclick="openAssetModal()">➕ Add Asset</button>
+            </div>
+            <div class="section-body">
+                <div id="assetStatsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+                
+                <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                    <select id="assetFilterCategory" onchange="loadAssets()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-family:inherit;font-size:13px;">
+                        <option value="">All Categories</option>
+                        <option value="Vehicle">🚗 Vehicle</option>
+                        <option value="Equipment">⚙️ Equipment</option>
+                        <option value="Furniture">🪑 Furniture</option>
+                        <option value="Electronics">💻 Electronics</option>
+                        <option value="Building">🏢 Building</option>
+                        <option value="Tool">🔧 Tool</option>
+                        <option value="Other">📦 Other</option>
+                    </select>
+                    <select id="assetFilterStatus" onchange="loadAssets()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-family:inherit;font-size:13px;">
+                        <option value="">All Status</option>
+                        <option value="Active">✅ Active</option>
+                        <option value="In Maintenance">🔧 In Maintenance</option>
+                        <option value="Retired">🗑️ Retired</option>
+                        <option value="Disposed">❌ Disposed</option>
+                    </select>
+                    <input type="text" id="assetSearchInput" placeholder="🔍 Search assets..." oninput="debounceLoadAssets()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-family:inherit;font-size:13px;flex:1;min-width:200px;">
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset Tag</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Custodian</th>
+                            <th>Current Value</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetsTableBody">
+                        <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- ===== SUB-TAB: MAINTENANCE LOG ===== -->
+    <div class="tab-content" id="sub-maintenance">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>🔧 Maintenance Log</h2>
+            </div>
+            <div class="section-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="maintenanceTableBody">
+                        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- ===== SUB-TAB: ADD ASSET ===== -->
+    <div class="tab-content" id="sub-add-asset">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>➕ Add New Asset</h2>
+            </div>
+            <div class="section-body" style="text-align:center; padding: 60px 20px; background: var(--gray-50);">
+                <div style="width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                    🏷️
+                </div>
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 10px;">Register a New Asset</h3>
+                <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 30px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    Keep track of company vehicles, equipment, furniture, and electronics. Click the button below to open the asset registration form.
+                </p>
+                <button class="action-btn gold" style="padding: 14px 32px; font-size: 15px; font-weight: 800; border-radius: 10px; box-shadow: 0 6px 20px rgba(245,158,11,0.4);" onclick="openAssetModal()">
+                    📝 Open Asset Form
+                </button>
+            </div>
+        </div>
+    </div>
+        </div>
+        <!-- ===== FOOTER ===== -->
+        <footer class="site-footer">
+            <p>MAK DC Investment Company — Procurement &amp; Store Dashboard</p>
+            <small>© 2026 All rights reserved.</small>
+        </footer>
+
+    </div>
+    <!-- ================================================================
+    MODALS
+    ================================================================ -->
+    <!-- View Procurement Modal -->
+    <!-- ================================================================
+     MODAL: VIEW PROCUREMENT DETAILS (PREMIUM UI)
+     ================================================================ -->
+    <div class="modal-overlay" id="viewProcurementModal">
+        <div class="modal-box" style="max-width: 780px; padding: 0; overflow: hidden; border-radius: 24px; box-shadow: 0 30px 90px rgba(0,0,0,0.4); max-height: 92vh; display: flex; flex-direction: column;">
+            
+            <!-- ===== HEADER ===== -->
+            <div id="viewProcHeader" style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 24px 32px; color: white; flex-shrink: 0; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -80px; right: -80px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(245,158,11,0.25) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                
+                <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+                    <div>
+                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.35); padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;">
+                            📋 Procurement Request
+                        </div>
+                        <h3 id="viewProcTitle" style="font-size: 26px; font-weight: 900; color: white; margin: 0 0 6px 0; font-family: 'Courier New', monospace; letter-spacing: -0.5px;">PR-000000</h3>
+                        <p id="viewProcSubtitle" style="font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500; margin: 0;">Loading...</p>
+                    </div>
+                    <button onclick="closeModal('viewProcurementModal')" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.6)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+                </div>
+
+                <!-- STATUS BAR (Ndani ya Header) -->
+                <div id="viewProcStatusBar" style="margin-top: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <!-- JS itajaza hapa -->
+                </div>
+            </div>
+
+            <!-- ===== BODY ===== -->
+            <div id="viewProcBody" style="padding: 28px 32px; overflow-y: auto; flex: 1; background: #f8fafc;">
+                <!-- JS itajaza hapa -->
+            </div>
+
+            <!-- ===== FOOTER (Action Buttons) ===== -->
+            <div id="viewProcFooter" style="padding: 18px 32px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap;">
+                <button onclick="closeModal('viewProcurementModal')" style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">
+                    ← Close
+                </button>
+                <div id="viewProcActions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <!-- JS itajaza hapa -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ================================================================
+    MODAL: CREATE PROCUREMENT REQUEST (Kamili)
+    ================================================================ -->
+    <div class="modal-overlay" id="createRequestModal">
+        <div class="modal-box" style="max-width: 900px; padding: 0; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column;">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 26px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;">📝</div>
+                    <div>
+                        <h3 style="font-size:18px;font-weight:800;color:white;margin:0 0 2px 0;">Create Procurement Request</h3>
+                        <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;">Submit a new procurement request for approval</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('createRequestModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Body -->
+            <div style="padding: 22px 26px; overflow-y: auto; flex: 1;">
+                
+                <!-- INFO BOX -->
+                <div style="background:rgba(245,158,11,0.08);border:1.5px solid rgba(245,158,11,0.25);border-left:4px solid var(--gold);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#78350f;">
+                    ⚠️ <strong>Note:</strong> Ombi lako litapelekwa moja kwa moja kwa <strong>Manager</strong> kwa ajili ya idhini. Kisha litaenda kwa CEO na Finance.
+                </div>
+
+                <!-- ===== SECTION: DEPARTMENT INFO ===== -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:18px;border:1px solid var(--gray-200);">
+                    <h4 style="font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                        🏢 Department Information
+                    </h4>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px;">Department <span style="color:var(--red);">*</span></label>
+                            <select id="createDept" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;background:white;">
+                                <option value="">-- Select Department --</option>
+                                <option value="Administration Department">🏢 Administration</option>
+                                <option value="Sales and Marketing Department">📈 Sales & Marketing</option>
+                                <option value="Engineering and Production Department">⚙️ Engineering & Production</option>
+                                <option value="Lawyer Department">⚖️ Lawyer</option>
+                                <option value="Finance Department">💰 Finance</option>
+                                <option value="Procurements Management Unit">🛒 Procurement</option>
+                                <option value="Information and Technology Department">💻 IT</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px;">Requested By <span style="color:var(--red);">*</span></label>
+                            <input type="text" id="createRequestedBy" placeholder="Full name" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;background:white;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px;">Urgency Level</label>
+                            <select id="createUrgency" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;background:white;">
+                                <option value="normal">🟢 Normal (1-2 weeks)</option>
+                                <option value="high">🟡 High (3-7 days)</option>
+                                <option value="urgent">🔴 Urgent (24-48 hours)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== SECTION: REQUEST DETAILS ===== -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:18px;border:1px solid var(--gray-200);">
+                    <h4 style="font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                        📋 Request Details
+                    </h4>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px;">Request Title <span style="color:var(--red);">*</span></label>
+                            <input type="text" id="createTitle" placeholder="e.g., Office Supplies for Q4" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;background:white;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px;">Required By (Date)</label>
+                            <input type="date" id="createRequiredBy" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;background:white;">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px;">Justification / Purpose <span style="color:var(--red);">*</span></label>
+                        <textarea id="createJustification" placeholder="Explain why these items are needed..." style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;background:white;min-height:70px;resize:vertical;"></textarea>
+                    </div>
+                </div>
+
+                <!-- ===== SECTION: ITEMS ===== -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:18px;border:1px solid var(--gray-200);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h4 style="font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;margin:0;">
+                            🛒 Items Needed
+                        </h4>
+                        <button type="button" onclick="addRequestItemRow()" style="padding:6px 14px;background:var(--gold);color:var(--primary-dark);border:none;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">➕ Add Item</button>
+                    </div>
+                    
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                       <thead>
+                            <tr style="background:white;">
+                                <th style="padding:8px;text-align:left;font-size:11px;font-weight:800;color:var(--gray-600);text-transform:uppercase;">Item Name</th>
+                                <th style="padding:8px;text-align:left;font-size:11px;font-weight:800;color:var(--gray-600);text-transform:uppercase;">Specification</th>
+                                <th style="padding:8px;text-align:left;font-size:11px;font-weight:800;color:var(--gray-600);text-transform:uppercase;width:80px;">Qty</th>
+                                <th style="padding:8px;text-align:left;font-size:11px;font-weight:800;color:var(--gray-600);text-transform:uppercase;width:100px;">Unit</th>
+                                <th style="padding:8px;text-align:left;font-size:11px;font-weight:800;color:var(--gray-600);text-transform:uppercase;width:140px;">Est. Price (TSh)</th>
+                                <th style="padding:8px;text-align:right;font-size:11px;font-weight:800;color:var(--gray-600);text-transform:uppercase;width:140px;">Subtotal</th>
+                                <th style="width:50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestItemsBody">
+                            <!-- JS itajaza hapa -->
+                        </tbody>
+                    </table>
+                    
+                    <!-- TOTAL -->
+                    <div style="margin-top:14px;padding:14px 18px;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-mid) 100%);border-radius:10px;color:white;display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.85);">Total Estimated Cost</span>
+                        <span id="requestTotal" style="font-size:22px;font-weight:900;color:var(--gold);font-family:'Courier New',monospace;">TSh 0</span>
+                    </div>
+                </div>
+
+                <!-- ===== SECTION: ATTACHMENTS ===== -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:18px;border:1px solid var(--gray-200);">
+                    <h4 style="font-size:13px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                        📎 Attachments (Optional)
+                    </h4>
+                    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                        <button type="button" onclick="document.getElementById('requestAttachments').click()" style="padding:10px 20px;background:white;border:1.5px dashed var(--gray-300);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--gray-600);">
+                            📎 Choose Files (Quotation, Specs, etc.)
+                        </button>
+                        <input type="file" id="requestAttachments" multiple style="display:none;" onchange="handleRequestAttachments(event)">
+                        <div id="attachmentsList" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+                    </div>
+                </div>
+
+                <!-- STATUS MESSAGE -->
+                <div id="createRequestStatus" class="status-msg"></div>
+
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 16px 26px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; gap: 12px; flex-shrink: 0;">
+                <button onclick="closeModal('createRequestModal')" style="padding: 12px 24px; background: var(--gray-200); color: var(--gray-700); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit;">Cancel</button>
+                <button onclick="submitCreateRequest()" style="padding: 12px 28px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--primary-dark); border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit; box-shadow: 0 6px 20px rgba(245,158,11,0.4);">
+                    📤 Submit Request to Manager
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== MODAL: CHANGE PASSWORD ===== -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal-box" style="max-width: 450px; padding: 0; overflow: hidden; border-radius: 16px;">
+            <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 16px; font-weight: 800; display:flex; align-items:center; gap:8px;">
+                    <span style="font-size: 20px;">🔐</span> Change Password
+                </div>
+                <button class="modal-close" style="color:white; background: rgba(255,255,255,0.1); border-radius: 50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; opacity:1; cursor:pointer;" onclick="closeModal('changePasswordModal')">✕</button>
+            </div>
+            
+            <div style="padding: 24px;">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">Current Password <span style="color:var(--red);">*</span></label>
+                    <input type="password" id="cpCurrentPassword" placeholder="Enter current password" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">New Password <span style="color:var(--red);">*</span></label>
+                    <input type="password" id="cpNewPassword" placeholder="At least 6 characters" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">Confirm New Password <span style="color:var(--red);">*</span></label>
+                    <input type="password" id="cpConfirmPassword" placeholder="Confirm new password" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;">
+                </div>
+                
+                <div id="cpStatusMsg" class="status-msg"></div>
+            </div>
+            
+            <div style="padding: 16px 24px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display:flex; justify-content:flex-end; gap:12px;">
+                <button class="btn-action" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700);" onclick="closeModal('changePasswordModal')">Cancel</button>
+                <button class="btn-action red" id="cpSaveBtn" onclick="submitChangePassword()" style="padding: 10px 24px; font-size:14px;">Update Password</button>
+            </div>
+        </div>
+    </div>
+    <!-- ================================================================
+    MODAL: PREVIEW & CONFIRM REQUEST
+    ================================================================ -->
+    <div class="modal-overlay" id="previewRequestModal">
+        <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column;">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 26px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;">👁️</div>
+                    <div>
+                        <h3 style="font-size:18px;font-weight:800;color:white;margin:0 0 2px 0;">Preview Your Request</h3>
+                        <p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;">Review before sending to Manager</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('previewRequestModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Body -->
+            <div style="padding: 22px 26px; overflow-y: auto; flex: 1;">
+                
+                <div style="background:rgba(34,197,94,0.08);border:1.5px solid rgba(34,197,94,0.25);border-left:4px solid var(--green);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:#14532d;">
+                    ✅ <strong>Karibu!</strong> Tafadhali kagua taarifa zote hapa chini. Kama zote ni sahihi, bonyeza <strong>"Confirm & Send"</strong>.
+                </div>
+
+                <!-- Department Info -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:14px;border:1px solid var(--gray-200);">
+                    <h4 style="font-size:12px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🏢 Department Information</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:13px;">
+                        <div><span style="color:var(--gray-500);font-weight:600;">Department:</span> <strong id="previewDept">—</strong></div>
+                        <div><span style="color:var(--gray-500);font-weight:600;">Requested By:</span> <strong id="previewRequestedBy">—</strong></div>
+                        <div><span style="color:var(--gray-500);font-weight:600;">Urgency:</span> <strong id="previewUrgency">—</strong></div>
+                        <div><span style="color:var(--gray-500);font-weight:600;">Required By:</span> <strong id="previewRequiredBy">—</strong></div>
+                    </div>
+                </div>
+
+                <!-- Request Details -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:14px;border:1px solid var(--gray-200);">
+                    <h4 style="font-size:12px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📋 Request Details</h4>
+                    <div style="font-size:13px;margin-bottom:8px;"><span style="color:var(--gray-500);font-weight:600;">Title:</span> <strong id="previewTitle">—</strong></div>
+                    <div style="font-size:13px;"><span style="color:var(--gray-500);font-weight:600;">Justification:</span> <span id="previewJustification">—</span></div>
+                </div>
+
+                <!-- Items -->
+                <div style="background:var(--gray-50);border-radius:12px;padding:16px 18px;margin-bottom:14px;border:1px solid var(--gray-200);">
+                    <h4 style="font-size:12px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛒 Items Needed</h4>
+                    <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:white;">
+                                <th style="padding:6px;text-align:left;font-weight:800;color:var(--gray-600);">Item</th>
+                                <th style="padding:6px;text-align:left;font-weight:800;color:var(--gray-600);">Spec</th>
+                                <th style="padding:6px;text-align:left;font-weight:800;color:var(--gray-600);">Qty</th>
+                                <th style="padding:6px;text-align:right;font-weight:800;color:var(--gray-600);">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewItemsBody"></tbody>
+                    </table>
+                    <div style="margin-top:10px;padding-top:10px;border-top:2px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--primary);">Total:</span>
+                        <span id="previewTotal" style="font-size:18px;font-weight:900;color:var(--primary);font-family:'Courier New',monospace;">TSh 0</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 16px 26px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; gap: 12px; flex-shrink: 0;">
+                <button onclick="closeModal('previewRequestModal')" style="padding: 12px 24px; background: var(--gray-200); color: var(--gray-700); border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit;">← Back to Edit</button>
+                <button id="previewConfirmBtn" onclick="confirmAndSubmitRequest()" style="padding: 12px 28px; background: linear-gradient(135deg, var(--green), #16a34a); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit; box-shadow: 0 6px 20px rgba(34,197,94,0.4);">
+                    ✅ Confirm & Send to Manager
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Stock Entry Modal -->
+    <div class="modal-overlay" id="stockEntryModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📦 Add Stock</h3>
+                <button class="modal-close" onclick="closeModal('stockEntryModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-top:6px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Item Name</label>
+                    <input type="text" id="stockItemName" placeholder="Enter item name...">
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Category</label>
+                    <select id="stockCategory">
+                        <option value="Building Materials">Building Materials</option>
+                        <option value="Cement">Cement</option>
+                        <option value="Blocks">Blocks</option>
+                        <option value="Roofing">Roofing</option>
+                        <option value="Paint">Paint</option>
+                        <option value="Hardware">Hardware</option>
+                        <option value="Steel">Steel</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Quantity</label>
+                    <input type="number" id="stockQty" placeholder="0">
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Unit</label>
+                    <input type="text" id="stockUnit" placeholder="e.g., bags, pieces, tons...">
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Unit Price (TSh)</label>
+                    <input type="number" id="stockPrice" placeholder="0">
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Transaction Type</label>
+                    <select id="stockTransType">
+                        <option value="in">Stock In</option>
+                        <option value="out">Stock Out</option>
+                    </select>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Notes</label>
+                    <textarea id="stockNotes" placeholder="Any notes..."></textarea>
+                </div>
+                <div id="stockEntryStatus" class="status-msg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('stockEntryModal')">Cancel</button>
+                <button class="btn-submit green" onclick="submitStockEntry()">✅ Save Stock</button>
+            </div>
+        </div>
+    </div>
+    <!-- Tender Modal -->
+    <div class="modal-overlay" id="tenderModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📄 Apply Tender</h3>
+                <button class="modal-close" onclick="closeModal('tenderModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-top:6px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Tender Title</label>
+                    <input type="text" id="tenderTitle" placeholder="Enter tender title...">
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Type</label>
+                    <select id="tenderType">
+                        <option value="Government">Government</option>
+                        <option value="Private">Private</option>
+                        <option value="International">International</option>
+                    </select>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Description</label>
+                    <textarea id="tenderDesc" placeholder="Describe the tender..."></textarea>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Deadline</label>
+                    <input type="date" id="tenderDeadline">
+                </div>
+                <div id="tenderStatusMsg" class="status-msg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('tenderModal')">Cancel</button>
+                <button class="btn-submit purple" onclick="submitTender()">📤 Apply</button>
+            </div>
+        </div>
+    </div>
+    <!-- Price Monitor Modal -->
+    <div class="modal-overlay" id="priceMonitorModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📊 Price Monitor</h3>
+                <button class="modal-close" onclick="closeModal('priceMonitorModal')">✕</button>
+            </div>
+            <div class="modal-body" id="priceMonitorBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('priceMonitorModal')">Close</button>
+                <button class="btn-submit" onclick="savePriceMonitor()">💾 Save Notes</button>
+            </div>
+        </div>
+    </div>
+    <!-- Price Control Modal -->
+    <div class="modal-overlay" id="priceControlModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>⚖️ Price Control</h3>
+                <button class="modal-close" onclick="closeModal('priceControlModal')">✕</button>
+            </div>
+            <div class="modal-body" id="priceControlBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('priceControlModal')">Close</button>
+                <button class="btn-submit" onclick="savePriceControl()">💾 Save Adjustments</button>
+            </div>
+        </div>
+    </div>
+    <!-- Procurement Report Modal -->
+    <div class="modal-overlay" id="procurementReportModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="procReportTitle">📈 Report</h3>
+                <button class="modal-close" onclick="closeModal('procurementReportModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-row"><span class="label">Period</span><span class="value" id="procReportPeriod">—</span></div>
+                <div style="margin-top:10px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Report Content</label>
+                    <textarea id="procReportText" placeholder="Write your report here..."></textarea>
+                </div>
+                <div id="procReportStatus" class="status-msg"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('procurementReportModal')">Cancel</button>
+                <button class="btn-submit" onclick="submitProcurementReport()">📤 Submit Report</button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== EDIT PROFILE MODAL (Premium) ===== -->
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-box" style="max-width: 650px; padding: 0; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0a1929 0%, #0f2942 100%); padding: 24px 32px; color: white; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(46, 204, 113, 0.2) 0%, transparent 70%); border-radius: 50%;"></div>
+                <div style="display:flex; align-items:center; gap:16px; z-index: 1;">
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:26px;">
+                        👤
+                    </div>
+                    <div>
+                        <h3 style="font-size: 20px; font-weight: 800; color: white; margin: 0 0 4px 0;">Profile Settings</h3>
+                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin: 0;">Manage your account information and security</p>
+                    </div>
+                </div>
+                <button class="modal-close" style="color:white; background: rgba(255,255,255,0.15); border-radius: 50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; opacity:1; cursor:pointer; border:none; font-size:18px; z-index: 1;" onclick="closeModal('editProfileModal')" onmouseover="this.style.background='rgba(239,68,68,0.8)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+            </div>
+            
+            <!-- Body -->
+            <div style="padding: 32px; max-height: 70vh; overflow-y: auto;">
+                
+                <!-- Avatar Section -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 28px;">
+                    <div style="position: relative;">
+                        <div class="edit-pic-preview" id="editPicPreview" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #1a7f5a; background: linear-gradient(135deg, #2ecc71 0%, #1a7f5a 100%); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: white; overflow: hidden; box-shadow: 0 8px 24px rgba(26, 127, 90, 0.3);">
+                            <span id="editPicInitials">EN</span>
+                        </div>
+                        <button class="edit-pic-upload-btn" onclick="document.getElementById('profilePicInput').click()" style="position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; border-radius: 50%; background: #1a7f5a; border: 3px solid white; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" title="Upload Photo">📷</button>
+                        <input type="file" id="profilePicInput" accept="image/*" onchange="handleProfilePicUpload(event)" style="display: none;">
+                    </div>
+                    <div style="font-size: 11px; color: var(--gray-500); margin-top: 10px;">Click the camera icon to update your photo</div>
+                </div>
+
+                <!-- Info Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Full Name</label>
+                        <input type="text" id="editProfileName" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Title / Position</label>
+                        <input type="text" id="editProfileTitle" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Email Address</label>
+                        <input type="email" id="editProfileEmail" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Phone Number <span style="color:var(--red);">*</span></label>
+                        <input type="tel" id="editProfilePhone" placeholder="+255 XXX XXX XXX" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 14px; background: white; color: var(--gray-800);">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Department</label>
+                        <input type="text" id="editProfileDepartment" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Employee ID</label>
+                        <input type="text" id="editProfileEmployeeId" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div id="editProfileStatus" class="status-msg"></div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="padding: 20px 32px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn-action" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700); padding: 10px 24px; font-weight: 700;" onclick="closeModal('editProfileModal')">Cancel</button>
+                <button class="btn-action primary" style="padding: 10px 28px; font-weight: 700; background: linear-gradient(135deg, #1a7f5a, #0f2942);" onclick="saveUserProfile()">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== MODAL: MESSAGES / CHAT THREAD (MODERN) ===== -->
+    <div id="messagesModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);z-index:50000;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:#fff;border-radius:20px;width:720px;max-width:100%;height:85vh;max-height:720px;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,0.35);overflow:hidden;">
+
+            <!-- HEADER -->
+            <div style="background:linear-gradient(135deg,#022908 0%,#034d13 100%);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;position:relative;overflow:hidden;">
+                <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(245,158,11,0.25),transparent 70%);border-radius:50%;pointer-events:none;"></div>
+                <div style="display:flex;align-items:center;gap:14px;position:relative;z-index:1;">
+                    <div style="width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;">💬</div>
+                    <div>
+                        <h3 style="margin:0;color:#fff;font-size:17px;font-weight:800;">Request Conversation</h3>
+                        <p id="msgReqLabel" style="margin:3px 0 0;color:#fbbf24;font-size:12px;font-weight:600;font-family:'Courier New',monospace;"></p>
+                    </div>
+                </div>
+                <button onclick="closeMessages()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;position:relative;z-index:1;" onmouseover="this.style.background='rgba(239,68,68,0.6)';this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.15)';this.style.transform='rotate(0deg)'">&times;</button>
+            </div>
+
+            <!-- THREAD -->
+            <div id="msgThread" style="flex:1;overflow-y:auto;padding:20px 24px;background:linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%);display:flex;flex-direction:column;gap:4px;">
+                <div style="text-align:center;color:#9aa38b;padding:40px 20px;">
+                    <div style="font-size:36px;margin-bottom:8px;opacity:0.4;">💬</div>
+                    <div style="font-size:13px;">Loading messages...</div>
+                </div>
+            </div>
+
+            <!-- INPUT -->
+            <div style="padding:16px 24px;border-top:1px solid #e2e8f0;background:#fff;flex-shrink:0;">
+                <input id="msgSubject" type="text" placeholder="Subject (optional) — e.g., Clarification needed"
+                    style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;margin-bottom:10px;font-family:inherit;background:#f8fafc;transition:all 0.2s;"
+                    onfocus="this.style.borderColor='#f59e0b';this.style.background='#fff'"
+                    onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">
+                <div style="display:flex;gap:10px;align-items:flex-end;">
+                    <textarea id="msgBody" rows="2" placeholder="Write your message here..."
+                            style="flex:1;box-sizing:border-box;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;resize:none;font-family:inherit;background:#f8fafc;min-height:48px;max-height:120px;transition:all 0.2s;"
+                            onfocus="this.style.borderColor='#f59e0b';this.style.background='#fff'"
+                            onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'"
+                            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+                    <button onclick="sendMessage()" style="padding:12px 22px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#022908;border:none;border-radius:10px;cursor:pointer;font-weight:800;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(245,158,11,0.35);transition:all 0.2s;white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        Send ➤
+                    </button>
+                </div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:6px;text-align:right;">Press <strong>Enter</strong> to send • <strong>Shift+Enter</strong> for new line</div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL: PURCHASER DETAILS (Baada ya CEO Approval) -->
+    <!-- ================================================================ -->
+    <div class="modal-overlay" id="purchaserDetailsModal">
+        <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 26px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-size:18px;">📝 Jaza Taarifa za Manunuzi</h3>
+                <button onclick="closeModal('purchaserDetailsModal')" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            
+            <div style="padding: 22px 26px; max-height: 70vh; overflow-y:auto;">
+                <!-- SEHEMU YA DOWNLOAD NA ATTACH -->
+                <div style="background:rgba(245,158,11,0.1); border-left:4px solid #f59e0b; padding:12px; margin-bottom:15px; font-size:13px;">
+                    ⚠️ <strong>Muhimu:</strong> Bonyeza kitufe hapa chini kupakua na ku-attach kibali (Imprest PDF) cha CEO moja kwa moja.
+                    <br><br>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button type="button" id="btnAutoAttachPdf" onclick="downloadAndAttachImprest()" style="background:#f59e0b; color:#022908; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-family:inherit;">
+                            📥 Download & Auto-Attach PDF
+                        </button>
+                        <button type="button" onclick="downloadImprestManually()" style="background:white; color:#022908; border:1px solid #cbd5e1; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-family:inherit;">
+                            👁️ View / Download Only
+                        </button>
+                    </div>
+                </div>
+
+                <input type="hidden" id="pd_request_id">
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div><label style="font-size:12px; font-weight:700;">Supplier Name *</label><input type="text" id="pd_supplier" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Supplier Contact *</label><input type="text" id="pd_contact" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Invoice Number *</label><input type="text" id="pd_invoice" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Invoice Date *</label><input type="date" id="pd_invoice_date" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Actual Total (TSh) *</label><input type="number" id="pd_total" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Payment Terms</label><input type="text" id="pd_terms" placeholder="e.g. Cash on delivery" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                </div>
+                
+                <!-- SEHEMU YA FILE INPUT -->
+                <div style="margin-top:15px;">
+                    <label style="font-weight:bold; color:#dc2626; font-size:13px;">Attach Imprest PDF *</label>
+                    <input type="file" id="pd_imprest_file" accept="application/pdf" style="width:100%; padding:10px; border:1px dashed #ccc; border-radius:6px; background:#f8fafc; margin-top:4px;">
+                    <small id="pd_file_status" style="color:var(--green); font-size:11px; font-weight:bold; display:none; margin-top:4px;">✅ PDF ime-attach automatically!</small>
+                </div>
+
+                <div id="pd_error" style="color:red; font-size:13px; margin-top:10px; display:none;"></div>
+            </div>
+
+            <div style="padding: 16px 26px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeModal('purchaserDetailsModal')" style="padding:10px 20px; background:#e2e8f0; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Cancel</button>
+                <button onclick="submitPurchaserDetails()" style="padding:10px 24px; background:#022908; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">📤 Tuma kwa Finance</button>
+            </div>
+        </div>
+    </div>
+    <!-- ================================================================ -->
+    <!-- MODAL: ADD / EDIT ASSET -->
+    <!-- ================================================================ -->
+    <div class="modal-overlay" id="assetModal">
+        <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 26px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-size:18px;" id="assetModalTitle">📝 Add New Asset</h3>
+                <button onclick="closeModal('assetModal')" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            
+            <div style="padding: 22px 26px; max-height: 70vh; overflow-y:auto;">
+                <input type="hidden" id="asset_id">
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                    <div><label style="font-size:12px; font-weight:700;">Asset Name *</label><input type="text" id="asset_name" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Category *</label>
+                        <select id="asset_category" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
+                            <option value="Vehicle">Vehicle</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Building">Building</option>
+                            <option value="Tool">Tool</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div><label style="font-size:12px; font-weight:700;">Serial Number</label><input type="text" id="asset_serial" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Purchase Date</label><input type="date" id="asset_pdate" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Purchase Value (TSh) *</label><input type="number" id="asset_value" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Useful Life (Years)</label><input type="number" id="asset_life" value="5" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Location</label><input type="text" id="asset_location" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                    <div><label style="font-size:12px; font-weight:700;">Custodian Name</label><input type="text" id="asset_custodian" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;"></div>
+                </div>
+                <div><label style="font-size:12px; font-weight:700;">Description / Notes</label><textarea id="asset_notes" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; min-height:60px;"></textarea></div>
+                
+                <div id="asset_error" style="color:red; font-size:13px; margin-top:10px; display:none;"></div>
+            </div>
+
+            <div style="padding: 16px 26px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeModal('assetModal')" style="padding:10px 20px; background:#e2e8f0; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Cancel</button>
+                <button id="saveAssetBtn" onclick="submitAsset()" style="padding:10px 24px; background:#022908; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">💾 Save Asset</button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== MODAL: FOLLOW-UP ===== -->
+    <div id="followUpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:14px;width:440px;max-width:92%;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.2);">
+        <h3 style="margin:0 0 10px;color:#2a3d2a;font-size:16px;">Follow-up Note</h3>
+        <p id="followUpReqLabel" style="font-size:13px;color:#6e7a5e;margin:0 0 12px;"></p>
+        <textarea id="followUpNote" rows="4" placeholder="Write follow-up progress..." style="width:100%;box-sizing:border-box;border:1px solid #dde1d6;border-radius:8px;padding:10px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+        <button onclick="closeFollowUpModal()" style="padding:8px 16px;background:#eef0ea;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Cancel</button>
+        <button onclick="saveFollowUp()" style="padding:8px 16px;background:#3d5a3d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Save Follow-up</button>
+        </div>
+    </div>
+    </div>
+    <!-- ===== CONFIRM DIALOG ===== -->
+    <div class="confirm-overlay" id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-icon" id="confirmIcon">❓</div>
+            <h3 class="confirm-title" id="confirmTitle">Confirm</h3>
+            <p class="confirm-message" id="confirmMessage">Are you sure?</p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" id="confirmCancelBtn" onclick="closeConfirm(false)">Cancel</button>
+                <button class="btn-confirm" id="confirmOkBtn" onclick="closeConfirm(true)">Yes, Confirm</button>
+            </div>
+        </div>
+    </div>
+    <!-- ===== CONFIRM LOGOUT DIALOG ===== -->
+    <div class="confirm-overlay" id="logoutConfirmModal">
+            <div class="confirm-box">
+                <div class="confirm-icon red">🔌</div>
+                <h3 class="confirm-title">Logout?</h3>
+                <p class="confirm-message">
+                    Are you sure you want to logout?<br>
+                    <small style="color:var(--gray-400);">You will need to sign in again to access your Mak Dc Investiment Company Limited Staff Portal.</small>
+                </p>
+                <div class="confirm-actions">
+                    <button class="btn-cancel" onclick="closeLogoutDialog()">Stay Logged In</button>
+                    <button class="btn-confirm danger" onclick="confirmLogout()">Yes, Logout</button>
+                </div>
+            </div>
+    </div>
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toastContainer"></div>
+    <!-- ===== SCRIPTS ===== -->
+    <script src="assets/js/core/config.js"></script>
+    <script src="assets/js/core/auth.js"></script>
+    <script src="assets/js/core/auth-guard.js"></script>
+    <script src="assets/js/core/api.js"></script>
+    <script src="assets/js/ui/toast.js"></script>
+    <script src="assets/js/ui/dashboard-common.js"></script>
+    <script src="assets/js/dashboards/procurement.js"></script>
+
+</body>
+</html>

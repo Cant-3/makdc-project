@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Portal - MAK DC Investment Company</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        :root {
+            --primary: #0f766e;
+            --primary-dark: #134e4a;
+            --primary-light: #14b8a6;
+            --accent: #c6a12a;
+            --accent-light: #d4b544;
+            --accent-dark: #a8851f;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --green: #22c55e;
+            --red-500: #ef4444;
+        }
+
+        .page-content { flex: 1; display: flex; flex-direction: column; min-height: 100vh; width: 100%; }
+
+        /* ===== HEADER ===== */
+        .site-header {
+            background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+            padding: 12px 40px;
+            border-bottom: 3px solid var(--accent);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .header-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .header-logo-img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); padding: 2px; background: white; }
+        .logo-placeholder-small { width: 52px; height: 52px; border-radius: 50%; background: white; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: var(--primary); }
+        .header-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .header-company-name { font-size: 18px; font-weight: 800; color: white; letter-spacing: 1.5px; margin-bottom: 2px; }
+        .header-company-name span { color: var(--accent); }
+        .header-motto { font-size: 11px; color: rgba(255, 255, 255, 0.55); font-style: italic; letter-spacing: 0.5px; }
+        .header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .header-link {
+            background: transparent; color: var(--accent); border: 1.5px solid var(--accent);
+            padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            text-decoration: none; display: flex; align-items: center; gap: 5px;
+            transition: all 0.3s; white-space: nowrap; cursor: pointer; font-family: inherit;
+        }
+        .header-link:hover { background: var(--accent); color: var(--primary-dark); transform: translateY(-2px); }
+
+        /* ===== PORTAL CONTENT ===== */
+        .portal-content { padding: 0; flex: 1; width: 100%; max-width: 100%; margin: 0; }
+
+        /* ===== PORTAL HERO ===== */
+        .portal-hero {
+            background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+            color: white;
+            padding: 50px 40px 46px;
+            margin-bottom: 0;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            border-radius: 0;
+        }
+        .portal-hero::before {
+            content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(198, 161, 42, 0.18), transparent 70%); border-radius: 50%;
+        }
+        .portal-hero .welcome-label {
+            font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6); margin-bottom: 10px; position: relative; z-index: 1;
+            font-weight: 700;
+        }
+        .portal-hero h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; position: relative; z-index: 1; letter-spacing: -0.5px; }
+        .portal-hero h2 span { color: var(--accent); font-style: normal; }
+        .portal-hero h3 { font-size: 16px; font-weight: 500; color: rgba(255, 255, 255, 0.85); margin-bottom: 12px; position: relative; z-index: 1; }
+        .portal-hero p { color: rgba(255, 255, 255, 0.75); font-size: 14px; max-width: 600px; line-height: 1.6; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* ===== MAIN OPTIONS ===== */
+        .main-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .option-card {
+            background: white; border-radius: 14px; padding: 28px 24px;
+            border: 1px solid var(--gray-200); box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease; text-align: center; cursor: pointer;
+        }
+        .option-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08); border-color: var(--accent); }
+        .option-card .option-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 14px; background: rgba(198, 161, 42, 0.1); }
+        .option-card h3 { font-size: 18px; font-weight: 800; color: var(--primary-dark); margin-bottom: 6px; }
+        .option-card p { font-size: 13px; color: var(--gray-500); line-height: 1.6; margin-bottom: 16px; max-width: 280px; margin-left: auto; margin-right: auto; }
+        .option-card .option-btn {
+            display: inline-block; padding: 11px 26px; border-radius: 8px;
+            font-weight: 700; font-size: 13px; text-decoration: none; transition: all 0.3s;
+            border: none; cursor: pointer; font-family: inherit;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white; box-shadow: 0 6px 20px rgba(198, 161, 42, 0.3);
+        }
+        .option-card .option-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(198, 161, 42, 0.4); }
+
+        /* ===== SECTIONS ===== */
+        .track-section, .place-order-section {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            margin-bottom: 0;
+            display: none;
+        }
+        .track-section.show, .place-order-section.show { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .place-order-section.show {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .section-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+            text-align: left;
+            grid-column: 1 / -1;
+            letter-spacing: -0.5px;
+        }
+        .section-sub {
+            font-size: 14px;
+            color: var(--gray-500);
+            text-align: left;
+            margin-bottom: 8px;
+            grid-column: 1 / -1;
+            line-height: 1.6;
+        }
+
+        .track-section .section-title,
+        .track-section .section-sub { text-align: center; }
+        .track-section .section-title { grid-column: auto; }
+        .track-section .section-sub { grid-column: auto; }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works {
+            grid-column: 1 / 2;
+            padding-top: 8px;
+        }
+        .how-it-works h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        .how-it-works > p {
+            font-size: 13px;
+            color: var(--gray-500);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .how-step {
+            display: flex;
+            gap: 14px;
+            padding: 14px 0;
+            align-items: flex-start;
+        }
+        .how-step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(198, 161, 42, 0.3);
+        }
+        .how-step-info h4 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+        .how-step-info p {
+            font-size: 12.5px;
+            color: var(--gray-500);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* ===== FORM WRAPPER ===== */
+        .order-form-wrapper {
+            grid-column: 2 / 3;
+            background: var(--gray-50);
+            border-radius: 14px;
+            padding: 32px 30px;
+            border: 1px solid var(--gray-200);
+        }
+        .order-form-wrapper h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+
+        /* ===== FORMS ===== */
+        .customer-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 16px;
+            margin: 0 0 22px;
+            padding-bottom: 22px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .customer-info .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .customer-info .form-group.full { grid-column: 1 / -1; }
+        .form-label {
+            font-size: 10.5px;
+            font-weight: 800;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-label .required { color: var(--red-500); }
+        .form-input, .form-select, .form-textarea {
+            padding: 11px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.3s;
+            width: 100%;
+            color: var(--gray-800);
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(198, 161, 42, 0.12);
+        }
+        .form-input::placeholder, .form-textarea::placeholder { color: var(--gray-400); }
+        .form-textarea { resize: vertical; min-height: 70px; }
+
+        /* ===== ITEMS TABLE ===== */
+        .items-section { margin: 0 0 22px; }
+        .items-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .items-header h3 { font-size: 15px; font-weight: 800; color: var(--primary-dark); }
+        .add-item-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white; border: none; border-radius: 6px;
+            font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s; font-family: inherit;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(198, 161, 42, 0.3);
+        }
+        .add-item-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(198, 161, 42, 0.4); }
+
+        .items-table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; border-radius: 8px; overflow: hidden; }
+        .items-table thead { background: var(--gray-100); }
+        .items-table th {
+            padding: 10px 12px; text-align: left; font-weight: 800; color: var(--gray-600);
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .items-table td { padding: 10px 12px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+        .items-table select, .items-table input {
+            padding: 8px 10px; border: 1.5px solid var(--gray-200); border-radius: 6px;
+            font-size: 12.5px; font-family: inherit; background: white; width: 100%;
+            color: var(--gray-800);
+        }
+        .items-table select:focus, .items-table input:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(198, 161, 42, 0.12);
+        }
+        .items-table .remove-btn {
+            background: rgba(239, 68, 68, 0.1); color: var(--red-500);
+            border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px;
+            padding: 6px 10px; cursor: pointer; font-size: 13px; font-weight: 700;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .items-table .remove-btn:hover { background: var(--red-500); color: white; }
+        .item-subtotal { font-weight: 800; color: var(--primary); font-size: 13px; white-space: nowrap; }
+
+        /* ===== ORDER SUMMARY ===== */
+        .order-summary {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin: 0 0 22px;
+        }
+        .order-summary .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13.5px; color: var(--gray-700); }
+        .order-summary .summary-row.total {
+            border-top: 2px solid var(--gray-300); margin-top: 6px;
+            padding-top: 12px; font-size: 18px; font-weight: 800; color: var(--primary-dark);
+        }
+        .order-summary .summary-row .label { color: var(--gray-500); font-weight: 600; }
+        .order-summary .summary-row .value { font-weight: 800; color: var(--primary); }
+
+        /* ===== DELIVERY ===== */
+        .delivery-section {
+            margin: 0 0 22px;
+            padding-top: 18px;
+            border-top: 2px solid var(--gray-200);
+        }
+        .delivery-section h3 {
+            font-size: 15px; font-weight: 800; color: var(--primary-dark);
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+        .delivery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+        .delivery-grid .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .delivery-grid .form-group.full { grid-column: 1 / -1; }
+
+        .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .radio-option {
+            flex: 1; min-width: 180px; padding: 12px 14px;
+            background: white; border: 2px solid var(--gray-200);
+            border-radius: 10px; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .radio-option:hover { border-color: var(--accent); background: white; }
+        .radio-option input[type="radio"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+        .radio-option .radio-info { display: flex; flex-direction: column; }
+        .radio-option .radio-info strong { font-size: 12.5px; font-weight: 800; color: var(--primary-dark); margin-bottom: 2px; }
+        .radio-option .radio-info small { font-size: 11px; color: var(--gray-500); }
+        .radio-option.selected {
+            border-color: var(--accent);
+            background: rgba(198, 161, 42, 0.05);
+            box-shadow: 0 0 0 3px rgba(198, 161, 42, 0.12);
+        }
+
+        /* ===== SUBMIT ===== */
+        .submit-order-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 32px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 24px rgba(198, 161, 42, 0.35);
+            margin-top: 8px;
+        }
+        .submit-order-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(198, 161, 42, 0.45); }
+        .submit-order-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ===== PREVIEW MODAL ===== */
+        .preview-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+        .preview-modal.show { opacity: 1; visibility: visible; }
+        .preview-box {
+            background: white;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 92vh;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9) translateY(30px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .preview-modal.show .preview-box { transform: scale(1) translateY(0); }
+        .preview-header {
+            background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+            padding: 24px 28px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .preview-header-left { display: flex; align-items: center; gap: 16px; }
+        .preview-header-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .preview-header h2 { font-size: 20px; font-weight: 800; margin-bottom: 2px; color: white; }
+        .preview-header p { font-size: 12.5px; color: rgba(255, 255, 255, 0.75); margin: 0; }
+        .preview-close-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none; color: white;
+            width: 36px; height: 36px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .preview-close-btn:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(90deg); }
+        .preview-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+            max-height: calc(92vh - 280px);
+        }
+        .preview-section { margin-bottom: 22px; }
+        .preview-section:last-child { margin-bottom: 0; }
+        .preview-section-title {
+            font-size: 11.5px; font-weight: 800; color: var(--primary-dark);
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+            padding-bottom: 8px; border-bottom: 2px solid var(--gray-200);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .preview-info-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px 16px;
+        }
+        .preview-info-item {
+            padding: 10px 14px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        .preview-info-item.full { grid-column: 1 / -1; }
+        .preview-info-label {
+            font-size: 9.5px; font-weight: 800; color: var(--gray-500);
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;
+        }
+        .preview-info-value {
+            font-size: 13px; font-weight: 700; color: var(--gray-800);
+            word-break: break-word;
+        }
+        .preview-items-list {
+            background: var(--gray-100); border-radius: 10px;
+            padding: 14px 18px; margin-bottom: 8px;
+        }
+        .preview-item-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 0; border-bottom: 1px solid var(--gray-200); font-size: 13px;
+        }
+        .preview-item-row:last-child { border-bottom: none; }
+        .preview-item-name {
+            font-weight: 700; color: var(--gray-800);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .preview-item-qty {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--primary); color: white;
+            font-size: 10px; font-weight: 800;
+            padding: 2px 8px; border-radius: 10px; min-width: 30px;
+        }
+        .preview-item-price {
+            font-weight: 800; color: var(--primary);
+            font-family: 'Courier New', monospace; white-space: nowrap;
+        }
+        .preview-grand-total {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 10px; color: white; margin-top: 10px;
+        }
+        .preview-grand-total .label {
+            font-size: 12px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.5px; color: rgba(255, 255, 255, 0.85);
+        }
+        .preview-grand-total .amount {
+            font-size: 22px; font-weight: 900; color: var(--accent-light);
+            font-family: 'Courier New', monospace;
+        }
+        .preview-footer {
+            padding: 16px 28px 22px;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            flex-shrink: 0;
+        }
+        .preview-warning {
+            background: #fef9e7;
+            border: 1.5px solid var(--accent);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 11px 14px;
+            font-size: 12px;
+            color: var(--gray-700);
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .preview-warning strong { color: var(--primary-dark); }
+        .preview-actions { display: flex; gap: 12px; }
+        .preview-btn-edit,
+        .preview-btn-confirm {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+            border: none;
+            letter-spacing: 0.3px;
+        }
+        .preview-btn-edit { background: var(--gray-200); color: var(--gray-700); }
+        .preview-btn-edit:hover { background: var(--gray-300); transform: translateY(-2px); }
+        .preview-btn-confirm {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35);
+        }
+        .preview-btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15, 118, 110, 0.45); }
+        .preview-btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* ===== SUCCESS MODAL ===== */
+        .success-modal {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; opacity: 0; visibility: hidden; transition: all 0.4s ease;
+        }
+        .success-modal.show { opacity: 1; visibility: visible; }
+        .success-box {
+            background: white; border-radius: 20px; padding: 40px 36px 32px;
+            max-width: 500px; width: 100%; text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            transform: scale(0.85) translateY(30px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; overflow: hidden;
+        }
+        .success-modal.show .success-box { transform: scale(1) translateY(0); }
+        .success-box .success-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(15, 118, 110, 0.15); border: 2px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; margin: 0 auto 20px;
+            animation: successPulse 2s ease-in-out infinite;
+        }
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(15, 118, 110, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 0 50px rgba(15, 118, 110, 0.6); }
+        }
+        .success-box h2 { font-size: 24px; font-weight: 800; color: var(--primary-dark); margin-bottom: 10px; }
+        .success-box p { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; line-height: 1.6; }
+        .tracking-display {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px;
+        }
+        .tracking-display .label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255, 255, 255, 0.7); margin-bottom: 6px; }
+        .tracking-display .code { font-size: 28px; font-weight: 900; letter-spacing: 3px; font-family: 'Courier New', monospace; color: var(--accent-light); }
+        .notification-info {
+            background: var(--gray-100); border-radius: 10px; padding: 14px; margin-bottom: 20px;
+            font-size: 13px; color: var(--gray-600); text-align: left;
+            display: flex; align-items: flex-start; gap: 10px;
+        }
+        .notification-info .info-icon { font-size: 18px; flex-shrink: 0; }
+        .success-actions { display: flex; gap: 10px; }
+        .success-actions button, .success-actions a {
+            flex: 1; padding: 12px; border-radius: 8px; font-size: 14px;
+            font-weight: 700; cursor: pointer; transition: all 0.3s;
+            text-decoration: none; text-align: center; font-family: inherit; border: none;
+        }
+        .success-actions .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); color: white; }
+        .success-actions .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1.5px solid var(--gray-200); }
+        .success-actions .btn-secondary:hover { background: var(--gray-200); }
+
+        /* ===== TRACK RESULT ===== */
+        .track-result { max-width: 900px; margin: 24px auto 0; display: none; }
+        .track-result.show { display: block; animation: fadeIn 0.4s ease; }
+        .track-result .result-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white; padding: 20px 24px; border-radius: 12px 12px 0 0;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .track-result .result-header h3 { font-size: 18px; font-weight: 700; }
+        .track-result .result-header .status-badge {
+            background: var(--accent-light); color: var(--primary-dark);
+            padding: 4px 14px; border-radius: 12px;
+            font-size: 12px; font-weight: 700; text-transform: uppercase;
+        }
+        .track-result .result-body {
+            background: white; border: 1px solid var(--gray-200);
+            border-top: none; border-radius: 0 0 12px 12px; padding: 24px;
+        }
+        .track-result .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+        .track-result .info-item { padding: 12px 16px; background: var(--gray-100); border-radius: 8px; }
+        .track-result .info-item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
+        .track-result .info-item .value { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
+
+        .timeline-steps { display: flex; justify-content: space-between; position: relative; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .timeline-step { flex: 1; min-width: 100px; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
+        .timeline-step .step-circle {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: white; border: 2px solid var(--gray-200);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 700; color: var(--gray-500);
+            margin-bottom: 8px; transition: all 0.3s;
+        }
+        .timeline-step.completed .step-circle { background: var(--primary); border-color: var(--primary); color: white; }
+        .timeline-step.active .step-circle {
+            background: var(--accent); border-color: var(--accent); color: white;
+            box-shadow: 0 0 0 6px rgba(198, 161, 42, 0.2);
+            animation: pulseStep 2s infinite;
+        }
+        @keyframes pulseStep {
+            0%, 100% { box-shadow: 0 0 0 6px rgba(198, 161, 42, 0.2); }
+            50% { box-shadow: 0 0 0 12px rgba(198, 161, 42, 0.1); }
+        }
+        .timeline-step .step-label { font-size: 11px; font-weight: 600; color: var(--gray-500); line-height: 1.3; }
+        .timeline-step.completed .step-label, .timeline-step.active .step-label { color: var(--primary-dark); }
+
+        /* ===== PAYMENT INSTRUCTIONS ===== */
+        .payment-instructions {
+            background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+            border: 2px solid var(--accent); border-radius: 14px;
+            padding: 20px 24px; margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(198, 161, 42, 0.15);
+        }
+        .payment-instructions .instruction-title {
+            font-size: 15px; font-weight: 800; color: var(--primary-dark);
+            margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+            padding-bottom: 10px; border-bottom: 2px solid rgba(198, 161, 42, 0.3);
+        }
+        .payment-instructions .instruction-step {
+            display: flex; gap: 12px; padding: 10px 0;
+            font-size: 13px; color: var(--gray-700); line-height: 1.6; align-items: flex-start;
+        }
+        .payment-instructions .step-number {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: var(--accent); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 12px; flex-shrink: 0; margin-top: 1px;
+        }
+        .payment-instructions .payment-info-box {
+            background: white; border-radius: 10px; padding: 12px 16px;
+            margin: 8px 0; border: 1px solid rgba(198, 161, 42, 0.3);
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .payment-instructions .payment-info-box .info-label {
+            font-size: 10px; font-weight: 800; color: var(--gray-500);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .payment-instructions .payment-info-box .info-value {
+            font-size: 15px; font-weight: 800; color: var(--primary-dark);
+            font-family: 'Courier New', monospace; letter-spacing: 1px; word-break: break-all;
+        }
+
+        /* ===== DELIVERY CONFIRMATION ===== */
+        .delivery-confirm-box {
+            background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+            border: 2px solid var(--primary);
+            border-radius: 14px; padding: 22px 24px;
+            margin: 20px 0; box-shadow: 0 8px 24px rgba(15, 118, 110, 0.15);
+        }
+        .delivery-confirm-box .dc-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .delivery-confirm-box .dc-icon {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, #0f766e, #134e4a);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0; box-shadow: 0 6px 16px rgba(15, 118, 110, 0.4);
+        }
+        .delivery-confirm-box .dc-title { font-size: 16px; font-weight: 800; color: #134e4a; }
+        .delivery-confirm-box .dc-sub { font-size: 12px; color: #0f766e; font-weight: 600; }
+        .delivery-confirm-box .dc-warning {
+            background: white; border-radius: 10px; padding: 14px 16px;
+            margin-bottom: 16px; font-size: 13px; color: #334155;
+            line-height: 1.7; border-left: 4px solid #f59e0b;
+        }
+        .delivery-confirm-box .dc-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+            color: white; border: none; border-radius: 10px;
+            font-weight: 800; cursor: pointer; font-family: inherit;
+            font-size: 15px; letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(15, 118, 110, 0.35);
+            transition: all 0.3s;
+        }
+        .delivery-confirm-box .dc-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(15, 118, 110, 0.45);
+        }
+        .delivery-confirm-box .dc-btn:disabled {
+            opacity: 0.6; cursor: not-allowed; transform: none;
+        }
+
+        .delivery-confirmed-box {
+            background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+            border-radius: 14px; padding: 20px 24px;
+            margin: 20px 0; color: white;
+            display: flex; align-items: center; gap: 14px;
+            box-shadow: 0 8px 24px rgba(15, 118, 110, 0.3);
+        }
+        .delivery-confirmed-box .dcc-icon {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .delivery-confirmed-box .dcc-title { font-size: 16px; font-weight: 800; }
+        .delivery-confirmed-box .dcc-sub { font-size: 12px; color: rgba(255, 255, 255, 0.85); margin-top: 2px; }
+        .delivery-confirmed-box .dcc-note { font-size: 11px; color: rgba(255, 255, 255, 0.7); margin-top: 4px; }
+
+        /* ===== RECEIPT BOX ===== */
+        .receipt-box {
+            background: linear-gradient(135deg, #fef9e7 0%, #fdf3d0 100%);
+            border: 2px solid #0f766e; border-radius: 14px;
+            padding: 18px 22px; margin: 20px 0;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; flex-wrap: wrap;
+        }
+        .receipt-box .rb-label { font-size: 14px; font-weight: 800; color: #134e4a; margin-bottom: 4px; }
+        .receipt-box .rb-number { font-size: 13px; color: #0f766e; font-family: monospace; font-weight: 700; }
+        .receipt-box .rb-btn {
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #0f766e, #134e4a);
+            color: white; border: none; border-radius: 10px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+            font-size: 13px; transition: all 0.3s;
+        }
+        .receipt-box .rb-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 118, 110, 0.4);
+        }
+
+        /* ===== FOOTER ===== */
+        .site-footer { background: var(--primary-dark); color: white; padding: 30px 44px 24px; text-align: center; margin-top: auto; }
+        .site-footer .footer-brand { font-size: 20px; font-weight: 700; color: var(--accent-light); text-decoration: none; display: block; margin-bottom: 6px; }
+        .site-footer p { font-size: 13px; color: rgba(255, 255, 255, 0.35); margin-bottom: 4px; }
+        .site-footer small { color: rgba(255, 255, 255, 0.15); font-size: 11px; }
+
+        /* ============================================================
+           MODERN CONFIRM MODAL
+           ============================================================ */
+        .cp-confirm-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(8px);
+            z-index: 30000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cp-confirm-overlay.show { opacity: 1; visibility: visible; }
+        .cp-confirm-box {
+            background: white; border-radius: 24px;
+            max-width: 460px; width: 100%;
+            padding: 0; overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cp-confirm-overlay.show .cp-confirm-box { transform: scale(1) translateY(0); }
+        .cp-confirm-banner {
+            height: 6px;
+            background: linear-gradient(90deg, #0f766e, #14b8a6, #c6a12a);
+        }
+        .cp-confirm-banner.danger { background: linear-gradient(90deg, #7f1d1d, #dc2626, #f87171); }
+        .cp-confirm-banner.success { background: linear-gradient(90deg, #14532d, #22c55e, #86efac); }
+        .cp-confirm-banner.warning { background: linear-gradient(90deg, #78350f, #f59e0b, #fcd34d); }
+        .cp-confirm-banner.info { background: linear-gradient(90deg, #134e4a, #14b8a6, #5eead4); }
+        .cp-confirm-icon-wrap { display: flex; justify-content: center; padding: 32px 24px 12px; }
+        .cp-confirm-icon {
+            width: 88px; height: 88px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 42px; position: relative;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+            animation: cpIconPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes cpIconPop {
+            0% { transform: scale(0.3); opacity: 0; }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .cp-confirm-icon.primary { background: linear-gradient(135deg, #0f766e, #14b8a6); color: white; box-shadow: 0 12px 32px rgba(15,118,110,0.35); }
+        .cp-confirm-icon.danger { background: linear-gradient(135deg, #dc2626, #f87171); color: white; box-shadow: 0 12px 32px rgba(220,38,38,0.35); }
+        .cp-confirm-icon.success { background: linear-gradient(135deg, #16a34a, #4ade80); color: white; box-shadow: 0 12px 32px rgba(22,163,74,0.35); }
+        .cp-confirm-icon.warning { background: linear-gradient(135deg, #d97706, #fbbf24); color: white; box-shadow: 0 12px 32px rgba(217,119,6,0.35); }
+        .cp-confirm-icon.info { background: linear-gradient(135deg, #0f766e, #5eead4); color: white; box-shadow: 0 12px 32px rgba(15,118,110,0.3); }
+        .cp-confirm-icon .cp-icon-pulse {
+            position: absolute; inset: -8px; border-radius: 50%;
+            border: 2px solid currentColor; opacity: 0.3;
+            animation: cpIconPulse 2s ease-out infinite;
+        }
+        @keyframes cpIconPulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+        .cp-confirm-content { padding: 8px 32px 24px; text-align: center; }
+        .cp-confirm-title { font-size: 21px; font-weight: 800; color: #134e4a; margin-bottom: 10px; line-height: 1.3; letter-spacing: -0.3px; }
+        .cp-confirm-msg { font-size: 14px; color: #64748b; line-height: 1.65; margin-bottom: 6px; }
+        .cp-confirm-detail {
+            display: inline-block; margin-top: 14px; padding: 12px 18px;
+            background: #f8fafc; border-radius: 12px;
+            border-left: 4px solid #0f766e;
+            font-size: 13px; color: #334155; text-align: left; max-width: 100%;
+        }
+        .cp-confirm-detail .cd-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
+        .cp-confirm-detail .cd-value { font-weight: 800; color: #134e4a; font-family: 'Courier New', monospace; font-size: 15px; }
+        .cp-confirm-checklist {
+            margin-top: 14px; padding: 14px 18px;
+            background: rgba(34,197,94,0.06);
+            border: 1.5px solid rgba(34,197,94,0.2);
+            border-left: 4px solid #22c55e;
+            border-radius: 10px; text-align: left;
+        }
+        .cp-confirm-checklist-title {
+            font-size: 11px; font-weight: 800; color: #166534;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+        }
+        .cp-confirm-checklist-item {
+            display: flex; align-items: flex-start; gap: 8px;
+            padding: 5px 0; font-size: 13px; color: #334155; line-height: 1.5;
+        }
+        .cp-confirm-checklist-item .check-icon {
+            color: #16a34a; font-weight: 900; flex-shrink: 0;
+        }
+        .cp-confirm-warn-box {
+            margin-top: 14px; padding: 12px 16px;
+            background: rgba(245,158,11,0.08);
+            border: 1.5px solid rgba(245,158,11,0.25);
+            border-left: 4px solid #f59e0b;
+            border-radius: 10px; font-size: 12.5px; color: #78350f;
+            line-height: 1.55; text-align: left;
+        }
+        .cp-confirm-actions {
+            display: flex; gap: 10px; padding: 0 24px 24px;
+        }
+        .cp-confirm-actions button {
+            flex: 1; padding: 14px 20px; border-radius: 12px;
+            font-size: 14px; font-weight: 800; cursor: pointer;
+            font-family: inherit; border: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            letter-spacing: 0.2px;
+        }
+        .cp-confirm-actions button:hover { transform: translateY(-2px); }
+        .cp-btn-confirm-cancel {
+            background: #f1f5f9; color: #475569;
+            border: 1.5px solid #e2e8f0 !important;
+        }
+        .cp-btn-confirm-cancel:hover { background: #e2e8f0; }
+        .cp-btn-confirm-primary {
+            background: linear-gradient(135deg, #0f766e, #134e4a);
+            color: white; box-shadow: 0 6px 20px rgba(15,118,110,0.3);
+        }
+        .cp-btn-confirm-success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white; box-shadow: 0 6px 20px rgba(22,163,74,0.3);
+        }
+        .cp-btn-confirm-danger {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white; box-shadow: 0 6px 20px rgba(220,38,38,0.3);
+        }
+
+        /* ============================================================
+           MODERN TOAST
+           ============================================================ */
+        .cp-toast-container {
+            position: fixed; top: 24px; right: 24px;
+            z-index: 40000; display: flex; flex-direction: column; gap: 12px;
+            pointer-events: none;
+        }
+        .cp-toast {
+            min-width: 300px; max-width: 420px;
+            padding: 16px 20px; background: white; border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            display: flex; align-items: center; gap: 14px;
+            transform: translateX(450px); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto; position: relative; overflow: hidden;
+            border-left: 5px solid #0f766e;
+        }
+        .cp-toast.show { transform: translateX(0); opacity: 1; }
+        .cp-toast.success { border-left-color: #22c55e; }
+        .cp-toast.error { border-left-color: #ef4444; }
+        .cp-toast.warning { border-left-color: #f59e0b; }
+        .cp-toast.info { border-left-color: #14b8a6; }
+        .cp-toast-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .cp-toast.success .cp-toast-icon { background: rgba(34,197,94,0.15); }
+        .cp-toast.error .cp-toast-icon { background: rgba(239,68,68,0.15); }
+        .cp-toast.warning .cp-toast-icon { background: rgba(245,158,11,0.15); }
+        .cp-toast.info .cp-toast-icon { background: rgba(20,184,166,0.15); }
+        .cp-toast-content { flex: 1; }
+        .cp-toast-title { font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 2px; }
+        .cp-toast-msg { font-size: 12.5px; color: #64748b; line-height: 1.4; }
+        .cp-toast-close {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: #f1f5f9; border: none; color: #64748b;
+            font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.2s;
+        }
+        .cp-toast-close:hover { background: #e2e8f0; color: #475569; }
+        .cp-toast-progress {
+            position: absolute; bottom: 0; left: 0;
+            height: 3px; animation: cpToastProgress 4s linear forwards; width: 100%;
+        }
+        .cp-toast.success .cp-toast-progress { background: #22c55e; }
+        .cp-toast.error .cp-toast-progress { background: #ef4444; }
+        .cp-toast.warning .cp-toast-progress { background: #f59e0b; }
+        .cp-toast.info .cp-toast-progress { background: #14b8a6; }
+        @keyframes cpToastProgress { from { width: 100%; } to { width: 0%; } }
+
+        /* ============================================================
+           DELIVERY SUCCESS MODAL
+           ============================================================ */
+        .delivery-success-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 35000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .delivery-success-overlay.show { opacity: 1; visibility: visible; }
+        .delivery-success-box {
+            background: white; border-radius: 24px;
+            max-width: 480px; width: 100%;
+            padding: 0; overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .delivery-success-overlay.show .delivery-success-box { transform: scale(1) translateY(0); }
+        .delivery-success-header {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            padding: 40px 32px 32px;
+            text-align: center; color: white;
+            position: relative; overflow: hidden;
+        }
+        .delivery-success-header::before {
+            content: ''; position: absolute;
+            top: -50%; right: -30%; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 70%);
+            border-radius: 50%;
+        }
+        .delivery-success-icon {
+            width: 96px; height: 96px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 4px solid rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 48px; margin: 0 auto 18px;
+            position: relative; z-index: 1;
+            animation: deliverySuccessPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+        @keyframes deliverySuccessPop {
+            0% { transform: scale(0.3) rotate(-180deg); opacity: 0; }
+            60% { transform: scale(1.15) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .delivery-success-header h2 {
+            font-size: 24px; font-weight: 800; margin-bottom: 8px;
+            position: relative; z-index: 1; letter-spacing: -0.3px;
+        }
+        .delivery-success-header p {
+            font-size: 14px; color: rgba(255,255,255,0.9);
+            position: relative; z-index: 1; line-height: 1.5;
+        }
+        .delivery-success-body {
+            padding: 28px 32px 24px;
+            text-align: center;
+        }
+        .delivery-success-info {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #16a34a;
+        }
+        .delivery-success-info .info-row {
+            display: flex; justify-content: space-between;
+            padding: 8px 0; font-size: 13px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .delivery-success-info .info-row:last-child { border-bottom: none; }
+        .delivery-success-info .info-label { color: #64748b; font-weight: 600; }
+        .delivery-success-info .info-value {
+            color: #134e4a; font-weight: 800;
+            font-family: 'Courier New', monospace; text-align: right;
+        }
+        .delivery-success-note {
+            background: rgba(34,197,94,0.06);
+            border: 1.5px solid rgba(34,197,94,0.2);
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 13px;
+            color: #166534;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .delivery-success-actions {
+            display: flex; gap: 10px;
+        }
+        .delivery-success-actions button {
+            flex: 1; padding: 13px 20px;
+            border-radius: 12px;
+            font-size: 14px; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+            border: none; transition: all 0.2s;
+        }
+        .delivery-success-actions .ds-btn-primary {
+            background: linear-gradient(135deg, #0f766e, #134e4a);
+            color: white;
+            box-shadow: 0 6px 20px rgba(15,118,110,0.3);
+        }
+        .delivery-success-actions .ds-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(15,118,110,0.4);
+        }
+        .delivery-success-actions .ds-btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1.5px solid #e2e8f0;
+        }
+        .delivery-success-actions .ds-btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .main-options { grid-template-columns: 1fr; }
+            .place-order-section.show {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .how-it-works { grid-column: 1 / -1; }
+            .order-form-wrapper { grid-column: 1 / -1; }
+            .section-title, .section-sub { grid-column: 1 / -1; }
+        }
+        @media (max-width: 768px) {
+            .site-header { padding: 10px 16px; }
+            .header-top { flex-wrap: wrap; justify-content: center; gap: 8px; }
+            .header-left { order: 1; gap: 8px; }
+            .header-right { order: 2; width: 100%; justify-content: center; margin-top: 8px; }
+            .header-center { order: 3; width: 100%; flex: none; }
+            .header-company-name { font-size: 14px; letter-spacing: 0.5px; }
+            .header-motto { font-size: 10px; }
+            .header-logo-img, .logo-placeholder-small { width: 44px; height: 44px; }
+            .portal-hero { padding: 36px 20px 34px; }
+            .portal-hero h2 { font-size: 22px; }
+            .portal-hero h3 { font-size: 14px; }
+            .main-options { padding: 0 20px; margin: 30px auto; }
+            .place-order-section, .track-section { padding: 32px 20px; }
+            .customer-info, .delivery-grid { grid-template-columns: 1fr; }
+            .order-form-wrapper { padding: 24px 20px; }
+            .items-table { font-size: 11px; }
+            .items-table th, .items-table td { padding: 7px 5px; }
+            .items-table select, .items-table input { font-size: 11px; padding: 5px 6px; }
+            .track-result .info-grid { grid-template-columns: 1fr; }
+            .success-box { padding: 30px 22px 24px; }
+            .success-box .success-icon { width: 64px; height: 64px; font-size: 32px; }
+            .tracking-display .code { font-size: 20px; letter-spacing: 2px; }
+            .success-actions { flex-direction: column; }
+            .site-footer { padding: 20px 24px; }
+
+            .preview-box { max-height: 96vh; }
+            .preview-info-grid { grid-template-columns: 1fr; }
+            .preview-actions { flex-direction: column; }
+            .preview-btn-edit, .preview-btn-confirm { width: 100%; }
+
+            .cp-confirm-box { max-width: 95vw; }
+            .cp-confirm-content { padding: 8px 20px 20px; }
+            .cp-confirm-actions { padding: 0 20px 20px; }
+        }
+        @media (max-width: 480px) {
+            .header-company-name { font-size: 12px; }
+            .portal-hero h2 { font-size: 18px; }
+            .section-title { font-size: 20px; }
+            .how-it-works h3, .order-form-wrapper h3 { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-content">
+
+        <!-- HEADER -->
+        <header class="site-header">
+            <div class="header-top">
+                <div class="header-left">
+                    <img src="assets/makdc-logo.jpg" alt="MAK DC Logo" class="header-logo-img"
+                         onerror="this.outerHTML='<div class=&quot;logo-placeholder-small&quot;>MAK</div>'">
+                </div>
+                <div class="header-center">
+                    <div class="header-company-name">
+                        MAK DC Investment <span>Company LTD </span> | CUSTOMER PORTAL
+                    </div>
+                    <div class="header-motto">
+                        "Quality service is our priority."
+                    </div>
+                </div>
+                <div class="header-right">
+                    <a class="header-link" href="index.html">
+                        ← Back to Website
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- PORTAL CONTENT -->
+        <div class="portal-content">
+
+            <!-- HERO -->
+            <div class="portal-hero">
+                <div class="welcome-label">CUSTOMER PORTAL</div>
+                <h2>Dear Customer, <span>Welcome</span> to the MAK DC Investment <span>Company LTD</span> Customer Portal</h2>
+                <h3>We much Value your Presence</h3>
+                <p>Place a new order or track your existing order easily and accurately</p>
+            </div>
+
+            <!-- MAIN OPTIONS -->
+            <div class="main-options">
+                <div class="option-card" onclick="showPlaceOrderSection()">
+                    <div class="option-icon gold">📝</div>
+                    <h3>Place an Order</h3>
+                    <p>Add multiple products in one order and get a Tracking ID to follow up.</p>
+                    <button class="option-btn gold">Place Order →</button>
+                </div>
+
+                <div class="option-card" onclick="showTrackSection()">
+                    <div class="option-icon blue">🔍</div>
+                    <h3>Track Your Order</h3>
+                    <p>Enter your Tracking ID and see the current status of your order.</p>
+                    <button class="option-btn blue">Track Order →</button>
+                </div>
+            </div>
+
+            <!-- TRACK ORDER SECTION -->
+            <div class="track-section" id="trackSection">
+                <h2 class="section-title">🔍 Track Your Order</h2>
+                <p class="section-sub">Enter your Tracking ID to see the current status of your order.</p>
+
+                <form onsubmit="return trackOrder(event)" style="max-width: 800px; margin: 0 auto;">
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;">
+                        <div class="form-group">
+                            <label class="form-label">Tracking ID <span class="required">*</span></label>
+                            <input type="text" id="trackId" class="form-input" placeholder="MAK-2026-XXXX" required>
+                        </div>
+                        <button type="submit" style="padding: 11px 24px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">
+                            🔍 Track
+                        </button>
+                    </div>
+                    <div style="margin-top: 10px; text-align: center;">
+                        <details style="font-size: 12px; color: var(--gray-500);">
+                            <summary style="cursor: pointer; font-weight: 600;">🔒 Want more security? (Optional)</summary>
+                            <div style="margin-top: 10px; display: flex; justify-content: center; gap: 8px; align-items: center;">
+                                <input type="tel" id="trackPhone" class="form-input" placeholder="Phone number (optional)" style="max-width: 240px; padding: 8px 12px; font-size: 12px;">
+                            </div>
+                            <div style="margin-top: 6px; font-size: 11px; color: var(--gray-400);">Enter phone number for extra security</div>
+                        </details>
+                    </div>
+                </form>
+                <div class="track-result" id="trackResult"></div>
+            </div>
+
+            <!-- PLACE ORDER SECTION -->
+            <div class="place-order-section" id="placeOrderSection">
+                <h2 class="section-title">📝 Place Your Order</h2>
+                <p class="section-sub">Fill in the form with your requirements and our sales team will respond to you shortly.</p>
+
+                <div class="how-it-works">
+                    <h3>How It Works</h3>
+                    <p>Placing an order with MAK DC is quick and straightforward. Fill in your requirements and our sales team will get back to you with a comprehensive wholesale proposal.</p>
+
+                    <div class="how-step">
+                        <div class="how-step-num">1</div>
+                        <div class="how-step-info">
+                            <h4>Submit Your Request</h4>
+                            <p>Fill in the form with your product type, quantity needed, and delivery location.</p>
+                        </div>
+                    </div>
+
+                    <div class="how-step">
+                        <div class="how-step-num">2</div>
+                        <div class="how-step-info">
+                            <h4>We Review &amp; Respond</h4>
+                            <p>Our sales team reviews your requirements and sends a competitive quote.</p>
+                        </div>
+                    </div>
+
+                    <div class="how-step">
+                        <div class="how-step-num">3</div>
+                        <div class="how-step-info">
+                            <h4>Confirm &amp; Deliver</h4>
+                            <p>Once you confirm the order, we arrange packaging and schedule delivery straight to your door.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-form-wrapper">
+                    <h3>Request a Quote</h3>
+
+                    <div class="customer-info">
+                        <div class="form-group">
+                            <label class="form-label">Full Name <span class="required">*</span></label>
+                            <input type="text" id="orderName" class="form-input" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="orderPhone" class="form-input" placeholder="+255 XXX XXX XXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email (For Tracking ID) <span class="required">*</span></label>
+                            <input type="email" id="orderEmail" class="form-input" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Region <span class="required">*</span></label>
+                            <select id="orderRegion" class="form-select" onchange="updateDistricts()" required>
+                                <option value="">-- Select Region --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">District <span class="required">*</span></label>
+                            <select id="orderDistrict" class="form-select" required>
+                                <option value="">-- Select District --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="items-section">
+                        <div class="items-header">
+                            <h3>🛒 Your Products</h3>
+                            <button class="add-item-btn" onclick="addItemRow()">➕ Add Product</button>
+                        </div>
+
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45%;">Product</th>
+                                    <th style="width: 15%;">Quantity</th>
+                                    <th style="width: 25%;">Total (TSh)</th>
+                                    <th style="width: 15%;">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span class="label">Total Items</span>
+                            <span class="value" id="totalItems">0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Total Quantity</span>
+                            <span class="value" id="totalQuantity">0</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span class="label">GRAND TOTAL:</span>
+                            <span class="value" id="grandTotal">TSh 0</span>
+                        </div>
+                    </div>
+
+                    <div class="delivery-section">
+                        <h3>🚚 Delivery Details</h3>
+
+                        <div class="delivery-grid">
+                            <div class="form-group full">
+                                <label class="form-label">Delivery Type <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option" onclick="selectDelivery(this)">
+                                        <input type="radio" name="deliveryType" value="company" required>
+                                        <div class="radio-info">
+                                            <strong>🚚 Company Delivery</strong>
+                                            <small>MAK DC will deliver products to your site</small>
+                                        </div>
+                                    </label>
+                                    <label class="radio-option" onclick="selectDelivery(this)">
+                                        <input type="radio" name="deliveryType" value="self">
+                                        <div class="radio-info">
+                                            <strong>🚗 Self Pickup</strong>
+                                            <small>I will come pick up the products myself</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group full" id="deliveryAddressGroup">
+                                <label class="form-label">Full Site Address (Delivery Address) <span class="required">*</span></label>
+                                <textarea id="orderDeliveryAddress" class="form-textarea" placeholder="Describe the complete site location: street, district, landmarks..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Expected Date</label>
+                                <input type="date" id="orderExpectedDate" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Preferred Time (Optional)</label>
+                                <select id="orderTimeSlot" class="form-select">
+                                    <option value="">-- Select Time --</option>
+                                    <option value="Morning (8:00 - 12:00)">Morning (8:00 - 12:00)</option>
+                                    <option value="Afternoon (12:00 - 16:00)">Afternoon (12:00 - 16:00)</option>
+                                    <option value="Evening (16:00 - 18:00)">Evening (16:00 - 18:00)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full">
+                                <label class="form-label">Additional Notes</label>
+                                <textarea id="orderNotes" class="form-textarea" placeholder="Special requirements, comments, or other notes..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="submit-order-btn" onclick="previewOrder()">
+                        👁️ Preview Order Before Submitting
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="site-footer">
+            <p class="footer-brand" href="index.html">MAK DC Investment <span>Company LTD </span></p>
+            <p>Quality service is our priority.</p>
+            <small>© 2026 MAK DC Investment Company Ltd. All rights reserved.</small>
+        </footer>
+
+    </div>
+
+    <!-- ===== PREVIEW MODAL ===== -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-box">
+            <div class="preview-header">
+                <div class="preview-header-left">
+                    <div class="preview-header-icon">📋</div>
+                    <div>
+                        <h2>Review Your Order</h2>
+                        <p>Please confirm all details are correct before submitting</p>
+                    </div>
+                </div>
+                <button class="preview-close-btn" onclick="closePreviewModal()">✕</button>
+            </div>
+            <div class="preview-body" id="previewBody"></div>
+            <div class="preview-footer">
+                <div class="preview-warning">
+                    ⚠️ <strong>Important:</strong> Once submitted, you will receive a Tracking ID. Order details cannot be changed by you — contact support if needed.
+                </div>
+                <div class="preview-actions">
+                    <button class="preview-btn-edit" onclick="closePreviewModal()">
+                        ← Edit Order
+                    </button>
+                    <button class="preview-btn-confirm" onclick="confirmAndSubmitOrder()" id="previewConfirmBtn">
+                        ✅ Confirm & Submit Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="success-modal" id="successModal">
+        <div class="success-box">
+            <div class="success-icon">✅</div>
+            <h2>Order Received!</h2>
+            <p>Use this Tracking ID to follow up on your order. We'll send notifications via email and SMS.</p>
+
+            <div class="tracking-display">
+                <div class="label">TRACKING ID</div>
+                <div class="code" id="generatedTrackingId">MAK-2026-0000</div>
+            </div>
+
+            <div class="notification-info">
+                <span class="info-icon">📧</span>
+                <div>
+                    <strong>Notifications sent to:</strong><br>
+                    <span id="notifyEmail">email@example.com</span> and <span id="notifyPhone">+255 XXX XXX XXX</span>
+                </div>
+            </div>
+
+            <div class="success-actions">
+                <a href="#" class="btn-primary" onclick="showTrackFromModal(); return false;">
+                    🔍 Track Order
+                </a>
+                <button class="btn-secondary" onclick="closeSuccessModal()">
+                    OK, Thank You
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECEIPT MODAL -->
+    <div class="modal-overlay" id="receiptModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:white;border-radius:16px;max-width:820px;width:100%;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 25px 60px rgba(0,0,0,0.3);">
+            <button onclick="document.getElementById('receiptModal').style.display='none';document.getElementById('receiptModal').classList.remove('show');" style="position:absolute;top:16px;right:20px;z-index:10;background:rgba(0,0,0,0.1);width:34px;height:34px;border-radius:50%;border:none;font-size:18px;cursor:pointer;">✕</button>
+            <div id="receiptContent"></div>
+            <div style="padding:16px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:0;">
+                <button onclick="document.getElementById('receiptModal').style.display='none';document.getElementById('receiptModal').classList.remove('show');" style="padding:11px 22px;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:#e2e8f0;color:#475569;">Close</button>
+                <button onclick="shareReceiptWhatsApp()" style="padding:11px 22px;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#25D366,#128C7E);color:white;">📱 WhatsApp</button>
+                <button onclick="printReceipt()" style="padding:11px 22px;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;">🖨️ Print</button>
+                <button onclick="downloadReceipt()" style="padding:11px 22px;border-radius:8px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#0f766e,#134e4a);color:white;">📥 PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODERN CONFIRM MODAL ===== -->
+    <div class="cp-confirm-overlay" id="cpConfirmOverlay">
+        <div class="cp-confirm-box">
+            <div class="cp-confirm-banner" id="cpConfirmBanner"></div>
+            <div class="cp-confirm-icon-wrap">
+                <div class="cp-confirm-icon" id="cpConfirmIcon">
+                    <span id="cpConfirmIconEmoji">?</span>
+                    <span class="cp-icon-pulse"></span>
+                </div>
+            </div>
+            <div class="cp-confirm-content">
+                <h3 class="cp-confirm-title" id="cpConfirmTitle">Confirm?</h3>
+                <p class="cp-confirm-msg" id="cpConfirmMsg">Are you sure?</p>
+                <div id="cpConfirmDetail"></div>
+                <div id="cpConfirmChecklist"></div>
+                <div id="cpConfirmWarn"></div>
+            </div>
+            <div class="cp-confirm-actions">
+                <button class="cp-btn-confirm-cancel" id="cpConfirmCancelBtn" onclick="cpConfirmCancel()">Cancel</button>
+                <button class="cp-btn-confirm-primary" id="cpConfirmOkBtn" onclick="cpConfirmOk()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DELIVERY SUCCESS MODAL ===== -->
+    <div class="delivery-success-overlay" id="deliverySuccessModal">
+        <div class="delivery-success-box">
+            <div class="delivery-success-header">
+                <div class="delivery-success-icon">✅</div>
+                <h2>Delivery Confirmed!</h2>
+                <p>Thank you for confirming receipt of your order</p>
+            </div>
+            <div class="delivery-success-body">
+                <div class="delivery-success-info">
+                    <div class="info-row">
+                        <span class="info-label">Receipt #</span>
+                        <span class="info-value" id="dsReceiptNumber">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Order ID</span>
+                        <span class="info-value" id="dsOrderId">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Confirmed At</span>
+                        <span class="info-value" id="dsConfirmedAt">—</span>
+                    </div>
+                </div>
+                <div class="delivery-success-note">
+                    Your order is now marked as <strong>COMPLETED</strong>. We appreciate your contribution and services!
+                </div>
+                <div class="delivery-success-actions">
+                    <button class="ds-btn-secondary" onclick="closeDeliverySuccess()">Close</button>
+                    <button class="ds-btn-primary" onclick="viewOrderAfterConfirm()">📄 View Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="cp-toast-container" id="cpToastContainer"></div>
+
+    <script>
+        // ================================================================
+        // TANZANIA REGIONS AND DISTRICTS
+        // ================================================================
+        const TANZANIA_REGIONS = {
+            'Arusha': ['Arusha City', 'Arusha District', 'Karatu', 'Longido', 'Meru', 'Monduli', 'Ngorongoro'],
+            'Dar es Salaam': ['Ilala', 'Kinondoni', 'Temeke', 'Ubungo', 'Kigamboni'],
+            'Dodoma': ['Bahi', 'Chamwino', 'Chemba', 'Dodoma City', 'Kondoa', 'Kongwa', 'Mpwapwa'],
+            'Geita': ['Bukombe', 'Chato', 'Geita', 'Mbogwe', 'Nyang\'hwale'],
+            'Iringa': ['Iringa District', 'Iringa Municipal', 'Kilolo', 'Mafinga Town', 'Mufindi'],
+            'Kagera': ['Biharamulo', 'Bukoba District', 'Bukoba Municipal', 'Karagwe', 'Kyerwa', 'Missenyi', 'Muleba', 'Ngara'],
+            'Katavi': ['Mlele', 'Mpanda District', 'Mpanda Municipal', 'Tanganyika'],
+            'Kigoma': ['Buhigwe', 'Kakonko', 'Kasulu District', 'Kasulu Town', 'Kibondo', 'Kigoma District', 'Kigoma-Ujiji', 'Uvinza'],
+            'Kilimanjaro': ['Hai', 'Moshi District', 'Moshi Municipal', 'Mwanga', 'Rombo', 'Same', 'Siha'],
+            'Lindi': ['Kilwa', 'Lindi District', 'Lindi Municipal', 'Liwale', 'Nachingwea', 'Ruangwa'],
+            'Manyara': ['Babati District', 'Babati Town', 'Hanang', 'Kiteto', 'Mbulu', 'Simanjiro'],
+            'Mara': ['Bunda', 'Butiama', 'Musoma District', 'Musoma Municipal', 'Rorya', 'Serengeti', 'Tarime'],
+            'Mbeya': ['Busokelo', 'Chunya', 'Kyela', 'Mbarali', 'Mbeya City', 'Mbeya District', 'Mbozi', 'Rungwe'],
+            'Morogoro': ['Gairo', 'Kilombero', 'Kilosa', 'Morogoro District', 'Morogoro Municipal', 'Mvomero', 'Ulanga', 'Malinyi', 'Ifakara'],
+            'Mtwara': ['Masasi District', 'Masasi Town', 'Mtwara District', 'Mtwara Municipal', 'Nanyumbu', 'Newala', 'Tandahimba'],
+            'Mwanza': ['Buchosa', 'Ilemela', 'Kwimba', 'Magu', 'Misungwi', 'Nyamagana', 'Sengerema', 'Ukerewe'],
+            'Njombe': ['Ludewa', 'Makambako Town', 'Makete', 'Njombe District', 'Njombe Town', 'Wanging\'ombe'],
+            'Pwani': ['Bagamoyo', 'Kibaha District', 'Kibaha Town', 'Kisarawe', 'Mafia', 'Mkuranga', 'Rufiji'],
+            'Rukwa': ['Kalambo', 'Nkasi', 'Sumbawanga District', 'Sumbawanga Municipal'],
+            'Ruvuma': ['Mbinga', 'Namtumbo', 'Nyasa', 'Songea District', 'Songea Municipal', 'Tunduru'],
+            'Shinyanga': ['Kahama District', 'Kahama Town', 'Kishapu', 'Shinyanga District', 'Shinyanga Municipal', 'Ushetu'],
+            'Simiyu': ['Bariadi', 'Busega', 'Itilima', 'Maswa', 'Meatu'],
+            'Singida': ['Ikungi', 'Iramba', 'Manyoni', 'Mkalama', 'Singida District', 'Singida Municipal'],
+            'Songwe': ['Ileje', 'Mbozi', 'Momba', 'Songwe', 'Tunduma'],
+            'Tabora': ['Igunga', 'Kaliua', 'Nzega', 'Sikonge', 'Tabora Municipal', 'Urambo', 'Uyui'],
+            'Tanga': ['Handeni District', 'Handeni Town', 'Kilindi', 'Korogwe District', 'Korogwe Town', 'Lushoto', 'Mkinga', 'Muheza', 'Pangani', 'Tanga City']
+            
+        };
+        let PRODUCTS = {};
+        let PRODUCTS_LIST = [];
+
+        async function loadProductsFromAPI() {
+            try {
+                const response = await fetch('http://localhost:5000/api/products');
+                if (!response.ok) throw new Error('Failed to fetch');
+
+                const products = await response.json();
+                PRODUCTS_LIST = products || [];
+
+                PRODUCTS = {};
+                PRODUCTS_LIST.forEach(p => {
+                    PRODUCTS[p.name] = Number(p.price);
+                });
+
+                console.log('✅ Products loaded from API:', products.length);
+
+            } catch (err) {
+                console.error('❌ Failed to load products:', err);
+                PRODUCTS = {
+                    'Concrete Blocks (6 inch)': 2380,
+                    'Cement 50kg': 18000,
+                    'Sand (1 ton)': 15000,
+                };
+            }
+        }
+
+        let itemCounter = 0;
+
+        function normalizePhone(phone) {
+            return (phone || '').replace(/\s+/g, '').replace(/^\+?255/, '0');
+        }
+
+        function addItemRow() {
+            const tbody = document.getElementById('itemsBody');
+            const rowId = 'item-row-' + itemCounter;
+
+            let options;
+            if (PRODUCTS_LIST && PRODUCTS_LIST.length > 0) {
+                options = PRODUCTS_LIST.map(p =>
+                    '<option value="' + p.name + '">' + p.name + ' — TSh ' + Number(p.price).toLocaleString() + (p.unit ? ' / ' + p.unit.replace('per ', '') : '') + '</option>'
+                ).join('');
+            } else {
+                options = Object.keys(PRODUCTS).map(p =>
+                    '<option value="' + p + '">' + p + ' — TSh ' + PRODUCTS[p].toLocaleString() + '</option>'
+                ).join('');
+            }
+
+            const row = document.createElement('tr');
+            row.id = rowId;
+            row.innerHTML = `
+                <td>
+                    <select onchange="updateTotals()" class="product-select">
+                        <option value="">-- Select Product --</option>
+                        ${options}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" min="1" value="1" onchange="updateTotals()" oninput="updateTotals()" class="qty-input">
+                </td>
+                <td>
+                    <span class="item-subtotal">TSh 0</span>
+                </td>
+                <td>
+                    <button class="remove-btn" onclick="removeItemRow('${rowId}')">✕</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            itemCounter++;
+        }
+
+        function removeItemRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) { row.remove(); updateTotals(); }
+        }
+
+        function updateTotals() {
+            const rows = document.querySelectorAll('#itemsBody tr');
+            let totalItems = 0;
+            let totalQuantity = 0;
+            let grandTotal = 0;
+
+            rows.forEach(row => {
+                const select = row.querySelector('.product-select');
+                const qtyInput = row.querySelector('.qty-input');
+                const subtotalEl = row.querySelector('.item-subtotal');
+
+                if (!subtotalEl) return;
+
+                if (select && select.value && PRODUCTS[select.value]) {
+                    const qty = parseInt(qtyInput.value) || 0;
+                    const price = PRODUCTS[select.value];
+                    const subtotal = price * qty;
+
+                    subtotalEl.textContent = 'TSh ' + subtotal.toLocaleString();
+                    totalItems++;
+                    totalQuantity += qty;
+                    grandTotal += subtotal;
+                } else {
+                    subtotalEl.textContent = 'TSh 0';
+                }
+            });
+
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('totalQuantity').textContent = totalQuantity;
+            document.getElementById('grandTotal').textContent = 'TSh ' + grandTotal.toLocaleString();
+        }
+
+        function selectDelivery(label) {
+            document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+            label.classList.add('selected');
+
+            const radio = label.querySelector('input[type="radio"]');
+            radio.checked = true;
+
+            const addressGroup = document.getElementById('deliveryAddressGroup');
+            if (radio.value === 'company') {
+                addressGroup.style.display = 'flex';
+            } else {
+                addressGroup.style.display = 'none';
+            }
+        }
+
+        // ================================================================
+        // PREVIEW ORDER
+        // ================================================================
+        function previewOrder() {
+            const name = document.getElementById('orderName').value.trim();
+            const phoneRaw = document.getElementById('orderPhone').value.trim();
+            const phone = normalizePhone(phoneRaw);
+            const email = document.getElementById('orderEmail').value.trim();
+            const region = document.getElementById('orderRegion').value;
+            const district = document.getElementById('orderDistrict').value;
+            const deliveryAddress = document.getElementById('orderDeliveryAddress').value.trim();
+            const expectedDate = document.getElementById('orderExpectedDate').value;
+            const timeSlot = document.getElementById('orderTimeSlot').value;
+            const notes = document.getElementById('orderNotes').value.trim();
+            const deliveryType = document.querySelector('input[name="deliveryType"]:checked');
+
+            if (!name) { cpToast('Missing Info', 'Please enter your Full Name.', 'warning'); return; }
+            if (!phone) { cpToast('Missing Info', 'Please enter your Phone Number.', 'warning'); return; }
+            if (!email) { cpToast('Missing Info', 'Please enter your Email.', 'warning'); return; }
+            if (!region) { cpToast('Missing Info', 'Please select Region.', 'warning'); return; }
+            if (!district) { cpToast('Missing Info', 'Please select District.', 'warning'); return; }
+            if (!deliveryType) { cpToast('Missing Info', 'Please select a Delivery Type.', 'warning'); return; }
+            if (deliveryType.value === 'company' && !deliveryAddress) {
+                cpToast('Missing Info', 'Please provide the Site Address for company delivery.', 'warning'); return;
+            }
+
+            const rows = document.querySelectorAll('#itemsBody tr');
+            const items = [];
+
+            rows.forEach(row => {
+                const select = row.querySelector('.product-select');
+                const qtyInput = row.querySelector('.qty-input');
+
+                if (select && select.value && PRODUCTS[select.value]) {
+                    const qty = parseInt(qtyInput.value) || 0;
+                    if (qty > 0) {
+                        items.push({
+                            productName: select.value,
+                            unitPrice: PRODUCTS[select.value],
+                            quantity: qty,
+                            subtotal: PRODUCTS[select.value] * qty
+                        });
+                    }
+                }
+            });
+
+            if (items.length === 0) {
+                cpToast('Missing Products', 'Please add at least one product.', 'warning'); return;
+            }
+
+            const totalItems = items.length;
+            const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
+            const grandTotal = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+            const itemsHtml = items.map(item => `
+                <div class="preview-item-row">
+                    <span class="preview-item-name">
+                        <span class="preview-item-qty">${item.quantity}×</span>
+                        ${item.productName}
+                    </span>
+                    <span class="preview-item-price">TSh ${item.subtotal.toLocaleString()}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('previewBody').innerHTML = `
+                <div class="preview-section">
+                    <div class="preview-section-title">👤 Customer Information</div>
+                    <div class="preview-info-grid">
+                        <div class="preview-info-item">
+                            <div class="preview-info-label">Full Name</div>
+                            <div class="preview-info-value">${name}</div>
+                        </div>
+                        <div class="preview-info-item">
+                            <div class="preview-info-label">Phone Number</div>
+                            <div class="preview-info-value">${phone}</div>
+                        </div>
+                        <div class="preview-info-item">
+                            <div class="preview-info-label">Email</div>
+                            <div class="preview-info-value">${email}</div>
+                        </div>
+                        <div class="preview-info-item">
+                            <div class="preview-info-label">Location</div>
+                            <div class="preview-info-value">${district}, ${region}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-section-title">🚚 Delivery Details</div>
+                    <div class="preview-info-grid">
+                        <div class="preview-info-item ${deliveryType.value === 'company' ? '' : 'full'}">
+                            <div class="preview-info-label">Delivery Type</div>
+                            <div class="preview-info-value">
+                                ${deliveryType.value === 'company' ? '🚚 Company Delivery' : '🚗 Self Pickup'}
+                            </div>
+                        </div>
+                        ${deliveryType.value === 'company' ? `
+                            <div class="preview-info-item full">
+                                <div class="preview-info-label">Site Address</div>
+                                <div class="preview-info-value">${deliveryAddress}</div>
+                            </div>
+                        ` : ''}
+                        ${expectedDate ? `
+                            <div class="preview-info-item">
+                                <div class="preview-info-label">Expected Date</div>
+                                <div class="preview-info-value">${new Date(expectedDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                            </div>
+                        ` : ''}
+                        ${timeSlot ? `
+                            <div class="preview-info-item">
+                                <div class="preview-info-label">Preferred Time</div>
+                                <div class="preview-info-value">${timeSlot}</div>
+                            </div>
+                        ` : ''}
+                        ${notes ? `
+                            <div class="preview-info-item full">
+                                <div class="preview-info-label">Additional Notes</div>
+                                <div class="preview-info-value">${notes}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-section-title">🛒 Order Items (${totalItems} products, ${totalQuantity} items)</div>
+                    <div class="preview-items-list">
+                        ${itemsHtml}
+                    </div>
+                    <div class="preview-grand-total">
+                        <span class="label">Grand Total</span>
+                        <span class="amount">TSh ${grandTotal.toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('previewModal').classList.add('show');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+        async function confirmAndSubmitOrder() {
+            const btn = document.getElementById('previewConfirmBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ Submitting your order...';
+            }
+
+            try {
+                const name = document.getElementById('orderName').value.trim();
+                const phoneRaw = document.getElementById('orderPhone').value.trim();
+                const phone = normalizePhone(phoneRaw);
+                const email = document.getElementById('orderEmail').value.trim();
+                const region = document.getElementById('orderRegion').value;
+                const district = document.getElementById('orderDistrict').value;
+                const deliveryAddress = document.getElementById('orderDeliveryAddress').value.trim();
+                const expectedDate = document.getElementById('orderExpectedDate').value;
+                const timeSlot = document.getElementById('orderTimeSlot').value;
+                const notes = document.getElementById('orderNotes').value.trim();
+                const deliveryType = document.querySelector('input[name="deliveryType"]:checked');
+
+                const rows = document.querySelectorAll('#itemsBody tr');
+                const items = [];
+
+                rows.forEach(row => {
+                    const select = row.querySelector('.product-select');
+                    const qtyInput = row.querySelector('.qty-input');
+
+                    if (select && select.value && PRODUCTS[select.value]) {
+                        const qty = parseInt(qtyInput.value) || 0;
+                        if (qty > 0) {
+                            items.push({
+                                productName: select.value,
+                                unitPrice: PRODUCTS[select.value],
+                                quantity: qty
+                            });
+                        }
+                    }
+                });
+
+                const response = await fetch('http://localhost:5000/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerName: name,
+                        phone,
+                        email,
+                        region,
+                        district,
+                        deliveryAddress: deliveryAddress || 'Self Pickup',
+                        deliveryType: deliveryType.value === 'company' ? 'Company Delivery' : 'Self Pickup',
+                        expectedDate: expectedDate || null,
+                        timeSlot: timeSlot || null,
+                        notes: notes || null,
+                        items,
+                        source: 'Customer Portal'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || 'Failed to submit order');
+                }
+
+                const data = await response.json();
+                const trackingId = data.order.orderId;
+
+                closePreviewModal();
+
+                document.getElementById('generatedTrackingId').textContent = trackingId;
+                document.getElementById('notifyEmail').textContent = email;
+                document.getElementById('notifyPhone').textContent = phone;
+                document.getElementById('successModal').classList.add('show');
+
+                resetForm();
+            } catch (err) {
+                console.error('Submit order error:', err);
+                cpToast('Submission Failed', err.message + '. Please try again.', 'error', 6000);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '✅ Confirm & Submit Order';
+                }
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('orderName').value = '';
+            document.getElementById('orderPhone').value = '';
+            document.getElementById('orderEmail').value = '';
+            document.getElementById('orderRegion').value = '';
+            document.getElementById('orderDistrict').innerHTML = '<option value="">-- Select District --</option>';
+            document.getElementById('orderDeliveryAddress').value = '';
+            document.getElementById('orderExpectedDate').value = '';
+            document.getElementById('orderTimeSlot').value = '';
+            document.getElementById('orderNotes').value = '';
+            document.getElementById('itemsBody').innerHTML = '';
+            document.querySelectorAll('input[name="deliveryType"]').forEach(r => r.checked = false);
+            document.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+            itemCounter = Date.now();
+            addItemRow();
+            updateTotals();
+        }
+
+        function closeSuccessModal() { document.getElementById('successModal').classList.remove('show'); }
+        function showTrackFromModal() { closeSuccessModal(); showTrackSection(); }
+
+        function showTrackSection() {
+            document.getElementById('trackSection').classList.add('show');
+            document.getElementById('placeOrderSection').classList.remove('show');
+            document.getElementById('trackSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showPlaceOrderSection() {
+            document.getElementById('placeOrderSection').classList.add('show');
+            document.getElementById('trackSection').classList.remove('show');
+            document.getElementById('placeOrderSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        async function trackOrder(event) {
+            event.preventDefault();
+
+            const trackingId = document.getElementById('trackId').value.trim().toUpperCase();
+            const phone = document.getElementById('trackPhone')?.value.trim() || null;
+
+            if (!trackingId) { cpToast('Missing Info', 'Please enter Tracking ID.', 'warning'); return false; }
+
+            const resultDiv = document.getElementById('trackResult');
+            if (resultDiv) {
+                resultDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="display: inline-block; width: 44px; height: 44px; border: 4px solid #e5e7eb; border-top-color: #0f766e; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                        <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+                        <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 600;">⏳ Searching for order...</div>
+                    </div>
+                `;
+                resultDiv.classList.add('show');
+            }
+
+            try {
+                let url = 'http://localhost:5000/api/orders/track/' + encodeURIComponent(trackingId);
+                if (phone) url += '?phone=' + encodeURIComponent(phone);
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || 'Order not found');
+                }
+
+                const order = await response.json();
+                showTrackResult(order);
+
+            } catch (err) {
+                if (resultDiv) {
+                    resultDiv.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px; color: #ef4444;">
+                            <div style="font-size: 40px; margin-bottom: 12px;">❌</div>
+                            <div style="font-weight: 700; margin-bottom: 6px;">Order Not Found</div>
+                            <div style="font-size: 13px; color: #94a3b8;">${err.message}. Please check the Tracking ID.</div>
+                        </div>
+                    `;
+                }
+            }
+
+            return false;
+        }
+
+        function populateRegions() {
+            const regionSelect = document.getElementById('orderRegion');
+            const regions = Object.keys(TANZANIA_REGIONS).sort();
+
+            regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region;
+                option.textContent = region;
+                regionSelect.appendChild(option);
+            });
+        }
+
+        function updateDistricts() {
+            const regionSelect = document.getElementById('orderRegion');
+            const districtSelect = document.getElementById('orderDistrict');
+            const selectedRegion = regionSelect.value;
+
+            districtSelect.innerHTML = '<option value="">-- Select District --</option>';
+
+            if (selectedRegion && TANZANIA_REGIONS[selectedRegion]) {
+                TANZANIA_REGIONS[selectedRegion].sort().forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+            }
+        }
+        function showTrackResult(order) {
+            const resultDiv = document.getElementById('trackResult');
+            if (!resultDiv) return;
+
+            const statusColors = {
+                'pending': '#f59e0b',
+                'ready-for-finance': '#14b8a6',
+                'awaiting-payment': '#f59e0b',
+                'postpaid-approved': '#4f46e5',
+                'paid': '#0f766e',
+                'delivered': '#0f766e',
+                'completed': '#134e4a',
+                'rejected': '#ef4444'
+            };
+            const statusText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1).replace(/-/g, ' ');
+            const statusColor = statusColors[order.status] || '#f59e0b';
+
+            const itemsHtml = (order.items || []).map(item => `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-200); font-size: 13px;">
+                    <span>${item.productName} × ${item.quantity}</span>
+                    <strong>TSh ${Number(item.subtotal || 0).toLocaleString()}</strong>
+                </div>
+            `).join('');
+
+            const statusSteps = ['pending', 'ready-for-finance', 'awaiting-payment', 'paid', 'delivered', 'completed'];
+            const currentIndex = statusSteps.indexOf(order.status);
+
+            const timelineSteps = [
+                { step: 'Order Received' },
+                { step: 'Processing' },
+                { step: 'Awaiting Payment' },
+                { step: 'Paid' },
+                { step: 'Delivered' },
+                { step: 'Completed' }
+            ];
+
+            const timelineHtml = timelineSteps.map((s, index) => {
+                let className = 'timeline-step';
+                if (index < currentIndex) className += ' completed';
+                if (index === currentIndex) className += ' active';
+
+                return `
+                    <div class="${className}">
+                        <div class="step-circle">${index < currentIndex ? '✓' : (index + 1)}</div>
+                        <div class="step-label">${s.step}</div>
+                    </div>
+                `;
+            }).join('');
+
+            let paymentHtml = '';
+            if (order.status === 'awaiting-payment' && order.paymentAccount) {
+                paymentHtml = `
+                    <div class="payment-instructions" style="margin-top: 20px;">
+                        <div class="instruction-title">💳 How to Make Payment</div>
+                        <div class="instruction-step">
+                            <span class="step-number">1</span>
+                            <span>Pay <strong>TSh ${Number(order.totalAmount || 0).toLocaleString()}</strong> using the account below:</span>
+                        </div>
+                        <div class="payment-info-box">
+                            <div class="info-label">${order.paymentAccount.type === 'Bank' ? '🏦 Bank Transfer' : '📱 Mobile Money'} — ${order.paymentAccount.name}</div>
+                            <div class="info-value">${order.paymentAccount.accountNumber}</div>
+                            <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Account Name: ${order.paymentAccount.accountName}</div>
+                            ${order.paymentAccount.branch ? `<div style="font-size:11px;color:var(--gray-500);">Branch: ${order.paymentAccount.branch}</div>` : ''}
+                        </div>
+                        ${order.paymentInstructions ? `
+                        <div class="instruction-step">
+                            <span class="step-number">2</span>
+                            <span>${order.paymentInstructions}</span>
+                        </div>` : ''}
+                        <div class="instruction-step">
+                            <span class="step-number">3</span>
+                            <span>Include your <strong>Tracking ID</strong> in the payment details: <strong>${order.orderId}</strong></span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let receiptHtml = '';
+            if (order.receiptNumber) {
+                receiptHtml = `
+                    <div class="receipt-box">
+                        <div>
+                            <div class="rb-label">🧾 Receipt Issued</div>
+                            <div class="rb-number">${order.receiptNumber}</div>
+                        </div>
+                        <button class="rb-btn" onclick="downloadCustomerReceipt('${order.orderId}')">📥 Download Receipt</button>
+                    </div>
+                `;
+            }
+
+            let deliveryConfirmHtml = '';
+            const canConfirm = (order.status === 'delivered' || order.status === 'paid') && !order.deliveryConfirmed;
+
+            if (canConfirm) {
+                deliveryConfirmHtml = `
+                    <div class="delivery-confirm-box">
+                        <div class="dc-header">
+                            <div class="dc-icon">📦</div>
+                            <div>
+                                <div class="dc-title">Verify Delivery Received</div>
+                                <div class="dc-sub">Please confirm you have received your order</div>
+                            </div>
+                        </div>
+                        <div class="dc-warning">
+                            <strong style="color: #d97706;">⚠️ Important:</strong><br>
+                            By clicking the button below, you confirm that you have received your order in <strong>good condition</strong> and you are satisfied with the delivery. This action <strong>cannot be undone</strong>.
+                        </div>
+                        <button class="dc-btn" onclick="confirmDeliveryReceived('${order.orderId}')">
+                            ✅ Yes, I Received My Order in Good Condition
+                        </button>
+                    </div>
+                `;
+            }
+
+            if (order.deliveryConfirmed) {
+                const confirmedDate = order.deliveryConfirmedAt ? new Date(order.deliveryConfirmedAt).toLocaleString('en-GB', {
+                    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : '—';
+
+                deliveryConfirmHtml = `
+                    <div class="delivery-confirmed-box">
+                        <div class="dcc-icon">✅</div>
+                        <div>
+                            <div class="dcc-title">Delivery Confirmed</div>
+                            <div class="dcc-sub">Thank you! Order completed on ${confirmedDate}</div>
+                            <div class="dcc-note">Your order is now officially completed.</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    <h3>📦 Order: ${order.orderId}</h3>
+                    <span class="status-badge" style="background: ${statusColor}; color: white;">${statusText.toUpperCase()}</span>
+                </div>
+                <div class="result-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="label">Customer Name</div>
+                            <div class="value">${order.customerName || '—'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Phone Number</div>
+                            <div class="value">${order.phone || '—'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Delivery Type</div>
+                            <div class="value">${order.deliveryType || '—'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Site Address</div>
+                            <div class="value">${order.deliveryAddress || '—'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Submitted On</div>
+                            <div class="value">${order.createdAt ? new Date(order.createdAt).toLocaleString() : '—'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Grand Total</div>
+                            <div class="value" style="color: var(--accent); font-size: 16px;">TSh ${Number(order.totalAmount || 0).toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 14px; font-weight: 700; color: var(--primary-dark); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">🛒 Ordered Products</h4>
+                    <div style="background: var(--gray-100); border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;">
+                        ${itemsHtml || '<div style="text-align:center;padding:10px;color:#94a3b8;">No items</div>'}
+                        <div style="display: flex; justify-content: space-between; padding-top: 10px; margin-top: 6px; border-top: 2px solid var(--gray-300); font-weight: 800; color: var(--primary-dark);">
+                            <span>GRAND TOTAL</span>
+                            <span>TSh ${Number(order.totalAmount || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 14px; font-weight: 700; color: var(--primary-dark); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">📍 Order Progress</h4>
+                    <div class="timeline-steps">
+                        ${timelineHtml}
+                    </div>
+
+                    ${paymentHtml}
+                    ${receiptHtml}
+                    ${deliveryConfirmHtml}
+                </div>
+            `;
+
+            resultDiv.classList.add('show');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        async function confirmDeliveryReceived(orderId) {
+            const step1 = await cpConfirm({
+                title: '📦 Confirm Delivery?',
+                message: 'Are you sure you have received your order in GOOD CONDITION?',
+                detail: {
+                    label: 'Order ID',
+                    value: orderId
+                },
+                checklist: [
+                    'You have received the order',
+                    'All items are in good condition',
+                    'You are satisfied with the delivery'
+                ],
+                warn: '⚠️ <strong>Important:</strong> This action <strong>CANNOT be undone</strong>. Once confirmed, your order will be marked as COMPLETED.',
+                type: 'primary',
+                okText: '✅ Yes, I Received It',
+                cancelText: 'Not Yet'
+            });
+
+            if (!step1.confirmed) return;
+
+            const step2 = await cpConfirm({
+                title: '🔒 Final Confirmation',
+                message: 'This is the last step. Please confirm one more time.',
+                detail: {
+                    label: 'Order',
+                    value: orderId
+                },
+                warn: '⚠️ <strong>Cannot be undone.</strong> Are you absolutely sure you received everything correctly?',
+                type: 'success',
+                okText: '🔒 Yes, Confirm Delivery',
+                cancelText: 'Cancel'
+            });
+
+            if (!step2.confirmed) return;
+
+            const buttons = document.querySelectorAll('button');
+            let confirmBtn = null;
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('Yes, I Received My Order')) {
+                    confirmBtn = btn;
+                }
+            });
+
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.6';
+                confirmBtn.style.cursor = 'not-allowed';
+                confirmBtn.textContent = '⏳ Confirming delivery...';
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/orders/' + orderId + '/confirm-delivery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        confirmedBy: 'Customer',
+                        confirmedAt: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to confirm delivery');
+                }
+
+                const data = await response.json();
+
+                showDeliverySuccessModal({
+                    orderId: orderId,
+                    receiptNumber: data.order?.receiptNumber || '—',
+                    confirmedAt: new Date().toLocaleString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    })
+                });
+
+                const trackId = document.getElementById('trackId').value.trim().toUpperCase();
+                if (trackId) {
+                    const fakeEvent = { preventDefault: () => {} };
+                    await trackOrder(fakeEvent);
+                }
+
+            } catch (err) {
+                console.error('Confirm delivery error:', err);
+                cpToast('Failed', err.message + '. Please try again or contact support.', 'error', 6000);
+
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.opacity = '1';
+                    confirmBtn.style.cursor = 'pointer';
+                    confirmBtn.textContent = '✅ Yes, I Received My Order in Good Condition';
+                }
+            }
+        }
+
+        function showDeliverySuccessModal(data) {
+            document.getElementById('dsReceiptNumber').textContent = data.receiptNumber;
+            document.getElementById('dsOrderId').textContent = data.orderId;
+            document.getElementById('dsConfirmedAt').textContent = data.confirmedAt;
+
+            document.getElementById('deliverySuccessModal').classList.add('show');
+        }
+
+        function closeDeliverySuccess() {
+            document.getElementById('deliverySuccessModal').classList.remove('show');
+        }
+
+        function viewOrderAfterConfirm() {
+            closeDeliverySuccess();
+            const trackId = document.getElementById('trackId').value.trim().toUpperCase();
+            if (trackId) {
+                const fakeEvent = { preventDefault: () => {} };
+                trackOrder(fakeEvent);
+            }
+        }
+        async function downloadCustomerReceipt(orderId) {
+            try {
+                console.log('📥 Downloading receipt for:', orderId);
+
+                const response = await fetch('http://localhost:5000/api/orders/track/' + orderId);
+                if (!response.ok) throw new Error('Order not found');
+
+                const order = await response.json();
+                console.log('✅ Order loaded:', order);
+
+                if (typeof showReceiptModal === 'function') {
+                    console.log('✅ Using showReceiptModal from receipt.js');
+                    showReceiptModal(order);
+                    return;
+                }
+
+                console.warn('⚠️ showReceiptModal not found, using fallback');
+                const printWindow = window.open('', '_blank', 'width=900,height=1000');
+                if (!printWindow) {
+                    cpToast('Popup Blocked', 'Please allow popups to view the receipt.', 'warning');
+                    return;
+                }
+
+                const itemsHtml = (order.items || []).map(item => 
+                    '<tr style="border-bottom:1px solid #e2e8f0;">' +
+                    '<td style="padding:10px;">' + (item.productName || '') + '</td>' +
+                    '<td style="padding:10px;text-align:center;">' + item.quantity + '</td>' +
+                    '<td style="padding:10px;text-align:right;">TSh ' + Number(item.subtotal || 0).toLocaleString() + '</td>' +
+                    '</tr>'
+                ).join('');
+
+                const html = '<!DOCTYPE html>' +
+                    '<html>' +
+                    '<head>' +
+                    '<title>Receipt ' + (order.receiptNumber || orderId) + '<\/title>' +
+                    '<style>' +
+                    'body{font-family:Arial,sans-serif;padding:40px;background:white;}' +
+                    '.header{border-bottom:3px solid #0f766e;padding-bottom:20px;margin-bottom:20px;}' +
+                    '.header h1{color:#0f766e;margin:0;}' +
+                    '.header p{color:#64748b;margin:5px 0;}' +
+                    '.info{margin-bottom:20px;}' +
+                    '.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;}' +
+                    'table{width:100%;border-collapse:collapse;margin:20px 0;}' +
+                    'th{background:#0f766e;color:white;padding:12px;text-align:left;}' +
+                    '.total{background:#fef9e7;padding:16px;font-weight:900;color:#0f766e;font-size:18px;text-align:right;border-radius:10px;}' +
+                    '<\/style>' +
+                    '<\/head>' +
+                    '<body>' +
+                    '<div class="header">' +
+                    '<h1>MAK DC Investment Company LTD</h1>' +
+                    '<p>Official Payment Receipt</p>' +
+                    '<p style="font-family:monospace;font-weight:800;color:#c6a12a;">' + (order.receiptNumber || '—') + '</p>' +
+                    '<\/div>' +
+                    '<div class="info">' +
+                    '<div class="info-row"><span>Customer:</span><strong>' + (order.customerName || '—') + '<\/strong><\/div>' +
+                    '<div class="info-row"><span>Phone:</span><strong>' + (order.phone || '—') + '<\/strong><\/div>' +
+                    '<div class="info-row"><span>Order ID:</span><strong>' + (order.orderId || '—') + '<\/strong><\/div>' +
+                    '<div class="info-row"><span>Date:</span><strong>' + new Date().toLocaleString() + '<\/strong><\/div>' +
+                    '<\/div>' +
+                    '<table>' +
+                    '<thead><tr><th>Product</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Subtotal</th></tr></thead>' +
+                    '<tbody>' + itemsHtml + '<\/tbody>' +
+                    '<\/table>' +
+                    '<div class="total">TOTAL: TSh ' + Number(order.totalAmount || 0).toLocaleString() + '<\/div>' +
+                    '<p style="text-align:center;color:#94a3b8;margin-top:40px;font-size:12px;">Thank you for your business!<\/p>' +
+                    '<\/body>' +
+                    '<\/html>';
+
+                printWindow.document.write(html);
+                printWindow.document.close();
+
+                setTimeout(() => printWindow.print(), 500);
+
+            } catch (err) {
+                console.error('❌ Download receipt error:', err);
+                cpToast('Failed', err.message, 'error', 6000);
+            }
+        }
+        let cpConfirmCallback = null;
+
+        function cpConfirm(opts = {}) {
+            return new Promise((resolve) => {
+                const {
+                    title = 'Confirm?',
+                    message = 'Are you sure?',
+                    detail = null,
+                    warn = null,
+                    checklist = null,
+                    type = 'primary',
+                    okText = 'Confirm',
+                    cancelText = 'Cancel'
+                } = opts;
+
+                document.getElementById('cpConfirmTitle').textContent = title;
+                document.getElementById('cpConfirmMsg').textContent = message;
+
+                const iconEl = document.getElementById('cpConfirmIcon');
+                const emojiEl = document.getElementById('cpConfirmIconEmoji');
+                const banners = { primary: '📋', danger: '⚠️', success: '✅', warning: '⏳', info: 'ℹ️' };
+                const iconTypes = { primary: 'primary', danger: 'danger', success: 'success', warning: 'warning', info: 'info' };
+                iconEl.className = 'cp-confirm-icon ' + (iconTypes[type] || 'primary');
+                emojiEl.textContent = banners[type] || '📋';
+
+                const bannerEl = document.getElementById('cpConfirmBanner');
+                bannerEl.className = 'cp-confirm-banner ' + (type === 'primary' ? '' : type);
+
+                const detailEl = document.getElementById('cpConfirmDetail');
+                if (detail) {
+                    detailEl.innerHTML = `
+                        <div class="cp-confirm-detail">
+                            <span class="cd-label">${detail.label || 'Details'}</span>
+                            <span class="cd-value">${detail.value || ''}</span>
+                        </div>
+                    `;
+                } else {
+                    detailEl.innerHTML = '';
+                }
+
+                const checklistEl = document.getElementById('cpConfirmChecklist');
+                if (checklist && checklist.length > 0) {
+                    checklistEl.innerHTML = `
+                        <div class="cp-confirm-checklist">
+                            <div class="cp-confirm-checklist-title">By confirming, you agree that:</div>
+                            ${checklist.map(item => `
+                                <div class="cp-confirm-checklist-item">
+                                    <span class="check-icon">✓</span>
+                                    <span>${item}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    checklistEl.innerHTML = '';
+                }
+
+                const warnEl = document.getElementById('cpConfirmWarn');
+                if (warn) {
+                    warnEl.innerHTML = `<div class="cp-confirm-warn-box">${warn}</div>`;
+                } else {
+                    warnEl.innerHTML = '';
+                }
+
+                const okBtn = document.getElementById('cpConfirmOkBtn');
+                const cancelBtn = document.getElementById('cpConfirmCancelBtn');
+                okBtn.textContent = okText;
+                cancelBtn.textContent = cancelText;
+
+                const btnClass = {
+                    primary: 'cp-btn-confirm-primary',
+                    danger: 'cp-btn-confirm-danger',
+                    success: 'cp-btn-confirm-success',
+                    warning: 'cp-btn-confirm-primary',
+                    info: 'cp-btn-confirm-primary'
+                };
+                okBtn.className = btnClass[type] || 'cp-btn-confirm-primary';
+
+                cpConfirmCallback = resolve;
+                document.getElementById('cpConfirmOverlay').classList.add('show');
+            });
+        }
+
+        function cpConfirmOk() {
+            document.getElementById('cpConfirmOverlay').classList.remove('show');
+            const cb = cpConfirmCallback;
+            cpConfirmCallback = null;
+            if (cb) cb({ confirmed: true });
+        }
+
+        function cpConfirmCancel() {
+            document.getElementById('cpConfirmOverlay').classList.remove('show');
+            const cb = cpConfirmCallback;
+            cpConfirmCallback = null;
+            if (cb) cb({ confirmed: false });
+        }
+        function cpToast(title, message, type = 'success', duration = 4000) {
+            const container = document.getElementById('cpToastContainer');
+            if (!container) return;
+
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+
+            const el = document.createElement('div');
+            el.className = `cp-toast ${type}`;
+            el.innerHTML = `
+                <div class="cp-toast-icon">${icons[type] || '✅'}</div>
+                <div class="cp-toast-content">
+                    <div class="cp-toast-title">${title}</div>
+                    <div class="cp-toast-msg">${message}</div>
+                </div>
+                <button class="cp-toast-close" onclick="this.closest('.cp-toast').remove()">✕</button>
+                <div class="cp-toast-progress"></div>
+            `;
+            container.appendChild(el);
+
+            setTimeout(() => el.classList.add('show'), 10);
+            setTimeout(() => {
+                el.classList.remove('show');
+                setTimeout(() => el.remove(), 400);
+            }, duration);
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const previewModal = document.getElementById('previewModal');
+                if (previewModal && previewModal.classList.contains('show')) {
+                    closePreviewModal();
+                }
+                const successModal = document.getElementById('successModal');
+                if (successModal && successModal.classList.contains('show')) {
+                    closeSuccessModal();
+                }
+                const confirmOverlay = document.getElementById('cpConfirmOverlay');
+                if (confirmOverlay && confirmOverlay.classList.contains('show')) {
+                    cpConfirmCancel();
+                }
+                const deliverySuccess = document.getElementById('deliverySuccessModal');
+                if (deliverySuccess && deliverySuccess.classList.contains('show')) {
+                    closeDeliverySuccess();
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProductsFromAPI();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const trackId = urlParams.get('track');
+            const productName = urlParams.get('product');
+
+            if (trackId) {
+                showTrackSection();
+                document.getElementById('trackId').value = trackId;
+            }
+
+            if (productName) {
+                showPlaceOrderSection();
+            }
+
+            populateRegions();
+            addItemRow();
+
+            if (productName) {
+                setTimeout(() => {
+                    const firstSelect = document.querySelector('#itemsBody .product-select');
+                    if (firstSelect) {
+                        firstSelect.value = productName;
+                        updateTotals();
+                    }
+                }, 100);
+            }
+        });
+    </script>
+    <script src="assets/js/ui/receipt.js"></script>
+
+</body>
+</html>

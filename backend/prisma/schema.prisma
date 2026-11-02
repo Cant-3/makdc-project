@@ -1,0 +1,942 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  employeeId   String?   @unique @map("employee_id")
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  fullName     String    @map("full_name")
+  role         String
+  department   String?
+  phone        String?
+  profilePic   String?   @map("profile_pic")
+  status       String    @default("Active")
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  title        String?
+
+  rawReceipts       RawMaterialReceipt[] @relation("RawReceipts")
+  productionBatches ProductionBatch[]    @relation("ProductionBatches")
+
+  // 🆕 Ongeza hii kwa ajili ya QC
+  qcInspections ProductionBatch[] @relation("QCInspector")
+
+  auditLogs                    AuditLog[]
+  accountsApproved             CompanyAccount[]    @relation("AccountApprover")
+  accountsRequested            CompanyAccount[]    @relation("AccountRequester")
+  marketResearch               MarketResearch[]    @relation("ResearchCreator")
+  marketingActivitiesAssigned  MarketingActivity[] @relation("ActivityAssignee")
+  marketingActivitiesCompleted MarketingActivity[] @relation("ActivityCompleter")
+  marketingPlans               MarketingPlan[]     @relation("MarketingPlanCreator")
+  notifications                Notification[]
+  ordersCreated                Order[]             @relation("OrderCreator")
+  ordersDelivered              Order[]             @relation("OrderDeliverer")
+  ordersVerifiedPayment        Order[]             @relation("OrderPaymentVerifier")
+  ordersPostpaidApproved       Order[]             @relation("OrderPostpaidApprover")
+  receiptsIssued               Order[]             @relation("ReceiptIssuer")
+  ordersReviewedBySales        Order[]             @relation("SalesReviewer")
+  payments                     Payment[]           @relation("PaymentVerifier")
+  reportsSent                  ReportSent[]        @relation("ReportSender")
+
+  @@map("users")
+}
+
+model SiteContent {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  category  String?
+  updatedBy Int?     @map("updated_by")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("site_content")
+}
+
+model Order {
+  id                  Int             @id @default(autoincrement())
+  orderId             String          @unique @map("order_id")
+  customerName        String?         @map("customer_name")
+  phone               String?
+  email               String?
+  region              String?
+  district            String?
+  deliveryAddress     String?         @map("delivery_address")
+  deliveryType        String?         @map("delivery_type")
+  expectedDate        DateTime?       @map("expected_date")
+  timeSlot            String?         @map("time_slot")
+  notes               String?
+  totalAmount         Decimal         @map("total_amount") @db.Decimal(15, 2)
+  totalItems          Int             @default(0) @map("total_items")
+  totalQuantity       Int             @default(0) @map("total_quantity")
+  status              String          @default("pending")
+  source              String?
+  createdBy           Int?            @map("created_by")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  deliveredAt         DateTime?       @map("delivered_at")
+  deliveredBy         Int?            @map("delivered_by")
+  deliveryDate        DateTime?       @map("delivery_date")
+  deliveryInfo        String?         @map("delivery_info")
+  paymentAccountId    Int?            @map("payment_account_id")
+  paymentDeadline     DateTime?       @map("payment_deadline")
+  paymentInstructions String?         @map("payment_instructions")
+  paymentReference    String?         @map("payment_reference")
+  paymentType         String?         @map("payment_type")
+  paymentVerifiedAt   DateTime?       @map("payment_verified_at")
+  paymentVerifiedBy   Int?            @map("payment_verified_by")
+  postpaidApprovedAt  DateTime?       @map("postpaid_approved_at")
+  postpaidApprovedBy  Int?            @map("postpaid_approved_by")
+  receiptIssuedAt     DateTime?       @map("receipt_issued_at")
+  receiptIssuedBy     Int?            @map("receipt_issued_by")
+  receiptNumber       String?         @unique @map("receipt_number")
+  reviewedAtSales     DateTime?       @map("reviewed_at_sales")
+  reviewedBySales     Int?            @map("reviewed_by_sales")
+  salesReviewNotes    String?         @map("sales_review_notes")
+  completedAt         DateTime?       @map("completed_at")
+  deliveryConfirmed   Boolean         @default(false) @map("delivery_confirmed")
+  deliveryConfirmedAt DateTime?       @map("delivery_confirmed_at")
+  deliveryConfirmedBy String?         @map("delivery_confirmed_by")
+  marketingPlanId     Int?            @map("marketing_plan_id")
+  items               OrderItem[]
+  creator             User?           @relation("OrderCreator", fields: [createdBy], references: [id])
+  deliverer           User?           @relation("OrderDeliverer", fields: [deliveredBy], references: [id])
+  marketingPlan       MarketingPlan?  @relation(fields: [marketingPlanId], references: [id])
+  paymentAccount      CompanyAccount? @relation(fields: [paymentAccountId], references: [id])
+  paymentVerifier     User?           @relation("OrderPaymentVerifier", fields: [paymentVerifiedBy], references: [id])
+  postpaidApprover    User?           @relation("OrderPostpaidApprover", fields: [postpaidApprovedBy], references: [id])
+  receiptIssuer       User?           @relation("ReceiptIssuer", fields: [receiptIssuedBy], references: [id])
+  salesReviewer       User?           @relation("SalesReviewer", fields: [reviewedBySales], references: [id])
+  payments            Payment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int     @map("order_id")
+  productName String  @map("product_name")
+  unitPrice   Decimal @map("unit_price") @db.Decimal(15, 2)
+  quantity    Int
+  subtotal    Decimal @db.Decimal(15, 2)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model Payment {
+  id               Int       @id @default(autoincrement())
+  orderId          String    @map("order_id")
+  amount           Decimal   @db.Decimal(15, 2)
+  paymentType      String?   @map("payment_type")
+  paymentMethod    String?   @map("payment_method")
+  paymentReference String?   @map("payment_reference")
+  status           String    @default("pending")
+  verifiedBy       Int?      @map("verified_by")
+  verifiedAt       DateTime? @map("verified_at")
+  receiptNumber    String?   @unique @map("receipt_number")
+  rejectionReason  String?   @map("rejection_reason")
+  notes            String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  order            Order     @relation(fields: [orderId], references: [orderId])
+  verifier         User?     @relation("PaymentVerifier", fields: [verifiedBy], references: [id])
+
+  @@map("payments")
+}
+
+model Employee {
+  id             Int       @id @default(autoincrement())
+  employeeId     String    @unique @map("employee_id")
+  fullName       String    @map("full_name")
+  position       String
+  department     String
+  basicSalary    Decimal   @map("basic_salary") @db.Decimal(15, 2)
+  allowances     Decimal   @default(0) @db.Decimal(15, 2)
+  paymentMode    String?   @map("payment_mode")
+  bankAccount    String?   @map("bank_account")
+  tin            String?
+  employmentType String?   @map("employment_type")
+  joinDate       DateTime? @map("join_date")
+  status         String    @default("Active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("employees")
+}
+
+model Contract {
+  id          Int       @id @default(autoincrement())
+  contractId  String    @unique @map("contract_id")
+  type        String
+  party       String
+  value       Decimal?  @db.Decimal(15, 2)
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  details     String?
+  status      String    @default("pending-review")
+  reviewNotes String?   @map("review_notes")
+  reviewedBy  Int?      @map("reviewed_by")
+  reviewedAt  DateTime? @map("reviewed_at")
+  signedBy    Int?      @map("signed_by")
+  signedAt    DateTime? @map("signed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("contracts")
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?     @map("user_id")
+  action     String
+  entityType String?  @map("entity_type")
+  entityId   String?  @map("entity_id")
+  details    Json?
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model ReportSent {
+  id         Int      @id @default(autoincrement())
+  reportType String   @map("report_type")
+  subject    String
+  message    String
+  sentBy     Int      @map("sent_by")
+  sentTo     String   @map("sent_to")
+  status     String   @default("Delivered")
+  sentAt     DateTime @default(now()) @map("sent_at")
+  sender     User     @relation("ReportSender", fields: [sentBy], references: [id])
+
+  @@map("reports_sent")
+}
+
+model Leadership {
+  id        Int      @id @default(autoincrement())
+  fullName  String   @map("full_name")
+  role      String
+  bio       String?
+  photo     String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  email     String?
+  linkedin  String?
+  phone     String?
+
+  @@map("leadership")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  price       Decimal  @db.Decimal(15, 2)
+  unit        String   @default("per piece")
+  category    String?
+  tag         String?
+  image       String?
+  stock       Int      @default(0)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // 🆕 PRODUCTION FIELDS
+  minStockLevel    Float   @default(0) @map("min_stock_level")
+  availableForSale Boolean @default(false) @map("available_for_sale")
+  damagedStock     Float   @default(0) @map("damaged_stock")
+
+  // 🆕 Relation mpya
+  productionBatches ProductionBatch[]
+
+  @@map("products")
+}
+
+model CompanyAccount {
+  id            Int     @id @default(autoincrement())
+  name          String
+  type          String
+  accountNumber String  @map("account_number")
+  accountName   String  @map("account_name")
+  branch        String?
+  swiftCode     String? @map("swift_code")
+  instructions  String?
+  currency      String  @default("TZS")
+  status        String  @default("draft")
+
+  // 🆕 PURPOSE — Aina ya account
+  purpose String @default("general")
+  // "collections" = makusanyo (CRDB, NMB, M-Pesa)
+  // "operations"  = malipo (Main Cash)
+  // "reserve"     = akiba
+  // "general"     = kawaida
+
+  requestedBy       Int       @map("requested_by")
+  approvedBy        Int?      @map("approved_by")
+  approvedAt        DateTime? @map("approved_at")
+  rejectedBy        String?   @map("rejected_by")
+  rejectedAt        DateTime? @map("rejected_at")
+  rejectionReason   String?   @map("rejection_reason")
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  balance           Decimal   @default(0) @db.Decimal(15, 2)
+  ceoApprovedAt     DateTime? @map("ceo_approved_at")
+  ceoApprovedBy     String?   @map("ceo_approved_by")
+  createdBy         String?   @map("created_by")
+  managerVerifiedAt DateTime? @map("manager_verified_at")
+  managerVerifiedBy String?   @map("manager_verified_by")
+  notes             String?
+  sentToManagerAt   DateTime? @map("sent_to_manager_at")
+  sentToManagerBy   String?   @map("sent_to_manager_by")
+
+  // Relations
+  approver          User?              @relation("AccountApprover", fields: [approvedBy], references: [id])
+  requester         User               @relation("AccountRequester", fields: [requestedBy], references: [id])
+  orders            Order[]
+  financialResource FinancialResource?
+
+  // 🆕 Fund Transfer relations
+  transfersFrom FundTransfer[] @relation("TransferFrom")
+  transfersTo   FundTransfer[] @relation("TransferTo")
+
+  @@map("company_accounts")
+}
+
+model Testimonial {
+  id           Int      @id @default(autoincrement())
+  customerName String   @map("customer_name")
+  role         String?
+  message      String
+  rating       Int      @default(5)
+  photo        String?
+  order        Int      @default(0)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("testimonials")
+}
+
+model News {
+  id             Int      @id @default(autoincrement())
+  title          String
+  slug           String?  @unique
+  category       String   @default("News")
+  excerpt        String?
+  content        String
+  image          String?
+  author         String?
+  publishedAt    DateTime @default(now()) @map("published_at")
+  order          Int      @default(0)
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  attachment     String?
+  attachmentName String?  @map("attachment_name")
+
+  @@map("news")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String?  @unique
+  category    String   @default("Commercial")
+  description String?
+  content     String?
+  image       String?
+  location    String?
+  client      String?
+  year        String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+model HeroSlide {
+  id        Int      @id @default(autoincrement())
+  title     String?
+  subtitle  String?
+  image     String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("hero_slides")
+}
+
+model SiteStat {
+  id        Int      @id @default(autoincrement())
+  label     String
+  value     Int
+  icon      String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_stats")
+}
+
+model MarketingPlan {
+  id               Int                 @id @default(autoincrement())
+  title            String
+  description      String?
+  periodStart      DateTime            @map("period_start")
+  periodEnd        DateTime            @map("period_end")
+  budget           Decimal             @db.Decimal(15, 2)
+  channels         String
+  goals            String?
+  targetAudience   String?             @map("target_audience")
+  status           String              @default("draft")
+  progress         Int                 @default(0)
+  targetCustomers  Int?                @map("target_customers")
+  actualCustomers  Int                 @default(0) @map("actual_customers")
+  targetRevenue    Decimal?            @map("target_revenue") @db.Decimal(15, 2)
+  actualRevenue    Decimal             @default(0) @map("actual_revenue") @db.Decimal(15, 2)
+  targetLeads      Int?                @map("target_leads")
+  actualLeads      Int                 @default(0) @map("actual_leads")
+  createdBy        Int                 @map("created_by")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  activityProgress Int                 @default(0) @map("activity_progress")
+  weightCustomers  Int                 @default(30) @map("weight_customers")
+  weightLeads      Int                 @default(20) @map("weight_leads")
+  weightRevenue    Int                 @default(50) @map("weight_revenue")
+  activities       MarketingActivity[]
+  creator          User                @relation("MarketingPlanCreator", fields: [createdBy], references: [id])
+  orders           Order[]
+
+  @@map("marketing_plans")
+}
+
+model MarketingActivity {
+  id          Int           @id @default(autoincrement())
+  planId      Int           @map("plan_id")
+  title       String
+  description String?
+  assignedTo  Int?          @map("assigned_to")
+  dueDate     DateTime?     @map("due_date")
+  status      String        @default("pending")
+  priority    String        @default("medium")
+  notes       String?
+  order       Int           @default(0)
+  completedAt DateTime?     @map("completed_at")
+  completedBy Int?          @map("completed_by")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  assignee    User?         @relation("ActivityAssignee", fields: [assignedTo], references: [id])
+  completer   User?         @relation("ActivityCompleter", fields: [completedBy], references: [id])
+  plan        MarketingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("marketing_activities")
+}
+
+model MarketResearch {
+  id              Int       @id @default(autoincrement())
+  title           String
+  researchType    String    @map("research_type")
+  description     String?
+  conductedBy     String?   @map("conducted_by")
+  periodStart     DateTime? @map("period_start")
+  periodEnd       DateTime? @map("period_end")
+  findings        String?
+  summary         String?
+  recommendations String?
+  attachmentName  String?   @map("attachment_name")
+  attachmentData  String?   @map("attachment_data")
+  status          String    @default("draft")
+  createdBy       Int       @map("created_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  creator         User      @relation("ResearchCreator", fields: [createdBy], references: [id])
+
+  @@map("market_research")
+}
+
+model Payroll {
+  id                Int           @id @default(autoincrement())
+  payrollId         String        @unique @map("payroll_id")
+  month             Int
+  year              Int
+  totalAmount       Decimal       @map("total_amount") @db.Decimal(15, 2)
+  status            String        @default("draft")
+  createdBy         String        @map("created_by")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  sentToManagerAt   DateTime?     @map("sent_to_manager_at")
+  sentToManagerBy   String?       @map("sent_to_manager_by")
+  managerVerifiedAt DateTime?     @map("manager_verified_at")
+  managerVerifiedBy String?       @map("manager_verified_by")
+  ceoApprovedAt     DateTime?     @map("ceo_approved_at")
+  ceoApprovedBy     String?       @map("ceo_approved_by")
+  rejectedAt        DateTime?     @map("rejected_at")
+  rejectedBy        String?       @map("rejected_by")
+  rejectionReason   String?       @map("rejection_reason")
+  paidAt            DateTime?     @map("paid_at")
+  paidBy            String?       @map("paid_by")
+  items             PayrollItem[]
+
+  @@map("payrolls")
+}
+
+model PayrollItem {
+  id           Int     @id @default(autoincrement())
+  payrollId    Int     @map("payroll_id")
+  employeeId   String  @map("employee_id")
+  employeeName String  @map("employee_name")
+  position     String
+  department   String
+  basicSalary  Decimal @map("basic_salary") @db.Decimal(15, 2)
+  allowances   Decimal @default(0) @db.Decimal(15, 2)
+  deductions   Decimal @default(0) @db.Decimal(15, 2)
+  netPay       Decimal @map("net_pay") @db.Decimal(15, 2)
+  paymentMode  String? @map("payment_mode")
+  bankAccount  String? @map("bank_account")
+  payroll      Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+
+  @@map("payroll_items")
+}
+
+// ================================================================
+// FINANCIAL RESOURCES — Company Assets & Cash
+// ================================================================
+model FinancialResource {
+  id          Int     @id @default(autoincrement())
+  resourceId  String  @unique @map("resource_id")
+  name        String
+  category    String // cash, bank, asset, investment, equipment, inventory, precious, other
+  amount      Decimal @default(0) @db.Decimal(15, 2)
+  currency    String  @default("TZS")
+  location    String?
+  description String?
+  status      String  @default("active") // active, closed, archived
+
+  // Link na CompanyAccount (kama ni bank)
+  accountId Int?            @unique @map("account_id")
+  account   CompanyAccount? @relation(fields: [accountId], references: [id])
+
+  createdBy String   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  transactions Transaction[]
+
+  @@index([status])
+  @@index([category])
+  @@map("financial_resources")
+}
+
+// ================================================================
+// TRANSACTIONS — Every Money Movement
+// ================================================================
+model Transaction {
+  id            Int    @id @default(autoincrement())
+  transactionId String @unique @map("transaction_id")
+
+  // Link na Resource
+  resourceId Int               @map("resource_id")
+  resource   FinancialResource @relation(fields: [resourceId], references: [id])
+
+  // Aina ya transaction
+  type     String // INFLOW, OUTFLOW
+  amount   Decimal @db.Decimal(15, 2)
+  currency String  @default("TZS")
+
+  // Source ya transaction
+  source      String // SALES, PAYMENT, PAYROLL, ACCOUNT, MANUAL
+  sourceId    String? @map("source_id")
+  sourceModel String? @map("source_model") // Order, Payment, Payroll
+
+  // Maelezo
+  reference   String
+  description String?
+
+  // Balance baada ya transaction
+  balanceBefore Decimal @map("balance_before") @db.Decimal(15, 2)
+  balanceAfter  Decimal @map("balance_after") @db.Decimal(15, 2)
+
+  // Audit
+  createdBy String   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([resourceId])
+  @@index([source])
+  @@index([type])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+// ================================================================
+// COMPANY PAYMENTS — Cash Outflow (Finance → Manager → CEO)
+// ================================================================
+model CompanyPayment {
+  id          Int       @id @default(autoincrement())
+  type        String // procurement, salary, rent, utilities, transport, marketing, maintenance, other
+  reference   String    @unique
+  vendor      String
+  amount      Decimal   @db.Decimal(15, 2)
+  dueDate     DateTime? @map("due_date")
+  method      String?
+  description String?
+  attachments Json?
+  status      String    @default("draft") // draft, pending-manager, pending-ceo, approved, paid, rejected
+
+  // Workflow tracking
+  createdBy         String    @map("created_by")
+  sentToManagerAt   DateTime? @map("sent_to_manager_at")
+  sentToManagerBy   String?   @map("sent_to_manager_by")
+  managerVerifiedAt DateTime? @map("manager_verified_at")
+  managerVerifiedBy String?   @map("manager_verified_by")
+  ceoApprovedAt     DateTime? @map("ceo_approved_at")
+  ceoApprovedBy     String?   @map("ceo_approved_by")
+  rejectedAt        DateTime? @map("rejected_at")
+  rejectedBy        String?   @map("rejected_by")
+  rejectionReason   String?   @map("rejection_reason")
+  paidAt            DateTime? @map("paid_at")
+  paidBy            String?   @map("paid_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@map("company_payments")
+}
+
+// ================================================================
+// FUND TRANSFER — Cash Movement Between Accounts
+// Workflow: Finance → Manager → CEO → Execute → Notice
+// ================================================================
+model FundTransfer {
+  id         Int    @id @default(autoincrement())
+  transferId String @unique @map("transfer_id")
+
+  fromAccountId Int            @map("from_account_id")
+  toAccountId   Int            @map("to_account_id")
+  fromAccount   CompanyAccount @relation("TransferFrom", fields: [fromAccountId], references: [id])
+  toAccount     CompanyAccount @relation("TransferTo", fields: [toAccountId], references: [id])
+
+  amount   Decimal @db.Decimal(15, 2)
+  currency String  @default("TZS")
+
+  reason String?
+  notes  String?
+
+  status String @default("draft")
+
+  createdBy         String    @map("created_by")
+  sentToManagerAt   DateTime? @map("sent_to_manager_at")
+  sentToManagerBy   String?   @map("sent_to_manager_by")
+  managerVerifiedAt DateTime? @map("manager_verified_at")
+  managerVerifiedBy String?   @map("manager_verified_by")
+  ceoApprovedAt     DateTime? @map("ceo_approved_at")
+  ceoApprovedBy     String?   @map("ceo_approved_by")
+  rejectedAt        DateTime? @map("rejected_at")
+  rejectedBy        String?   @map("rejected_by")
+  rejectionReason   String?   @map("rejection_reason")
+
+  executedAt DateTime? @map("executed_at")
+  executedBy String?   @map("executed_by")
+
+  fromBalanceBefore Decimal? @map("from_balance_before") @db.Decimal(15, 2)
+  fromBalanceAfter  Decimal? @map("from_balance_after") @db.Decimal(15, 2)
+  toBalanceBefore   Decimal? @map("to_balance_before") @db.Decimal(15, 2)
+  toBalanceAfter    Decimal? @map("to_balance_after") @db.Decimal(15, 2)
+
+  transactionOutId String? @map("transaction_out_id")
+  transactionInId  String? @map("transaction_in_id")
+
+  noticeId       String?   @unique @map("notice_id")
+  noticeIssuedAt DateTime? @map("notice_issued_at")
+  noticeIssuedBy String?   @map("notice_issued_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([fromAccountId])
+  @@index([toAccountId])
+  @@index([createdAt])
+  @@map("fund_transfers")
+}
+
+// ================================================================
+// PRODUCTION MODULE — Raw Materials, Batches, Usage
+// ================================================================
+
+// ==================== RAW MATERIAL ====================
+model RawMaterial {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique // Cement, Sand, Gravel, Water, Color
+  unit         String // bags, tons, m3, liters, pcs
+  currentStock Float    @default(0) @map("current_stock")
+  reorderLevel Float    @default(0) @map("reorder_level")
+  unitCost     Decimal? @map("unit_cost") @db.Decimal(15, 2)
+  description  String?
+  specs        String?
+  status       String   @default("active") // active, inactive
+
+  receipts RawMaterialReceipt[]
+  usages   ProductionUsage[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("raw_materials")
+}
+
+// ==================== RAW MATERIAL RECEIPT ====================
+model RawMaterialReceipt {
+  id         Int         @id @default(autoincrement())
+  materialId Int         @map("material_id")
+  material   RawMaterial @relation(fields: [materialId], references: [id])
+
+  quantity   Float
+  unitCost   Decimal  @map("unit_cost") @db.Decimal(15, 2)
+  totalCost  Decimal  @map("total_cost") @db.Decimal(15, 2)
+  supplier   String?
+  invoiceNo  String?  @map("invoice_no")
+  receivedAt DateTime @default(now()) @map("received_at")
+
+  receivedById Int  @map("received_by_id")
+  receivedBy   User @relation("RawReceipts", fields: [receivedById], references: [id])
+
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([materialId])
+  @@index([receivedAt])
+  @@map("raw_material_receipts")
+}
+
+// ==================== PRODUCTION BATCH ====================
+model ProductionBatch {
+  id      Int    @id @default(autoincrement())
+  batchNo String @unique @map("batch_no")
+
+  productId Int     @map("product_id")
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantityProduced Float @map("quantity_produced")
+  quantityGood     Float @default(0) @map("quantity_good")
+  quantityDamaged  Float @default(0) @map("quantity_damaged")
+  wastePercent     Float @default(0) @map("waste_percent")
+
+  damagedReason String? @map("damaged_reason")
+
+  productionDate DateTime @default(now()) @map("production_date")
+  shift          String? // Morning, Afternoon, Night
+
+  workersCount Int     @default(0) @map("workers_count")
+  machineUsed  String? @map("machine_used")
+
+  // 🆕 QC FIELDS (Zote zipo hapa)
+  qcStatus        String?   @map("qc_status") // "pending", "passed", "failed"
+  qcNotes         String?   @map("qc_notes")
+  qcCheckedBy     Int?      @map("qc_checked_by")
+  qcInspector     User?     @relation("QCInspector", fields: [qcCheckedBy], references: [id]) // 🆕 Relation
+  qcCheckedAt     DateTime? @map("qc_checked_at")
+  qcNoticeNo      String?   @unique @map("qc_notice_no")
+  qcInspectorName String?   @map("qc_inspector_name")
+
+  status String @default("completed") // draft, completed, cancelled
+
+  releasedToSales Boolean   @default(false) @map("released_to_sales")
+  releasedAt      DateTime? @map("released_at")
+  releasedBy      Int?      @map("released_by")
+
+  reportedById Int  @map("reported_by_id")
+  reportedBy   User @relation("ProductionBatches", fields: [reportedById], references: [id])
+
+  usages ProductionUsage[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([productId])
+  @@index([productionDate])
+  @@index([releasedToSales])
+  @@index([status])
+  @@map("production_batches")
+}
+
+// ==================== PRODUCTION USAGE ====================
+model ProductionUsage {
+  id      Int             @id @default(autoincrement())
+  batchId Int             @map("batch_id")
+  batch   ProductionBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  materialId Int         @map("material_id")
+  material   RawMaterial @relation(fields: [materialId], references: [id])
+
+  quantityUsed Float @map("quantity_used")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([batchId])
+  @@index([materialId])
+  @@map("production_usages")
+}
+// ================================================================
+// 🆕 MESSAGES & FOLLOW-UPS
+// ================================================================
+model ProcurementRequestMessage {
+  id           Int      @id @default(autoincrement())
+  requestId    Int      @map("request_id") // Hii inaunganisha na ProcurementRequest id
+  senderId     Int      @map("sender_id")
+  senderName   String   @map("sender_name")
+  senderRole   String   @map("sender_role")
+  subject      String?
+  body         String
+  isRead       Boolean  @default(false) @map("is_read")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("procurement_request_messages")
+}
+model ProcurementRequest {
+  receivedAsAsset Boolean @default(false) @map("received_as_asset")
+  assetId         Int?    @unique @map("asset_id")
+}
+
+model ProcurementRequestFollowUp {
+  id        Int      @id @default(autoincrement())
+  requestId Int      @map("request_id")
+  note      String
+  statusAtTime String? @map("status_at_time")
+  createdBy Int      @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("procurement_request_followups")
+}
+// ================================================================
+// FIXED ASSETS — Mali za Kudumu
+// ================================================================
+model Asset {
+  id              Int      @id @default(autoincrement())
+  assetTag        String   @unique @map("asset_tag")
+  name            String
+  category        String
+  description     String?
+  serialNumber    String?  @map("serial_number")
+  model           String?
+  manufacturer    String?
+
+  purchaseDate    DateTime? @map("purchase_date") @db.Date
+  purchaseValue   Decimal   @default(0) @map("purchase_value") @db.Decimal(15, 2)
+  currentValue    Decimal   @default(0) @map("current_value") @db.Decimal(15, 2)
+  salvageValue    Decimal   @default(0) @map("salvage_value") @db.Decimal(15, 2)
+  usefulLifeYears Int       @default(5) @map("useful_life_years")
+  depreciationRate Decimal  @default(20) @map("depreciation_rate") @db.Decimal(5, 2)
+  currency        String    @default("TZS")
+
+  location        String?
+  department      String?
+  custodianName   String?   @map("custodian_name")
+  custodianId     Int?      @map("custodian_id")
+
+  condition       String    @default("Good")
+  status          String    @default("Active")
+
+  warrantyExpiry  DateTime? @map("warranty_expiry") @db.Date
+  supplier        String?
+  invoiceNumber   String?   @map("invoice_number")
+  notes           String?
+  attachments     Json?     @default("[]")
+
+  procurementRequestId Int?  @unique @map("procurement_request_id")
+
+  createdById     Int       @map("created_by_id")
+  createdByName   String    @map("created_by_name")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  maintenanceLogs  AssetMaintenance[]
+  depreciationLogs AssetDepreciationLog[]
+
+  @@index([category])
+  @@index([status])
+  @@index([location])
+  @@index([createdById])
+  @@map("assets")
+}
+
+model AssetMaintenance {
+  id              Int      @id @default(autoincrement())
+  assetId         Int      @map("asset_id")
+  asset           Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  type            String   @default("routine")
+  description     String
+  cost            Decimal? @db.Decimal(15, 2)
+  performedBy     String?  @map("performed_by")
+
+  scheduledDate   DateTime? @map("scheduled_date") @db.Date
+  completedDate   DateTime? @map("completed_date") @db.Date
+  status          String    @default("pending")
+  nextDueDate     DateTime? @map("next_due_date") @db.Date
+  notes           String?
+  attachments     Json?     @default("[]")
+
+  createdById     Int       @map("created_by_id")
+  createdByName   String    @map("created_by_name")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([assetId])
+  @@index([status])
+  @@map("asset_maintenance")
+}
+
+model AssetDepreciationLog {
+  id              Int      @id @default(autoincrement())
+  assetId         Int      @map("asset_id")
+  asset           Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  year            Int
+  openingValue    Decimal  @map("opening_value") @db.Decimal(15, 2)
+  depreciation    Decimal  @db.Decimal(15, 2)
+  closingValue    Decimal  @map("closing_value") @db.Decimal(15, 2)
+  method          String   @default("straight-line")
+
+  calculatedAt    DateTime @default(now()) @map("calculated_at")
+  calculatedBy    String   @map("calculated_by")
+
+  @@unique([assetId, year])
+  @@index([assetId])
+  @@map("asset_depreciation_logs")
+}
