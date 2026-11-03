@@ -829,6 +829,7 @@ model ProcurementRequestMessage {
   @@map("procurement_request_messages")
 }
 model ProcurementRequest {
+  id              Int     @id @default(autoincrement())
   receivedAsAsset Boolean @default(false) @map("received_as_asset")
   assetId         Int?    @unique @map("asset_id")
 }
