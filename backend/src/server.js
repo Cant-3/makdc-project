@@ -1,9 +1,3 @@
-// ================================================================
-// MAK DC INVESTMENT — SERVER ENTRY POINT
-// ================================================================
-// File hii inaanzisha server na kuunganisha kila kitu
-// ================================================================
-
 require('dotenv').config();
 
 const app = require('./app');

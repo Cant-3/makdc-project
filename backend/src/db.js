@@ -1,10 +1,9 @@
 // ================================================================
-// DATABASE CONNECTION — Railway PostgreSQL (Cloud)
+// DATABASE CONNECTION — Neon PostgreSQL (Cloud)
 // ================================================================
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Railway inatoa DATABASE_URL moja tu — tunaitumia moja kwa moja
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' 
@@ -17,7 +16,7 @@ const pool = new Pool({
 
 // Log connection
 pool.on('connect', () => {
-    console.log('✅ PostgreSQL (Railway) connected');
+    console.log('✅ PostgreSQL (Neon) connected');
 });
 
 pool.on('error', (err) => {
