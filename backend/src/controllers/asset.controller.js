@@ -6,7 +6,7 @@
 // ================================================================
 
 const { query, execute } = require('../db');
-
+const QRCode = require('qrcode');
 // ================================================================
 // HELPER: Role check
 // ================================================================
@@ -165,74 +165,60 @@ async function getAssetById(req, res) {
 // ================================================================
 async function createAsset(req, res) {
     try {
-        const user = req.user;
-        
-        if (!canWrite(user)) {
-            return res.status(403).json({ error: 'Procurement pekee anaweza kuunda assets.' });
-        }
-        
         const {
             name, category, description, serialNumber, model, manufacturer,
-            purchaseDate, purchaseValue, salvageValue, usefulLifeYears,
-            location, department, custodianName, custodianId,
-            condition, warrantyExpiry, supplier, invoiceNumber, notes, attachments
+            purchaseDate, purchaseValue, currentValue, salvageValue,
+            usefulLifeYears, location, department, custodianName,
+            condition, status, supplier, invoiceNumber, notes
         } = req.body;
-        
-        // Validation
-        if (!name || !name.trim()) {
-            return res.status(400).json({ error: 'Jina la asset linahitajika.' });
-        }
-        if (!category || !category.trim()) {
-            return res.status(400).json({ error: 'Category inahitajika.' });
-        }
-        if (purchaseValue === undefined || purchaseValue === null || isNaN(purchaseValue)) {
-            return res.status(400).json({ error: 'Bei ya manunuzi (purchase value) inahitajika.' });
-        }
-        
-        const tag = await generateAssetTag();
-        
-        const pv = Number(purchaseValue);
-        const slv = Number(salvageValue || 0);
-        const life = Number(usefulLifeYears || 5);
-        const rate = life > 0 ? Math.round((100 / life) * 100) / 100 : 20;
-        
-        const result = await query(
-            `INSERT INTO assets (
+
+        const user = req.user;
+
+        // 1. Tengeneza Asset Tag (Mfano: AST-2026-0001)
+        const year = new Date().getFullYear();
+        const countRes = await query(
+            `SELECT COUNT(*) as c FROM assets WHERE asset_tag LIKE $1`,
+            [`AST-${year}-%`]
+        );
+        const nextCount = String(parseInt(countRes[0].c) + 1).padStart(4, '0');
+        const assetTag = `AST-${year}-${nextCount}`;
+
+        // 2. Tengeneza QR Code (Inahifadhiwa kama Base64 Image)
+        // Unaweza kubadilisha qrData iwe URL ya mfumo wako baadaye
+        const qrData = JSON.stringify({ tag: assetTag, name: name, company: 'MAK DC' });
+        const qrCodeBase64 = await QRCode.toDataURL(qrData, { width: 300, margin: 2 });
+
+        // 3. Hesabu Depreciation Rate (Straight Line)
+        const life = parseInt(usefulLifeYears) || 5;
+        const depreciationRate = (100 / life).toFixed(2);
+
+        // 4. Insert kwenye Database
+        const result = await query(`
+            INSERT INTO assets (
                 asset_tag, name, category, description, serial_number, model, manufacturer,
                 purchase_date, purchase_value, current_value, salvage_value,
-                useful_life_years, depreciation_rate, currency,
-                location, department, custodian_name, custodian_id,
-                condition, status, warranty_expiry, supplier, invoice_number, notes, attachments,
-                created_by_id, created_by_name
+                useful_life_years, depreciation_rate, location, department, custodian_name,
+                condition, status, supplier, invoice_number, notes, qr_code,
+                created_by_id, created_by_name, created_at, updated_at
             ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7,
-                $8, $9, $9, $10,
-                $11, $12, 'TZS',
-                $13, $14, $15, $16,
-                $17, 'Active', $18, $19, $20, $21, $22,
-                $23, $24
-            ) RETURNING *`,
-            [
-                tag, name.trim(), category.trim(), description || null,
-                serialNumber || null, model || null, manufacturer || null,
-                purchaseDate || null, pv, slv,
-                life, rate,
-                location || null, department || null,
-                custodianName || null, custodianId || null,
-                condition || 'Good',
-                warrantyExpiry || null, supplier || null, invoiceNumber || null,
-                notes || null, JSON.stringify(attachments || []),
-                user.userId, user.fullName
-            ]
-        );
-        
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+                $17, $18, $19, $20, $21, $22, $23, $24, NOW(), NOW()
+            ) RETURNING *
+        `, [
+            assetTag, name, category, description || null, serialNumber || null, model || null, manufacturer || null,
+            purchaseDate || null, purchaseValue || 0, currentValue || purchaseValue || 0, salvageValue || 0,
+            life, depreciationRate, location || null, department || null, custodianName || null,
+            condition || 'Good', status || 'Active', supplier || null, invoiceNumber || null, notes || null, qrCodeBase64,
+            user.userId, user.fullName
+        ]);
+
         res.status(201).json(result[0]);
+
     } catch (err) {
         console.error('createAsset error:', err);
         res.status(500).json({ error: err.message });
     }
 }
-
 // ================================================================
 // 4. UPDATE ASSET
 // ================================================================
@@ -443,10 +429,7 @@ async function listAllMaintenance(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-
-// ================================================================
 // 10. CREATE MAINTENANCE
-// ================================================================
 async function createMaintenance(req, res) {
     try {
         const user = req.user;
@@ -469,12 +452,13 @@ async function createMaintenance(req, res) {
             return res.status(404).json({ error: 'Asset haipo.' });
         }
         
+        // 🆕 Nimeongeza created_at na updated_at hapa
         const result = await query(
             `INSERT INTO asset_maintenance (
                 asset_id, type, description, cost, performed_by,
                 scheduled_date, completed_date, status, next_due_date, notes, attachments,
-                created_by_id, created_by_name
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+                created_by_id, created_by_name, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
             RETURNING *`,
             [
                 id,
@@ -495,12 +479,12 @@ async function createMaintenance(req, res) {
         // Kama completed, update asset status
         if ((status || 'pending') === 'completed') {
             await query(
-                `UPDATE assets SET status = 'Active' WHERE id = $1 AND status = 'In Maintenance'`,
+                `UPDATE assets SET status = 'Active', updated_at = NOW() WHERE id = $1 AND status = 'In Maintenance'`,
                 [id]
             );
         } else if (status === 'in-progress') {
             await query(
-                `UPDATE assets SET status = 'In Maintenance' WHERE id = $1`,
+                `UPDATE assets SET status = 'In Maintenance', updated_at = NOW() WHERE id = $1`,
                 [id]
             );
         }
@@ -760,7 +744,79 @@ async function getDepreciationHistory(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+// ================================================================
+// 🆕 MAINTENANCE REPORTS
+// ================================================================
 
+// 1. Ripoti ya Jumla (Overall)
+async function getMaintenanceSummary(req, res) {
+    try {
+        // Gharama zote kwa mwaka huu
+        const totalCost = await query(`
+            SELECT COALESCE(SUM(cost), 0) as total 
+            FROM asset_maintenance 
+            WHERE status = 'completed'
+        `);
+
+        // Assets zilizotumia pesa nyingi kwenye matengenezo
+        const topAssets = await query(`
+            SELECT a.id, a.name, a.asset_tag, COALESCE(SUM(m.cost), 0) as total_cost, COUNT(m.id) as repair_count
+            FROM assets a
+            JOIN asset_maintenance m ON a.id = m.asset_id
+            WHERE m.status = 'completed'
+            GROUP BY a.id, a.name, a.asset_tag
+            ORDER BY total_cost DESC
+            LIMIT 5
+        `);
+
+        // Gharama kwa aina ya matengenezo
+        const byType = await query(`
+            SELECT type, COALESCE(SUM(cost), 0) as total_cost, COUNT(*) as count
+            FROM asset_maintenance
+            WHERE status = 'completed'
+            GROUP BY type
+        `);
+
+        res.json({
+            totalCost: Number(totalCost[0].total),
+            topAssets,
+            byType
+        });
+    } catch (err) {
+        console.error('getMaintenanceSummary error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+// 2. Historia ya Asset Moja (Per-Asset)
+async function getAssetMaintenanceHistory(req, res) {
+    try {
+        const { id } = req.params; // Asset ID
+
+        const history = await query(`
+            SELECT * FROM asset_maintenance 
+            WHERE asset_id = $1 
+            ORDER BY created_at DESC
+        `, [id]);
+
+        const total = await query(`
+            SELECT COALESCE(SUM(cost), 0) as total_cost, COUNT(*) as total_repairs
+            FROM asset_maintenance 
+            WHERE asset_id = $1 AND status = 'completed'
+        `, [id]);
+
+        res.json({
+            history,
+            summary: {
+                totalCost: Number(total[0].total_cost),
+                totalRepairs: Number(total[0].total_repairs)
+            }
+        });
+    } catch (err) {
+        console.error('getAssetMaintenanceHistory error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
 // ================================================================
 // EXPORTS
 // ================================================================
@@ -779,5 +835,7 @@ module.exports = {
     updateMaintenance,
     calculateDepreciation,
     runAnnualDepreciation,
+    getMaintenanceSummary,
+    getAssetMaintenanceHistory,
     getDepreciationHistory
 };

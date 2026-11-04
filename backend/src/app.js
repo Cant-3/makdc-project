@@ -116,7 +116,7 @@ app.use('/api/production', require('./routes/production.routes'));
 app.use('/api/procurement', require('./routes/procurement.routes'));
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/assets', require('./routes/asset.routes'));
-
+app.use('/api/tenders', require('./routes/tender.routes'));
 
 
 

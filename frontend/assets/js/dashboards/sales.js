@@ -1082,7 +1082,7 @@ async function viewDeptRequest(id) {
                         
                         ${request.status === 'rejected' ? `
                             <button class="modern-btn-primary" onclick="document.getElementById('viewRequestModal').remove(); openEditRequestModal(${request.id})" style="background:linear-gradient(135deg, #f59e0b, #d97706); box-shadow:0 4px 12px rgba(245,158,11,0.3);">
-                                ✏️ Edit & Resubmit
+                                🖊️ Edit & Resubmit
                             </button>
                         ` : ''}
                     </div>

@@ -2998,7 +2998,7 @@ function renderPayrollEmployees(items) {
                     <span style="color: #dc2626; font-family: 'Courier New', monospace; font-weight: 600;">-TSh ${item.deductions.toLocaleString()}</span>
                     <span style="font-weight: 800; color: #0f766e; font-family: 'Courier New', monospace;">TSh ${item.netPay.toLocaleString()}</span>
                     <div style="text-align:center;">
-                        <button onclick="editPayrollItem(${i})" style="width: 34px; height: 34px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
+                        <button onclick="editPayrollItem(${i})" style="width: 34px; height: 34px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🖊️</button>
                     </div>
                 </div>
             `).join('')}

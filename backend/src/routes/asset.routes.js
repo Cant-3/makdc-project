@@ -1,6 +1,3 @@
-// ================================================================
-// MAK DC INVESTMENT — ASSET ROUTES
-// ================================================================
 const express = require('express');
 const router = express.Router();
 const c = require('../controllers/asset.controller');
@@ -8,11 +5,14 @@ const { authenticate } = require('../middleware/auth');
 
 router.use(authenticate);
 
-// === READ (Wote wanaweza kuona: Procurement, Manager, CEO, Finance) ===
+// === READ (Wote wanaweza kuona) ===
 router.get('/', c.listAssets);
 router.get('/stats', c.getAssetStats);
 router.get('/categories', c.getCategories);
-router.get('/maintenance/all', c.listAllMaintenance);
+
+// 🆕 Maintenance (Weka hizi juu ili zisigongane na /:id)
+router.get('/maintenance/all', c.listAllMaintenance || c.getAllMaintenance); 
+
 router.get('/:id', c.getAssetById);
 router.get('/:id/maintenance', c.listMaintenance);
 router.get('/:id/depreciation', c.getDepreciationHistory);
@@ -28,5 +28,8 @@ router.post('/depreciation/run-annual', c.runAnnualDepreciation);
 
 // === DELETE (SuperAdmin pekee) ===
 router.delete('/:id', c.deleteAsset);
+
+router.get('/maintenance/summary', c.getMaintenanceSummary);
+router.get('/:id/maintenance/history', c.getAssetMaintenanceHistory);
 
 module.exports = router;

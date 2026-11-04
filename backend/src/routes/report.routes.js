@@ -52,8 +52,29 @@ router.get('/sales/top-customers',
     requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'),
     reportController.getTopCustomers
 );
+// ================================================================
+// 🆕 PROCUREMENT, STORE & ASSET REPORTS
+// ================================================================
+router.get('/procurement-summary', 
+    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
+    reportController.getProcurementSummary
+);
 
-// ================================================================
-// EXPORT — MWISHO WA FAILI
-// ================================================================
+router.get('/store-summary',
+    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
+    reportController.getStoreSummary
+);
+
+router.get('/asset-summary',
+    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
+    reportController.getAssetSummary
+);
+router.get('/master-summary',
+    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
+    reportController.getMasterReport
+);
+router.get('/procurement-trend',
+    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
+    reportController.getProcurementTrend
+);
 module.exports = router;

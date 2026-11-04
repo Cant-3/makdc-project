@@ -57,6 +57,10 @@ const API = {
     delete(endpoint) {
         return this.request(endpoint, { method: 'DELETE' });
     },
+    
+    // ============================================================
+    // AUTH & USERS
+    // ============================================================
     login(email, password) {
         return this.post('/auth/login', { email, password });
     },
@@ -64,21 +68,30 @@ const API = {
     getMe() {
         return this.get('/auth/me');
     },
+    
     getUsers() {
         return this.get('/users');
     },
+    
     updateOwnProfile(data){
         return this.put('/users/me', data);
     },    
+    
     createUser(userData) {
         return this.post('/users', userData);
     },
+    
     updateUser(userId, userData) {
         return this.put(`/users/${userId}`, userData);
     },
+    
     deleteUser(userId) {
         return this.delete(`/users/${userId}`);
     },
+    
+    // ============================================================
+    // SITE CONTENT
+    // ============================================================
     getSiteContent() {
         return this.get('/content');
     },
@@ -86,6 +99,10 @@ const API = {
     updateSiteContent(key, value) {
         return this.put(`/content/${key}`, { value });
     },
+
+    // ============================================================
+    // ORDERS
+    // ============================================================
     getOrders() {
         return this.get('/orders');
     },
@@ -98,7 +115,7 @@ const API = {
         return this.post('/orders', data);
     },
 
-    ttrackOrder(orderId, phone = null) {
+    trackOrder(orderId, phone = null) {
         const query = phone ? `?phone=${encodeURIComponent(phone)}` : '';
         return this.get(`/orders/track/${orderId}${query}`);
     },
@@ -134,6 +151,10 @@ const API = {
     rejectOrder(orderId, reason) {
         return this.put(`/orders/${orderId}/reject`, { reason });
     },
+
+    // ============================================================
+    // ACCOUNTS & PAYMENTS
+    // ============================================================
     getAccounts() {
         return this.get('/accounts');
     },
@@ -153,30 +174,42 @@ const API = {
     updateAccount(id, data) {
         return this.put(`/accounts/${id}`, data);
     },
+
     sendAccountToManager(id, data = {}) {
         return this.put(`/accounts/${id}/send-to-manager`, data);
     },
+
     verifyAccount(id, data = {}) {
         return this.put(`/accounts/${id}/verify`, data);
     },
+
     approveAccount(id, data = {}) {
         return this.put(`/accounts/${id}/approve`, data);
     },
+
     rejectAccount(id, reason) {
         return this.put(`/accounts/${id}/reject`, { reason });
     },
+
     toggleAccountActive(id) {
         return this.put(`/accounts/${id}/toggle-active`);
     },
+
     deleteAccount(id) {
         return this.delete(`/accounts/${id}`);
     },
+
     getPayments() {
         return this.get('/payments');
     },
+
     getAuditLogs() {
         return this.get('/audit');
     },
+
+    // ============================================================
+    // EMPLOYEES
+    // ============================================================
     getEmployees(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/employees${query ? '?' + query : ''}`);
@@ -197,6 +230,10 @@ const API = {
     deleteEmployee(id) {
         return this.delete(`/employees/${id}`);
     },
+
+    // ============================================================
+    // LEADERSHIP
+    // ============================================================
     getLeadership() {
         return this.get('/leadership');
     },
@@ -216,6 +253,10 @@ const API = {
     deleteLeadership(id) {
         return this.delete(`/leadership/${id}`);
     },
+
+    // ============================================================
+    // PRODUCTS
+    // ============================================================
     getProducts() {
         return this.get('/products');
     },
@@ -235,6 +276,10 @@ const API = {
     deleteProduct(id) {
         return this.delete(`/products/${id}`);
     },
+
+    // ============================================================
+    // TESTIMONIALS, NEWS, PROJECTS, HERO, STATS
+    // ============================================================
     getTestimonials() {
         return this.get('/testimonials');
     },
@@ -254,6 +299,7 @@ const API = {
     deleteTestimonial(id) {
         return this.delete(`/testimonials/${id}`);
     },
+
     getNews() {
         return this.get('/news');
     },
@@ -277,6 +323,7 @@ const API = {
     deleteNews(id) {
         return this.delete(`/news/${id}`);
     },
+
     getProjects() {
         return this.get('/projects');
     },
@@ -300,36 +347,50 @@ const API = {
     deleteProject(id) {
         return this.delete(`/projects/${id}`);
     },
+
     getHeroSlides() {
         return this.get('/hero');
     },
+
     getHeroSlidesAdmin() {
         return this.get('/hero/admin');
     },
+
     createHeroSlide(data) {
         return this.post('/hero', data);
     },
+
     updateHeroSlide(id, data) {
         return this.put(`/hero/${id}`, data);
     },
+
     deleteHeroSlide(id) {
         return this.delete(`/hero/${id}`);
     },
+
     getStats() {
         return this.get('/stats');
     },
+
     getStatsAdmin() {
         return this.get('/stats/admin');
     },
+
     createStat(data) {
         return this.post('/stats', data);
     },
+
     updateStat(id, data) {
         return this.put(`/stats/${id}`, data);
     },
+
     deleteStat(id) {
         return this.delete(`/stats/${id}`);
     },
+
+    // ============================================================
+    // SALES REPORTS
+    // ============================================================
     getSalesSummary(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/reports/sales${query ? '?' + query : ''}`);
@@ -354,6 +415,10 @@ const API = {
         const query = new URLSearchParams(params).toString();
         return this.get(`/reports/sales/top-customers${query ? '?' + query : ''}`);
     },
+
+    // ============================================================
+    // MARKETING
+    // ============================================================
     getMarketingPlans(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/marketing-plans${query ? '?' + query : ''}`);
@@ -378,6 +443,7 @@ const API = {
     deleteMarketingPlan(id) {
         return this.delete(`/marketing-plans/${id}`);
     },
+
     getMarketingActivities(planId) {
         return this.get(`/marketing-plans/${planId}/activities`);
     },
@@ -397,6 +463,7 @@ const API = {
     deleteMarketingActivity(planId, activityId) {
         return this.delete(`/marketing-plans/${planId}/activities/${activityId}`);
     },
+
     getLinkedOrders(planId) {
         return this.get(`/marketing-plans/${planId}/orders`);
     },
@@ -404,6 +471,10 @@ const API = {
     recalculateKpi(planId) {
         return this.post(`/marketing-plans/${planId}/recalculate-kpi`);
     },
+
+    // ============================================================
+    // MARKET RESEARCH
+    // ============================================================
     getMarketResearch(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/market-research${query ? '?' + query : ''}`);
@@ -424,6 +495,10 @@ const API = {
     deleteResearch(id) {
         return this.delete(`/market-research/${id}`);
     },
+
+    // ============================================================
+    // PAYROLL
+    // ============================================================
     getPayrolls() {
         return this.get('/payrolls');
     },
@@ -443,8 +518,9 @@ const API = {
     deletePayroll(id) {
         return this.delete(`/payrolls/${id}`);
     },
+
     // ============================================================
-    // === FINANCIAL RESOURCES ENDPOINTS ===
+    // FINANCIAL RESOURCES
     // ============================================================
     getFinancialResources() {
         return this.get('/financial-resources');
@@ -465,6 +541,7 @@ const API = {
     deleteFinancialResource(id) {
         return this.delete(`/financial-resources/${id}`);
     },
+
     getTransactions(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/transactions${query ? '?' + query : ''}`);
@@ -477,6 +554,10 @@ const API = {
     getResourceTransactions(resourceId) {
         return this.get(`/financial-resources/${resourceId}/transactions`);
     },
+
+    // ============================================================
+    // COMPANY PAYMENTS
+    // ============================================================
     getCompanyPayments() {
         return this.get('/company-payments');
     },
@@ -500,6 +581,7 @@ const API = {
     markCompanyPaymentPaid(id, data = {}) {
         return this.put(`/company-payments/${id}/mark-paid`, data);
     },
+
     depositToResource(id, data) {
         return this.post(`/financial-resources/${id}/deposit`, data);
     },
@@ -507,8 +589,9 @@ const API = {
     withdrawFromResource(id, data) {
         return this.post(`/financial-resources/${id}/withdraw`, data);
     },
+
     // ============================================================
-    // === FUND TRANSFER ENDPOINTS ===
+    // FUND TRANSFERS
     // ============================================================
     getFundTransfers() {
         return this.get('/fund-transfers');
@@ -549,11 +632,13 @@ const API = {
     deleteFundTransfer(id) {
         return this.delete(`/fund-transfers/${id}`);
     },
+
     setupMainCash() {
-    return this.post('/accounts/setup-main-cash');
+        return this.post('/accounts/setup-main-cash');
     },
-        // ============================================================
-    // === FINANCE REPORTS ENDPOINTS (6 REPORTS) ===
+
+    // ============================================================
+    // FINANCE REPORTS
     // ============================================================
     getCashFlowReport(params = {}) {
         const query = new URLSearchParams(params).toString();
@@ -584,95 +669,110 @@ const API = {
         const query = new URLSearchParams(params).toString();
         return this.get(`/finance-reports/reconciliation${query ? '?' + query : ''}`);
     },
+
     getOverallReport(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.get(`/finance-reports/overall${query ? '?' + query : ''}`);
+        const query = new URLSearchParams(params).toString();
+        return this.get(`/finance-reports/overall${query ? '?' + query : ''}`);
     },
+
     getDashboardStats() {
-    return this.get('/finance-reports/dashboard');
+        return this.get('/finance-reports/dashboard');
     },
+
+    // ============================================================
+    // PRODUCTION
+    // ============================================================
     getProductionDashboard() {
         return this.get('/production/dashboard');
     },
     
-    // Raw Materials
     getRawMaterials() {
         return this.get('/production/raw-materials');
     },
+
     createRawMaterial(data) {
         return this.post('/production/raw-materials', data);
     },
+
     receiveRawMaterial(data) {
         return this.post('/production/raw-materials/receive', data);
     },
+
     getRawMaterialReceipts(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/production/raw-materials/receipts${query ? '?' + query : ''}`);
     },
     
-    // Production Batches
     getProductionBatches(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/production/batches${query ? '?' + query : ''}`);
     },
+
     createProductionBatch(data) {
         return this.post('/production/batches', data);
     },
+
     releaseBatchToSales(id) {
         return this.put(`/production/batches/${id}/release-to-sales`);
     },
     
-    // Stock
     getStockOverview() {
         return this.get('/production/stock');
     },
     
-    // Damaged
     getDamagedProducts() {
         return this.get('/production/damaged');
     },
+
     disposeDamaged(data) {
         return this.post('/production/damaged/dispose', data);
     },
     
-    // Reports
     getDailyProductionReports(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/production/reports/daily${query ? '?' + query : ''}`);
     },
+
     getProductionSummary(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/production/reports/summary${query ? '?' + query : ''}`);
     },
     
-    // Products for dropdown
     getProductionProducts() {
         return this.get('/production/products');
     },
-        getRawMaterialUsage(materialId) {
+
+    getRawMaterialUsage(materialId) {
         return this.get(`/production/raw-materials/${materialId}/usage`);
     },
-        submitBatchQC(id, data) {
+
+    submitBatchQC(id, data) {
         return this.put(`/production/batches/${id}/qc`, data);
     },
-        getReportMaterials(params = {}) {
+
+    getReportMaterials(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/production/reports/materials${query ? '?' + query : ''}`);
     },
-    // Kwenye api.js, ndani ya const API = { ... }
+
+    // ============================================================
+    // ANALYTICS
+    // ============================================================
     getLiveAnalytics() {
         return this.get('/analytics/live');
     },
+
     getSystemUsageTrend(days = 7) {
-    return this.get(`/analytics/system-usage?days=${days}`);
+        return this.get(`/analytics/system-usage?days=${days}`);
     },
 
     getModuleActivity(days = 7) {
         return this.get(`/analytics/module-activity?days=${days}`);
     },
-    // ================================================================
-    // PROCUREMENT APIs
-    // ================================================================
+
+    // ============================================================
+    // PROCUREMENT
+    // ============================================================
     getProcurementRequests(endpoint = '/all') {
         return this.get(`/procurement${endpoint}`);
     },
@@ -688,171 +788,283 @@ const API = {
     updateProcurementStatus(id, data) {
         return this.put(`/procurement/${id}/status`, data);
     },
-    // Stock APIs
-    getStockItems() {
-        return this.get('/procurement/stock');
+
+    createDepartmentRequest(data) {
+        return this.post('/procurement', { ...data, source: 'department' });
+    },
+
+    getRequestMessages(requestId) {
+        return this.get(`/procurement/${requestId}/messages`);
+    },
+
+    sendRequestMessage(requestId, data) {
+        return this.post(`/procurement/${requestId}/messages`, data);
+    },
+
+    saveRequestFollowUp(requestId, note) {
+        return this.post(`/procurement/${requestId}/follow-up`, { note });
+    },
+
+    markMessagesAsRead(requestId) {
+        return this.put(`/procurement/${requestId}/messages/read`);
+    },
+
+    setTypingStatus(requestId, isTyping) {
+        return this.post(`/procurement/${requestId}/typing`, { isTyping });
+    },
+
+    getTypingStatus(requestId) {
+        return this.get(`/procurement/${requestId}/typing`);
+    },
+
+    // ============================================================
+    // PROCUREMENT WORKFLOW
+    // ============================================================
+    forwardRequestToManager(id) {
+        return this.put(`/procurement/${id}/forward-to-manager`);
+    },
+
+    managerApproveRequest(id, notes) {
+        return this.put(`/procurement/${id}/manager-approve`, { notes });
+    },
+
+    managerRejectRequest(id, reason) {
+        return this.put(`/procurement/${id}/manager-reject`, { reason });
+    },
+
+    ceoApproveRequest(id, notes) {
+        return this.put(`/procurement/${id}/ceo-approve`, { notes });
+    },
+
+    ceoRejectRequest(id, reason) {
+        return this.put(`/procurement/${id}/ceo-reject`, { reason });
+    },
+
+    submitPurchaserDetails(id, data) {
+        return this.put(`/procurement/${id}/purchaser-details`, data);
+    },
+
+    // ============================================================
+    // PROCUREMENT PAYMENT WORKFLOW
+    // ============================================================
+    financeVerifyAndSendToManager(id, data) {
+        return this.put(`/procurement/${id}/finance-verify`, data);
+    },
+
+    managerApprovePayment(id, notes) {
+        return this.put(`/procurement/${id}/manager-approve-payment`, { notes });
+    },
+
+    managerRejectPayment(id, reason) {
+        return this.put(`/procurement/${id}/manager-reject-payment`, { reason });
+    },
+
+    ceoApprovePayment(id, notes) {
+        return this.put(`/procurement/${id}/ceo-approve-payment`, { notes });
+    },
+
+    ceoRejectPayment(id, reason) {
+        return this.put(`/procurement/${id}/ceo-reject-payment`, { reason });
+    },
+
+    financeMarkAsPaid(id, data) {
+        return this.put(`/procurement/${id}/mark-paid`, data);
+    },
+
+    getPaymentDetails(id) {
+        return this.get(`/procurement/${id}/payment`);
+    },
+
+    getStatusHistory(id) {
+        return this.get(`/procurement/${id}/history`);
+    },
+
+    getImprestPdfUrl(id) {
+        return `${CONFIG.API_URL}/procurement/${id}/imprest/pdf`;
+    },
+
+    financeVerifyProcurement(id, data) {
+        return this.put(`/procurement/${id}/finance-verify`, data);
+    },
+
+    // ============================================================
+    // 🆕 STOCK MODULE (Mpya na Kamili)
+    // ============================================================
+    getStockItems(filters = {}) {
+        const query = new URLSearchParams(filters).toString();
+        return this.get(`/procurement/stock${query ? '?' + query : ''}`);
+    },
+
+    getStockItemById(id) {
+        return this.get(`/procurement/stock/${id}`);
+    },
+
+    getStockSummary() {
+        return this.get('/procurement/stock/summary');
+    },
+
+    getLowStockItems() {
+        return this.get('/procurement/stock/low-stock');
+    },
+
+    getStockMovements(filters = {}) {
+        const query = new URLSearchParams(filters).toString();
+        return this.get(`/procurement/stock/movements${query ? '?' + query : ''}`);
     },
 
     addStockItem(data) {
         return this.post('/procurement/stock', data);
     },
 
-    receiveStock(requestId) {
-        return this.post(`/procurement/stock/receive/${requestId}`, {});
+    adjustStockItem(data) {
+        return this.post('/procurement/stock/adjust', data);
     },
 
     stockOut(data) {
         return this.post('/procurement/stock/out', data);
     },
 
-    getStockTransactions() {
-        return this.get('/procurement/stock/transactions');
+    receiveStock(requestId) {
+        return this.post(`/procurement/stock/receive/${requestId}`, {});
     },
-    createDepartmentRequest(data) {
-    return this.post('/procurement', { ...data, source: 'department' });
+
+    // ============================================================
+    // 🆕 SUPPLIERS & PURCHASE ORDERS
+    // ============================================================
+    getSuppliers() {
+        return this.get('/procurement/suppliers');
     },
-        getRequestMessages(requestId) {
-        return this.get(`/procurement/${requestId}/messages`);
+
+    createSupplier(data) {
+        return this.post('/procurement/suppliers', data);
     },
-    sendRequestMessage(requestId, data) {
-        return this.post(`/procurement/${requestId}/messages`, data);
+
+    getPurchaseOrders() {
+        return this.get('/procurement/purchase-orders');
     },
-    saveRequestFollowUp(requestId, note) {
-        return this.post(`/procurement/${requestId}/follow-up`, { note });
+
+    createPurchaseOrder(data) {
+        return this.post('/procurement/purchase-orders', data);
     },
-    // Kwenye API object, ongeza:
-    markMessagesAsRead(requestId) {
-        return this.put(`/procurement/${requestId}/messages/read`);
-    },
-    setTypingStatus(requestId, isTyping) {
-        return this.post(`/procurement/${requestId}/typing`, { isTyping });
-    },
-    getTypingStatus(requestId) {
-        return this.get(`/procurement/${requestId}/typing`);
-    },
-        // ================================================================
-    // PROCUREMENT WORKFLOW APIs (Mpya)
-    // ================================================================
-    forwardRequestToManager(id) {
-        return this.put(`/procurement/${id}/forward-to-manager`);
-    },
-    managerApproveRequest(id, notes) {
-        return this.put(`/procurement/${id}/manager-approve`, { notes });
-    },
-    managerRejectRequest(id, reason) {
-        return this.put(`/procurement/${id}/manager-reject`, { reason });
-    },
-    ceoApproveRequest(id, notes) {
-        return this.put(`/procurement/${id}/ceo-approve`, { notes });
-    },
-    ceoRejectRequest(id, reason) {
-        return this.put(`/procurement/${id}/ceo-reject`, { reason });
-    },
-    submitPurchaserDetails(id, data) {
-        return this.put(`/procurement/${id}/purchaser-details`, data);
-    },
-    // Ndani ya api.js
-    async getProcurementRequestById(id) {
-        return this.request(`/procurement/${id}`, 'GET');
-    },
-    // Payment Workflow APIs
-    financeVerifyAndSendToManager(id, data) {
-        return this.put(`/procurement/${id}/finance-verify`, data);
-    },
-    managerApprovePayment(id, notes) {
-        return this.put(`/procurement/${id}/manager-approve-payment`, { notes });
-    },
-    managerRejectPayment(id, reason) {
-        return this.put(`/procurement/${id}/manager-reject-payment`, { reason });
-    },
-    ceoApprovePayment(id, notes) {
-        return this.put(`/procurement/${id}/ceo-approve-payment`, { notes });
-    },
-    ceoRejectPayment(id, reason) {
-        return this.put(`/procurement/${id}/ceo-reject-payment`, { reason });
-    },
-    financeMarkAsPaid(id, data) {
-        return this.put(`/procurement/${id}/mark-paid`, data);
-    },
-    getPaymentDetails(id) {
-        return this.get(`/procurement/${id}/payment`);
-    },
-    getStatusHistory(id) {
-        return this.get(`/procurement/${id}/history`);
-    },
-    getImprestPdfUrl(id) {
-        return `${CONFIG.API_URL}/procurement/${id}/imprest/pdf`;
-    },
-    financeVerifyProcurement(id, data) {
-    return this.put(`/procurement/${id}/finance-verify`, data);
-    },
-    forwardRequestToManager(id) { 
-    return this.put(`/procurement/${id}/forward-to-manager`); 
-    },
-    managerApproveRequest(id, notes) { 
-    return this.put(`/procurement/${id}/manager-approve`, { notes }); 
-    },
-    ceoApproveRequest(id, notes) {
-    return this.put(`/procurement/${id}/ceo-approve`, { notes }); 
-    },
-    submitPurchaserDetails(id, data) { return this.put(`/procurement/${id}/purchaser-details`, data); },
-    // Kupata PDF ya Imprest
-    getImprestPdfUrl(id) {
-    return `${CONFIG.API_URL}/procurement/${id}/imprest/pdf`;
-    },
-        // ================================================================
-    // ASSETS MODULE APIs
-    // ================================================================
+
+    // ============================================================
+    // ASSETS
+    // ============================================================
     getAssets(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.get(`/assets${query ? '?' + query : ''}`);
     },
+
     getAssetStats() {
         return this.get('/assets/stats');
     },
+
     getAssetCategories() {
         return this.get('/assets/categories');
     },
+
     getAsset(id) {
         return this.get(`/assets/${id}`);
     },
+
     createAsset(data) {
         return this.post('/assets', data);
     },
+
     updateAsset(id, data) {
         return this.put(`/assets/${id}`, data);
     },
+
     retireAsset(id, data) {
         return this.put(`/assets/${id}/retire`, data);
     },
+
     deleteAsset(id) {
         return this.delete(`/assets/${id}`);
     },
-    // Maintenance
+
     getAllMaintenance() {
         return this.get('/assets/maintenance/all');
     },
+
     getAssetMaintenance(id) {
         return this.get(`/assets/${id}/maintenance`);
     },
+
     createAssetMaintenance(id, data) {
         return this.post(`/assets/${id}/maintenance`, data);
     },
+
     updateAssetMaintenance(id, maintId, data) {
         return this.put(`/assets/${id}/maintenance/${maintId}`, data);
     },
-    // Depreciation
+
     calculateAssetDepreciation(id, year) {
         return this.post(`/assets/${id}/depreciation/calculate`, { year });
     },
+
     runAnnualDepreciation(year) {
         return this.post('/assets/depreciation/run-annual', { year });
     },
+
     getAssetDepreciationHistory(id) {
         return this.get(`/assets/${id}/depreciation`);
     },
-    // Procurement Integration
+
     receiveProcurementAsAsset(requestId, data) {
         return this.put(`/procurement/${requestId}/receive-as-asset`, data);
-    }   
-}
+    },
+    getPendingReceives() {
+    return this.get('/procurement/stock/pending-receives');
+    },
+    confirmReceive(id) {
+    return this.post(`/procurement/stock/confirm-receive/${id}`, {});
+    },
+    getMaintenanceSummary() {
+    return this.get('/assets/maintenance/summary');
+    },
+    getAssetMaintenanceHistory(id) {
+        return this.get(`/assets/${id}/maintenance/history`);
+    },
+    // Tenders
+    getTenders(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.get(`/tenders${query ? '?' + query : ''}`);
+    },
+    getTender(id) {
+        return this.get(`/tenders/${id}`);
+    },
+    createTender(data) {
+        return this.post('/tenders', data);
+    },
+    updateTender(id, data) {
+        return this.put(`/tenders/${id}`, data);
+    },
+    linkTenderToProcurement(id) {
+        return this.put(`/tenders/${id}/link-procurement`);
+    },
+    deleteTender(id) {
+        return this.delete(`/tenders/${id}`);
+    },
+    // Reports — Procurement/Store/Assets
+    getProcurementSummary(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.get(`/reports/procurement-summary${query ? '?' + query : ''}`);
+    },
+    getStoreSummary(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.get(`/reports/store-summary${query ? '?' + query : ''}`);
+    },
+    getAssetSummary(params = {}) {
+        const query = new URLSearchParams(params).toString();
+    return this.get(`/reports/asset-summary${query ? '?' + query : ''}`);
+    },
+    getMasterReport(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.get(`/reports/master-summary${query ? '?' + query : ''}`);
+    },
+    getProcurementTrend(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.get(`/reports/procurement-trend${query ? '?' + query : ''}`);
+},
+};

@@ -312,7 +312,7 @@ function renderLiveActivity(logs) {
         const action = (log.action || '').toLowerCase();
         if (action.includes('create')) { dotColor = '#22c55e'; icon = '✅'; }
         else if (action.includes('delete')) { dotColor = '#ef4444'; icon = '🗑️'; }
-        else if (action.includes('update')) { dotColor = '#f59e0b'; icon = '✏️'; }
+        else if (action.includes('update')) { dotColor = '#f59e0b'; icon = '🖊️'; }
         else if (action.includes('login')) { dotColor = '#3b82f6'; icon = '🔐'; }
 
         const timeStr = log.createdAt ? new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';

@@ -301,7 +301,7 @@ async function viewDeptRequest(id) {
                         <button class="modern-btn-cancel" onclick="document.getElementById('viewRequestModal').remove()">Close</button>
                         ${request.status === 'rejected' ? `
                             <button class="modern-btn-primary" onclick="document.getElementById('viewRequestModal').remove(); openEditRequestModal(${request.id})" style="background:linear-gradient(135deg, #f59e0b, #d97706);">
-                                ✏️ Edit & Resubmit
+                                🖊️ Edit & Resubmit
                             </button>
                         ` : ''}
                     </div>

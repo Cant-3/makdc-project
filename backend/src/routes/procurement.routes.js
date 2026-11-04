@@ -22,12 +22,27 @@ router.get('/paid', controller.listPaidProcurements);
 // ================================================================
 // 2. STOCK ENDPOINTS
 // ================================================================
+// 🔴 Weka hizi maalum kwanza kabla ya :id
 router.get('/stock', controller.listStockItems);
+router.get('/stock/summary', controller.getStockSummary);
+router.get('/stock/low-stock', controller.getLowStockItems);
+router.get('/stock/movements', controller.listStockMovements); 
+router.get('/stock/pending-receives', controller.getPendingReceives); // 🆕 Hii iwe hapa
+
 router.post('/stock', controller.addStockItem);
+router.post('/stock/adjust', controller.adjustStockItem);
 router.post('/stock/receive/:requestId', controller.receiveStockFromProcurement);
 router.post('/stock/out', controller.stockOut);
-router.get('/stock/transactions', controller.listStockTransactions);
+router.post('/stock/confirm-receive/:id', controller.confirmReceive);// 🆕 Badilisha jina lisigongane
 
+// 🟢 Hii iwe mwisho kabisa kwa stock
+router.get('/stock/:id', controller.getStockItemById); 
+
+// Suppliers & POs
+router.get('/suppliers', controller.listSuppliers);
+router.post('/suppliers', controller.createSupplier);
+router.get('/purchase-orders', controller.listPurchaseOrders);
+router.post('/purchase-orders', controller.createPurchaseOrder);
 // ================================================================
 // 3. CREATE REQUEST
 // ================================================================
@@ -80,4 +95,7 @@ router.get('/:id/history', controller.getStatusHistory);
 // ================================================================
 router.get('/:id', controller.getRequestById);
 router.put('/:id/receive-as-asset', controller.receiveAsAsset);
+
+router.get('/stock/pending-receives', controller.getPendingReceives);
+router.post('/stock/receive/:id', controller.confirmReceive); // Angalia hii haigongani na nyingine
 module.exports = router;

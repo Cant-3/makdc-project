@@ -812,6 +812,176 @@ model ProductionUsage {
   @@index([materialId])
   @@map("production_usages")
 }
+
+// ================================================================
+// STORE & STOCK — Inventory Ledger
+// ================================================================
+model StockItem {
+  id              Int      @id @default(autoincrement())
+  itemCode        String?  @unique @map("item_code")   // 🆕 e.g., STK-2026-0001
+  itemName        String   @map("item_name")
+  category        String?
+  subCategory     String?  @map("sub_category")        // 🆕
+  specification   String?
+  description     String?                              // 🆕
+
+  // QUANTITY (Float ili kuruhusu 1.5 kg)
+  quantity        Float    @default(0)
+  reservedQty     Float    @default(0) @map("reserved_qty")   // 🆕
+  minStockLevel   Float    @default(10) @map("min_stock_level")
+  maxStockLevel   Float?   @map("max_stock_level")            // 🆕
+
+  // VALUATION
+  unit            String   @default("pcs")
+  unitPrice       Decimal? @map("unit_price") @db.Decimal(15, 2)
+  
+  // LOCATION
+  location        String?
+  warehouse       String   @default("Main Store")             // 🆕
+
+  // STATUS
+  status          String   @default("active")
+  isSellable      Boolean  @default(false) @map("is_sellable")          // 🆕
+  requiresApproval Boolean @default(true) @map("requires_approval")    // 🆕
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  transactions    StockTransaction[]
+  adjustments     StockAdjustment[]
+
+  @@unique([itemName, specification])
+  @@index([category])
+  @@index([status])
+  @@index([itemCode])
+  @@map("stock_items")
+}
+model StockTransaction {
+  id              Int      @id @default(autoincrement())
+  movementNumber  String   @unique @map("movement_number")   // 🆕 e.g., MV-2026-00001
+  stockItemId     Int      @map("stock_item_id")
+  stockItem       StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+
+  // TYPE (ina types 10 sasa)
+  transactionType String   @map("transaction_type")
+  // in, out, transfer, adjustment, return, damage,
+  // production-in, production-out, asset-convert, sale
+
+  quantity        Float    @default(0)
+  unitPrice       Decimal? @map("unit_price") @db.Decimal(15, 2)  // 🆕
+  totalCost       Decimal? @map("total_cost") @db.Decimal(15, 2)   // 🆕
+
+  // BALANCE TRACKING
+  balanceBefore   Float?   @map("balance_before")   // 🆕
+  balanceAfter    Float?   @map("balance_after")    // 🆕
+
+  isReceived      Boolean?  @default(false) @map("is_received")
+  receivedAt      DateTime? @map("received_at")
+  receivedBy      String?   @map("received_by")
+
+  // WHO & WHERE
+  department      String?                              // 🆕
+  issuedTo        String?  @map("issued_to")           // 🆕
+  performedBy     String?  @map("performed_by")
+  performedById   Int?     @map("performed_by_id")
+  approvedBy      String?  @map("approved_by")         // 🆕
+  approvedById    Int?     @map("approved_by_id")      // 🆕
+
+  // REFERENCE
+  reference       String?                             // 🆕 human-readable
+  referenceType   String?  @map("reference_type")     // 🆕 procurement, order, manual
+  referenceId     String?  @map("reference_id")       // 🆕
+  requestId       Int?     @map("request_id")         // legacy
+
+  // DETAILS
+  reason          String?                             // 🆕
+  notes           String?
+  
+  // STATUS
+  status          String   @default("completed")      // 🆕 pending, approved, completed, cancelled
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([stockItemId])
+  @@index([requestId])
+  @@index([transactionType])
+  @@index([createdAt])
+  @@index([department])
+  @@map("stock_transactions")
+}
+model StockAdjustment {
+  id              Int      @id @default(autoincrement())
+  adjustmentNumber String  @unique @map("adjustment_number")  // 🆕
+  stockItemId     Int      @map("stock_item_id")
+  stockItem       StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+  
+  reason          String
+  systemQuantity  Float    @map("system_quantity")    // 🆕
+  physicalQuantity Float   @map("physical_quantity")  // 🆕
+  difference      Float                                // 🆕
+  
+  approvedBy      String?  @map("approved_by")
+  approvedById    Int?     @map("approved_by_id")     // 🆕
+  performedBy     String?  @map("performed_by")       // 🆕
+  performedById   Int?     @map("performed_by_id")    // 🆕
+  
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([stockItemId])
+  @@index([createdAt])
+  @@map("stock_adjustments")
+}
+model Supplier {
+  id             Int      @id @default(autoincrement())
+  name           String
+  contactPerson  String?  @map("contact_person")
+  phone          String?
+  email          String?
+  address        String?
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  purchaseOrders PurchaseOrder[]
+
+  @@unique([name, email])
+  @@map("suppliers")
+}
+
+model PurchaseOrder {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique @map("order_number")
+  supplierId    Int?     @map("supplier_id")
+  supplier      Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  status        String   @default("draft")
+  totalAmount   Decimal  @default(0) @map("total_amount") @db.Decimal(15, 2)
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  items         PurchaseOrderItem[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              Int      @id @default(autoincrement())
+  purchaseOrderId Int      @map("purchase_order_id")
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  itemName        String   @map("item_name")
+  specification   String?
+  quantity        Int      @default(0)
+  unit            String   @default("pcs")
+  unitPrice       Decimal  @map("unit_price") @db.Decimal(15, 2)
+  total           Decimal  @db.Decimal(15, 2)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([purchaseOrderId])
+  @@map("purchase_order_items")
+}
 // ================================================================
 // 🆕 MESSAGES & FOLLOW-UPS
 // ================================================================
@@ -828,10 +998,75 @@ model ProcurementRequestMessage {
 
   @@map("procurement_request_messages")
 }
+model ProcurementItem {
+  id             Int      @id @default(autoincrement())
+  requestId      Int      @map("request_id")
+  request        ProcurementRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  itemName       String   @map("item_name")
+  specification  String?
+  quantity       Int      @default(1)
+  unit           String   @default("pcs")
+  estimatedPrice Decimal? @map("estimated_price") @db.Decimal(15, 2)
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([requestId])
+  @@map("procurement_items")
+}
+
 model ProcurementRequest {
-  id              Int     @id @default(autoincrement())
-  receivedAsAsset Boolean @default(false) @map("received_as_asset")
-  assetId         Int?    @unique @map("asset_id")
+  id                Int      @id @default(autoincrement())
+  requestNumber     String   @unique @map("request_number")
+  department        String?
+  requestedBy       String?  @map("requested_by")
+  requestedById     Int?     @map("requested_by_id")
+  status            String   @default("pending")
+  totalAmount       Decimal  @default(0) @map("total_amount") @db.Decimal(15, 2)
+  notes             String?
+  title             String?
+  urgency           String?  @default("normal")
+  requiredBy        String?  @map("required_by")
+  attachments       Json?    @default("[]")
+  itemCount         Int?     @default(0) @map("item_count")
+
+  supplierName      String?  @map("supplier_name")
+  invoiceNumber     String?  @map("invoice_number")
+  purchaserDetails  Json?    @map("purchaser_details")
+  imprestNumber     String?  @map("imprest_number")
+  paymentReference  String?  @map("payment_reference")
+  paymentStatus     String?  @map("payment_status")
+  managerApprovedAt DateTime? @map("manager_approved_at")
+  managerNotes      String?  @map("manager_notes")
+  ceoApprovedAt     DateTime? @map("ceo_approved_at")
+  ceoNotes          String?  @map("ceo_notes")
+  procurementNotes  String?  @map("procurement_notes")
+  financeNotes      String?  @map("finance_notes")
+  rejectionReason   String?  @map("rejection_reason")
+  paidAt            DateTime? @map("paid_at")
+  completedAt       DateTime? @map("completed_at")
+  receivedAsAsset   Boolean  @default(false) @map("received_as_asset")
+  assetId           Int?     @unique @map("asset_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  rejectionStage       String?   @map("rejection_stage")
+  returnedAt           DateTime? @map("returned_at")
+  returnedBy           String?   @map("returned_by")
+  purchaserDetailsAt   DateTime? @map("purchaser_details_at")
+  purchaserDetailsBy   String?   @map("purchaser_details_by")
+  imprestId            Int?      @map("imprest_id")
+  imprestGeneratedAt   DateTime? @map("imprest_generated_at")
+  paymentApprovedAt    DateTime? @map("payment_approved_at")
+  paymentApprovedBy    String?   @map("payment_approved_by")
+  receivedAt           DateTime? @map("received_at")
+  paidBy               String?   @map("paid_by")
+  receivedAsStock      Boolean   @default(false) @map("received_as_stock")
+  items             ProcurementItem[]
+
+  @@index([status])
+  @@index([requestedById])
+  @@index([department])
+  @@map("procurement_requests")
 }
 
 model ProcurementRequestFollowUp {
@@ -856,6 +1091,7 @@ model Asset {
   serialNumber    String?  @map("serial_number")
   model           String?
   manufacturer    String?
+  qrCode          String?   @map("qr_code")
 
   purchaseDate    DateTime? @map("purchase_date") @db.Date
   purchaseValue   Decimal   @default(0) @map("purchase_value") @db.Decimal(15, 2)
@@ -940,4 +1176,80 @@ model AssetDepreciationLog {
   @@unique([assetId, year])
   @@index([assetId])
   @@map("asset_depreciation_logs")
+}
+// ================================================================
+// 🆕 PROCUREMENT IMPRESTS — PDF records
+// ================================================================
+model ProcurementImprest {
+  id               Int      @id @default(autoincrement())
+  imprestNumber    String   @unique @map("imprest_number")
+  requestId        Int      @map("request_id")
+  requestNumber    String   @map("request_number")
+  department       String?
+  requestedBy      String?  @map("requested_by")
+  title            String?
+  items            Json?
+  totalAmount      Decimal  @map("total_amount") @db.Decimal(15, 2)
+  approvedByCeo    String?  @map("approved_by_ceo")
+  approvedByCeoId  Int?     @map("approved_by_ceo_id")
+  qrCodeData       String?  @map("qr_code_data")
+  pdfPath          String?  @map("pdf_path")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([requestId])
+  @@map("procurement_imprests")
+}
+
+// ================================================================
+// 🆕 PROCUREMENT STATUS HISTORY — Audit trail
+// ================================================================
+model ProcurementStatusHistory {
+  id             Int      @id @default(autoincrement())
+  requestId      Int      @map("request_id")
+  fromStatus     String?  @map("from_status")
+  toStatus       String   @map("to_status")
+  changedBy      String   @map("changed_by")
+  changedById    Int?     @map("changed_by_id")
+  changedByRole  String?  @map("changed_by_role")
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([requestId])
+  @@map("procurement_status_history")
+}
+model Tender {
+  id                Int       @id @default(autoincrement())
+  tenderNumber      String    @unique @map("tender_number") // Mfano: TND-2026-001
+  title             String
+  description       String?
+  clientName        String?   @map("client_name") // Mteja anayetoa tenda (Serikali, Kampuni n.k.)
+  category          String?   // Ujenzi, Ugavi, Huduma
+  location          String?
+  
+  // TAREHE
+  publishedDate     DateTime? @map("published_date")
+  submissionDate    DateTime? @map("submission_date") // Deadline ya kuwasilisha
+  awardedDate       DateTime? @map("awarded_date")    // Iliposhindwa
+  
+  // FEDHA
+  estimatedBudget   Decimal?  @map("estimated_budget") @db.Decimal(15, 2)
+  awardedAmount     Decimal?  @map("awarded_amount") @db.Decimal(15, 2)
+  
+  // HALI (Status)
+  status            String    @default("incoming") // incoming, preparing, submitted, won, lost, cancelled
+  
+  // NYARAKA (Attachments)
+  documents         Json?     @default("[]") // Hifadhi majina ya files, base64 au URL
+  
+  // MUUNGANIKO NA PROCUREMENT (Kama tumeshinda)
+  procurementId     Int?      @map("procurement_id")
+  
+  createdById       Int?      @map("created_by_id")
+  createdByName     String?   @map("created_by_name")
+  notes             String?
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("tenders")
 }

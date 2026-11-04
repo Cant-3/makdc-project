@@ -1680,7 +1680,6 @@
         .modern-confirm-form label { display:block; font-size:11px; font-weight:800; color:#334155; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
         .modern-confirm-form textarea { width:100%; padding:12px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13.5px; font-family:inherit; background:#f8fafc; color:#1e293b; min-height:90px; resize:vertical; }
         .modern-confirm-form textarea:focus { outline:none; border-color:#dc2626; background:white; box-shadow:0 0 0 3px rgba(220,38,38,0.12); }
-
         /* MODERN TOAST */
         .modern-toast-container { position:fixed; top:24px; right:24px; z-index:40000; display:flex; flex-direction:column; gap:12px; pointer-events:none; }
         .modern-toast { min-width:300px; max-width:420px; padding:16px 20px; background:white; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05); display:flex; align-items:center; gap:14px; transform:translateX(450px); opacity:0; transition:all 0.4s cubic-bezier(0.16,1,0.3,1); pointer-events:auto; position:relative; overflow:hidden; border-left:5px solid #384b67; }
@@ -1772,6 +1771,7 @@
             <a onclick="switchSidebarTab('sub-all-stock', event)">📦 All Stock Items</a>
             <a onclick="switchSidebarTab('sub-add-stock', event)">➕ Add Stock</a>
             <a onclick="switchSidebarTab('sub-stock-out', event)">📤 Stock Out</a>
+            <a onclick="switchSidebarTab('sub-stock-receive', event)">📥 Receive Stock</a>
             <a onclick="switchSidebarTab('sub-stock-trans', event)">📊 Transactions History</a>
         </div>
     </div>
@@ -1799,23 +1799,8 @@
         </div>
         <div class="sidebar-submenu">
             <a onclick="switchSidebarTab('sub-all-tenders', event)">📄 All Tenders</a>
-            <a onclick="switchSidebarTab('sub-apply-tender', event)">➕ Apply Tender</a>
         </div>
     </div>
-
-    <!-- 6. PRICING -->
-    <div class="sidebar-nav-group">
-        <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
-            <span>💰</span>
-            <span class="nav-text">Pricing</span>
-            <span class="nav-arrow">▼</span>
-        </div>
-        <div class="sidebar-submenu">
-            <a onclick="switchSidebarTab('sub-price-monitor', event)">📊 Price Monitor</a>
-            <a onclick="switchSidebarTab('sub-price-control', event)">⚖️ Price Control</a>
-        </div>
-    </div>
-
     <!-- 7. REPORTS -->
     <div class="sidebar-nav-group">
         <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
@@ -1824,11 +1809,8 @@
             <span class="nav-arrow">▼</span>
         </div>
         <div class="sidebar-submenu">
-            <a onclick="switchSidebarTab('sub-report-weekly', event)">📅 Weekly Report</a>
-            <a onclick="switchSidebarTab('sub-report-monthly', event)">📆 Monthly Report</a>
-            <a onclick="switchSidebarTab('sub-report-quarterly', event)">📊 Quarterly Report</a>
-            <a onclick="switchSidebarTab('sub-report-annual', event)">📈 Annual Report</a>
-        </div>
+        <a onclick="switchSidebarTab('sub-report-annual', event)">📊 Master Report</a>
+    </div>
     </div>
   </nav>
 
@@ -1841,13 +1823,6 @@
         </div>
 
         <button class="sidebar-portal" onclick="handleLogoutClick(event)">🔌 Logout</button>
-
-        <div class="sidebar-contact">
-            <a href="index.html#contact">
-                <span>📞</span>
-                Contact Support
-            </a>
-        </div>
 
         <div class="sidebar-bottom">
             <span>MAKETE DISTRICT COUNCIL SPV</span>
@@ -2120,19 +2095,115 @@
             </div>
         </div>
     </div>
-        <!-- ===== SUB-TAB: ALL ASSETS ===== -->
+    <!-- ===== SUB-TAB: STOCK MOVEMENTS ===== -->
+    <div class="tab-content" id="sub-stock-trans">
+    <div class="section-card">
+        <div class="section-header">
+        <h2>📊 Stock Movements</h2>
+        <button class="action-btn blue" onclick="loadStockTransactions()">🔄 Refresh</button>
+        </div>
+        <div class="section-body">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <select id="movementFilterType" onchange="loadStockTransactions()"
+                    style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-size:13px;font-family:inherit;">
+            <option value="">All Types</option>
+            <option value="in">📥 IN</option>
+            <option value="out">📤 OUT</option>
+            <option value="adjustment">🔧 Adjustment</option>
+            <option value="damage">❌ Damage</option>
+            <option value="return">↩️ Return</option>
+            </select>
+            <input type="date" id="movementStartDate" onchange="loadStockTransactions()"
+                style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-size:13px;font-family:inherit;">
+            <input type="date" id="movementEndDate" onchange="loadStockTransactions()"
+                style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-size:13px;font-family:inherit;">
+        </div>
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Movement #</th>
+                <th>Item</th>
+                <th>Type</th>
+                <th>Qty</th>
+                <th>Balance</th>
+                <th>Department</th>
+                <th>Reference</th>
+                <th>By</th>
+            </tr>
+            </thead>
+            <tbody id="stockTransTableBody">
+            <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    </div>
+
+    <div class="tab-content" id="sub-add-stock">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>➕ Add Stock</h2>
+            </div>
+            <div class="section-body" style="text-align:center; padding: 60px 20px; background: var(--gray-50);">
+                <div style="width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                    📦
+                </div>
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 10px;">Record New Stock</h3>
+                <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 30px; max-width: 420px; margin-left: auto; margin-right: auto;">
+                    Add items to the store ledger, track quantity levels, and keep the stock movement history accurate.
+                </p>
+                <button class="action-btn gold" style="padding: 14px 32px; font-size: 15px; font-weight: 800; border-radius: 10px; box-shadow: 0 6px 20px rgba(245,158,11,0.4);" onclick="openStockEntryModal()">
+                    📝 Open Stock Form
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="sub-stock-receive">
+    <div class="section-card">
+        <div class="section-header">
+            <h2>📥 Received Stock (Department)</h2>
+            <button class="action-btn blue" onclick="loadPendingReceives()">🔄 Refresh</button>
+        </div>
+        <div class="section-body">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date Issued</th>
+                        <th>Voucher No.</th>
+                        <th>Item</th>
+                        <th>Qty Issued</th>
+                        <th>From Store</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="receiveTableBody">
+                    <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    <!-- ===== SUB-TAB: ALL ASSETS ===== -->
     <div class="tab-content" id="sub-all-assets">
         <div class="section-card">
             <div class="section-header">
                 <h2>🏷️ Asset Register <span class="badge" id="assetsCount">0</span></h2>
-                <button class="action-btn gold" onclick="openAssetModal()">➕ Add Asset</button>
+                <div style="display:flex;gap:8px;">
+                    <button class="action-btn gold" onclick="openAssetModal()">➕ Add Asset</button>
+                    <button class="action-btn blue" onclick="loadAssets()">🔄 Refresh</button>
+                </div>
             </div>
             <div class="section-body">
+                <!-- STATS GRID -->
                 <div id="assetStatsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
                 
-                <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-                    <select id="assetFilterCategory" onchange="loadAssets()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-family:inherit;font-size:13px;">
-                        <option value="">All Categories</option>
+                <!-- FILTERS -->
+                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid var(--gray-200);">
+                    <select id="assetFilterCategory" onchange="loadAssets()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit; outline:none; flex:1; min-width:150px;">
+                        <option value="">📁 All Categories</option>
                         <option value="Vehicle">🚗 Vehicle</option>
                         <option value="Equipment">⚙️ Equipment</option>
                         <option value="Furniture">🪑 Furniture</option>
@@ -2141,58 +2212,188 @@
                         <option value="Tool">🔧 Tool</option>
                         <option value="Other">📦 Other</option>
                     </select>
-                    <select id="assetFilterStatus" onchange="loadAssets()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-family:inherit;font-size:13px;">
-                        <option value="">All Status</option>
+                    
+                    <select id="assetFilterStatus" onchange="loadAssets()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit; outline:none; flex:1; min-width:150px;">
+                        <option value="">🚦 All Status</option>
                         <option value="Active">✅ Active</option>
                         <option value="In Maintenance">🔧 In Maintenance</option>
                         <option value="Retired">🗑️ Retired</option>
                         <option value="Disposed">❌ Disposed</option>
                     </select>
-                    <input type="text" id="assetSearchInput" placeholder="🔍 Search assets..." oninput="debounceLoadAssets()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:8px;font-family:inherit;font-size:13px;flex:1;min-width:200px;">
+                    
+                    <input type="text" id="assetSearchInput" placeholder="🔍 Search assets by name or tag..." oninput="debounceLoadAssets()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit; outline:none; flex:2; min-width:250px;">
                 </div>
 
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Asset Tag</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Location</th>
-                            <th>Custodian</th>
-                            <th>Current Value</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assetsTableBody">
-                        <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
-                    </tbody>
-                </table>
+                <!-- MODERN TABLE -->
+                <div style="overflow-x:auto; background:white; border-radius:12px; border:1px solid var(--gray-200);">
+                    <table class="data-table" style="width:100%; border-collapse:collapse; min-width:800px;">
+                        <thead style="background:var(--gray-50); border-bottom:2px solid var(--gray-200);">
+                            <tr>
+                                <th style="text-align:left; padding:14px;">Asset Details</th>
+                                <th style="text-align:left; padding:14px;">Category</th>
+                                <th style="text-align:left; padding:14px;">Location & Custodian</th>
+                                <th style="text-align:right; padding:14px;">Current Value</th>
+                                <th style="text-align:center; padding:14px;">Status</th>
+                                <th style="text-align:center; padding:14px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assetsTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">⏳ Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
     <!-- ===== SUB-TAB: MAINTENANCE LOG ===== -->
     <div class="tab-content" id="sub-maintenance">
+    <div class="section-card">
+        <div style="display:flex;gap:8px;">
+        <button class="action-btn red" onclick="printMaintenanceReport()">🖨️ Print PDF</button>
+        <button class="action-btn blue" onclick="loadMaintenanceLog()">🔄 Refresh</button>
+        </div>
+        <div class="section-body">
+            
+            <!-- STATS CARDS -->
+            <div id="maintenanceStatsGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                <!-- JS itajaza hapa -->
+            </div>
+
+            <!-- TABLE -->
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Cost</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="maintenanceTableBody">
+                    <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    <!-- ===== SUB-TAB: ALL STOCK ===== -->
+    <div class="tab-content" id="sub-all-stock">
         <div class="section-card">
             <div class="section-header">
-                <h2>🔧 Maintenance Log</h2>
+                <h2>📦 All Stock Items <span class="badge" id="stockSummaryCount">0</span></h2>
+                <div style="display:flex;gap:8px;">
+                    <button class="action-btn gold" onclick="openStockEntryModal()">➕ Add Stock</button>
+                    <button class="action-btn blue" onclick="loadStockItems()">🔄 Refresh</button>
+                </div>
             </div>
             <div class="section-body">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                            <th>Cost</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="maintenanceTableBody">
-                        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">Loading...</td></tr>
-                    </tbody>
-                </table>
+                <!-- STATS GRID -->
+                <div id="stockSummaryGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
+                <!-- FILTERS -->
+                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center; background:white; padding:12px; border-radius:10px; border:1px solid var(--gray-200);">
+                    <select id="stockFilterCategory" onchange="loadStockItems()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit; outline:none; flex:1; min-width:150px;">
+                        <option value="">📁 All Categories</option>
+                        <option value="Building Materials">Building Materials</option>
+                        <option value="Cement">Cement</option>
+                        <option value="Blocks">Blocks</option>
+                        <option value="Roofing">Roofing</option>
+                        <option value="Paint">Paint</option>
+                        <option value="Hardware">Hardware</option>
+                        <option value="Stationery">Stationery</option>
+                        <option value="Electronics">Electronics</option>
+                    </select>
+                    
+                    <select id="stockFilterStatus" onchange="loadStockItems()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit; outline:none; flex:1; min-width:150px;">
+                        <option value="">🚦 All Status</option>
+                        <option value="in-stock">✅ In Stock</option>
+                        <option value="low-stock">⚠️ Low Stock</option>
+                        <option value="out-of-stock">❌ Out of Stock</option>
+                    </select>
+                    
+                    <input type="text" id="stockSearchInput" placeholder="🔍 Search items..." oninput="debounceLoadStock()" style="padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit; outline:none; flex:2; min-width:250px;">
+                </div>
+
+                <!-- MODERN TABLE -->
+                <div style="overflow-x:auto; background:white; border-radius:12px; border:1px solid var(--gray-200);">
+                    <table class="data-table" style="width:100%; border-collapse:collapse; min-width:800px;">
+                        <thead style="background:var(--gray-50); border-bottom:2px solid var(--gray-200);">
+                            <tr>
+                                <th style="text-align:left; padding:14px;">Item Details</th>
+                                <th style="text-align:left; padding:14px;">Category</th>
+                                <th style="text-align:center; padding:14px;">Stock Qty</th>
+                                <th style="text-align:right; padding:14px;">Unit Price</th>
+                                <th style="text-align:center; padding:14px;">Status</th>
+                                <th style="text-align:center; padding:14px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">⏳ Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+   <!-- ===== SUB-TAB: STOCK OUT ===== -->
+    <div class="tab-content" id="sub-stock-out">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📤 Issue Stock (Stock Out)</h2>
+            </div>
+            <div class="section-body">
+                <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:20px;align-items:start;">
+                    
+                    <!-- LEFT: FORM -->
+                    <div style="background:var(--gray-50); border:1px solid var(--gray-200); padding:20px; border-radius:12px;">
+                        <h3 style="font-size:16px; margin-bottom:16px; color:var(--primary); border-bottom:1px solid var(--gray-200); padding-bottom:10px;">Issue Details</h3>
+                        
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Select Item <span style="color:var(--red);">*</span></label>
+                            <select id="so_stockItemId" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+                                <option value="">-- Chagua Bidhaa --</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Quantity <span style="color:var(--red);">*</span></label>
+                            <input type="number" id="so_quantity" placeholder="0" min="0.01" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Department <span style="color:var(--red);">*</span></label>
+                            <select id="so_department" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+                                <option value="">-- Chagua Idara --</option>
+                                <option value="Administration Department">🏢 Administration</option>
+                                <option value="Sales and Marketing Department">📈 Sales & Marketing</option>
+                                <option value="Engineering and Production Department">⚙️ Engineering & Production</option>
+                                <option value="Finance Department">💰 Finance</option>
+                                <option value="Procurements Management Unit">🛒 Procurement</option>
+                                <option value="Information and Technology Department">💻 IT</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:14px;">
+                            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Issued To (Receiver Name) <span style="color:var(--red);">*</span></label>
+                            <input type="text" id="so_issuedTo" placeholder="Full name" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Notes / Purpose</label>
+                            <textarea id="so_notes" placeholder="Why is this needed?" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;min-height:60px;resize:vertical;"></textarea>
+                        </div>
+                        <div id="so_status" class="status-msg"></div>
+                        <button onclick="submitStockOutForm()" style="width:100%; padding:14px; background:linear-gradient(135deg,#dc2626,#991b1b); color:white; border:none; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(220,38,38,0.3);">
+                            📤 Issue Item Now
+                        </button>
+                    </div>
+
+                    <!-- RIGHT: RECENT HISTORY -->
+                    <div style="background:white; border:1px solid var(--gray-200); padding:20px; border-radius:12px;">
+                        <h3 style="font-size:16px; margin-bottom:16px; color:var(--primary); border-bottom:1px solid var(--gray-200); padding-bottom:10px;">Recent Stock Outs</h3>
+                        <div id="recentStockOutContainer" style="display:flex; flex-direction:column; gap:12px; max-height: 500px; overflow-y:auto;">
+                            <!-- JS itajaza hapa -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2216,21 +2417,161 @@
             </div>
         </div>
     </div>
+    <!-- ===== SUB-TAB: ALL TENDERS ===== -->
+    <div class="tab-content" id="sub-all-tenders">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📄 Tenders Register <span class="badge" id="tendersCount">0</span></h2>
+                <div style="display:flex;gap:8px;">
+                    <button class="action-btn gold" onclick="openTenderModal()">➕ Add Tender</button>
+                    <button class="action-btn blue" onclick="loadTenders()">🔄 Refresh</button>
+                </div>
+            </div>
+            <div class="section-body">
+                <!-- STATS -->
+                <div id="tenderStatsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
+                <!-- FILTERS -->
+                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                    <select id="tenderFilterStatus" onchange="loadTenders()" style="padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;flex:1;">
+                        <option value="">🚦 All Status</option>
+                        <option value="incoming">📥 Incoming</option>
+                        <option value="preparing">📝 Preparing</option>
+                        <option value="submitted">📤 Submitted</option>
+                        <option value="won">🏆 Won</option>
+                        <option value="lost">❌ Lost</option>
+                    </select>
+                    <input type="text" id="tenderSearchInput" placeholder="🔍 Search tenders..." oninput="debounceLoadTenders()" style="padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;flex:2;">
+                </div>
+
+                <!-- TABLE -->
+                <div style="overflow-x:auto; background:white; border-radius:12px; border:1px solid var(--gray-200);">
+                    <table class="data-table" style="width:100%; border-collapse:collapse; min-width:900px;">
+                        <thead style="background:var(--gray-50); border-bottom:2px solid var(--gray-200);">
+                            <tr>
+                                <th style="text-align:left; padding:14px;">Tender Details</th>
+                                <th style="text-align:left; padding:14px;">Client</th>
+                                <th style="text-align:right; padding:14px;">Budget (TSh)</th>
+                                <th style="text-align:center; padding:14px;">Deadline</th>
+                                <th style="text-align:center; padding:14px;">Status</th>
+                                <th style="text-align:center; padding:14px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tendersTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">⏳ Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <!-- ===== FOOTER ===== -->
-        <footer class="site-footer">
+    </div>
+    <!-- ===== SUB-TAB: MASTER REPORT (Executive Summary) ===== -->
+    <div class="tab-content" id="sub-report-annual">
+        <div class="section-card">
+            <div class="section-header">
+                <h2>📊 Executive Summary Report</h2>
+            </div>
+            <div class="section-body">
+
+                <!-- FILTERS -->
+                <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--gray-200); margin-bottom:20px;">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+                        <div>
+                            <label style="font-size:11px; font-weight:800; color:var(--gray-600); text-transform:uppercase; display:block; margin-bottom:4px;">Period</label>
+                            <select id="masterPeriodType" onchange="toggleCustomDateRange()" style="padding:10px; border:1.5px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:inherit;">
+                                <option value="monthly">📅 This Month</option>
+                                <option value="last-month">📅 Last Month</option>
+                                <option value="yearly">📆 This Year</option>
+                                <option value="weekly">🗓️ This Week</option>
+                                <option value="custom">🎯 Custom Range</option>
+                            </select>
+                        </div>
+                        <div id="customDateRange" style="display:none; gap:8px; align-items:flex-end;">
+                            <div>
+                                <label style="font-size:11px; font-weight:800; color:var(--gray-600); text-transform:uppercase; display:block; margin-bottom:4px;">From</label>
+                                <input type="date" id="masterDateFrom" style="padding:10px; border:1.5px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:inherit;">
+                            </div>
+                            <div>
+                                <label style="font-size:11px; font-weight:800; color:var(--gray-600); text-transform:uppercase; display:block; margin-bottom:4px;">To</label>
+                                <input type="date" id="masterDateTo" style="padding:10px; border:1.5px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:inherit;">
+                            </div>
+                        </div>
+                        <button onclick="loadMasterReport()" style="padding:10px 24px; background:var(--gold); color:var(--primary-dark); border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit;">
+                            🔍 Generate Report
+                        </button>
+                        <button onclick="printMasterReport()" style="padding:10px 24px; background:var(--red); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit;">
+                            🖨️ Print PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NARRATIVE -->
+                <div id="masterNarrative" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1.5px solid #bbf7d0; border-radius:12px; padding:20px; margin-bottom:24px;">
+                    <h4 style="color:#166534; font-size:14px; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">📝 Executive Summary</h4>
+                    <p id="masterNarrativeText" style="font-size:14px; line-height:1.8; color:#1e293b; margin:0;">Bonyeza "Generate Report" kuanza.</p>
+                </div>
+                <!-- KPI CARDS -->
+                <h3 style="font-size:16px; margin-bottom:12px; color:var(--primary);">Key Performance Indicators</h3>
+                <div id="masterKPIGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px; margin-bottom:24px;"></div>
+                <!-- CHARTS (COMPACT) -->
+                <h3 style="font-size:16px; margin-bottom:12px; color:var(--primary);">📊 Visual Analytics</h3>
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom:24px;">
+                <!-- LINE CHART: Procurement Trend -->
+                <div style="background:white; padding:20px; border-radius:12px; border:1px solid var(--gray-200); grid-column: span 2;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div>
+                            <h4 style="font-size:15px; margin:0; color:var(--gray-800);">📈 Procurement Value Trend</h4>
+                            <p style="font-size:11px; color:var(--gray-500); margin:4px 0 0 0;">Daily performance over selected period</p>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button onclick="changeTrendPeriod('7d')" class="trend-btn active" data-period="7d" style="padding:6px 14px; border-radius:6px; border:1px solid var(--gray-300); background:white; font-size:11px; font-weight:700; cursor:pointer;">7D</button>
+                            <button onclick="changeTrendPeriod('30d')" class="trend-btn" data-period="30d" style="padding:6px 14px; border-radius:6px; border:1px solid var(--gray-300); background:white; font-size:11px; font-weight:700; cursor:pointer;">30D</button>
+                            <button onclick="changeTrendPeriod('90d')" class="trend-btn" data-period="90d" style="padding:6px 14px; border-radius:6px; border:1px solid var(--gray-300); background:white; font-size:11px; font-weight:700; cursor:pointer;">90D</button>
+                        </div>
+                    </div>
+                    <div style="position:relative; height:280px;">
+                        <canvas id="procurementTrendChart"></canvas>
+                    </div>
+                </div>
+                    <!-- BAR CHART: Procurement Status Breakdown -->
+                    <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--gray-200);">
+                        <h4 style="font-size:13px; margin:0 0 12px 0; color:var(--gray-700);">📊 Status Breakdown</h4>
+                        <div style="position:relative; height:180px;">
+                            <canvas id="procurementStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 2: Stock & Assets -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <!-- STOCK DOUGHNUT (Small) -->
+                    <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--gray-200);">
+                        <h4 style="font-size:13px; margin:0 0 12px 0; color:var(--gray-700);">📦 Store Stock Value</h4>
+                        <div style="position:relative; height:180px;">
+                            <canvas id="storeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- ASSET BAR (Small) -->
+                    <div style="background:white; padding:16px; border-radius:12px; border:1px solid var(--gray-200);">
+                        <h4 style="font-size:13px; margin:0 0 12px 0; color:var(--gray-700);">🏷️ Fixed Asset Status</h4>
+                        <div style="position:relative; height:180px;">
+                            <canvas id="assetChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== FOOTER ===== -->
+    <footer class="site-footer">
             <p>MAK DC Investment Company — Procurement &amp; Store Dashboard</p>
             <small>© 2026 All rights reserved.</small>
-        </footer>
-
-    </div>
+    </footer>
+     </div>
     <!-- ================================================================
     MODALS
     ================================================================ -->
-    <!-- View Procurement Modal -->
-    <!-- ================================================================
-     MODAL: VIEW PROCUREMENT DETAILS (PREMIUM UI)
-     ================================================================ -->
     <div class="modal-overlay" id="viewProcurementModal">
         <div class="modal-box" style="max-width: 780px; padding: 0; overflow: hidden; border-radius: 24px; box-shadow: 0 30px 90px rgba(0,0,0,0.4); max-height: 92vh; display: flex; flex-direction: column;">
             
@@ -2525,95 +2866,301 @@
             </div>
         </div>
     </div>
-    <!-- Stock Entry Modal -->
-    <div class="modal-overlay" id="stockEntryModal">
+    
+    <div class="modal-overlay" id="supplierModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3>📦 Add Stock</h3>
-                <button class="modal-close" onclick="closeModal('stockEntryModal')">✕</button>
+                <h3>🏢 Add Supplier</h3>
+                <button class="modal-close" onclick="closeModal('supplierModal')">✕</button>
             </div>
             <div class="modal-body">
                 <div style="margin-top:6px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Item Name</label>
-                    <input type="text" id="stockItemName" placeholder="Enter item name...">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Supplier Name</label>
+                    <input type="text" id="supplierName" placeholder="Enter supplier name...">
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Category</label>
-                    <select id="stockCategory">
-                        <option value="Building Materials">Building Materials</option>
-                        <option value="Cement">Cement</option>
-                        <option value="Blocks">Blocks</option>
-                        <option value="Roofing">Roofing</option>
-                        <option value="Paint">Paint</option>
-                        <option value="Hardware">Hardware</option>
-                        <option value="Steel">Steel</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Contact Person</label>
+                    <input type="text" id="supplierContactPerson" placeholder="Optional">
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Quantity</label>
-                    <input type="number" id="stockQty" placeholder="0">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Phone</label>
+                    <input type="text" id="supplierPhone" placeholder="Optional">
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Unit</label>
-                    <input type="text" id="stockUnit" placeholder="e.g., bags, pieces, tons...">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Email</label>
+                    <input type="email" id="supplierEmail" placeholder="Optional">
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Unit Price (TSh)</label>
-                    <input type="number" id="stockPrice" placeholder="0">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Address</label>
+                    <input type="text" id="supplierAddress" placeholder="Optional">
                 </div>
-                <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Transaction Type</label>
-                    <select id="stockTransType">
-                        <option value="in">Stock In</option>
-                        <option value="out">Stock Out</option>
-                    </select>
-                </div>
-                <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Notes</label>
-                    <textarea id="stockNotes" placeholder="Any notes..."></textarea>
-                </div>
-                <div id="stockEntryStatus" class="status-msg"></div>
+                <div id="supplierStatus" class="status-msg"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('stockEntryModal')">Cancel</button>
-                <button class="btn-submit green" onclick="submitStockEntry()">✅ Save Stock</button>
+                <button class="btn-cancel" onclick="closeModal('supplierModal')">Cancel</button>
+                <button class="btn-submit green" onclick="submitSupplier()">✅ Save Supplier</button>
             </div>
         </div>
     </div>
-    <!-- Tender Modal -->
-    <div class="modal-overlay" id="tenderModal">
+    <!-- ===== MODAL: ADD STOCK ===== -->
+    <div class="modal-overlay" id="stockEntryModal">
+    <div class="modal-box" style="max-width: 600px; padding: 0; overflow: hidden;">
+        <div style="background:linear-gradient(135deg,#022908 0%,#034d13 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">📦</div>
+            <div>
+            <h3 style="font-size:17px;font-weight:800;margin:0;">Add Stock</h3>
+            <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;">Record new stock item</p>
+            </div>
+        </div>
+        <button onclick="closeModal('stockEntryModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+
+        <div style="padding: 20px 26px; max-height: 70vh; overflow-y: auto;">
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Item Name <span style="color:var(--red);">*</span></label>
+            <input type="text" id="stockItemName" placeholder="e.g., Cement Bag, A4 Paper" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Category</label>
+            <select id="stockCategory" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+                <option value="Building Materials">Building Materials</option>
+                <option value="Cement">Cement</option>
+                <option value="Blocks">Blocks</option>
+                <option value="Roofing">Roofing</option>
+                <option value="Paint">Paint</option>
+                <option value="Hardware">Hardware</option>
+                <option value="Stationery">Stationery</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Other">Other</option>
+            </select>
+            </div>
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Specification</label>
+            <input type="text" id="stockSpecification" placeholder="e.g., 6-inch, A4, 50kg" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Quantity <span style="color:var(--red);">*</span></label>
+            <input type="number" id="stockQty" placeholder="0" min="0" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            </div>
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Unit</label>
+            <select id="stockUnit" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+                <option value="pcs">Pieces</option>
+                <option value="bags">Bags</option>
+                <option value="blocks">Blocks</option>
+                <option value="tons">Tons</option>
+                <option value="kg">Kg</option>
+                <option value="litres">Litres</option>
+                <option value="boxes">Boxes</option>
+                <option value="rolls">Rolls</option>
+                <option value="reams">Reams</option>
+                <option value="sheets">Sheets</option>
+            </select>
+            </div>
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Unit Price (TSh)</label>
+            <input type="number" id="stockPrice" placeholder="0" min="0" step="100" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Min Stock Level</label>
+            <input type="number" id="stockMinLevel" placeholder="10" min="0" value="10" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            </div>
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Location</label>
+            <input type="text" id="stockLocation" placeholder="e.g., Shelf A-3, Main Store" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Notes (optional)</label>
+            <textarea id="stockNotes" placeholder="Additional notes..." style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;min-height:60px;resize:vertical;"></textarea>
+        </div>
+
+        <div id="stockEntryStatus" class="status-msg"></div>
+        </div>
+
+        <div style="padding:14px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="closeModal('stockEntryModal')" style="padding:10px 20px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+        <button onclick="submitStockEntry()" style="padding:10px 24px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--primary-dark);border:none;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(245,158,11,0.4);">💾 Save Stock</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ===== MODAL: ISSUE STOCK ===== -->
+    <div class="modal-overlay" id="stockIssueModal">
+    <div class="modal-box" style="max-width: 500px; padding: 0; overflow: hidden;">
+        <div style="background:linear-gradient(135deg,#022908 0%,#034d13 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">📤</div>
+            <div>
+            <h3 style="font-size:17px;font-weight:800;margin:0;">Issue Stock</h3>
+            <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;">Give stock to department</p>
+            </div>
+        </div>
+        <button onclick="closeModal('stockIssueModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+
+        <div style="padding: 20px 26px;">
+        <input type="hidden" id="issueStockItemId">
+        
+        <div style="background:var(--gray-50);padding:14px;border-radius:10px;margin-bottom:14px;border-left:4px solid var(--gold);">
+            <div style="font-size:10px;font-weight:800;color:var(--gray-500);text-transform:uppercase;margin-bottom:2px;">Item</div>
+            <div id="issueStockItemName" style="font-weight:800;font-size:15px;color:var(--gray-800);">—</div>
+            <div id="issueStockItemAvailable" style="font-size:11px;color:var(--gray-500);margin-top:2px;">Available: —</div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Quantity to Issue <span style="color:var(--red);">*</span></label>
+            <input type="number" id="issueStockQty" placeholder="0" min="0.01" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Department <span style="color:var(--red);">*</span></label>
+            <select id="issueStockDepartment" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            <option value="">-- Select Department --</option>
+            <option value="Administration Department">🏢 Administration</option>
+            <option value="Sales and Marketing Department">📈 Sales & Marketing</option>
+            <option value="Engineering and Production Department">⚙️ Engineering & Production</option>
+            <option value="Finance Department">💰 Finance</option>
+            <option value="Procurements Management Unit">🛒 Procurement</option>
+            <option value="Information and Technology Department">💻 IT</option>
+            <option value="Lawyer Department">⚖️ Lawyer</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Issued To (Receiver Name)</label>
+            <input type="text" id="issueStockIssuedTo" placeholder="Full name of person receiving" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Purpose / Notes</label>
+            <textarea id="issueStockNotes" placeholder="Why is this needed?" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;min-height:60px;resize:vertical;"></textarea>
+        </div>
+
+        <div id="stockIssueStatus" class="status-msg"></div>
+        </div>
+
+        <div style="padding:14px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="closeModal('stockIssueModal')" style="padding:10px 20px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+        <button onclick="submitStockIssue()" style="padding:10px 24px;background:linear-gradient(135deg,#dc2626,#991b1b);color:white;border:none;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(220,38,38,0.4);">📤 Issue Stock</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ===== MODAL: ADJUST STOCK ===== -->
+    <div class="modal-overlay" id="stockAdjustModal">
+    <div class="modal-box" style="max-width: 500px; padding: 0; overflow: hidden;">
+        <div style="background:linear-gradient(135deg,#1e40af 0%,#1e3a8a 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">🔧</div>
+            <div>
+            <h3 style="font-size:17px;font-weight:800;margin:0;">Adjust Stock</h3>
+            <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;">Correct stock quantity</p>
+            </div>
+        </div>
+        <button onclick="closeModal('stockAdjustModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+
+        <div style="padding: 20px 26px;">
+        <input type="hidden" id="adjustStockItemId">
+        
+        <div style="background:var(--gray-50);padding:14px;border-radius:10px;margin-bottom:14px;border-left:4px solid var(--blue);">
+            <div style="font-size:10px;font-weight:800;color:var(--gray-500);text-transform:uppercase;margin-bottom:2px;">Item</div>
+            <div id="adjustStockItemName" style="font-weight:800;font-size:15px;color:var(--gray-800);">—</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Current Qty</label>
+            <input type="number" id="adjustCurrentQty" readonly style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;background:var(--gray-100);color:var(--gray-600);">
+            </div>
+            <div>
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">New Actual Qty <span style="color:var(--red);">*</span></label>
+            <input type="number" id="adjustNewQty" placeholder="0" min="0" step="0.01" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            </div>
+        </div>
+
+        <div id="adjustDiffBox" style="margin-bottom:14px;padding:10px;background:var(--gray-50);border-radius:8px;font-size:12px;text-align:center;color:var(--gray-600);display:none;">
+            Difference: <strong id="adjustDiffValue">—</strong>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Reason <span style="color:var(--red);">*</span></label>
+            <select id="adjustReason" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;">
+            <option value="">-- Select Reason --</option>
+            <option value="physical-count">Physical count correction</option>
+            <option value="damage">Damaged / spoiled</option>
+            <option value="theft">Theft / loss</option>
+            <option value="expiry">Expired</option>
+            <option value="return">Customer return</option>
+            <option value="system-error">System error</option>
+            <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:6px;">Notes (optional)</label>
+            <textarea id="adjustNotes" placeholder="Explain the adjustment..." style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;min-height:60px;resize:vertical;"></textarea>
+        </div>
+
+        <div id="stockAdjustStatus" class="status-msg"></div>
+        </div>
+
+        <div style="padding:14px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;">
+        <button onclick="closeModal('stockAdjustModal')" style="padding:10px 20px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+        <button onclick="submitStockAdjust()" style="padding:10px 24px;background:linear-gradient(135deg,#1e40af,#1e3a8a);color:white;border:none;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(30,64,175,0.4);">🔧 Save Adjustment</button>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal-overlay" id="purchaseOrderModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3>📄 Apply Tender</h3>
-                <button class="modal-close" onclick="closeModal('tenderModal')">✕</button>
+                <h3>🧾 Create Purchase Order</h3>
+                <button class="modal-close" onclick="closeModal('purchaseOrderModal')">✕</button>
             </div>
             <div class="modal-body">
                 <div style="margin-top:6px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Tender Title</label>
-                    <input type="text" id="tenderTitle" placeholder="Enter tender title...">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Supplier Name</label>
+                    <input type="text" id="poSupplierName" placeholder="Supplier name">
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Type</label>
-                    <select id="tenderType">
-                        <option value="Government">Government</option>
-                        <option value="Private">Private</option>
-                        <option value="International">International</option>
-                    </select>
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Item Name</label>
+                    <input type="text" id="poItemName" placeholder="e.g. Cement bags">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr; gap:12px; margin-top:8px;">
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Quantity</label>
+                        <input type="number" id="poItemQty" placeholder="0" min="1">
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Unit</label>
+                        <input type="text" id="poItemUnit" placeholder="bags / pcs / tons">
+                    </div>
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Description</label>
-                    <textarea id="tenderDesc" placeholder="Describe the tender..."></textarea>
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Unit Price (TSh)</label>
+                    <input type="number" id="poItemPrice" placeholder="0">
                 </div>
                 <div style="margin-top:8px;">
-                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Deadline</label>
-                    <input type="date" id="tenderDeadline">
+                    <label style="font-size:13px;font-weight:600;color:var(--gray-700);">Notes</label>
+                    <textarea id="poNotes" placeholder="Optional notes"></textarea>
                 </div>
-                <div id="tenderStatusMsg" class="status-msg"></div>
+                <div id="purchaseOrderStatus" class="status-msg"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('tenderModal')">Cancel</button>
-                <button class="btn-submit purple" onclick="submitTender()">📤 Apply</button>
+                <button class="btn-cancel" onclick="closeModal('purchaseOrderModal')">Cancel</button>
+                <button class="btn-submit green" onclick="submitPurchaseOrder()">✅ Create PO</button>
             </div>
         </div>
     </div>
@@ -2663,6 +3210,36 @@
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal('procurementReportModal')">Cancel</button>
                 <button class="btn-submit" onclick="submitProcurementReport()">📤 Submit Report</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL: VIEW VOUCHER -->
+    <div class="modal-overlay" id="viewVoucherModal">
+        <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden; background: #f8fafc;">
+            
+            <!-- Header (Banner) -->
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 26px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;" id="voucherIcon">🧾</div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:800;margin:0;" id="voucherTitle">Stock Voucher</h3>
+                        <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;" id="voucherSubtitle">Voucher Details</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('viewVoucherModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Body (Voucher Content) -->
+            <div id="voucherContent" style="padding: 30px; max-height: 65vh; overflow-y: auto;">
+                <!-- JS itajaza hapa -->
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 16px 26px; background: white; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeModal('viewVoucherModal')" style="padding:10px 20px;background:var(--gray-100);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;cursor:pointer;">Close</button>
+                <button onclick="printCurrentVoucher()" style="padding:10px 24px;background:var(--gold);color:var(--primary-dark);border:none;border-radius:8px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                    🖨️ Print Voucher
+                </button>
             </div>
         </div>
     </div>
@@ -2834,6 +3411,91 @@
             </div>
         </div>
     </div>
+    <!-- MODAL: VIEW ASSET DETAILS -->
+    <div class="modal-overlay" id="viewAssetModal">
+        <div class="modal-box" style="max-width: 750px; padding: 0; overflow: hidden; background: #f8fafc;">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 26px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">🏷️</div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:800;margin:0;" id="va_title">Asset Details</h3>
+                        <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;" id="va_tag">TAG-XXXX</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('viewAssetModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Body -->
+            <div style="padding: 26px; max-height: 70vh; overflow-y: auto;">
+                <div style="display:grid; grid-template-columns: 200px 1fr; gap: 24px;">
+                    
+                    <!-- LEFT: QR CODE & STATUS -->
+                    <div style="text-align:center;">
+                        <div style="background:white; padding:15px; border-radius:12px; border:1px solid var(--gray-200); box-shadow:0 4px 12px rgba(0,0,0,0.05); display:inline-block;">
+                            <img id="va_qr" src="" alt="QR Code" style="width:150px; height:150px; display:block;">
+                            <div style="font-size:10px; color:var(--gray-500); margin-top:8px; font-weight:800; letter-spacing:1px;">SCAN TO VERIFY</div>
+                        </div>
+                        <div style="margin-top:20px;">
+                            <div style="font-size:11px; font-weight:800; color:var(--gray-400); text-transform:uppercase; margin-bottom:6px;">Status</div>
+                            <div id="va_status" style="font-size:14px; font-weight:800; padding:6px 12px; border-radius:20px; display:inline-block;">Active</div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: DETAILS -->
+                    <div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                            <div style="background:white; padding:14px; border-radius:10px; border:1px solid var(--gray-200);">
+                                <div style="font-size:10px; font-weight:800; color:var(--gray-400); text-transform:uppercase; margin-bottom:4px;">Category</div>
+                                <div style="font-size:14px; font-weight:700;" id="va_category">—</div>
+                            </div>
+                            <div style="background:white; padding:14px; border-radius:10px; border:1px solid var(--gray-200);">
+                                <div style="font-size:10px; font-weight:800; color:var(--gray-400); text-transform:uppercase; margin-bottom:4px;">Serial Number</div>
+                                <div style="font-size:14px; font-weight:700; font-family:monospace;" id="va_serial">—</div>
+                            </div>
+                            <div style="background:white; padding:14px; border-radius:10px; border:1px solid var(--gray-200);">
+                                <div style="font-size:10px; font-weight:800; color:var(--gray-400); text-transform:uppercase; margin-bottom:4px;">Location</div>
+                                <div style="font-size:14px; font-weight:700;" id="va_location">—</div>
+                            </div>
+                            <div style="background:white; padding:14px; border-radius:10px; border:1px solid var(--gray-200);">
+                                <div style="font-size:10px; font-weight:800; color:var(--gray-400); text-transform:uppercase; margin-bottom:4px;">Custodian</div>
+                                <div style="font-size:14px; font-weight:700;" id="va_custodian">—</div>
+                            </div>
+                        </div>
+
+                        <div style="background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border:1px solid #bbf7d0; padding:16px; border-radius:12px; margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:11px; font-weight:800; color:#166534; text-transform:uppercase;">Current Value</div>
+                                    <div style="font-size:24px; font-weight:900; color:#15803d;" id="va_current_value">TSh 0</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:11px; font-weight:800; color:#166534; text-transform:uppercase;">Purchase Value</div>
+                                    <div style="font-size:16px; font-weight:700; color:#166534;" id="va_purchase_value">TSh 0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background:white; padding:16px; border-radius:10px; border:1px solid var(--gray-200);">
+                            <div style="font-size:10px; font-weight:800; color:var(--gray-400); text-transform:uppercase; margin-bottom:6px;">Description / Notes</div>
+                            <div style="font-size:13px; color:var(--gray-700); line-height:1.6;" id="va_description">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 16px 26px; background: white; border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; gap: 10px;">
+                <button onclick="printAssetDetails()" style="padding:10px 20px;background:var(--gray-100);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                    🖨️ Print Label
+                </button>
+                <button onclick="closeModal('viewAssetModal')" style="padding:10px 24px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:800;cursor:pointer;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- ================================================================ -->
     <!-- MODAL: ADD / EDIT ASSET -->
     <!-- ================================================================ -->
@@ -2878,6 +3540,71 @@
             </div>
         </div>
     </div>
+    <!-- MODAL: ADD MAINTENANCE -->
+    <div class="modal-overlay" id="maintenanceModal">
+        <div class="modal-box" style="max-width: 500px; padding: 0; overflow: hidden;">
+            <div style="background:linear-gradient(135deg,#d97706 0%,#b45309 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">🔧</div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:800;margin:0;">Add Maintenance</h3>
+                        <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;">Rekodi matengenezo ya Asset</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('maintenanceModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+            </div>
+
+            <div style="padding: 20px 26px;">
+                <input type="hidden" id="mt_assetId">
+                <div style="background:var(--gray-50);padding:14px;border-radius:10px;margin-bottom:14px;border-left:4px solid var(--orange);">
+                    <div style="font-size:10px;font-weight:800;color:var(--gray-500);text-transform:uppercase;margin-bottom:2px;">Asset</div>
+                    <div id="mt_assetName" style="font-weight:800;font-size:15px;color:var(--gray-800);">—</div>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Maintenance Type</label>
+                        <select id="mt_type" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                            <option value="routine">Routine Checkup</option>
+                            <option value="repair">Repair / Fix</option>
+                            <option value="replacement">Parts Replacement</option>
+                            <option value="inspection">Inspection</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Status</label>
+                        <select id="mt_status" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                            <option value="pending">Pending (Scheduled)</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:12px;font-weight:700;">Description *</label>
+                    <textarea id="mt_desc" placeholder="Eleza tatizo au kazi inayofanyika..." style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;min-height:60px;"></textarea>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Cost (TSh)</label>
+                        <input type="number" id="mt_cost" placeholder="0" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Performed By</label>
+                        <input type="text" id="mt_performedBy" placeholder="Jina la fundi/kampuni" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                    </div>
+                </div>
+                <div id="mt_error" style="color:red; font-size:12px; margin-bottom:10px; display:none;"></div>
+            </div>
+
+            <div style="padding:14px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;">
+                <button onclick="closeModal('maintenanceModal')" style="padding:10px 20px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;cursor:pointer;">Cancel</button>
+                <button onclick="submitMaintenance()" style="padding:10px 24px;background:linear-gradient(135deg,#d97706,#b45309);color:white;border:none;border-radius:8px;font-weight:800;cursor:pointer;">💾 Save Maintenance</button>
+            </div>
+        </div>
+    </div>
     <!-- ===== MODAL: FOLLOW-UP ===== -->
     <div id="followUpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50000;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:14px;width:440px;max-width:92%;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.2);">
@@ -2890,6 +3617,46 @@
         </div>
     </div>
     </div>
+    <!-- MODAL: ASSET MAINTENANCE HISTORY -->
+    <div class="modal-overlay" id="assetHistoryModal">
+    <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden;">
+        <div style="background:linear-gradient(135deg,#1e40af 0%,#1e3a8a 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">📊</div>
+                <div>
+                    <h3 style="font-size:17px;font-weight:800;margin:0;">Asset History</h3>
+                    <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;" id="ah_assetName">—</p>
+                </div>
+            </div>
+            <button onclick="closeModal('assetHistoryModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+
+        <div style="padding: 20px 26px; max-height: 70vh; overflow-y:auto;">
+            <!-- Summary ya Gharama -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;">
+                <div style="background:#fef2f2;border:1px solid #fecaca;padding:15px;border-radius:10px;text-align:center;">
+                    <div style="font-size:11px;font-weight:800;color:#991b1b;text-transform:uppercase;">Total Repair Cost</div>
+                    <div style="font-size:24px;font-weight:900;color:#dc2626;" id="ah_totalCost">TSh 0</div>
+                </div>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:15px;border-radius:10px;text-align:center;">
+                    <div style="font-size:11px;font-weight:800;color:#166534;text-transform:uppercase;">Total Repairs</div>
+                    <div style="font-size:24px;font-weight:900;color:#16a34a;" id="ah_totalRepairs">0</div>
+                </div>
+            </div>
+
+            <!-- Orodha ya Matengenezo -->
+            <h4 style="font-size:14px;font-weight:800;margin-bottom:10px;color:var(--primary);">Maintenance History</h4>
+            <div id="ah_historyList" style="display:flex;flex-direction:column;gap:10px;">
+                <!-- JS itajaza hapa -->
+            </div>
+        </div>
+
+        <div style="padding:14px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);display:flex;justify-content:space-between;">
+            <button onclick="printAssetHistory()" style="padding:10px 20px;background:var(--gray-200);color:var(--gray-800);border:none;border-radius:8px;font-weight:800;cursor:pointer;">🖨️ Print PDF</button>
+            <button onclick="closeModal('assetHistoryModal')" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:800;cursor:pointer;">Close</button>
+        </div>
+    </div>
+    </div>
     <!-- ===== CONFIRM DIALOG ===== -->
     <div class="confirm-overlay" id="confirmModal">
         <div class="confirm-box">
@@ -2899,6 +3666,80 @@
             <div class="confirm-actions">
                 <button class="btn-cancel" id="confirmCancelBtn" onclick="closeConfirm(false)">Cancel</button>
                 <button class="btn-confirm" id="confirmOkBtn" onclick="closeConfirm(true)">Yes, Confirm</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL: ADD / EDIT TENDER -->
+    <div class="modal-overlay" id="tenderModal">
+        <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden;">
+            <div style="background:linear-gradient(135deg,#022908 0%,#034d13 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;">📄</div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:800;margin:0;" id="tenderModalTitle">Add New Tender</h3>
+                        <p style="font-size:11px;color:rgba(255,255,255,0.85);margin:2px 0 0 0;">Rekodi taarifa za tender</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('tenderModal')" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>
+            </div>
+
+            <div style="padding: 22px 26px; max-height: 70vh; overflow-y:auto;">
+                <input type="hidden" id="tender_id">
+                
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:12px;font-weight:700;">Tender Title / Jina la Tenda *</label>
+                    <input type="text" id="tender_title" placeholder="Mf. Ujenzi wa Barabara..." style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Client / Mtoa Tenda</label>
+                        <input type="text" id="tender_client" placeholder="Mf. TANROADS, Serikali..." style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Category</label>
+                        <select id="tender_category" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                            <option value="Construction">Construction (Ujenzi)</option>
+                            <option value="Supply">Supply (Ugavi)</option>
+                            <option value="Services">Services (Huduma)</option>
+                            <option value="Consultancy">Consultancy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Submission Deadline</label>
+                        <input type="date" id="tender_deadline" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:700;">Estimated Budget (TSh)</label>
+                        <input type="number" id="tender_budget" placeholder="0" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:12px;font-weight:700;">Status</label>
+                    <select id="tender_status" style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;">
+                        <option value="incoming">📥 Incoming (Mpya)</option>
+                        <option value="preparing">📝 Preparing (Tunajiandaa)</option>
+                        <option value="submitted">📤 Submitted (Tumewasilisha)</option>
+                        <option value="won">🏆 Won (Tumeshinda)</option>
+                        <option value="lost">❌ Lost (Tumeshindwa)</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:12px;font-weight:700;">Description / Maelezo</label>
+                    <textarea id="tender_desc" placeholder="Maelezo ya tender..." style="width:100%;padding:10px;border:1.5px solid var(--gray-200);border-radius:8px;min-height:60px;"></textarea>
+                </div>
+
+                <div id="tender_error" style="color:red; font-size:12px; margin-top:10px; display:none;"></div>
+            </div>
+
+            <div style="padding:14px 26px;background:var(--gray-50);border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;">
+                <button onclick="closeModal('tenderModal')" style="padding:10px 20px;background:var(--gray-200);color:var(--gray-700);border:none;border-radius:8px;font-weight:700;cursor:pointer;">Cancel</button>
+                <button onclick="submitTender()" style="padding:10px 24px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--primary-dark);border:none;border-radius:8px;font-weight:800;cursor:pointer;">💾 Save Tender</button>
             </div>
         </div>
     </div>
@@ -2927,6 +3768,7 @@
     <script src="assets/js/ui/toast.js"></script>
     <script src="assets/js/ui/dashboard-common.js"></script>
     <script src="assets/js/dashboards/procurement.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </body>
 </html>
