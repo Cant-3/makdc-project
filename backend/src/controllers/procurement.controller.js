@@ -177,8 +177,8 @@ async function createRequest(req, res) {
         // 🆕 Fix: Tumia user.userId (sio user.id)
         const requestResult = await query(`
             INSERT INTO procurement_requests 
-            (request_number, department, requested_by, requested_by_id, status, total_amount, notes, title, urgency, required_by, attachments, item_count)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            (request_number, department, requested_by, requested_by_id, status, total_amount, notes, title, urgency, required_by, attachments, item_count, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
             RETURNING *
         `, [
             requestNumber, department, user.fullName, user.userId, initialStatus, 
@@ -192,8 +192,8 @@ async function createRequest(req, res) {
         for (const item of items) {
             await query(`
                 INSERT INTO procurement_items 
-                (request_id, item_name, specification, quantity, unit, estimated_price, notes)
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                (request_id, item_name, specification, quantity, unit, estimated_price, notes, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
             `, [
                 request.id, 
                 item.itemName, 
@@ -324,7 +324,110 @@ async function getStockItemById(req, res) {
     res.status(err.message.includes('haipo') ? 404 : 500).json({ error: err.message });
   }
 }
+// ================================================================
+// GET FUEL LOGS (Kutoka Database)
+// ================================================================
+async function getFuelLogs(req, res) {
+    try {
+        const logs = await query(`
+            SELECT 
+                f.*, 
+                a.name AS asset_name, 
+                a.serial_number AS asset_plate
+            FROM fuel_logs f
+            LEFT JOIN assets a ON f.asset_id = a.id
+            ORDER BY f.created_at DESC
+        `);
+        res.json(logs);
+    } catch (err) {
+        console.error('getFuelLogs error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
 
+// ================================================================
+// ISSUE FUEL (Inaingiza kwenye Database na Kupunguza Stock)
+// ================================================================
+async function issueFuel(req, res) {
+    try {
+        const { 
+            fuelType, 
+            assetId, 
+            liters, 
+            driverName, 
+            purpose, 
+            stockItemId 
+        } = req.body;
+        const user = req.user;
+
+        // 1. Validation
+        if (!fuelType || !assetId || !liters || !driverName) {
+            return res.status(400).json({ error: 'Tafadhali jaza taarifa zote muhimu.' });
+        }
+
+        // 2. Punguza Stock (Tumia service ya stock)
+        if (stockItemId) {
+            // Pata stock item ya sasa
+            const stockItems = await query('SELECT * FROM stock_items WHERE id = $1', [stockItemId]);
+            if (stockItems.length === 0) throw new Error('Stock item haipo.');
+            
+            const currentStock = Number(stockItems[0].quantity);
+            const newQuantity = currentStock - Number(liters);
+            
+            if (newQuantity < 0) throw new Error('Mafuta yaliyopo store hayatoshi.');
+
+            // Sasisha stock
+            await query(
+                'UPDATE stock_items SET quantity = $1, updated_at = NOW() WHERE id = $2',
+                [newQuantity, stockItemId]
+            );
+
+            // Rekodi movement
+            await query(`
+                INSERT INTO stock_movements 
+                (stock_item_id, movement_type, quantity, balance_before, balance_after, reason, notes, performed_by, created_at)
+                VALUES ($1, 'out', $2, $3, $4, 'Fuel Issued', $5, $6, NOW())
+            `, [
+                stockItemId, liters, currentStock, newQuantity,
+                `Fuel issued to ${driverName} for vehicle ${assetId}`,
+                user.fullName
+            ]);
+        }
+
+        // 3. Tengeneza Permit Number
+        const permitNumber = `FP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+
+        // 4. Ingiza kwenye fuel_logs table
+        const result = await query(`
+            INSERT INTO fuel_logs 
+            (permit_number, fuel_type, asset_id, liters, driver_name, purpose, issued_by, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+            RETURNING *
+        `, [
+            permitNumber, fuelType, assetId, liters, driverName, purpose, user.fullName
+        ]);
+
+        const newLog = result[0];
+
+        // 5. Pata taarifa za gari kwa ajili ya PDF
+        const assets = await query('SELECT * FROM assets WHERE id = $1', [assetId]);
+        const asset = assets.length > 0 ? assets[0] : { name: 'Unknown', serial_number: 'N/A' };
+
+        res.json({
+            success: true,
+            message: 'Mafuta yametolewa na stock imepunguzwa.',
+            log: {
+                ...newLog,
+                asset_name: asset.name,
+                asset_plate: asset.serial_number
+            }
+        });
+
+    } catch (err) {
+        console.error('issueFuel error:', err);
+        res.status(400).json({ error: err.message });
+    }
+}
 // ================================================================
 // 5. CREATE STOCK ITEM (Inatumia Stock Service)
 // ================================================================
@@ -337,14 +440,31 @@ async function addStockItem(req, res) {
     res.status(400).json({ error: err.message });
   }
 }
-
-// ================================================================
-// 6. ADJUST STOCK (Inatumia Stock Service)
-// ================================================================
 async function adjustStockItem(req, res) {
   try {
-    const result = await stockService.adjustStock(query, req.body, req.user);
-    res.json(result);
+    // 1. Chukua data zote kutoka kwa Frontend
+    const { stockItemId, newQuantity, reason, notes } = req.body;
+    
+    // 2. Validation ya Msingi
+    if (!stockItemId) throw new Error("stockItemId ni lazima.");
+    if (newQuantity === undefined || newQuantity < 0) throw new Error("newQuantity ni lazima na isiwe chini ya 0.");
+    if (!reason) throw new Error("Sababu (reason) ni lazima.");
+
+    // 3. Tuma kwa stockService (Hii inashughulikia database)
+    const result = await stockService.adjustStock(query, {
+      stockItemId: parseInt(stockItemId),
+      newQuantity: parseFloat(newQuantity),
+      reason: reason,
+      notes: notes || ''
+    }, req.user);
+
+    // 4. Rudisha majibu kwa Frontend
+    res.json({
+      success: true,
+      message: 'Stock adjusted successfully',
+      data: result
+    });
+
   } catch (err) {
     console.error('adjustStockItem error:', err);
     res.status(400).json({ error: err.message });
@@ -403,10 +523,6 @@ async function listStockMovements(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
-
-// ================================================================
-// 9. RECEIVE STOCK FROM PROCUREMENT (Inatumia Services)
-// ================================================================
 async function receiveStockFromProcurement(req, res) {
   try {
     const { requestId } = req.params;
@@ -426,24 +542,36 @@ async function receiveStockFromProcurement(req, res) {
     const items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [requestId]);
 
     for (const item of items) {
-      // Tafuta stock item iliyopo
+      // 🆕 1. TAMBUA KAMA NI MAFUTA NA UPE JINA SAHIHI
+      let itemName = item.item_name;
+      let category = 'Procurement';
+      
+      // Kama jina lina "petrol" au "diesel", weka category kuwa "Fuel"
+      if (itemName.toLowerCase().includes('petrol') || itemName.toLowerCase().includes('diesel')) {
+          category = 'Fuel';
+          // Hakikisha jina ni "Petrol" au "Diesel" safi
+          if (itemName.toLowerCase().includes('petrol')) itemName = 'Petrol';
+          if (itemName.toLowerCase().includes('diesel')) itemName = 'Diesel';
+      }
+
+      // 2. Angalia kama Item ipo kwenye Stock (Tumia jina lililosafishwa)
       const existing = await query(
         `SELECT id FROM stock_items 
          WHERE LOWER(item_name) = LOWER($1) 
          AND COALESCE(specification, '') = COALESCE($2, '')`,
-        [item.item_name, item.specification]
+        [itemName, item.specification]
       );
 
       let stockItemId;
       if (existing.length > 0) {
         stockItemId = existing[0].id;
       } else {
-        // Unda mpya
+        // 3. Unda mpya kwenye Stock
         const newItem = await stockService.createStockItem(query, {
-          itemName: item.item_name,
-          category: 'Procurement',
+          itemName: itemName,      // 🆕 Tumia jina lililosafishwa
+          category: category,      // 🆕 Weka category kuwa 'Fuel' kama ni mafuta
           specification: item.specification,
-          quantity: 0,  // 0 kwa sababu movement itaongeza
+          quantity: 0, 
           unit: item.unit,
           unitPrice: item.estimated_price,
           location: 'Main Store'
@@ -451,9 +579,9 @@ async function receiveStockFromProcurement(req, res) {
         stockItemId = newItem.id;
       }
 
-      // Rekodi movement ya 'in'
+      // 4. Rekodi Movement ya 'IN'
       await stockMovementService.createMovement(query, {
-        stockItemId,
+        stockItemId: stockItemId,
         movementType: 'in',
         quantity: item.quantity,
         unitPrice: item.estimated_price,
@@ -465,7 +593,7 @@ async function receiveStockFromProcurement(req, res) {
       }, user);
     }
 
-    // Update request — received as stock
+    // 5. Update Request kuwa 'completed'
     await query(`
       UPDATE procurement_requests 
       SET status = 'completed', 
@@ -2107,6 +2235,8 @@ module.exports = {
 
     getAllMaintenance,
     createMaintenance,
-    retireAsset
+    retireAsset,
+    getFuelLogs,
+    issueFuel
 
 };

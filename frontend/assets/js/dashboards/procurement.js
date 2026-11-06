@@ -24,16 +24,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     initSidebar();
     await loadProcurementDashboard();
     
+    // 🆕 Ongeza hii hapa
+    await loadDashboardOverview();
+    
     // Start polling after 5 seconds
     setTimeout(() => {
         checkNewMessages();
         setInterval(checkNewMessages, 30000);
     }, 5000);
 });
-
-// ================================================================
-// PROFILE RENDER
-// ================================================================
 function renderProcurementProfile() {
     const user = Auth.getUser();
     if (!user) return;
@@ -45,31 +44,27 @@ function renderProcurementProfile() {
         .substring(0, 2)
         .toUpperCase();
     
-    setText('sidebarUserAvatar', initials);
+    currentProfilePic = user.profilePic || null;
+    
+    // Sidebar
     setText('sidebarUserName', user.fullName || 'Procurement Officer');
     setText('sidebarUserRole', '📦 ' + (user.department || 'Procurement & Store'));
+    setAvatar('sidebarUserAvatar', user.profilePic, initials);
     
-    setText('udInitials', initials);
+    // Header Dropdown
     setText('udName', user.fullName || 'Procurement Officer');
     setText('udRole', '📦 ' + (user.department || 'Procurement & Store'));
-    setText('udpInitials', initials);
+    setAvatar('udAvatar', user.profilePic, initials);
+    
+    // Dropdown Panel
     setText('udpName', user.fullName || 'Procurement Officer');
     setText('udpRole', '📦 ' + (user.department || 'Procurement & Store'));
     setText('udpEmail', user.email || '—');
     setText('udpPhone', user.phone || '—');
     setText('udpDepartment', user.department || 'Procurement & Store');
     setText('udpEmployeeId', user.employeeId || '—');
-    
-    if (user.profilePic) {
-        currentProfilePic = user.profilePic;
-        const avatars = ['sidebarUserAvatar', 'udAvatar', 'udpPic'];
-        avatars.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = `<img src="${user.profilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        });
-    }
+    setAvatar('udpPic', user.profilePic, initials);
 }
-
 function initSidebar() {
     const firstParent = document.querySelector('.sidebar-nav-parent');
     if (firstParent) {
@@ -77,7 +72,358 @@ function initSidebar() {
         if (submenu) submenu.classList.add('open');
     }
 }
+// ================================================================
+// 🆕 MASTER REPORT (Modern & Narrated) - MPYA KABISA
+// ================================================================
+let reportTrendChartInstance = null;
+let reportStatusChartInstance = null;
+let reportStockChartInstance = null;
+let reportAssetChartInstance = null;
+let currentMasterReport = null;
 
+// Function ya kuonyesha/kuficha Tarehe maalum
+function toggleCustomDateRange() {
+    const type = document.getElementById('masterPeriodType').value;
+    const customDiv = document.getElementById('customDateRange');
+    if (type === 'custom') {
+        customDiv.style.display = 'flex';
+    } else {
+        customDiv.style.display = 'none';
+    }
+}
+
+// Function Kuu ya Kutengeneza Ripoti
+async function loadMasterReport() {
+    const narrativeEl = document.getElementById('reportNarrativeText');
+    const kpiGrid = document.getElementById('reportKPIGrid');
+    const tableBody = document.getElementById('reportSummaryTable');
+    const dateBadge = document.getElementById('reportDateBadge');
+    
+    if (!kpiGrid) return;
+
+    const periodType = document.getElementById('masterPeriodType').value;
+    
+    // Weka UI kwenye hali ya kupakia (Loading)
+    narrativeEl.innerHTML = '⏳ Inachambua data... Tafadhali subiri.';
+    kpiGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#64748b;">⏳ Loading metrics...</div>';
+    dateBadge.textContent = '📅 Generating...';
+
+    let params = {};
+    if (periodType === 'custom') {
+        const from = document.getElementById('masterDateFrom').value;
+        const to = document.getElementById('masterDateTo').value;
+        if (!from || !to) {
+            showToast('Chagua tarehe za mwanzo na mwisho.', 'warning');
+            return;
+        }
+        params = { from, to };
+    } else {
+        params = { period: periodType };
+    }
+
+    try {
+        // 1. Vuta data zote kutoka API (Procurement, Stock, Assets, Tenders)
+        const [procRequests, stockItems, assets, tenders] = await Promise.all([
+            API.getProcurementRequests('/all').catch(() => []),
+            API.getStockItems().catch(() => []),
+            API.getAssets().catch(() => []),
+            API.getTenders().catch(() => [])
+        ]);
+
+        // 2. Hesabu Takwimu
+        let totalProcValue = 0;
+        let pendingCount = 0;
+        let approvedCount = 0;
+        let paidCount = 0;
+        
+        procRequests.forEach(r => {
+            totalProcValue += Number(r.total_amount || 0);
+            if (r.status.includes('pending')) pendingCount++;
+            else if (r.status === 'approved') approvedCount++;
+            else if (r.status === 'paid' || r.status === 'completed') paidCount++;
+        });
+
+        let totalStockValue = 0;
+        let lowStockCount = 0;
+        stockItems.forEach(item => {
+            totalStockValue += (Number(item.quantity) * Number(item.unit_price));
+            if (Number(item.quantity) <= Number(item.min_stock_level)) lowStockCount++;
+        });
+
+        let totalAssetValue = 0;
+        assets.forEach(a => totalAssetValue += Number(a.current_value || 0));
+
+        const wonTenders = tenders.filter(t => t.status === 'won').length;
+
+        currentMasterReport = { totalProcValue, pendingCount, stockItems, assets, procRequests };
+
+        // 3. Update Tarehe kwenye Badge
+        dateBadge.textContent = '📅 ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // 4. Tunga Maelezo (Narrative kwa Kiswahili)
+        const narrativeText = `
+            Katika kipindi hiki, Idara ya Manunuzi imeshughulikia jumla ya maombi yenye thamani ya <strong>TSh ${totalProcValue.toLocaleString()}</strong>. 
+            Kati ya maombi hayo, <strong>${pendingCount}</strong> bado yanasubiri idhini, <strong>${approvedCount}</strong> yameidhinishwa tayari kwa ajili ya ununuzi, na <strong>${paidCount}</strong> yameshalipwa kikamilifu. 
+            <br><br>
+            Kwa upande wa Ghala (Store), kwa sasa kuna bidhaa zenye thamani ya <strong>TSh ${totalStockValue.toLocaleString()}</strong>. Hata hivyo, kuna <strong>${lowStockCount}</strong> bidhaa ambazo ziko chini ya kiwango cha chini (Low Stock) — hivyo inashauriwa kufanya manunuzi ya haraka ili kuzuia uhaba.
+            <br><br>
+            Mali za Kampuni (Fixed Assets) zina thamani ya jumla ya <strong>TSh ${totalAssetValue.toLocaleString()}</strong>. Aidha, kati ya zabuni (Tenders) zilizowasilishwa, <strong>${wonTenders}</strong> zimeshinda, jambo linaloonyesha ufanisi wa timu ya manunuzi katika kukamata fursa za kibiashara.
+        `;
+
+        narrativeEl.innerHTML = narrativeText;
+
+        // 5. Jaza KPI Cards
+        kpiGrid.innerHTML = `
+            <div class="report-kpi-card" style="border-left-color: #f59e0b;">
+                <span class="report-kpi-icon">📋</span>
+                <div class="report-kpi-value">${procRequests.length}</div>
+                <div class="report-kpi-label">Total Requests</div>
+                <div class="report-kpi-sub">TSh ${totalProcValue.toLocaleString()}</div>
+            </div>
+            <div class="report-kpi-card" style="border-left-color: #dc2626;">
+                <span class="report-kpi-icon">⚠️</span>
+                <div class="report-kpi-value">${lowStockCount}</div>
+                <div class="report-kpi-label">Low Stock Items</div>
+                <div class="report-kpi-sub">Needs immediate re-order</div>
+            </div>
+            <div class="report-kpi-card" style="border-left-color: #3b82f6;">
+                <span class="report-kpi-icon">📦</span>
+                <div class="report-kpi-value">TSh ${totalStockValue.toLocaleString()}</div>
+                <div class="report-kpi-label">Store Value</div>
+                <div class="report-kpi-sub">${stockItems.length} unique items</div>
+            </div>
+            <div class="report-kpi-card" style="border-left-color: #16a34a;">
+                <span class="report-kpi-icon">🏷️</span>
+                <div class="report-kpi-value">TSh ${totalAssetValue.toLocaleString()}</div>
+                <div class="report-kpi-label">Asset Value</div>
+                <div class="report-kpi-sub">${assets.length} registered assets</div>
+            </div>
+        `;
+
+        // 6. Jenga Jedwali la Muhtasari
+        tableBody.innerHTML = `
+            <tr>
+                <td><strong>Procurement Requests</strong></td>
+                <td>${procRequests.length}</td>
+                <td>TSh ${totalProcValue.toLocaleString()}</td>
+                <td><span style="color:#16a34a; font-weight:700;">${paidCount} Paid</span> • <span style="color:#f59e0b; font-weight:700;">${pendingCount} Pending</span></td>
+            </tr>
+            <tr>
+                <td><strong>Store Inventory</strong></td>
+                <td>${stockItems.length}</td>
+                <td>TSh ${totalStockValue.toLocaleString()}</td>
+                <td><span style="color:#dc2626; font-weight:700;">${lowStockCount} Low Stock Alerts</span></td>
+            </tr>
+            <tr>
+                <td><strong>Fixed Assets</strong></td>
+                <td>${assets.length}</td>
+                <td>TSh ${totalAssetValue.toLocaleString()}</td>
+                <td>${assets.filter(a => a.status === 'In Maintenance').length} in maintenance</td>
+            </tr>
+            <tr>
+                <td><strong>Tenders</strong></td>
+                <td>${tenders.length}</td>
+                <td>—</td>
+                <td><span style="color:#16a34a; font-weight:700;">${wonTenders} Won</span></td>
+            </tr>
+        `;
+
+        // 7. Chora Grafu (Charts)
+        renderReportTrendChart(procRequests);
+        renderReportStatusChart(pendingCount, approvedCount, paidCount);
+        renderReportStockChart(stockItems, lowStockCount);
+        renderReportAssetChart(assets);
+
+    } catch (err) {
+        console.error(err);
+        narrativeEl.innerHTML = `❌ Imeshindwa kupata taarifa: ${err.message}`;
+    }
+}
+
+// ================================================================
+// CHART RENDERING FUNCTIONS (Kuchora Grafu)
+// ================================================================
+
+function renderReportTrendChart(requests) {
+    const ctx = document.getElementById('reportTrendChart');
+    if (!ctx) return;
+    if (reportTrendChartInstance) reportTrendChartInstance.destroy();
+
+    // Panga maombi kwa siku 7 zilizopita
+    const last7Days = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    });
+
+    const counts = last7Days.map(dateStr => {
+        return requests.filter(r => {
+            if (!r.created_at) return false;
+            const rDate = new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            return rDate === dateStr;
+        }).length;
+    });
+
+    reportTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: last7Days,
+            datasets: [{
+                label: 'Requests Created',
+                data: counts,
+                borderColor: '#022908',
+                backgroundColor: 'rgba(2,41,8,0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#f59e0b',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderReportStatusChart(pending, approved, paid) {
+    const ctx = document.getElementById('reportStatusChart');
+    if (!ctx) return;
+    if (reportStatusChartInstance) reportStatusChartInstance.destroy();
+
+    reportStatusChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Approved', 'Paid'],
+            datasets: [{
+                data: [pending, approved, paid],
+                backgroundColor: ['#f59e0b', '#16a34a', '#3b82f6'],
+                borderWidth: 3,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, padding: 10 } } }
+        }
+    });
+}
+
+function renderReportStockChart(stockItems, lowStockCount) {
+    const ctx = document.getElementById('reportStockChart');
+    if (!ctx) return;
+    if (reportStockChartInstance) reportStockChartInstance.destroy();
+
+    const inStock = stockItems.length - lowStockCount;
+    const outOfStock = stockItems.filter(i => Number(i.quantity) === 0).length;
+
+    reportStockChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+            datasets: [{
+                data: [inStock, lowStockCount, outOfStock],
+                backgroundColor: ['#22c55e', '#f59e0b', '#dc2626'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+function renderReportAssetChart(assets) {
+    const ctx = document.getElementById('reportAssetChart');
+    if (!ctx) return;
+    if (reportAssetChartInstance) reportAssetChartInstance.destroy();
+
+    const active = assets.filter(a => a.status === 'Active').length;
+    const maintenance = assets.filter(a => a.status === 'In Maintenance').length;
+    const retired = assets.filter(a => a.status === 'Retired' || a.status === 'Disposed').length;
+
+    reportAssetChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'In Maintenance', 'Retired'],
+            datasets: [{
+                data: [active, maintenance, retired],
+                backgroundColor: ['#16a34a', '#f59e0b', '#dc2626'],
+                borderWidth: 3,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, padding: 10 } } }
+        }
+    });
+}
+
+// ================================================================
+// PRINT PDF FUNCTION
+// ================================================================
+function printMasterReport() {
+    if (!currentMasterReport) {
+        showToast('Tafadhali tengeneza ripoti kwanza.', 'warning');
+        return;
+    }
+
+    const d = currentMasterReport;
+    const html = `
+        <html>
+        <head>
+            <title>Procurement Executive Report - MAK DC</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
+                .header { text-align: center; border-bottom: 3px solid #022908; padding-bottom: 15px; margin-bottom: 25px; }
+                .header h1 { margin: 0; font-size: 22px; color: #022908; }
+                .header p { margin: 5px 0; font-size: 13px; color: #666; }
+                .narrative { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 20px; margin-bottom: 25px; font-size: 14px; line-height: 1.8; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 12px; }
+                th { background: #f1f5f9; color: #022908; }
+                .footer { text-align: center; font-size: 11px; color: #888; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>MAK DC INVESTMENT COMPANY LTD</h1>
+                <p>Procurement & Store Department — Executive Report</p>
+                <p>Generated on ${new Date().toLocaleString()} by ${Auth.getUser().fullName}</p>
+            </div>
+            <div class="narrative" id="printNarrative">${document.getElementById('reportNarrativeText').innerHTML}</div>
+            
+            <!-- Jedwali la Muhtasari -->
+            <h3>Detailed Summary</h3>
+            <table>
+                <thead>
+                    <tr><th>Category</th><th>Total Count</th><th>Total Value (TSh)</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    ${document.getElementById('reportSummaryTable').innerHTML}
+                </tbody>
+            </table>
+
+            <div class="footer">
+                This is a computer-generated document. No signature required.<br>
+                MAK DC Investment Company LTD &copy; ${new Date().getFullYear()}
+            </div>
+        </body>
+        </html>
+    `;
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+}
 // ================================================================
 // CHANGE PASSWORD
 // ================================================================
@@ -461,25 +807,87 @@ function addRequestItemRow() {
     row.style.borderBottom = '1px solid var(--gray-100)';
     row.innerHTML = `
         <td style="padding:6px;">
-            <input type="text" class="req-item-name" placeholder="Item name" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:inherit;background:white;">
+            <!-- ORODHA KUBWA YA BIDHAA -->
+            <select class="req-item-name" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:inherit;background:white;">
+                <option value="">-- Chagua Bidhaa --</option>
+                
+                <optgroup label="⛽ Mafuta (Fuel)">
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Engine Oil">Engine Oil</option>
+                    <option value="Gear Oil">Gear Oil</option>
+                    <option value="Brake Fluid">Brake Fluid</option>
+                </optgroup>
+
+                <optgroup label="🧱 Vifaa vya Ujenzi (Building Materials)">
+                    <option value="Cement">Cement</option>
+                    <option value="Sand">Sand (Mchanga)</option>
+                    <option value="Gravel">Gravel (Changarawe)</option>
+                    <option value="Blocks">Blocks (Matofali)</option>
+                    <option value="Bricks">Bricks (Matofali ya Udongo)</option>
+                    <option value="Rebar">Rebar (Nondo za Chuma)</option>
+                    <option value="Binding Wire">Binding Wire (Wayaya)</option>
+                    <option value="Roofing Sheets">Roofing Sheets (Mabati)</option>
+                    <option value="Roofing Nails">Roofing Nails (Misumari ya Mabati)</option>
+                    <option value="Timber">Timber (Mbao)</option>
+                    <option value="Plywood">Plywood</option>
+                    <option value="Paint">Paint (Rangi)</option>
+                    <option value="Thinner">Thinner</option>
+                </optgroup>
+
+                <optgroup label="🔧 Vifaa vya Ufundi (Hardware & Tools)">
+                    <option value="PVC Pipes">PVC Pipes</option>
+                    <option value="GI Pipes">GI Pipes</option>
+                    <option value="Electrical Wires">Electrical Wires</option>
+                    <option value="Switches & Sockets">Switches & Sockets</option>
+                    <option value="Bulbs">Bulbs (Balbu)</option>
+                    <option value="Door Locks">Door Locks</option>
+                    <option value="Hinges">Hinges (Bawaba)</option>
+                    <option value="Screws & Nails">Screws & Nails (Vifaa vya Kufungia)</option>
+                </optgroup>
+
+                <optgroup label="📚 Ofisi (Office Supplies)">
+                    <option value="A4 Paper">A4 Paper (Karatasi)</option>
+                    <option value="Pens">Pens (Kalamu)</option>
+                    <option value="Printing Ink">Printing Ink (Wino wa Printer)</option>
+                    <option value="Staples">Staples (Vifaa vya Kufungia Karatasi)</option>
+                    <option value="Files">Files (Makasha ya Faili)</option>
+                    <option value="Toilet Paper">Toilet Paper</option>
+                    <option value="Cleaning Detergents">Cleaning Detergents (Sabuni)</option>
+                </optgroup>
+
+                <optgroup label="💻 Elektroniki (Electronics)">
+                    <option value="Laptops">Laptops</option>
+                    <option value="Desktops">Desktops</option>
+                    <option value="Printers">Printers</option>
+                    <option value="Phones">Phones</option>
+                    <option value="Network Cables">Network Cables</option>
+                </optgroup>
+
+                <option value="Other">📦 Nyingine (Other)</option>
+            </select>
         </td>
         <td style="padding:6px;">
-            <input type="text" class="req-item-spec" placeholder="e.g., 6 inch, Red, A4" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:inherit;background:white;">
+            <input type="text" class="req-item-spec" placeholder="Mf. 50kg, 6-inch, A4..." style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:inherit;background:white;">
         </td>
         <td style="padding:6px;">
             <input type="number" class="req-item-qty" placeholder="0" min="1" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:inherit;background:white;">
         </td>
         <td style="padding:6px;">
+            <!-- VITENGO VINGI (UNITS) -->
             <select class="req-item-unit" style="width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:inherit;background:white;">
-                <option value="pcs">Pieces</option>
-                <option value="bags">Bags</option>
-                <option value="blocks">Blocks</option>
-                <option value="tons">Tons</option>
-                <option value="kg">Kg</option>
-                <option value="litres">Litres</option>
-                <option value="boxes">Boxes</option>
-                <option value="rolls">Rolls</option>
-                <option value="sheets">Sheets</option>
+                <option value="pcs">Pcs (Vipande)</option>
+                <option value="litres">Litres (Lita)</option>
+                <option value="bags">Bags (Magunia)</option>
+                <option value="blocks">Blocks (Matofali)</option>
+                <option value="tons">Tons (Tani)</option>
+                <option value="kg">Kg (Kilo)</option>
+                <option value="meters">Meters (Mita)</option>
+                <option value="rolls">Rolls (Maroli)</option>
+                <option value="reams">Reams (Mabonge ya Karatasi)</option>
+                <option value="boxes">Boxes (Masanduku)</option>
+                <option value="pairs">Pairs (Jozi)</option>
+                <option value="trip">Trip (Mzigo/Safari)</option>
             </select>
         </td>
         <td style="padding:6px;">
@@ -494,10 +902,11 @@ function addRequestItemRow() {
     `;
     tbody.appendChild(row);
     
+    // Hakikisha unachukua thamani ya select sasa
+    row.querySelector('.req-item-name').addEventListener('change', calculateRequestTotal); 
     row.querySelector('.req-item-qty').addEventListener('input', calculateRequestTotal);
     row.querySelector('.req-item-price').addEventListener('input', calculateRequestTotal);
 }
-
 function removeRequestItem(rowId) {
     const row = document.getElementById(rowId);
     if (row) { row.remove(); calculateRequestTotal(); }
@@ -888,22 +1297,41 @@ function switchSidebarTab(targetId, event) {
         const link = event.target.closest('a');
         if (link) link.classList.add('active');
     }
-    if (targetId === 'sub-all-requests') loadAllRequests();
-    else if (targetId === 'sub-incoming') loadIncomingRequests();
-    else if (targetId === 'sub-remedial') loadRemedialRequests();
-    else if (targetId === 'sub-pending') loadPendingRequests('');
-    else if (targetId === 'sub-approved') loadApprovedRequests();
-    else if (targetId === 'sub-paid') loadPaidProcurements();
-    else if (targetId === 'sub-all-stock') {loadStockItems();loadSuppliers();loadPurchaseOrders();}
-    else if (targetId === 'sub-add-stock') openStockEntryModal();
-    else if (targetId === 'sub-stock-trans') loadStockTransactions();
-    else if (targetId === 'sub-stock-trans') loadStockTransactions();
-    else if (targetId === 'sub-all-assets') loadAssets();
-    else if (targetId === 'sub-stock-out') loadRecentStockOuts();
-    else if (targetId === 'sub-stock-out') loadStockItems();
-    else if (targetId === 'sub-stock-receive') loadPendingReceives();
-    else if (targetId === 'sub-maintenance') loadMaintenanceLog();
-    else if (targetId === 'sub-report-annual') loadMasterReport();
+    
+    // 🆕 Rekebisha hapa
+    if (targetId === 'tab-dashboard') {
+        loadDashboardOverview();
+    } else if (targetId === 'sub-fuel-management') {
+        loadFuelDashboard();
+    } else if (targetId === 'sub-all-requests') {
+        loadAllRequests();
+    } else if (targetId === 'sub-incoming') {
+        loadIncomingRequests();
+    } else if (targetId === 'sub-remedial') {
+        loadRemedialRequests();
+    } else if (targetId === 'sub-pending') {
+        loadPendingRequests('');
+    } else if (targetId === 'sub-approved') {
+        loadApprovedRequests();
+    } else if (targetId === 'sub-paid') {
+        loadPaidProcurements();
+    } else if (targetId === 'sub-all-stock') {
+        loadStockItems(); loadSuppliers(); loadPurchaseOrders();
+    } else if (targetId === 'sub-add-stock') {
+        openStockEntryModal();
+    } else if (targetId === 'sub-stock-trans') {
+        loadStockTransactions();
+    } else if (targetId === 'sub-all-assets') {
+        loadAssets();
+    } else if (targetId === 'sub-stock-out') {
+        loadRecentStockOuts(); loadStockItems();
+    } else if (targetId === 'sub-stock-receive') {
+        loadPendingReceives();
+    } else if (targetId === 'sub-maintenance') {
+        loadMaintenanceLog();
+    } else if (targetId === 'sub-report-annual') {
+        loadMasterReport();
+    }
 
     if (window.innerWidth <= 768) closeSidebar();
 }
@@ -1007,59 +1435,6 @@ async function loadProcurementDashboard() {
         console.error('Dashboard error:', err);
     }
 }
-// ================================================================
-// 🆕 MASTER REPORT (Executive Summary)
-// ================================================================
-let currentMasterReport = null;
-
-async function loadMasterReport() {
-    const narrative = document.getElementById('masterNarrativeText');
-    const grid = document.getElementById('masterKPIGrid');
-    const period = document.getElementById('masterPeriodFilter').value;
-
-    narrative.textContent = '⏳ Loading report...';
-    grid.innerHTML = '';
-
-    try {
-        const data = await API.getMasterReport({ period });
-        currentMasterReport = data;
-
-        // Onyesha Narrative
-        narrative.textContent = data.narrative;
-
-        // Onyesha KPI Cards
-        grid.innerHTML = `
-            <div class="stat-card" style="border-left:4px solid var(--blue);">
-                <div class="stat-icon">📋</div>
-                <div class="stat-number">${data.procurement.total_requests || 0}</div>
-                <div class="stat-label">Procurement Requests</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">TSh ${Number(data.procurement.total_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--green);">
-                <div class="stat-icon">📦</div>
-                <div class="stat-number">${data.stock.total_items || 0}</div>
-                <div class="stat-label">Stock Items</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Value: TSh ${Number(data.stock.total_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--orange);">
-                <div class="stat-icon">🏷️</div>
-                <div class="stat-number">${data.assets.total_assets || 0}</div>
-                <div class="stat-label">Fixed Assets</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Value: TSh ${Number(data.assets.total_current_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--purple);">
-                <div class="stat-icon">📄</div>
-                <div class="stat-number">${data.tenders.total_tenders || 0}</div>
-                <div class="stat-label">Tenders Registered</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Won: ${data.tenders.won || 0} (TSh ${Number(data.tenders.won_value || 0).toLocaleString()})</div>
-            </div>
-        `;
-
-    } catch (err) {
-        narrative.textContent = '❌ Failed to load report: ' + err.message;
-        narrative.style.color = 'red';
-    }
-}
 function printMasterReport() {
     if (!currentMasterReport) {
         showToast('Load the report first.', 'warning');
@@ -1091,12 +1466,6 @@ function printMasterReport() {
                 <p>Generated on ${new Date().toLocaleString()} by ${Auth.getUser().fullName}</p>
             </div>
             <div class="narrative">${d.narrative}</div>
-            <div class="stats">
-                <div class="card"><div class="card-label">Procurement Requests</div><div class="card-value">${d.procurement.total_requests || 0} (TSh ${Number(d.procurement.total_value || 0).toLocaleString()})</div></div>
-                <div class="card"><div class="card-label">Stock Value</div><div class="card-value">TSh ${Number(d.stock.total_value || 0).toLocaleString()}</div></div>
-                <div class="card"><div class="card-label">Assets Value</div><div class="card-value">TSh ${Number(d.assets.total_current_value || 0).toLocaleString()}</div></div>
-                <div class="card"><div class="card-label">Tenders Won</div><div class="card-value">${d.tenders.won || 0} (TSh ${Number(d.tenders.won_value || 0).toLocaleString()})</div></div>
-            </div>
             <div class="footer">
                 This is a computer-generated document. No signature required.<br>
                 MAK DC Investment Company LTD &copy; ${new Date().getFullYear()}
@@ -1202,16 +1571,33 @@ async function loadApprovedRequests() {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--red);">❌ ${err.message}</td></tr>`;
     }
 }
-
 async function loadPaidProcurements() {
     const tbody = document.getElementById('paidProcurementsTableBody');
     if (!tbody) return;
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">⏳ Loading...</td></tr>`;
     
     try {
-        const requests = await API.getProcurementRequests('/paid');
-        document.getElementById('paidProcurementsCount').textContent = requests.length;
-        renderRequestsTable(tbody, requests, true);
+        // 🆕 Vuta zote, kisha chuja zenye status 'paid' au 'completed'
+        const requests = await API.getProcurementRequests('/all');
+        
+        // Chuja kulingana na status mbalimbali zinazoweza kuashiria malipo kukamilika
+        const paidRequests = requests.filter(r => 
+            r.status === 'paid' || 
+            r.status === 'completed' || 
+            r.status === 'payment-approved'
+        );
+
+        // Update idadi kwenye badge
+        document.getElementById('paidProcurementsCount').textContent = paidRequests.length;
+
+        if (paidRequests.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-400);">📭 No paid procurements found.</td></tr>`;
+            return;
+        }
+
+        // Onyesha jedwali
+        renderRequestsTable(tbody, paidRequests, true); 
+        
     } catch (err) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--red);">❌ ${err.message}</td></tr>`;
     }
@@ -1223,7 +1609,7 @@ function renderRequestsTable(tbody, requests, showActions = true, showPurchase =
         return;
     }
     
-        tbody.innerHTML = requests.map(r => {
+    tbody.innerHTML = requests.map(r => {
         let dropdownItems = `<button onclick="viewRequestDetail(${r.id})">👁️ View Details</button>`;
 
         if (showActions) {
@@ -1233,8 +1619,17 @@ function renderRequestsTable(tbody, requests, showActions = true, showPurchase =
             } else if (r.status === 'pending-purchaser-details') {
                 dropdownItems += `<button onclick="openPurchaserDetailsModal(${r.id})">📝 Fill Purchaser Details</button>`;
             } else if (r.status === 'paid') {
-                dropdownItems += `<button onclick="receiveStock(${r.id})">📦 Receive Stock</button>`;
+                // 🆕 Hapa tunaweka masharti mawili: Status iwe paid, NA haijapokelewa kwenye stock bado
+                if (!r.received_as_stock && !r.received_as_asset) {
+                    dropdownItems += `
+                        <button onclick="receiveStock(${r.id})" style="color: #16a34a; font-weight: 800; background: rgba(34,197,94,0.1);">
+                            📦 Receive Stock / Bidhaa
+                        </button>`;
+                } else {
+                     dropdownItems += `<button disabled style="opacity: 0.5; cursor: not-allowed;">✅ Stock Already Received</button>`;
+                }
             }
+
             // Chat button
             let badgeHtml = '';
             if (typeof unreadMessageCount !== 'undefined' && unreadMessageCount > 0) {
@@ -1710,14 +2105,34 @@ async function rejectRequest(id) {
 }
 
 async function receiveStock(id) {
-    if (!confirm('Receive items to store? This will add items to stock.')) return;
+    // 1. Uliza uthibitisho kwa mtumiaji
+    const res = await modernConfirm({
+        title: '📦 Pokea Bidhaa (Stock)',
+        message: 'Je, una uhakika bidhaa hizi zimefika na unataka kuziingiza kwenye Ghala (Stock)?',
+        type: 'success',
+        okText: 'Ndio, Pokea',
+        cancelText: 'Ghairi'
+    });
+    
+    if (!res.confirmed) return;
+    
     try {
-        await API.receiveStock(id);
-        showToast('✅ Stock received!', 'success');
-        closeModal('viewProcurementModal');
-        loadAllRequests();
-        loadProcurementDashboard();
+        // 2. Tuma ombi kwa API (Hakikisha API.receiveStock ipo kwenye api.js)
+        await API.receiveStock(id); 
+        
+        // 3. Onyesha ujumbe wa mafanikio
+        showToast('✅ Stock received successfully!', 'success');
+        
+        // 4. Refresh data zote ili mabadiliko yaonekane papo hapo
+        closeModal('viewProcurementModal'); // Funga modal kama ilikuwa wazi
+        loadAllRequests();                  // Refresh orodha ya maombi yote
+        loadProcurementDashboard();         // Refresh takwimu za juu
+        loadIncomingRequests();             // Refresh maombi mapya
+        loadStockItems();                   // 🆕 Refresh orodha ya bidhaa zilizopo ghalani
+        loadPaidProcurements();             // 🆕 Refresh orodha ya "Paid Procurements"
+        
     } catch (err) {
+        // 5. Kama kuna kosa, lionyeshe
         showToast('❌ Failed: ' + err.message, 'error');
     }
 }
@@ -3660,149 +4075,11 @@ async function linkTenderToProcurement(id) {
 }
 let procurementChartInstance = null;
 let assetChartInstance = null;
-
-function toggleCustomDateRange() {
-    const type = document.getElementById('masterPeriodType').value;
-    const customDiv = document.getElementById('customDateRange');
-    if (type === 'custom') {
-        customDiv.style.display = 'flex';
-    } else {
-        customDiv.style.display = 'none';
-    }
-}
-
-async function loadMasterReport() {
-    const narrative = document.getElementById('masterNarrativeText');
-    const grid = document.getElementById('masterKPIGrid');
-    const periodType = document.getElementById('masterPeriodType').value;
-
-    let params = {};
-    if (periodType === 'custom') {
-        const from = document.getElementById('masterDateFrom').value;
-        const to = document.getElementById('masterDateTo').value;
-        if (!from || !to) {
-            showToast('Chagua tarehe za mwanzo na mwisho.', 'warning');
-            return;
-        }
-        params = { from, to };
-    } else {
-        params = { period: periodType };
-    }
-
-    narrative.textContent = '⏳ Loading report...';
-    grid.innerHTML = '';
-
-    try {
-        const data = await API.getMasterReport(params);
-        currentMasterReport = data;
-
-        narrative.textContent = data.narrative;
-
-        // KPI Cards
-        grid.innerHTML = `
-            <div class="stat-card" style="border-left:4px solid var(--blue);">
-                <div class="stat-icon">📋</div>
-                <div class="stat-number">${data.procurement.total_requests || 0}</div>
-                <div class="stat-label">Procurement Requests</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">TSh ${Number(data.procurement.total_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--green);">
-                <div class="stat-icon">📦</div>
-                <div class="stat-number">${data.stock.total_items || 0}</div>
-                <div class="stat-label">Stock Items</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Value: TSh ${Number(data.stock.total_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--orange);">
-                <div class="stat-icon">🏷️</div>
-                <div class="stat-number">${data.assets.total_assets || 0}</div>
-                <div class="stat-label">Fixed Assets</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Value: TSh ${Number(data.assets.total_current_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--purple);">
-                <div class="stat-icon">📄</div>
-                <div class="stat-number">${data.tenders.total_tenders || 0}</div>
-                <div class="stat-label">Tenders Registered</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Won: ${data.tenders.won || 0} (TSh ${Number(data.tenders.won_value || 0).toLocaleString()})</div>
-            </div>
-        `;
-
-        // Charts
-        renderProcurementChart(data.procurement);
-        renderAssetChart(data.assets);
-
-    } catch (err) {
-        narrative.textContent = '❌ Failed to load report: ' + err.message;
-        narrative.style.color = 'red';
-    }
-}
 let storeChartInstance = null;
 let procurementTrendInstance = null;
 let procurementStatusInstance = null;
 
-async function loadMasterReport() {
-    const narrative = document.getElementById('masterNarrativeText');
-    const grid = document.getElementById('masterKPIGrid');
-    const periodType = document.getElementById('masterPeriodType').value;
 
-    let params = {};
-    if (periodType === 'custom') {
-        const from = document.getElementById('masterDateFrom').value;
-        const to = document.getElementById('masterDateTo').value;
-        if (!from || !to) {
-            showToast('Chagua tarehe za mwanzo na mwisho.', 'warning');
-            return;
-        }
-        params = { from, to };
-    } else {
-        params = { period: periodType };
-    }
-
-    narrative.textContent = '⏳ Loading report...';
-    grid.innerHTML = '';
-
-    try {
-        const data = await API.getMasterReport(params);
-        currentMasterReport = data;
-
-        narrative.textContent = data.narrative;
-
-        // KPI Cards
-        grid.innerHTML = `
-            <div class="stat-card" style="border-left:4px solid var(--blue);">
-                <div class="stat-icon">📋</div>
-                <div class="stat-number">${data.procurement.total_requests || 0}</div>
-                <div class="stat-label">Procurement Requests</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">TSh ${Number(data.procurement.total_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--green);">
-                <div class="stat-icon">📦</div>
-                <div class="stat-number">${data.stock.total_items || 0}</div>
-                <div class="stat-label">Stock Items</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Value: TSh ${Number(data.stock.total_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--orange);">
-                <div class="stat-icon">🏷️</div>
-                <div class="stat-number">${data.assets.total_assets || 0}</div>
-                <div class="stat-label">Fixed Assets</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Value: TSh ${Number(data.assets.total_current_value || 0).toLocaleString()}</div>
-            </div>
-            <div class="stat-card" style="border-left:4px solid var(--purple);">
-                <div class="stat-icon">📄</div>
-                <div class="stat-number">${data.tenders.total_tenders || 0}</div>
-                <div class="stat-label">Tenders Registered</div>
-                <div style="font-size:11px;color:var(--gray-500);margin-top:4px;">Won: ${data.tenders.won || 0}</div>
-            </div>
-        `;
-        await loadProcurementTrendChart();
-        renderProcurementStatusChart(data.procurement);
-        renderStoreChart(data.stock);
-        renderAssetChart(data.assets);
-
-    } catch (err) {
-        narrative.textContent = '❌ Failed to load report: ' + err.message;
-        narrative.style.color = 'red';
-    }
-}
 let currentTrendPeriod = '7d';
 
 function changeTrendPeriod(period) {
@@ -4099,6 +4376,1262 @@ async function deleteTenderPrompt(id) {
 function debounceLoadTenders() {
     clearTimeout(tenderSearchTimeout);
     tenderSearchTimeout = setTimeout(loadTenders, 400);
+}
+// ================================================================
+// USER DROPDOWN TOGGLE
+// ================================================================
+function toggleUserDropdown(event) {
+    if (event) event.stopPropagation();
+    const wrap = document.getElementById('userDropdownWrap');
+    if (wrap) {
+        wrap.classList.toggle('open');
+    }
+}
+
+function closeUserDropdown() {
+    const wrap = document.getElementById('userDropdownWrap');
+    if (wrap) {
+        wrap.classList.remove('open');
+    }
+}
+
+// Funga dropdown ukibonyeza nje
+document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('userDropdownWrap');
+    if (wrap && !wrap.contains(e.target)) {
+        wrap.classList.remove('open');
+    }
+});
+// ================================================================
+// 🆕 DASHBOARD OVERVIEW (Like Finance)
+// ================================================================
+let dashTrendChartInstance = null;
+let dashStatusChartInstance = null;
+
+async function loadDashboardOverview() {
+    const user = Auth.getUser();
+    if (!user) return;
+
+    // Weka Jina na Tarehe
+    const nameEl = document.getElementById('dashUserName');
+    if (nameEl) nameEl.textContent = user.fullName.split(' ')[0];
+    
+    const dateEl = document.getElementById('dashDate');
+    if (dateEl) {
+        dateEl.textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    try {
+        // Vuta data zote kwa pamoja
+        const [pendingReqs, approvedReqs, allReqs, stockItems, assets, tenders, movements] = await Promise.all([
+            API.getProcurementRequests('/pending').catch(() => []),
+            API.getProcurementRequests('/approved').catch(() => []),
+            API.getProcurementRequests('/all').catch(() => []),
+            API.getStockItems().catch(() => []),
+            API.getAssets().catch(() => []),
+            API.getTenders().catch(() => []),
+            API.getStockMovements({ limit: 5 }).catch(() => [])
+        ]);
+
+        // ==========================================
+        // 1. UPDATE KPIs
+        // ==========================================
+        document.getElementById('dashHeroPending').textContent = pendingReqs.length;
+        document.getElementById('kpiPending').textContent = pendingReqs.length;
+        document.getElementById('kpiApproved').textContent = approvedReqs.length;
+
+        let totalStockValue = 0;
+        let lowStockCount = 0;
+        
+        stockItems.forEach(item => {
+            const qty = Number(item.quantity) || 0;
+            const min = Number(item.min_stock_level) || 10;
+            const price = Number(item.unit_price) || 0;
+            totalStockValue += (qty * price);
+            if (qty > 0 && qty <= min) lowStockCount++;
+        });
+
+        document.getElementById('kpiStockValue').textContent = 'TSh ' + totalStockValue.toLocaleString();
+        document.getElementById('modStockCount').textContent = stockItems.length + ' ITEMS';
+        document.getElementById('modLowStock').textContent = lowStockCount;
+
+        // ==========================================
+        // 2. MODULE SUMMARIES
+        // ==========================================
+        document.getElementById('modAssetCount').textContent = assets.length + ' ASSETS';
+        document.getElementById('modAssetMaint').textContent = assets.filter(a => a.status === 'In Maintenance').length;
+
+        document.getElementById('modTenderCount').textContent = tenders.length + ' TENDERS';
+        document.getElementById('modTenderWon').textContent = tenders.filter(t => t.status === 'won').length;
+
+        // ==========================================
+        // 3. RENDER CHARTS
+        // ==========================================
+        renderProcTrendChart(allReqs);
+        renderProcStatusChart(allReqs);
+
+        // ==========================================
+        // 4. RECENT ACTIVITIES (Requests)
+        // ==========================================
+        const recentReqList = document.getElementById('recentRequestsList');
+        if (recentReqList) {
+            if (allReqs.length === 0) {
+                recentReqList.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No requests yet</div>';
+            } else {
+                recentReqList.innerHTML = allReqs.slice(0, 5).map(r => `
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:rgba(2,41,8,0.1);color:#022908;">📋</div>
+                        <div class="activity-info">
+                            <div class="activity-title">${esc(r.request_number)}</div>
+                            <div class="activity-meta">${esc(r.department)} • ${new Date(r.created_at).toLocaleDateString('en-GB')}</div>
+                        </div>
+                        <div class="activity-amount">
+                            <div class="activity-amount-value">TSh ${Number(r.total_amount || 0).toLocaleString()}</div>
+                            <div class="activity-amount-status" style="color:${getStatusColor(r.status)};">${(r.status || '').toUpperCase().replace(/-/g, ' ')}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ==========================================
+        // 5. RECENT ACTIVITIES (Stock)
+        // ==========================================
+        const recentStockList = document.getElementById('recentStockList');
+        if (recentStockList) {
+            if (movements.length === 0) {
+                recentStockList.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No stock movements yet</div>';
+            } else {
+                recentStockList.innerHTML = movements.map(m => {
+                    const isIn = ['in', 'return'].includes(m.transaction_type);
+                    const icon = isIn ? '📥' : '📤';
+                    const color = isIn ? '#16a34a' : '#dc2626';
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background:rgba(${isIn ? '34,197,94' : '220,38,38'},0.1);color:${color};">${icon}</div>
+                            <div class="activity-info">
+                                <div class="activity-title">${esc(m.item_name)}</div>
+                                <div class="activity-meta">${esc(m.department || 'Store')} • ${new Date(m.created_at).toLocaleDateString('en-GB')}</div>
+                            </div>
+                            <div class="activity-amount">
+                                <div class="activity-amount-value" style="color:${color};">${isIn ? '+' : '-'}${m.quantity} ${m.item_unit}</div>
+                                <div class="activity-amount-status" style="color:${color};">${isIn ? 'IN' : 'OUT'}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+    } catch (err) {
+        console.error("Dashboard error:", err);
+    }
+}
+
+// Function ya kupata rangi ya status
+function getStatusColor(status) {
+    const colors = {
+        'pending': '#f59e0b', 'pending-manager': '#f59e0b', 'pending-ceo': '#8b5cf6',
+        'approved': '#16a34a', 'paid': '#22c55e', 'completed': '#22c55e', 'rejected': '#dc2626'
+    };
+    return colors[status] || '#64748b';
+}
+
+// Chora Line Chart ya Maombi
+function renderProcTrendChart(requests) {
+    const ctx = document.getElementById('procTrendChart');
+    if (!ctx) return;
+    if (dashTrendChartInstance) dashTrendChartInstance.destroy();
+
+    // Panga maombi kwa siku 7 zilizopita
+    const last7Days = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    });
+
+    const counts = last7Days.map(dateStr => {
+        return requests.filter(r => {
+            if (!r.created_at) return false;
+            const rDate = new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            return rDate === dateStr;
+        }).length;
+    });
+
+    dashTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: last7Days,
+            datasets: [{
+                label: 'Requests',
+                data: counts,
+                borderColor: '#022908',
+                backgroundColor: 'rgba(2,41,8,0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#f59e0b',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+// Chora Doughnut Chart ya Status
+function renderProcStatusChart(requests) {
+    const ctx = document.getElementById('procStatusChart');
+    if (!ctx) return;
+    if (dashStatusChartInstance) dashStatusChartInstance.destroy();
+
+    const pending = requests.filter(r => r.status && r.status.includes('pending')).length;
+    const approved = requests.filter(r => r.status === 'approved').length;
+    const paid = requests.filter(r => r.status === 'paid' || r.status === 'completed').length;
+    const rejected = requests.filter(r => r.status === 'rejected').length;
+
+    dashStatusChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Approved', 'Paid', 'Rejected'],
+            datasets: [{
+                data: [pending, approved, paid, rejected],
+                backgroundColor: ['#f59e0b', '#16a34a', '#22c55e', '#dc2626'],
+                borderWidth: 3,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 10, weight: '600' }, padding: 8, boxWidth: 10 } } }
+        }
+    });
+}
+// ================================================================
+// EDIT PROFILE MODAL
+// ================================================================
+function openEditProfileModal() {
+    const user = Auth.getUser();
+    if (!user) return;
+
+    document.getElementById('editProfileName').value = user.fullName || '';
+    document.getElementById('editProfileTitle').value = user.role || '';
+    document.getElementById('editProfileEmail').value = user.email || '';
+    document.getElementById('editProfilePhone').value = user.phone || '';
+    document.getElementById('editProfileDepartment').value = user.department || '';
+    document.getElementById('editProfileEmployeeId').value = user.employeeId || '';
+
+    const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    const preview = document.getElementById('editPicPreview');
+    if (preview) {
+        if (user.profilePic) {
+            preview.innerHTML = `<img src="${user.profilePic}" style="width:100%;height:100%;object-fit:cover;" alt="Profile">`;
+        } else {
+            preview.innerHTML = `<span id="editPicInitials">${initials}</span>`;
+        }
+    }
+
+    currentProfilePic = user.profilePic || null;
+    
+    const status = document.getElementById('editProfileStatus');
+    if (status) { status.className = 'status-msg'; status.textContent = ''; }
+
+    document.getElementById('editProfileModal').classList.add('show');
+}
+
+async function saveUserProfile() {
+    const btn = document.getElementById('saveProfileBtn');
+    const statusDiv = document.getElementById('editProfileStatus');
+    const phone = document.getElementById('editProfilePhone').value.trim();
+    
+    if (!phone) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ Please enter Phone Number.';
+        return;
+    }
+    
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Saving...';
+    }
+    
+    try {
+        // ✅ Tuma phone NA profilePic kama zimebadilika
+        const payload = { phone };
+        
+        const user = Auth.getUser();
+        if (currentProfilePic !== user.profilePic) {
+            payload.profilePic = currentProfilePic;
+        }
+        
+        const response = await API.updateOwnProfile(payload);
+        
+        // ✅ Tumia Auth.saveSession() sawa na Finance
+        const updatedUser = response.user || { ...user, ...payload };
+        Auth.saveSession(Auth.getToken(), updatedUser);
+        
+        // ✅ Refresh UI
+        renderProcurementProfile();
+        
+        statusDiv.className = 'status-msg success';
+        statusDiv.textContent = '✓ Profile updated!';
+        showToast('✅ Profile updated successfully!', 'success');
+        
+        setTimeout(() => closeModal('editProfileModal'), 1000);
+        
+    } catch (err) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ ' + err.message;
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '💾 Save Changes';
+        }
+    }
+}
+// ================================================================
+// AVATAR HELPER — Sawa na Finance Dashboard
+// ================================================================
+function setAvatar(id, pic, initials) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (pic) {
+        el.innerHTML = `<img src="${pic}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+        el.innerHTML = `<span>${initials}</span>`;
+    }
+}
+function handleProfilePicUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 2 * 1024 * 1024) { 
+        showToast('Image too large (max 2MB)', 'error'); 
+        return; 
+    }
+    if (!file.type.startsWith('image/')) { 
+        showToast('Please select an image', 'error'); 
+        return; 
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentProfilePic = e.target.result;  // ✅ MUHIMU!
+        const preview = document.getElementById('editPicPreview');
+        if (preview) {
+            preview.innerHTML = `<img src="${currentProfilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="Profile">`;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+// ==========================================
+// 🆕 FUEL MANAGEMENT LOGIC
+// ==========================================
+// 1. Fungua Modal
+async function openFuelIssueModal() {
+    document.getElementById('fuelType').value = '';
+    document.getElementById('fuelAssetId').value = '';
+    document.getElementById('fuelLiters').value = '';
+    document.getElementById('fuelDriverName').value = '';
+    document.getElementById('fuelPurpose').value = '';
+    document.getElementById('fuelIssueStatus').className = 'status-msg';
+    document.getElementById('fuelStockWarning').style.display = 'none';
+    
+    const select = document.getElementById('fuelAssetId');
+    select.innerHTML = '<option value="">⏳ Inatafuta magari...</option>';
+
+    try {
+        const assets = await API.getAssets().catch(() => []);
+        select.innerHTML = '<option value="">-- Chagua Gari --</option>';
+        const vehicles = (assets || []).filter(a => a.category === 'Vehicle');
+        
+        if(vehicles.length === 0) {
+            select.innerHTML = '<option value="">Hakuna gari lililosajiliwa</option>';
+        } else {
+            vehicles.forEach(v => {
+                select.innerHTML += `<option value="${v.id}" data-plate="${v.serial_number || ''}">${v.name} (${v.serial_number || 'No Plate'})</option>`;
+            });
+        }
+    } catch(e) {
+        select.innerHTML = '<option value="">❌ Imeshindwa kupata magari</option>';
+    }
+    showModal('fuelIssueModal');
+}
+
+// 2. Angalia Stock ya Mafuta (Inazuia kutoa kama hakuna)
+async function checkFuelStock() {
+    const type = document.getElementById('fuelType').value;
+    const warningDiv = document.getElementById('fuelStockWarning');
+    const stockSpan = document.getElementById('availableStock');
+    
+    if (!type) {
+        warningDiv.style.display = 'none';
+        return;
+    }
+
+    try {
+        const stockItems = await API.getStockItems().catch(() => []);
+        // 🆕 Tafuta kwa usahihi zaidi (case-insensitive, bila nafasi za ziada)
+        const fuelItem = stockItems.find(item => 
+            item.item_name && item.item_name.toLowerCase().trim() === type.toLowerCase().trim()
+        );
+        
+        const available = fuelItem ? Number(fuelItem.quantity) : 0;
+        stockSpan.textContent = `${available} L`;
+        warningDiv.style.display = 'block';
+        
+        if (available <= 0) {
+            warningDiv.style.background = 'rgba(239,68,68,0.1)';
+            warningDiv.style.borderLeftColor = '#dc2626';
+            warningDiv.style.color = '#991b1b';
+            warningDiv.innerHTML = `⚠️ Hakuna ${type} iliyopo Store. Tafadhali nunua kwanza.`;
+        } else {
+            warningDiv.style.background = 'rgba(59,130,246,0.1)';
+            warningDiv.style.borderLeftColor = '#3b82f6';
+            warningDiv.style.color = '#1e3a8a';
+            warningDiv.innerHTML = `ℹ️ ${type} yaliyopo: <strong>${available} L</strong>`;
+        }
+        
+        window.currentFuelStock = available;
+        window.currentFuelItemId = fuelItem ? fuelItem.id : null;
+
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// 3. Submit & Tengeneza Kibali
+async function submitFuelIssue() {
+    const statusDiv = document.getElementById('fuelIssueStatus');
+    const fuelType = document.getElementById('fuelType').value;
+    const assetId = document.getElementById('fuelAssetId').value;
+    
+    // 🆕 Hakikisha tunasoma input vizuri
+    const litersInput = document.getElementById('fuelLiters');
+    const liters = litersInput ? parseFloat(litersInput.value) : 0;
+    
+    const driverName = document.getElementById('fuelDriverName').value.trim();
+    const purpose = document.getElementById('fuelPurpose').value.trim();
+
+    // 🆕 DEBUG: Angalia nini kinakosekana
+    console.log("🔍 DEBUG SUBMIT FUEL:");
+    console.log("fuelType:", fuelType);
+    console.log("assetId:", assetId);
+    console.log("liters:", liters);
+    console.log("driverName:", driverName);
+    console.log("window.currentFuelStock:", window.currentFuelStock);
+    console.log("window.currentFuelItemId:", window.currentFuelItemId);
+
+    if (!fuelType || !assetId || liters <= 0 || !driverName) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ Tafadhali jaza Aina ya Mafuta, Gari, Lita, na Jina la Dereva.';
+        return;
+    }
+
+    if (liters > (window.currentFuelStock || 0)) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = `⚠ Mafuta yaliyopo Store ni ${window.currentFuelStock || 0} L tu. Huwezi kutoa ${liters} L.`;
+        return;
+    }
+
+    const btn = document.querySelector('#fuelIssueModal button[onclick="submitFuelIssue()"]');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Inatoa...';
+
+    try {
+        // 1. Pata taarifa za Gari
+        const assets = await API.getAssets().catch(() => []);
+        const selectedAsset = assets.find(a => String(a.id) === String(assetId));
+        const assetName = selectedAsset ? selectedAsset.name : 'Unknown Vehicle';
+        const assetPlate = selectedAsset ? (selectedAsset.serial_number || 'N/A') : 'N/A';
+        const officerName = Auth.getUser()?.fullName || 'Procurement Officer';
+
+        // 2. Punguza Stock
+        if (window.currentFuelItemId) {
+            const newQuantity = (window.currentFuelStock || 0) - liters;
+            if (newQuantity < 0) throw new Error("Mafuta yaliyopo hayatoshi!");
+
+            console.log(`📉 Inapunguza stock ID ${window.currentFuelItemId} kutoka ${window.currentFuelStock} kwenda ${newQuantity}`);
+
+            await API.adjustStockItem({
+                stockItemId: window.currentFuelItemId,
+                newQuantity: newQuantity,
+                reason: 'Fuel Issued',
+                notes: `Issued ${liters}L of ${fuelType} to ${driverName} for ${assetName}`
+            });
+            console.log("✅ Stock imepunguzwa kikamilifu");
+        } else {
+            throw new Error("Haikupata ID ya mafuta kwenye stock. Haiwezi kupunguza.");
+        }
+        // 3. Tengeneza Log Mpya
+        const newLog = {
+            id: 'FUEL-' + Date.now(),
+            permit_number: `FP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+            fuel_type: fuelType,
+            asset_id: assetId,
+            asset_name: assetName,
+            asset_plate: assetPlate,
+            liters: liters,
+            driver_name: driverName,
+            purpose: purpose,
+            issued_by: officerName,
+            created_at: new Date().toISOString()
+        };
+
+        // 4. Hifadhi kwenye Logbook
+        let existingLogs = JSON.parse(localStorage.getItem('makdc_fuel_logs') || '[]');
+        existingLogs.unshift(newLog); 
+        localStorage.setItem('makdc_fuel_logs', JSON.stringify(existingLogs));
+
+        // 5. Onyesha mafanikio
+        showToast('✅ Mafuta yametolewa! Kibali kinatengenezwa...', 'success');
+        
+        // 6. Tengeneza Kibali
+        generateFuelPermit(newLog);
+
+        // 7. Safisha fomu na fungua upya Dashboard
+        closeModal('fuelIssueModal');
+        loadFuelDashboard(); 
+        loadStockItems(); // Refresh Store
+        
+    } catch (err) {
+        console.error("❌ Error:", err);
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '⛽ Toa Mafuta & Toa Kibali';
+    }
+}
+
+// 4. Load Dashboard
+async function loadFuelDashboard() {
+    const tbody = document.getElementById('fuelLogTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">⏳ Loading...</td></tr>`;
+
+    try {
+        const logs = JSON.parse(localStorage.getItem('makdc_fuel_logs') || '[]');
+        const stockItems = await API.getStockItems().catch(() => []);
+        
+        // Hesabu Stock za Petrol na Diesel
+        let petrolStock = 0, dieselStock = 0;
+        if (stockItems) {
+            stockItems.forEach(item => {
+                if (item.item_name.toLowerCase().includes('petrol')) petrolStock += Number(item.quantity);
+                if (item.item_name.toLowerCase().includes('diesel')) dieselStock += Number(item.quantity);
+            });
+        }
+
+        if (document.getElementById('fuelStockPetrol')) document.getElementById('fuelStockPetrol').textContent = `${petrolStock} L`;
+        if (document.getElementById('fuelStockDiesel')) document.getElementById('fuelStockDiesel').textContent = `${dieselStock} L`;
+        
+        let totalIssued = 0;
+        logs.forEach(l => totalIssued += Number(l.liters));
+        if (document.getElementById('fuelTotalIssued')) document.getElementById('fuelTotalIssued').textContent = `${totalIssued} L`;
+
+        if (logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-400);">📭 Hakuna kumbukumbu za matumizi ya mafuta.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = logs.map(l => `
+            <tr>
+                <td style="font-size:11px;">${new Date(l.created_at).toLocaleDateString('en-GB')}</td>
+                <td>
+                    <strong>${esc(l.asset_name)}</strong>
+                    <div style="font-size:10px;color:var(--gray-500);font-family:monospace;">${esc(l.asset_plate)}</div>
+                </td>
+                <td><span class="status-badge ${l.fuel_type === 'Petrol' ? 'pending' : 'in-progress'}" style="font-size:10px;">${l.fuel_type}</span></td>
+                <td><strong style="color:var(--primary);">${l.liters} L</strong></td>
+                <td>${esc(l.driver_name)}</td>
+                <td><button onclick='printFuelPermit(${JSON.stringify(l).replace(/'/g, "&#39;")})' class="action-btn blue" style="font-size:11px;padding:4px 8px;">🖨️ View Permit</button></td>
+            </tr>
+        `).join('');
+
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--red);">❌ ${esc(err.message)}</td></tr>`;
+    }
+}
+
+function generateFuelPermit(log) {
+    const permitNumber = log.permit_number || `FP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+    
+    // 🆕 Hakikisha tunapata majina sahihi hata kama yamekuja tofauti
+    const assetName = log.asset_name || log.assetName || 'Company Vehicle';
+    const assetPlate = log.asset_plate || log.assetPlate || log.serial_number || 'N/A';
+    const fuelType = log.fuel_type || log.fuelType || 'Petrol';  // 🆕 Fallback ni Petrol
+    const driverName = log.driver_name || log.driverName || 'Driver';
+    const issuedBy = log.issued_by || log.issuedBy || Auth.getUser()?.fullName || 'Procurement Officer';
+    const purpose = log.purpose || 'Official Company Duties';
+    const liters = log.liters || 0;
+
+    const html = `
+        <html>
+        <head>
+            <title>Fuel Permit - ${permitNumber}</title>
+            <style>
+                /* CSS YAKO YOTE IPO HAPA KAMA ILIVYOKUWA */
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+                @page { size: A4; margin: 0; }
+                body { font-family: 'Inter', sans-serif; margin: 0; padding: 25px 35px; color: #333; background: #fff; -webkit-print-color-adjust: exact; }
+                .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #022908; padding-bottom: 12px; margin-bottom: 15px; }
+                .header-left { display: flex; align-items: center; gap: 15px; }
+                .logo { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #f59e0b; object-fit: cover; }
+                .company-details h1 { margin: 0; font-size: 20px; color: #022908; text-transform: uppercase; letter-spacing: 1px; }
+                .company-details p { margin: 3px 0 0 0; font-size: 11px; color: #666; font-weight: 600; }
+                .voucher-title { text-align: center; margin-bottom: 15px; }
+                .voucher-title h2 { margin: 0; font-size: 18px; color: #f59e0b; text-transform: uppercase; letter-spacing: 2px; }
+                .permit-number-box { background: #022908; color: #fff; font-size: 16px; font-weight: 900; padding: 6px 20px; border-radius: 6px; display: inline-block; margin-top: 8px; letter-spacing: 2px; box-shadow: 0 4px 10px rgba(2,41,8,0.2); }
+                .narrative-box { background: #f8fafc; border-left: 5px solid #3b82f6; padding: 15px 20px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 11.5px; line-height: 1.6; color: #1e293b; }
+                .narrative-box strong { color: #1e40af; }
+                .narrative-box p { margin: 0 0 8px 0; text-align: justify; }
+                .narrative-box p:last-child { margin-bottom: 0; }
+                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+                .info-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 15px; background: #fff; }
+                .info-card h4 { margin: 0 0 10px 0; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+                .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+                .info-row span:first-child { color: #64748b; font-weight: 600; }
+                .info-row span:last-child { font-weight: 800; color: #0f172a; text-align: right; }
+                .terms-box { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px 15px; font-size: 10.5px; color: #92400e; margin-bottom: 25px; line-height: 1.5; }
+                .terms-box h4 { margin: 0 0 5px 0; font-size: 11px; text-transform: uppercase; color: #b45309; }
+                .terms-box ul { margin: 0; padding-left: 18px; }
+                .terms-box li { margin-bottom: 4px; }
+                .signatures { display: flex; justify-content: space-between; margin-top: 25px; padding: 0 20px; }
+                .sig-box { width: 40%; border-top: 2px solid #022908; padding-top: 10px; text-align: center; }
+                .sig-name { font-size: 13px; font-weight: 800; color: #022908; margin: 0; }
+                .sig-title { font-size: 10px; color: #64748b; margin: 5px 0 0 0; font-weight: 600; }
+                .footer { text-align: center; font-size: 9px; color: #94a3b8; margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="header-left">
+                    <img src="assets/makdc-logo.jpg" class="logo" onerror="this.src='https://via.placeholder.com/65x65/022908/ffffff?text=MAK'">
+                    <div class="company-details">
+                        <h1>MAK DC INVESTMENT COMPANY LTD</h1>
+                        <p>Procurement & Store Department</p>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:11px; color:#64748b; font-weight:700;">DATE ISSUED</div>
+                    <div style="font-size:14px; font-weight:800; color:#022908;">${new Date(log.created_at || Date.now()).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})}</div>
+                </div>
+            </div>
+
+            <div class="voucher-title">
+                <h2>Official Fuel Issuance Permit</h2>
+                <div class="permit-number-box">REF NO: ${permitNumber}</div>
+            </div>
+
+            <!-- NARRATIVE IMARA NA NDEFU HAPA -->
+            <div class="narrative-box">
+                <p>
+                    This document serves as an official, authorized permit for the issuance of fuel from the MAK DC Investment Company Limited store. 
+                    By the authority vested in the Procurement and Store Department, this permit officially authorizes the allocation of <strong>${liters} Liters of ${fuelType}</strong> to the vehicle detailed below. This allocation is strictly intended for the execution of official company duties, specifically noted under the purpose of this trip.
+                </p>
+                <p>
+                    <strong>Critical Directive Regarding Fueling Station Protocol:</strong> Please be advised that <strong>NO FUEL SHALL BE DISPENSED OR CONSUMED WITHOUT THIS ORIGINAL PERMIT</strong>. Upon arrival at the designated fueling station, the receiver/driver is strictly required to present this permit to the fuel attendant. The fuel attendant must verify the permit number (<strong>${permitNumber}</strong>) and the vehicle details before dispensing the requested fuel. 
+                </p>
+                <p>
+                    Furthermore, upon successful completion of the fueling process, this original permit <strong>must be surrendered to the fuel station attendant</strong> for their official records and reconciliation. The station will retain this document as proof of transaction, while MAK DC Investment will rely on their issued receipt for our internal audit and accounting purposes. Any unauthorized use, duplication, or alteration of this permit is strictly prohibited.
+                </p>
+            </div>
+
+            <div class="details-grid">
+                <div class="info-card">
+                    <h4>Vehicle & Fuel Details</h4>
+                    <div class="info-row"><span>Vehicle / Asset:</span> <span>${assetName}</span></div>
+                    <div class="info-row"><span>Plate Number:</span> <span>${assetPlate}</span></div>
+                    <div class="info-row"><span>Fuel Type:</span> <span>${fuelType}</span></div>
+                    <div class="info-row"><span>Quantity Issued:</span> <span style="color: #16a34a;">${liters} Liters</span></div>
+                </div>
+                <div class="info-card">
+                    <h4>Issuance & Receiver Details</h4>
+                    <div class="info-row"><span>Receiver (Driver):</span> <span>${driverName}</span></div>
+                    <div class="info-row"><span>Issued By:</span> <span>${issuedBy}</span></div>
+                    <div class="info-row"><span>Date & Time:</span> <span>${new Date(log.created_at || Date.now()).toLocaleString('en-GB')}</span></div>
+                    <div class="info-row"><span>Status:</span> <span style="color: #2563eb;">AUTHORIZED</span></div>
+                </div>
+            </div>
+
+            <div class="terms-box">
+                <h4>Terms, Conditions & Attendant Instructions:</h4>
+                <ul>
+                    <li><strong>Validity:</strong> This permit is valid for a single fueling session only and expires upon issuance of fuel.</li>
+                    <li><strong>Verification:</strong> The fuel attendant MUST verify the Reference Number (<strong>${permitNumber}</strong>).</li>
+                    <li><strong>Retention:</strong> The fuel station attendant must collect and retain this original copy for their records.</li>
+                    <li><strong>Prohibition:</strong> This permit cannot be transferred to another vehicle or used for personal purposes.</li>
+                </ul>
+            </div>
+
+            <div class="signatures">
+                <div class="sig-box">
+                    <p class="sig-name">${issuedBy}</p>
+                    <p class="sig-title">Issued By (Procurement Officer)</p>
+                </div>
+                <div class="sig-box">
+                    <p class="sig-name">${driverName}</p>
+                    <p class="sig-title">Received By (Driver)</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                This is a computer-generated document. No physical signature is required if printed directly from the system.<br>
+                MAK DC Investment Company LTD &copy; ${new Date().getFullYear()}
+            </div>
+        </body>
+        </html>
+    `;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 500);
+}
+// 6. Print Permit kutoka Logbook
+function printFuelPermit(log) {
+    generateFuelPermit(log);
+}
+// ================================================================
+// LOGOUT LOGIC
+// ================================================================
+function handleLogoutClick(event) {
+    if (event) event.preventDefault();
+    closeUserDropdown();
+    const modal = document.getElementById('logoutConfirmModal');
+    if (modal) modal.classList.add('show');
+}
+
+function closeLogoutDialog() {
+    const modal = document.getElementById('logoutConfirmModal');
+    if (modal) modal.classList.remove('show');
+}
+
+function confirmLogout() {
+    Auth.logout();
+}
+// ==========================================
+// 🆕 ASSET FORM LOGIC (Plate Number)
+// ==========================================
+
+// 1. Function ya kuficha/kufungua sehemu ya Plate Number
+function togglePlateNumberField() {
+    const category = document.getElementById('asset_category').value;
+    const plateField = document.getElementById('plateNumberField');
+    
+    if (category === 'Vehicle') {
+        plateField.style.display = 'block';
+    } else {
+        plateField.style.display = 'none';
+        document.getElementById('asset_plate').value = ''; // Safisha
+    }
+}
+function openAssetModal(id = null) {
+    // 1. Safisha fomu kwa usalama (Kuzuia makosa kama kipengele hakipo)
+    const setVal = (elId, val) => {
+        const el = document.getElementById(elId);
+        if (el) el.value = val;
+    };
+
+    setVal('asset_id', id || '');
+    setVal('asset_name', '');
+    setVal('asset_category', 'Equipment'); // Default ni Equipment
+    setVal('asset_serial', '');
+    setVal('asset_pdate', new Date().toISOString().split('T')[0]);
+    setVal('asset_value', '');
+    setVal('asset_life', '5');
+    setVal('asset_location', '');
+    setVal('asset_custodian', '');
+    setVal('asset_notes', '');
+    setVal('asset_plate', ''); // Safisha Plate Number
+    
+    const errDiv = document.getElementById('asset_error');
+    if (errDiv) errDiv.style.display = 'none';
+
+    // 2. Ficha sehemu ya Plate Number kwa kuanzia
+    if (typeof togglePlateNumberField === 'function') togglePlateNumberField();
+
+    // 3. Kama ni Edit (Kuna ID imetumwa)
+    if (id) {
+        document.getElementById('assetModalTitle').textContent = '🖊️ Edit Asset';
+        
+        // Tafuta asset kwenye array yako ya currentAssets (iliyopakiwa na loadAssets)
+        const asset = currentAssets.find(a => String(a.id) === String(id));
+        
+        if (asset) {
+            setVal('asset_name', asset.name || '');
+            setVal('asset_category', asset.category || 'Equipment');
+            setVal('asset_serial', asset.serial_number || '');
+            setVal('asset_pdate', asset.purchase_date ? asset.purchase_date.split('T')[0] : '');
+            setVal('asset_value', asset.purchase_value || '');
+            setVal('asset_life', asset.useful_life_years || 5);
+            setVal('asset_location', asset.location || '');
+            setVal('asset_custodian', asset.custodian_name || '');
+            setVal('asset_notes', asset.notes || '');
+            
+            // Kama ni gari, weka plate number kwenye field yake
+            if (asset.category === 'Vehicle') {
+                setVal('asset_plate', asset.serial_number || '');
+            }
+        }
+    } else {
+        document.getElementById('assetModalTitle').textContent = '📝 Add New Asset';
+    }
+
+    // 4. Hakikisha sehemu ya Plate Number inaonekana au inafichwa kulingana na Category
+    if (typeof togglePlateNumberField === 'function') togglePlateNumberField();
+
+    // 5. Fungua Modal
+    showModal('assetModal');
+}
+
+// Function ya Kusaidia Kuficha/Kufungua Plate Number
+function togglePlateNumberField() {
+    const categoryEl = document.getElementById('asset_category');
+    const plateField = document.getElementById('plateNumberField');
+    
+    if (!categoryEl || !plateField) return;
+
+    if (categoryEl.value === 'Vehicle') {
+        plateField.style.display = 'block';
+    } else {
+        plateField.style.display = 'none';
+        const plateInput = document.getElementById('asset_plate');
+        if (plateInput) plateInput.value = ''; // Safisha kama sio gari
+    }
+}
+async function submitAsset() {
+    const id = document.getElementById('asset_id').value;
+    const btn = document.getElementById('saveAssetBtn');
+    const errDiv = document.getElementById('asset_error');
+    
+    // Chukua values kwa usalama
+    const name = document.getElementById('asset_name').value.trim();
+    const category = document.getElementById('asset_category').value;
+    const plateNumber = document.getElementById('asset_plate') ? document.getElementById('asset_plate').value.trim() : '';
+    let serialNumber = document.getElementById('asset_serial').value.trim();
+    
+    // Validation ya Msingi
+    if (!name) {
+        if (errDiv) {
+            errDiv.textContent = '⚠️ Jina la Asset ni lazima!';
+            errDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    // 🆕 Kama ni Gari (Vehicle) na kaweka Plate Number, tumia hiyo kama Serial Number
+    if (category === 'Vehicle' && plateNumber) {
+        serialNumber = plateNumber;
+    }
+
+    // Tengeneza Data ya Kutuma
+    const data = {
+        name: name,
+        category: category,
+        serialNumber: serialNumber,
+        purchaseDate: document.getElementById('asset_pdate').value || null,
+        purchaseValue: parseFloat(document.getElementById('asset_value').value) || 0,
+        usefulLifeYears: parseInt(document.getElementById('asset_life').value) || 5,
+        location: document.getElementById('asset_location').value.trim(),
+        custodianName: document.getElementById('asset_custodian').value.trim(),
+        notes: document.getElementById('asset_notes').value.trim()
+    };
+
+    // Weka kitufe kwenye hali ya kupakia
+    if (btn) {
+        btn.innerHTML = '⏳ Saving...';
+        btn.disabled = true;
+    }
+    if (errDiv) errDiv.style.display = 'none';
+
+    try {
+        if (id) {
+            // Update
+            await API.updateAsset(id, data);
+            showToast('✅ Asset updated successfully!', 'success');
+        } else {
+            // Create New
+            await API.createAsset(data);
+            showToast('✅ Asset created successfully!', 'success');
+        }
+        
+        closeModal('assetModal');
+        loadAssets(); // Refresh table ya Assets
+        
+    } catch (err) {
+        if (errDiv) {
+            errDiv.textContent = '❌ ' + err.message;
+            errDiv.style.display = 'block';
+        }
+    } finally {
+        // Rudisha kitufe kwenye hali ya kawaida
+        if (btn) {
+            btn.innerHTML = '💾 Save Asset';
+            btn.disabled = false;
+        }
+    }
+}
+// ==========================================
+// 🆕 FUEL REPORT LOGIC (Modern, Safe & Analytics)
+// ==========================================
+let fuelTrendChartInstance = null;
+let fuelTypeChartInstance = null;
+
+async function loadFuelReport() {
+    const reportSection = document.getElementById('fuelReportSection');
+    
+    if (reportSection.style.display === 'none') {
+        reportSection.style.display = 'block';
+        document.getElementById('fuelReportSection').scrollIntoView({ behavior: 'smooth' });
+        await renderFuelReport();
+    } else {
+        reportSection.style.display = 'none';
+    }
+}
+
+async function renderFuelReport() {
+    try {
+        const logs = JSON.parse(localStorage.getItem('makdc_fuel_logs') || '[]');
+        const stockItems = await API.getStockItems().catch(() => []);
+        
+        let petrolPrice = 0;
+        let dieselPrice = 0;
+        
+        stockItems.forEach(item => {
+            if (item.item_name && item.item_name.toLowerCase().includes('petrol')) petrolPrice = Number(item.unit_price) || 0;
+            if (item.item_name && item.item_name.toLowerCase().includes('diesel')) dieselPrice = Number(item.unit_price) || 0;
+        });
+
+        let totalPetrol = 0;
+        let totalDiesel = 0;
+        let totalCost = 0;
+        
+        // Hifadhi muhtasari wa kila gari (Petrol, Diesel, Cost, Date)
+        const vehicleSummary = {}; 
+
+        logs.forEach(log => {
+            const liters = Number(log.liters) || 0;
+            const fuelTypeStr = (log.fuel_type || '').toString().toLowerCase();
+            const isPetrol = fuelTypeStr.includes('petrol');
+            const isDiesel = fuelTypeStr.includes('diesel');
+            
+            // Jumla kuu
+            if (isPetrol) totalPetrol += liters;
+            else if (isDiesel) totalDiesel += liters;
+
+            const pricePerLiter = isPetrol ? (petrolPrice || 3000) : (dieselPrice || 3000);
+            totalCost += (liters * pricePerLiter);
+
+            // Muhtasari wa Gari
+            const vName = log.asset_name || 'Unknown Vehicle';
+            if (!vehicleSummary[vName]) {
+                vehicleSummary[vName] = { 
+                    petrolLiters: 0, 
+                    dieselLiters: 0, 
+                    totalCost: 0, 
+                    lastDate: log.created_at 
+                };
+            }
+            
+            if (isPetrol) vehicleSummary[vName].petrolLiters += liters;
+            if (isDiesel) vehicleSummary[vName].dieselLiters += liters;
+            
+            vehicleSummary[vName].totalCost += (liters * pricePerLiter);
+            if (log.created_at && new Date(log.created_at) > new Date(vehicleSummary[vName].lastDate)) {
+                vehicleSummary[vName].lastDate = log.created_at;
+            }
+        });
+
+        // 1. Jaza KPI Cards
+        document.getElementById('fuelReportKPI').innerHTML = `
+            <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                <div class="stat-icon">⛽</div>
+                <div class="stat-number">${totalPetrol.toLocaleString()} L</div>
+                <div class="stat-label">Total Petrol Issued</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+                <div class="stat-icon">🛢️</div>
+                <div class="stat-number">${totalDiesel.toLocaleString()} L</div>
+                <div class="stat-label">Total Diesel Issued</div>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #16a34a;">
+                <div class="stat-icon">💰</div>
+                <div class="stat-number" style="font-size: 22px;">TSh ${totalCost.toLocaleString()}</div>
+                <div class="stat-label">Total Estimated Cost</div>
+            </div>
+        `;
+
+        // 2. Jaza Jedwali la Muhtasari
+        const tbody = document.getElementById('fuelReportSummaryBody');
+        const sortedVehicles = Object.entries(vehicleSummary).sort((a, b) => 
+            (b[1].petrolLiters + b[1].dieselLiters) - (a[1].petrolLiters + a[1].dieselLiters)
+        );
+        
+        if (sortedVehicles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No fuel records found.</td></tr>';
+        } else {
+            tbody.innerHTML = sortedVehicles.map(([name, data]) => `
+                <tr>
+                    <td><strong>${name}</strong></td>
+                    <td style="text-align:center;"><span class="status-badge pending" style="font-size:12px; background:rgba(245,158,11,0.15); color:#d97706;">${data.petrolLiters} L</span></td>
+                    <td style="text-align:center;"><span class="status-badge in-progress" style="font-size:12px; background:rgba(59,130,246,0.15); color:#2563eb;">${data.dieselLiters} L</span></td>
+                    <td style="text-align:center; font-weight:800; color:var(--primary);">${data.petrolLiters + data.dieselLiters} L</td>
+                    <td>TSh ${data.totalCost.toLocaleString()}</td>
+                    <td>${data.lastDate ? new Date(data.lastDate).toLocaleDateString('en-GB') : '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 3. Chora Grafu (Tumia function mpya hapa chini)
+        renderFuelCharts(logs, totalPetrol, totalDiesel);
+
+    } catch (err) {
+        console.error("Report Error:", err);
+        document.getElementById('fuelReportKPI').innerHTML = `<div style="grid-column: 1/-1; color: red; text-align: center;">⚠️ Error loading data: ${err.message}</div>`;
+    }
+}
+function renderFuelCharts(logs, totalPetrol, totalDiesel) {
+    // ==========================================
+    // A. DOUGHNUT CHART (Jumla ya Petrol vs Diesel)
+    // ==========================================
+    const ctxType = document.getElementById('fuelTypeChart');
+    if (fuelTypeChartInstance) fuelTypeChartInstance.destroy();
+    
+    const pData = totalPetrol === 0 && totalDiesel === 0 ? 1 : totalPetrol;
+    const dData = totalPetrol === 0 && totalDiesel === 0 ? 1 : totalDiesel;
+
+    fuelTypeChartInstance = new Chart(ctxType, {
+        type: 'doughnut',
+        data: {
+            labels: ['Petrol', 'Diesel'],
+            datasets: [{
+                data: [pData, dData],
+                backgroundColor: ['#f59e0b', '#3b82f6'],
+                borderWidth: 3,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '70%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 12, weight: 'bold' } } } }
+        }
+    });
+
+    // ==========================================
+    // B. LINE CHART (Matumizi kwa Siku - Petrol vs Diesel)
+    // ==========================================
+    const ctxTrend = document.getElementById('fuelTrendChart');
+    if (fuelTrendChartInstance) fuelTrendChartInstance.destroy();
+
+    // Panga siku 7 zilizopita
+    const last7Days = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    });
+
+    // Hesabu matumizi ya Petrol KILA SIKU
+    const dailyPetrol = last7Days.map(dateStr => {
+        let liters = 0;
+        logs.forEach(log => {
+            if (!log.created_at) return;
+            const logDate = new Date(log.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            const isPetrol = (log.fuel_type || '').toLowerCase().includes('petrol');
+            if (logDate === dateStr && isPetrol) {
+                liters += Number(log.liters || 0);
+            }
+        });
+        return liters;
+    });
+
+    // Hesabu matumizi ya Diesel KILA SIKU
+    const dailyDiesel = last7Days.map(dateStr => {
+        let liters = 0;
+        logs.forEach(log => {
+            if (!log.created_at) return;
+            const logDate = new Date(log.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            const isDiesel = (log.fuel_type || '').toLowerCase().includes('diesel');
+            if (logDate === dateStr && isDiesel) {
+                liters += Number(log.liters || 0);
+            }
+        });
+        return liters;
+    });
+
+    fuelTrendChartInstance = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+            labels: last7Days,
+            datasets: [
+                {
+                    label: 'Petrol (Liters)',
+                    data: dailyPetrol,
+                    borderColor: '#f59e0b', // Njano
+                    backgroundColor: 'rgba(245,158,11,0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#f59e0b',
+                    pointRadius: 5
+                },
+                {
+                    label: 'Diesel (Liters)',
+                    data: dailyDiesel,
+                    borderColor: '#3b82f6', // Bluu
+                    backgroundColor: 'rgba(59,130,246,0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#3b82f6',
+                    pointRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: true, position: 'top', labels: { font: { size: 11, weight: 'bold' }, usePointStyle: true } } 
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Liters' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+// ==========================================
+// 🆕 MODERN PRINT PDF (Narrated & Beautiful)
+// ==========================================
+function printFuelReport() {
+    const logs = JSON.parse(localStorage.getItem('makdc_fuel_logs') || '[]');
+    
+    // Hesabu kwa ajili ya PDF
+    let totalPetrol = 0, totalDiesel = 0, totalCost = 0;
+    logs.forEach(l => {
+        const isP = (l.fuel_type || '').toLowerCase().includes('petrol');
+        const liters = Number(l.liters) || 0;
+        if (isP) totalPetrol += liters;
+        else if ((l.fuel_type || '').toLowerCase().includes('diesel')) totalDiesel += liters;
+        totalCost += (liters * 3000); // Bei ya wastani kwa PDF
+    });
+
+    const html = `
+        <html>
+        <head>
+            <title>Fuel Executive Report - MAK DC</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+                @page { size: A4; margin: 0; }
+                body { font-family: 'Inter', sans-serif; padding: 30px 40px; color: #333; background: #fff; -webkit-print-color-adjust: exact; }
+                
+                .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #022908; padding-bottom: 15px; margin-bottom: 20px; }
+                .header h1 { margin: 0; font-size: 22px; color: #022908; text-transform: uppercase; }
+                .header p { margin: 5px 0 0 0; font-size: 13px; color: #666; }
+                
+                .narrative-box { background: #f8fafc; border-left: 5px solid #022908; padding: 15px 20px; border-radius: 0 8px 8px 0; margin-bottom: 25px; font-size: 13px; line-height: 1.6; }
+                .narrative-box strong { color: #022908; }
+
+                .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+                .kpi-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; }
+                .kpi-title { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin-bottom: 5px; }
+                .kpi-value { font-size: 22px; font-weight: 900; color: #022908; }
+
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+                th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+                th { background: #f1f5f9; color: #022908; text-transform: uppercase; font-size: 10px; }
+                
+                .footer { text-align: center; font-size: 10px; color: #94a3b8; margin-top: 40px; border-top: 1px dashed #cbd5e1; padding-top: 15px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div>
+                    <h1>MAK DC INVESTMENT COMPANY LTD</h1>
+                    <p>Fuel Management & Executive Report</p>
+                </div>
+                <div style="text-align:right;">
+                    <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
+                    <p><strong>Generated By:</strong> ${Auth.getUser()?.fullName || 'System'}</p>
+                </div>
+            </div>
+
+            <div class="narrative-box">
+                <strong>Executive Summary:</strong><br>
+                This report provides a comprehensive analysis of the company's fuel consumption for the current period. 
+                A total of <strong>${(totalPetrol + totalDiesel).toLocaleString()} Liters</strong> of fuel has been dispensed across all registered vehicles. 
+                The analysis indicates that Petrol accounts for <strong>${totalPetrol.toLocaleString()} Liters</strong>, while Diesel accounts for <strong>${totalDiesel.toLocaleString()} Liters</strong>. 
+                The estimated total cost of fuel issuance stands at <strong>TSh ${totalCost.toLocaleString()}</strong>. 
+                Please note that all fuel issuances are strictly tied to authorized permits to prevent unauthorized use.
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Petrol</div>
+                    <div class="kpi-value" style="color: #f59e0b;">${totalPetrol.toLocaleString()} L</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Diesel</div>
+                    <div class="kpi-value" style="color: #3b82f6;">${totalDiesel.toLocaleString()} L</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Est. Cost</div>
+                    <div class="kpi-value" style="color: #16a34a;">TSh ${totalCost.toLocaleString()}</div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 14px; color: #022908; text-transform: uppercase;">Detailed Fuel Issuance History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Vehicle / Asset</th>
+                        <th>Plate No.</th>
+                        <th>Fuel Type</th>
+                        <th>Liters</th>
+                        <th>Driver</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${logs.map(l => {
+                        const typeStr = l.fuel_type ? l.fuel_type.toUpperCase() : 'N/A';
+                        const plate = l.asset_plate || l.serial_number || 'N/A';
+                        return `
+                        <tr>
+                            <td>${new Date(l.created_at).toLocaleDateString('en-GB')}</td>
+                            <td><strong>${l.asset_name || 'N/A'}</strong></td>
+                            <td>${plate}</td>
+                            <td>${typeStr}</td>
+                            <td style="font-weight: bold;">${l.liters} L</td>
+                            <td>${l.driver_name || 'N/A'}</td>
+                        </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+
+            <div class="footer">
+                This is a computer-generated document. No signature required.<br>
+                MAK DC Investment Company LTD &copy; ${new Date().getFullYear()}
+            </div>
+        </body>
+        </html>
+    `;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
 }
 // ================================================================
 // UTILITY FUNCTIONS

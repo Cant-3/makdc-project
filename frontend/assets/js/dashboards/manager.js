@@ -838,7 +838,6 @@ function filterManagerPayments(status) {
     });
     renderManagerPaymentsList();
 }
-
 async function managerVerifyPayment(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) return;
@@ -863,7 +862,13 @@ async function managerVerifyPayment(id) {
 
     try {
         await persistManagerPayment(p);
-        modernToast('✅ Verified', `Payment ${p.reference} sent to CEO for final approval.`, 'success');
+        
+        // 🆕 Sasisha Procurement Request husika iende kwa CEO
+        if (p.procurementRequestId) {
+            await API.updateProcurementStatus(p.procurementRequestId, { status: 'pending-ceo' });
+        }
+
+        modernToast('✅ Verified', `Payment ${p.reference} sent to CEO.`, 'success');
         await loadManagerCompanyPayments();
     } catch (err) {
         modernToast('Failed', err.message, 'error');

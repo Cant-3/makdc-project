@@ -1,6 +1,5 @@
 // ================================================================
-// MAK DC INVESTMENT — PRODUCT CONTROLLER
-// Dual Admin: Sales + SuperAdmin wanaweza ku-manage
+// MAK DC INVESTMENT — PRODUCT CONTROLLER (FIXED)
 // ================================================================
 
 const { prisma } = require('../config/database');
@@ -10,8 +9,9 @@ async function listProducts(req, res) {
     try {
         const products = await prisma.product.findMany({
             where: { 
-                isActive: true,
-                availableForSale: true  // 🆕 Onyesha tu bidhaa zilizotolewa na Engineer
+                isActive: true 
+                // TUMEONDOA availableForSale: true HAPA
+                // Ili bidhaa zote zilizo active zionekane kwenye website
             },
             orderBy: [
                 { order: 'asc' },
@@ -26,10 +26,8 @@ async function listProducts(req, res) {
         res.status(500).json({ error: 'Failed to fetch products.' });
     }
 }
-// ================================================================
-// LIST ALL PRODUCTS (ADMIN — includes inactive AND not-yet-released)
-// GET /api/products/admin
-// ================================================================
+
+// ... (Functions nyingine zibaki vilevile: listProductsAdmin, getProduct, createProduct, updateProduct, deleteProduct)
 async function listProductsAdmin(req, res) {
     try {
         const products = await prisma.product.findMany({

@@ -187,10 +187,6 @@ async function getStockSummary(query) {
     categoryBreakdown
   };
 }
-
-// ================================================================
-// 5. ADJUST STOCK (physical count correction)
-// ================================================================
 async function adjustStock(query, data, user) {
   const {
     stockItemId,
@@ -238,7 +234,13 @@ async function adjustStock(query, data, user) {
     user.fullName, user.userId, user.fullName, user.userId, notes
   ]);
 
-  // Create movement (adjustment type, signed qty)
+  // 🆕 SASISHA QUANTITY MOJA KWA MOJA (Bila createMovement kwanza)
+  await query(
+    'UPDATE stock_items SET quantity = $1, updated_at = NOW() WHERE id = $2',
+    [newQty, stockItemId]
+  );
+
+  // 🆕 Rekodi movement (Hii haitasasisha quantity tena, itarekodi tu)
   await createMovement(query, {
     stockItemId,
     movementType: 'adjustment',
@@ -258,7 +260,6 @@ async function adjustStock(query, data, user) {
     difference
   };
 }
-
 // ================================================================
 // 6. LIST MOVEMENTS (with filters)
 // ================================================================

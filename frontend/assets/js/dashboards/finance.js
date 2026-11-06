@@ -2358,7 +2358,6 @@ async function ceoApprovePayment(id) {
         await loadCompanyPayments();
     } catch (err) { cpToast('Failed', err.message, 'error'); }
 }
-
 async function markCompanyPaymentPaid(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) return;
@@ -2370,7 +2369,7 @@ async function markCompanyPaymentPaid(id) {
             label: 'Reference • Amount',
             value: `${p.reference} • TSh ${Number(p.amount).toLocaleString()}`
         },
-        warn: '⚠️ <strong>Confirm:</strong> Please ensure the payment has actually been made to the vendor.',
+        warn: '⚠️ <strong>Confirm:</strong> Fedha zitakatwa kwenye akaunti husika na Request itabadilika kuwa Imelipwa.',
         type: 'success',
         okText: '💰 Yes, Mark as Paid',
         cancelText: 'Cancel'
@@ -2383,12 +2382,46 @@ async function markCompanyPaymentPaid(id) {
     p.paidBy = currentUser?.fullName || 'Finance Officer';
 
     try {
+        // 1. Hifadhi Company Payment kama 'paid'
         await persistCompanyPayment(p);
-        cpToast('💰 Payment Completed', `Payment ${p.reference} marked as paid.`, 'success');
-        await loadCompanyPayments();
-    } catch (err) { cpToast('Failed', err.message, 'error'); }
-}
 
+        // 2. 🆕 Punguza Fedha kwenye ACCOUNT (Sio Resource)
+        if (p.accountId) {
+            try {
+                // Tunatumia API.updateAccount kuweka balance mpya
+                const accounts = await API.getAccounts().catch(() => []);
+                const selectedAccount = accounts.find(a => String(a.id) === String(p.accountId));
+                
+                if (selectedAccount) {
+                    const currentBalance = Number(selectedAccount.balance || 0);
+                    const newBalance = currentBalance - Number(p.amount);
+                    
+                    await API.updateAccount(p.accountId, {
+                        balance: newBalance
+                    });
+                    console.log('✅ Fedha zimekatwa kwenye account:', p.accountId);
+                }
+            } catch (accErr) {
+                console.warn('⚠️ Imeshindwa kukata fedha kwenye account:', accErr.message);
+            }
+        }
+
+        // 3. 🆕 Sasisha Procurement Request husika kuwa 'paid'
+        if (p.procurementRequestId) {
+            await API.updateProcurementStatus(p.procurementRequestId, { status: 'paid' });
+            console.log('✅ Procurement Request imebadilishwa kuwa paid:', p.procurementRequestId);
+        }
+
+        cpToast('💰 Payment Completed', `Payment ${p.reference} marked as paid. Fedha zimekatwa na Request imekamilika.`, 'success');
+        
+        // 4. Refresh data zote
+        await loadCompanyPayments();
+        if (typeof loadFinancialResources === 'function') await loadFinancialResources();
+        
+    } catch (err) { 
+        cpToast('Failed', err.message, 'error'); 
+    }
+}
 async function rejectCompanyPayment(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) return;
@@ -9476,49 +9509,97 @@ async function setupPaymentForRequest(reqId) {
         const req = await API.getProcurementRequestById(reqId);
         if (!req) return;
 
-        // Vuta accounts za Operations kutoka API
+        // 1. Vuta accounts zote zilizoidhinishwa
         const accounts = await API.getApprovedAccounts().catch(() => []);
-        const opsAccounts = accounts.filter(a => a.purpose === 'operations');
+        
+        // Chuja kwa uangalifu zaidi: Chukua zote zenye operations AU collections
+        const opsAccounts = accounts.filter(a => 
+            a.purpose === 'operations' || 
+            a.purpose === 'collections' || 
+            !a.purpose // Kama haina purpose, iweke pia
+        );
         
         if (opsAccounts.length === 0) {
-            return cpToast('No Account', 'You need at least one approved Operations account.', 'warning');
+            return cpToast('Hakuna Account', 'Hakuna Account iliyoidhinishwa kwa sasa. Tafadhali nenda kwenye "Accounts" uunde na uidhinishwe kwanza.', 'warning');
         }
 
         const options = opsAccounts.map(a => ({
-            value: a.id,
-            label: `${a.name} (${a.currency} ${Number(a.balance).toLocaleString()})`
+            value: String(a.id), 
+            label: `${a.name} (${a.currency || 'TZS'} ${Number(a.balance || 0).toLocaleString()})`
         }));
 
-        // Tumia Modal nzuri ya cpPrompt (Ipo kwenye code yako)
+        // 2. Fungua Fomu
         const res = await cpPrompt({
             title: '💸 Setup Procurement Payment',
             message: `Set up payment for <strong>${esc(req.request_number)}</strong> (TSh ${Number(req.total_amount).toLocaleString()})`,
             fields: [
-                { name: 'accountId', label: 'Select Operations Account', type: 'select', options: options, required: true },
-                { name: 'invoiceNumber', label: 'Invoice Number', type: 'text', placeholder: 'e.g., INV-12345', required: true },
-                { name: 'supplierName', label: 'Supplier Name', type: 'text', placeholder: 'e.g., Mkalimu Ltd', required: true }
+                { 
+                    name: 'accountId', 
+                    label: 'Chagua Account ya Malipo', 
+                    type: 'select', 
+                    options: options, 
+                    required: true 
+                },
+                { 
+                    name: 'invoiceNumber', 
+                    label: 'Invoice Number', 
+                    type: 'text', 
+                    placeholder: 'e.g., INV-12345', 
+                    required: true 
+                },
+                { 
+                    name: 'supplierName', 
+                    label: 'Supplier Name', 
+                    type: 'text', 
+                    placeholder: 'e.g., Mkalimu Ltd', 
+                    required: true 
+                }
             ],
-            okText: 'Send to Manager',
+            okText: 'Tengeneza Company Payment',
             type: 'primary'
         });
 
         if (!res.confirmed) return;
 
-        // API hii inapaswa kutengeneza Company Payment (Cash Outflow) yenye status 'pending-manager'
-        await API.setupProcurementPayment(reqId, {
-            accountId: res.values.accountId,
-            invoiceNumber: res.values.invoiceNumber,
-            supplierName: res.values.supplierName
-        });
+        // 🆕 Ulinzi mkali wa accountId
+        const selectedAccountId = res.values.accountId; 
+        if (!selectedAccountId) {
+            return cpToast('Kosa', 'Tafadhali chagua account kabla ya kuendelea.', 'error');
+        }
 
-        cpToast('✅ Success', 'Payment setup complete. Sent to Manager.', 'success');
+        // Pata jina la account iliyochaguliwa
+        const selectedAccount = opsAccounts.find(a => String(a.id) === String(selectedAccountId));
+        const accountName = selectedAccount ? selectedAccount.name : 'Unknown Account';
+
+        // 3. TENGENEZA COMPANY PAYMENT
+        const newCompanyPayment = {
+            type: 'procurement',
+            reference: `PAY-${req.request_number}`, 
+            vendor: res.values.supplierName,
+            amount: Number(req.total_amount),
+            dueDate: null,
+            method: 'bank',
+            description: `Malipo ya Manunuzi: ${req.title} (Invoice: ${res.values.invoiceNumber}) | Account: ${accountName}`,
+            accountId: parseInt(selectedAccountId), // 🆕 MUHIMU: Hii inasave account ID
+            status: 'draft', 
+            procurementRequestId: reqId 
+        };
+
+        // Hifadhi Company Payment kwenye API
+        await API.createCompanyPayment(newCompanyPayment);
+        
+        // 4. Sasisha Procurement Request (Bado haijalipwa, inasubiri Manager)
+        await API.updateProcurementStatus(reqId, { status: 'pending-manager' });
+
+        cpToast('✅ Success', 'Payment setup complete. Sent to Manager for verification.', 'success');
         
         // Refresh data
-        loadProcurementFinanceRequests(); 
-        loadCompanyPayments(); 
+        if (typeof loadProcurementFinanceRequests === 'function') loadProcurementFinanceRequests(); 
+        if (typeof loadCompanyPayments === 'function') loadCompanyPayments(); 
         
     } catch (err) {
-        cpToast('Failed', err.message, 'error');
+        console.error('Setup payment error:', err);
+        cpToast('Failed', err.message || 'Failed to setup payment', 'error');
     }
 }
 function refreshAll() { loadFinanceDashboard(); cpToast('🔄 Refreshed!', 'Dashboard refreshed.', 'info'); }

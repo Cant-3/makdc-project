@@ -1066,5 +1066,15 @@ const API = {
     getProcurementTrend(params = {}) {
     const query = new URLSearchParams(params).toString();
     return this.get(`/reports/procurement-trend${query ? '?' + query : ''}`);
-},
+    },
+    // ============================================================
+    // FUEL MANAGEMENT
+    // ============================================================
+    getFuelLogs() {
+        return this.get('/procurement/fuel/logs');
+    },
+
+    issueFuel(data) {
+        return this.post('/procurement/fuel/issue', data);
+    },
 };

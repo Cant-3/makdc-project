@@ -95,6 +95,11 @@ router.get('/:id/history', controller.getStatusHistory);
 // ================================================================
 router.get('/:id', controller.getRequestById);
 router.put('/:id/receive-as-asset', controller.receiveAsAsset);
+// ================================================================
+// FUEL MANAGEMENT ROUTES
+// ================================================================
+router.get('/fuel/logs', controller.getFuelLogs);
+router.post('/fuel/issue', controller.issueFuel);
 
 router.get('/stock/pending-receives', controller.getPendingReceives);
 router.post('/stock/receive/:id', controller.confirmReceive); // Angalia hii haigongani na nyingine

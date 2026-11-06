@@ -202,14 +202,21 @@ async function updateAccount(req, res) {
         if (!existing) {
             return res.status(404).json({ error: 'Account not found.' });
         }
+        // 🆕 Ruhusu balance update tu kwa accounts zilizoidhinishwa
+        // (Kwa malipo ya Finance — sio kuhariri taarifa za account)
+        const isOnlyBalanceUpdate = 
+            balance !== undefined && 
+            name === undefined && 
+            accountNumber === undefined && 
+            type === undefined &&
+            status === undefined;
 
-        // Block editing kama approved (kasoro kama ni reject)
-        if (existing.status === 'approved' && !rejectionReason) {
+        // Block editing kama approved, ISIPOKUWA ni balance tu
+        if (existing.status === 'approved' && !rejectionReason && !isOnlyBalanceUpdate) {
             return res.status(400).json({
                 error: 'Cannot edit approved accounts. Contact CEO/Manager.'
             });
         }
-
         const updateData = {
             ...(name !== undefined && { name }),
             ...(type !== undefined && { type }),

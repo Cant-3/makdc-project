@@ -591,11 +591,8 @@ async function getMasterReport(req, res) {
         let dateFilter = "";
         const params = [];
         
-        // ============================================================
-        // 1. DATE FILTER LOGIC
-        // ============================================================
+        // DATE FILTER
         if (from && to) {
-            // Custom range - tumia parameters kuzuia SQL Injection
             dateFilter = `AND created_at >= $1 AND created_at <= $2::timestamp + interval '1 day'`;
             params.push(from, to);
         } else if (period === 'monthly') {
@@ -608,9 +605,7 @@ async function getMasterReport(req, res) {
             dateFilter = "AND created_at >= date_trunc('week', CURRENT_DATE)";
         }
 
-        // ============================================================
-        // 2. PROCUREMENT SUMMARY
-        // ============================================================
+        // PROCUREMENT
         const proc = await query(`
             SELECT 
                 COUNT(*) as total_requests,
@@ -618,14 +613,13 @@ async function getMasterReport(req, res) {
                 COALESCE(SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END), 0) as paid_value,
                 COALESCE(SUM(CASE WHEN status NOT IN ('paid', 'rejected', 'returned') THEN total_amount ELSE 0 END), 0) as pending_value,
                 COUNT(CASE WHEN status = 'pending-manager' THEN 1 END) as pending_manager,
-                COUNT(CASE WHEN status = 'pending-ceo' THEN 1 END) as pending_ceo
+                COUNT(CASE WHEN status = 'pending-ceo' THEN 1 END) as pending_ceo,
+                COUNT(CASE WHEN status = 'paid' THEN 1 END) as paid_count
             FROM procurement_requests
             WHERE 1=1 ${dateFilter}
         `, params);
 
-        // ============================================================
-        // 3. STORE SUMMARY
-        // ============================================================
+        // STORE
         const stock = await query(`
             SELECT 
                 COUNT(*) as total_items,
@@ -634,17 +628,13 @@ async function getMasterReport(req, res) {
             FROM stock_items
         `);
 
-        // Stock Out Filter inahitaji column ya `created_at` kwenye `stock_transactions`
         const stockOut = await query(`
             SELECT COUNT(*) as out_count
             FROM stock_transactions
-            WHERE transaction_type = 'out' 
-            ${dateFilter.replace(/created_at/g, 'created_at')}
+            WHERE transaction_type = 'out' ${dateFilter}
         `, params);
 
-        // ============================================================
-        // 4. ASSETS SUMMARY
-        // ============================================================
+        // ASSETS
         const assets = await query(`
             SELECT 
                 COUNT(*) as total_assets,
@@ -662,9 +652,7 @@ async function getMasterReport(req, res) {
             WHERE status = 'completed' ${dateFilter}
         `, params);
 
-        // ============================================================
-        // 5. TENDERS SUMMARY
-        // ============================================================
+        // TENDERS
         const tenders = await query(`
             SELECT 
                 COUNT(*) as total_tenders,
@@ -676,86 +664,39 @@ async function getMasterReport(req, res) {
             WHERE 1=1 ${dateFilter}
         `, params);
 
-               // ============================================================
-        // 6. SMART NARRATIVE CONSTRUCTION (Truthful)
-        // ============================================================
+        // DATA OBJECTS
         const p = proc[0] || {};
         const s = stock[0] || {};
         const a = assets[0] || {};
         const m = maintCost[0] || {};
         const t = tenders[0] || {};
-        
+
         let periodLabel = 'this month';
         if (from && to) periodLabel = `from ${from} to ${to}`;
         else if (period === 'last-month') periodLabel = 'last month';
         else if (period === 'yearly') periodLabel = 'this year';
         else if (period === 'weekly') periodLabel = 'this week';
 
-        // Kujenga sentensi kwa kila idara (Smart)
-        const sentences = [];
+        // NARRATIVES ZA KILA IDARA
+        const procurementNarrative = Number(p.total_requests) > 0
+            ? `During ${periodLabel}, the company processed ${p.total_requests} procurement requests valued at TSh ${Number(p.total_value).toLocaleString()}. ${Number(p.paid_value) > 0 ? `TSh ${Number(p.paid_value).toLocaleString()} has been paid to suppliers.` : 'No payments have been made yet.'}`
+            : `No procurement activities were recorded during ${periodLabel}.`;
 
-        // PROCUREMENT
-        const totalProcRequests = Number(p.total_requests || 0);
-        if (totalProcRequests > 0) {
-            sentences.push(
-                `During ${periodLabel}, the company processed a total of ${totalProcRequests} procurement requests with a combined value of TSh ${Number(p.total_value || 0).toLocaleString()}. Out of these, TSh ${Number(p.paid_value || 0).toLocaleString()} has been paid to suppliers, while TSh ${Number(p.pending_value || 0).toLocaleString()} remains pending for various approval stages.`
-            );
-        } else {
-            sentences.push(
-                `No procurement activities were recorded during ${periodLabel}. This indicates that no new requests were submitted to the Procurement Department during this period.`
-            );
-        }
+        const stockNarrative = Number(s.total_items) > 0
+            ? `The Store currently holds ${s.total_items} unique items with a total value of TSh ${Number(s.total_value).toLocaleString()}. ${Number(stockOut[0]?.out_count) > 0 ? `${stockOut[0].out_count} stock issues were made to departments during this period.` : 'No stock issues were made during this period.'}`
+            : `The Store has no items registered in the system.`;
 
-        // STORE
-        const totalStockItems = Number(s.total_items || 0);
-        const totalStockOut = Number(stockOut[0]?.out_count || 0);
-        if (totalStockItems > 0) {
-            let stockSentence = `In the Store Department, the company currently holds ${totalStockItems} unique items with a total stock quantity of ${Number(s.total_quantity || 0).toLocaleString()}. The total stock value is estimated at TSh ${Number(s.total_value || 0).toLocaleString()}.`;
-            if (totalStockOut > 0) {
-                stockSentence += ` During ${periodLabel}, a total of ${totalStockOut} stock issues were processed to various departments.`;
-            } else {
-                stockSentence += ` No stock issues were recorded during ${periodLabel}, suggesting that departments did not request any items from the Store.`;
-            }
-            sentences.push(stockSentence);
-        } else {
-            sentences.push(
-                `The Store Department has no stock items recorded in the system. There is a need to register stock items to enable tracking of materials.`
-            );
-        }
+        const assetNarrative = Number(a.total_assets) > 0
+            ? `The company manages ${a.total_assets} fixed assets (${a.active} active, ${a.maintenance} in maintenance) valued at TSh ${Number(a.total_current_value).toLocaleString()}. ${Number(m.total_repairs) > 0 ? `TSh ${Number(m.total_cost).toLocaleString()} was spent on ${m.total_repairs} maintenance works.` : 'No maintenance costs were incurred.'}`
+            : `No fixed assets are registered in the system.`;
 
-        // ASSETS
-        const totalAssets = Number(a.total_assets || 0);
-        const totalRepairs = Number(m.total_repairs || 0);
-        if (totalAssets > 0) {
-            let assetSentence = `Regarding Fixed Assets, the company manages ${totalAssets} assets, of which ${Number(a.active || 0)} are active and ${Number(a.maintenance || 0)} are currently under maintenance. The total current value of these assets is TSh ${Number(a.total_current_value || 0).toLocaleString()}.`;
-            if (totalRepairs > 0) {
-                assetSentence += ` A total of ${totalRepairs} maintenance works were completed during ${periodLabel}, costing the company TSh ${Number(m.total_cost || 0).toLocaleString()}.`;
-            } else {
-                assetSentence += ` No maintenance works were completed during ${periodLabel}.`;
-            }
-            sentences.push(assetSentence);
-        } else {
-            sentences.push(
-                `No fixed assets have been registered in the system yet. The company needs to register its assets to enable proper tracking and depreciation management.`
-            );
-        }
+        const tenderNarrative = Number(t.total_tenders) > 0
+            ? `A total of ${t.total_tenders} tenders were registered during ${periodLabel}. ${t.won} were won (valued at TSh ${Number(t.won_value).toLocaleString()}), ${t.lost} were lost, and ${t.incoming} are still incoming.`
+            : `No tenders were registered during ${periodLabel}.`;
 
-        // TENDERS
-        const totalTenders = Number(t.total_tenders || 0);
-        if (totalTenders > 0) {
-            sentences.push(
-                `On the Tenders front, the company registered ${totalTenders} tenders during ${periodLabel}. Out of these, ${Number(t.won || 0)} were successfully won (valued at TSh ${Number(t.won_value || 0).toLocaleString()}), ${Number(t.lost || 0)} were lost, and ${Number(t.incoming || 0)} are still in the incoming pipeline.`
-            );
-        } else {
-            sentences.push(
-                `No tenders were registered or processed during ${periodLabel}. The Tenders Department has no new activity to report for this period.`
-            );
-        }
+        // MAIN NARRATIVE (Inayojumuisha yote)
+        const narrative = [procurementNarrative, stockNarrative, assetNarrative, tenderNarrative].join(' ');
 
-        const narrative = sentences.join(' ');
-        // ============================================================
-        // 7. RESPONSE
-        // ============================================================
         res.json({
             period,
             from: from || null,
@@ -764,7 +705,13 @@ async function getMasterReport(req, res) {
             stock: { ...s, stockOut: stockOut[0]?.out_count || 0 },
             assets: { ...a, ...m },
             tenders: t,
-            narrative
+            narrative,
+            narratives: {
+                procurement: procurementNarrative,
+                stock: stockNarrative,
+                assets: assetNarrative,
+                tenders: tenderNarrative
+            }
         });
 
     } catch (err) {

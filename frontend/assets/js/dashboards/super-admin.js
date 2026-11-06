@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load overview stats
     await loadOverview();
 
-    // 🆕 Pre-load data zote ili "Loading..." isionekane
+    // Pre-load data zote ili "Loading..." isionekane
     Promise.all([
         loadSiteContent().catch(err => console.warn('Site content preload:', err)),
         loadTestimonials().catch(err => console.warn('Testimonials preload:', err)),
@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     console.log('✅ All data preloaded');
 });
+
 // ================================================================
 // 🆕 LIVE CLOCK
 // ================================================================
@@ -89,12 +90,13 @@ function updateUserInfo() {
 
     startLiveClock();
 }
+
 // ================================================================
 // 🆕 LOAD OVERVIEW (MAIN DASHBOARD LOGIC) — FIXED
 // ================================================================
 async function loadOverview() {
     try {
-        // 🆕 Soma thamani ya dropdown (7 au 30)
+        // Soma thamani ya dropdown (7 au 30)
         const trendRange = document.getElementById('trendRange');
         const days = parseInt(trendRange?.value) || 7;
 
@@ -157,6 +159,7 @@ async function loadOverview() {
         console.error('Overview load error:', err);
     }
 }
+
 // ================================================================
 // 🆕 RENDER SYSTEM USAGE CHART (Line)
 // ================================================================
@@ -212,7 +215,9 @@ function renderSystemUsageChart(data) {
             }
         }
     });
-}// ================================================================
+}
+
+// ================================================================
 // 🆕 RENDER MODULE ACTIVITY (Line Chart)
 // ================================================================
 function renderModuleActivityChart(data) {
@@ -248,6 +253,7 @@ function renderModuleActivityChart(data) {
         }
     });
 }
+
 // ================================================================
 // 🆕 RENDER LIVE ANALYTICS
 // ================================================================
@@ -294,6 +300,7 @@ function renderLiveAnalytics(data) {
         `;
     }
 }
+
 function renderLiveActivity(logs) {
     const container = document.getElementById('liveActivityFeed');
     if (!container) return;
@@ -318,7 +325,7 @@ function renderLiveActivity(logs) {
         const timeStr = log.createdAt ? new Date(log.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
         const dateStr = log.createdAt ? new Date(log.createdAt).toLocaleDateString('en-GB', {day: '2-digit', month: 'short'}) : '';
 
-        // 🆕 Tumia userName kutoka backend
+        // Tumia userName kutoka backend
         const userName = log.userName || log.userId || 'System';
 
         return `
@@ -334,6 +341,7 @@ function renderLiveActivity(logs) {
         `;
     }).join('');
 }
+
 function renderUserDropdown() {
     if (!currentUser) return;
 
@@ -444,7 +452,6 @@ function switchContentSubTab(subtab, btnElement) {
 
     if (btnElement) btnElement.classList.add('active');
 
-    // ✅ FIXED: Ondoa comments
     switch(subtab) {
         case 'general': 
             loadSiteContent(); 
@@ -536,6 +543,7 @@ async function loadUsers() {
         `;
     }
 }
+
 // ================================================================
 // 🆕 VIEW USER PROFILE
 // ================================================================
@@ -599,12 +607,12 @@ async function openViewUserModal(userId) {
         Toast.error('Failed to load user profile');
     }
 }
+
 // ================================================================
-// 🆕 EXPORT USERS TO CSV (Excel)
+// 🆕 EXPORT USERS TO CSV (Excel) - FIXED
 // ================================================================
 async function exportUsersToCSV() {
     try {
-        // Vuta data mpya kutoka API
         const users = await API.getUsers();
 
         if (!users || users.length === 0) {
@@ -612,19 +620,11 @@ async function exportUsersToCSV() {
             return;
         }
 
-        // Unda vichwa vya safu (Headers)
         const headers = [
-            'No', 
-            'Full Name', 
-            'Employee ID', 
-            'Email', 
-            'Phone', 
-            'Role', 
-            'Department', 
-            'Status'
+            'No', 'Full Name', 'Employee ID', 'Email', 
+            'Phone', 'Role', 'Department', 'Status'
         ];
 
-        // Unda data ya kila mtumiaji
         const rows = users.map((user, index) => [
             index + 1,
             user.fullName || '',
@@ -636,29 +636,31 @@ async function exportUsersToCSV() {
             user.status || ''
         ]);
 
-        // Unganisha Headers na Rows kuwa CSV
         const csvContent = [
             headers.join(','),
             ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
         ].join('\n');
 
-        // Unda Faili na uipakue
         const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
+        
+        // HAPA NDIPO KOSA LILIKUWA: Ilikuwa haijakamilika
         link.href = url;
-        link.download = `MAKDC_Users_${new Date().toISOString().split('T')[0]}.csv`;
+        link.setAttribute('download', 'MAK-DC-Users.csv'); 
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url); 
+        
+        Toast.success('Users exported successfully!');
 
-        Toast.success('✅ Users exported successfully!');
     } catch (err) {
         console.error('Export error:', err);
         Toast.error('Failed to export users');
     }
 }
+
 // ================================================================
 // 🆕 OPEN CHANGE PASSWORD MODAL
 // ================================================================
@@ -739,6 +741,7 @@ async function submitChangePassword() {
         saveBtn.textContent = 'Update Password';
     }
 }
+
 // ================================================================
 // LOAD SITE CONTENT
 // ================================================================
@@ -1073,6 +1076,7 @@ async function saveContentChanges() {
         statusDiv.textContent = '⚠ ' + err.message;
     }
 }
+
 // ================================================================
 // ADD NEW CONTENT
 // ================================================================
@@ -1094,11 +1098,15 @@ async function saveNewContent() {
     const statusDiv = document.getElementById('addContentStatus');
 
     const key = document.getElementById('newContentKey').value.trim();
-    const value = document.getElementById('newContentValue').value.trim();
+    const textValue = document.getElementById('newContentValue').value.trim();
+    const imageBase64 = document.getElementById('newContentImageBase64').value; // 🆕
 
-    if (!key || !value) {
+    // 🆕 Kama kuna picha, tumia picha. Kama hakuna, tumia maandishi.
+    const finalValue = imageBase64 ? imageBase64 : textValue;
+
+    if (!key || !finalValue) {
         statusDiv.className = 'status-msg error';
-        statusDiv.textContent = '⚠ Key na Value zinahitajika';
+        statusDiv.textContent = '⚠ Key na Value (au Picha) zinahitajika';
         return;
     }
 
@@ -1115,8 +1123,7 @@ async function saveNewContent() {
     }
 
     try {
-        // PUT iliyopo — inafanya upsert (create au update)
-        await API.updateSiteContent(key, value);
+        await API.updateSiteContent(key, finalValue); // Tumia finalValue
 
         statusDiv.className = 'status-msg success';
         statusDiv.textContent = '✓ Content imeongezwa!';
@@ -1125,6 +1132,9 @@ async function saveNewContent() {
             closeModal('addContentModal');
             loadSiteContent();
             Toast.success('✅ Content imeongezwa!');
+            // Safisha fomu
+            document.getElementById('newContentImageBase64').value = '';
+            document.getElementById('newContentImageName').textContent = 'Hakuna picha iliyochaguliwa';
         }, 800);
 
     } catch (err) {
@@ -3034,6 +3044,7 @@ async function deleteStat(id) {
         Toast.error('Failed to delete: ' + err.message);
     }
 }
+
 async function openEditUserModal(userId) {
     try {
         const users = await API.getUsers();
@@ -3129,6 +3140,33 @@ async function saveEditUser() {
             saveBtn.textContent = '💾 Update User';
         }
     }
+}
+// 🆕 Function ya Kupakia Picha kwenye Add Content
+function handleNewContentImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Angalia ukubwa (Max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        Toast.error('Picha ni kubwa mno (Max 2MB)');
+        event.target.value = '';
+        return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+        Toast.error('Tafadhali chagua faili la picha');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        document.getElementById('newContentImageBase64').value = base64;
+        document.getElementById('newContentImageName').textContent = file.name;
+        document.getElementById('newContentImageName').style.color = '#16a34a';
+    };
+    reader.readAsDataURL(file);
 }
 
 // ================================================================

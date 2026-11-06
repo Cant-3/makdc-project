@@ -52,7 +52,7 @@ model User {
 model SiteContent {
   id        Int      @id @default(autoincrement())
   key       String   @unique
-  value     String
+  value     String   @db.Text
   category  String?
   updatedBy Int?     @map("updated_by")
   updatedAt DateTime @default(now()) @map("updated_at")
@@ -607,11 +607,13 @@ model CompanyPayment {
   type        String // procurement, salary, rent, utilities, transport, marketing, maintenance, other
   reference   String    @unique
   vendor      String
+  accountId   Int?
   amount      Decimal   @db.Decimal(15, 2)
   dueDate     DateTime? @map("due_date")
   method      String?
   description String?
   attachments Json?
+  procurementRequestId Int?
   status      String    @default("draft") // draft, pending-manager, pending-ceo, approved, paid, rejected
 
   // Workflow tracking

@@ -395,7 +395,7 @@ async function ceoApprovePayment(id) {
 
     const res = await modernConfirm({
         title: '✅ Approve Payment?',
-        message: `Approve payment "${p.reference}" (TSh ${Number(p.amount).toLocaleString()})? Finance will be notified.`,
+        message: `Approve payment "${p.reference}" (TSh ${Number(p.amount).toLocaleString()})?`,
         detail: { label: 'Reference • Amount', value: `${p.reference} • TSh ${Number(p.amount).toLocaleString()}` },
         type: 'success',
         okText: '✅ Approve',
@@ -410,7 +410,13 @@ async function ceoApprovePayment(id) {
             ceoApprovedAt: new Date().toISOString(),
             ceoApprovedBy: currentUser?.fullName || 'CEO'
         });
-        modernToast('✅ Approved', `Payment ${p.reference} approved.`, 'success');
+
+        // 🆕 Sasisha Procurement Request iwe tayari kulipwa
+        if (p.procurementRequestId) {
+            await API.updateProcurementStatus(p.procurementRequestId, { status: 'payment-approved' });
+        }
+
+        modernToast('✅ Approved', `Payment ${p.reference} approved. Finance notified.`, 'success');
         await loadPaymentsTab();
     } catch (err) {
         modernToast('Failed', err.message, 'error');

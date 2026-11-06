@@ -6,14 +6,36 @@
 // ================================================================
 
 const { prisma } = require('../config/database');
-
-// ================================================================
-// LIST ALL COMPANY PAYMENTS
-// GET /api/company-payments
-// ================================================================
 async function listCompanyPayments(req, res) {
     try {
         const payments = await prisma.companyPayment.findMany({
+            select: {
+                id: true,
+                type: true,
+                reference: true,
+                vendor: true,
+                amount: true,
+                status: true,
+                description: true,
+                method: true,
+                dueDate: true,
+                createdAt: true,
+                paidAt: true,
+                paidBy: true,
+                accountId: true,              // 🆕
+                procurementRequestId: true,   // 🆕
+                createdBy: true,
+                attachments: true,
+                sentToManagerAt: true,
+                sentToManagerBy: true,
+                managerVerifiedAt: true,
+                managerVerifiedBy: true,
+                ceoApprovedAt: true,
+                ceoApprovedBy: true,
+                rejectedAt: true,
+                rejectedBy: true,
+                rejectionReason: true
+            },
             orderBy: { createdAt: 'desc' }
         });
         res.json(payments);
@@ -22,7 +44,6 @@ async function listCompanyPayments(req, res) {
         res.status(500).json({ error: 'Failed to fetch company payments.' });
     }
 }
-
 // ================================================================
 // GET COMPANY PAYMENT BY ID
 // GET /api/company-payments/:id
@@ -42,15 +63,13 @@ async function getCompanyPayment(req, res) {
         res.status(500).json({ error: 'Failed to fetch company payment.' });
     }
 }
-// ================================================================
-// CREATE COMPANY PAYMENT — With Balance Validation
-// ================================================================
 async function createCompanyPayment(req, res) {
     try {
         const {
             type, reference, vendor, amount,
             dueDate, method, description, accountId,
-            attachments
+            attachments,
+            procurementRequestId  // 🆕 Ongeza hii
         } = req.body;
 
         const amountNum = parseFloat(amount);
@@ -66,9 +85,7 @@ async function createCompanyPayment(req, res) {
 
         // 2. Angalia operations account
         if (!accountId) {
-            return res.status(400).json({ 
-                error: 'Operations account is required' 
-            });
+            return res.status(400).json({ error: 'Operations account is required' });
         }
 
         const account = await prisma.companyAccount.findUnique({
@@ -80,26 +97,22 @@ async function createCompanyPayment(req, res) {
         }
 
         if (account.status !== 'approved') {
-            return res.status(400).json({ 
-                error: 'Account must be approved before use' 
-            });
+            return res.status(400).json({ error: 'Account must be approved before use' });
         }
 
         if (account.purpose !== 'operations') {
-            return res.status(400).json({ 
-                error: 'Only Operations accounts can be used for payments' 
-            });
+            return res.status(400).json({ error: 'Only Operations accounts can be used for payments' });
         }
 
-        // 🆕 3. ANGALIA BALANCE
+        // 3. ANGALIA BALANCE
         const balance = parseFloat(account.balance || 0);
         if (amountNum > balance) {
             return res.status(400).json({
-                error: `Insufficient balance. Available: ${account.currency} ${balance.toLocaleString()}, Requested: ${account.currency} ${amountNum.toLocaleString()}, Shortage: ${account.currency} ${(amountNum - balance).toLocaleString()}`
+                error: `Insufficient balance. Available: ${account.currency} ${balance.toLocaleString()}, Requested: ${account.currency} ${amountNum.toLocaleString()}`
             });
         }
 
-        // 4. Unda payment
+        // 4. Unda payment — 🆕 Ongeza procurementRequestId
         const payment = await prisma.companyPayment.create({
             data: {
                 type,
@@ -112,7 +125,8 @@ async function createCompanyPayment(req, res) {
                 accountId: parseInt(accountId),
                 attachments: attachments || null,
                 status: 'draft',
-                createdBy: req.user.fullName || 'Finance Officer'
+                createdBy: req.user.fullName || 'Finance Officer',
+                procurementRequestId: procurementRequestId ? parseInt(procurementRequestId) : null  // 🆕 MUHIMU
             }
         });
 
@@ -183,13 +197,11 @@ async function deleteCompanyPayment(req, res) {
         res.status(500).json({ error: 'Failed to delete company payment.' });
     }
 }
-// ================================================================
 async function markCompanyPaymentPaid(req, res) {
     try {
         const { id } = req.params;
         const { actionBy } = req.body;
 
-        // 1. Pata company payment
         const existing = await prisma.companyPayment.findUnique({
             where: { id: parseInt(id) }
         });
@@ -199,16 +211,38 @@ async function markCompanyPaymentPaid(req, res) {
         }
 
         if (existing.status === 'paid') {
-            return res.status(400).json({ error: 'Company payment is already marked as paid.' });
+            return res.status(400).json({ error: 'Already marked as paid.' });
         }
 
         if (existing.status !== 'approved') {
-            return res.status(400).json({ 
-                error: 'Only approved company payments can be marked as paid.' 
-            });
+            return res.status(400).json({ error: 'Only approved payments can be marked as paid.' });
         }
 
-        // 2. Update company payment
+        // 🆕 Punguza Balance ya Account
+        if (existing.accountId) {
+            const account = await prisma.companyAccount.findUnique({
+                where: { id: existing.accountId }
+            });
+
+            if (account) {
+                const currentBalance = parseFloat(account.balance || 0);
+                const newBalance = currentBalance - parseFloat(existing.amount);
+
+                if (newBalance < 0) {
+                    return res.status(400).json({ 
+                        error: `Insufficient balance. Available: ${currentBalance.toLocaleString()}, Required: ${existing.amount.toLocaleString()}` 
+                    });
+                }
+
+                await prisma.companyAccount.update({
+                    where: { id: existing.accountId },
+                    data: { balance: newBalance }
+                });
+                console.log(`💰 Balance updated: ${account.name} ${currentBalance} → ${newBalance}`);
+            }
+        }
+
+        // Update payment status
         const payment = await prisma.companyPayment.update({
             where: { id: parseInt(id) },
             data: {
@@ -218,13 +252,24 @@ async function markCompanyPaymentPaid(req, res) {
             }
         });
 
-        // ================================================================
-        // 🆕 INTEGRATION HOOK: Record Transaction (OUTFLOW)
-        // ================================================================
+        // 🆕 Update Procurement Request kama ipo
+        if (existing.procurementRequestId) {
+            try {
+                await prisma.$executeRaw`
+                    UPDATE procurement_requests 
+                    SET status = 'paid', paid_at = NOW(), updated_at = NOW()
+                    WHERE id = ${existing.procurementRequestId}
+                `;
+                console.log(`✅ Procurement Request ${existing.procurementRequestId} marked as PAID`);
+            } catch (procErr) {
+                console.error('⚠️ Procurement update failed:', procErr.message);
+            }
+        }
+
+        // Ledger (OUTFLOW)
         try {
             const { recordTransaction, getMainCashResource } = require('../services/ledger.service');
             const mainCash = await getMainCashResource();
-
             if (mainCash) {
                 await recordTransaction({
                     resourceId: mainCash.id,
@@ -237,25 +282,19 @@ async function markCompanyPaymentPaid(req, res) {
                     description: `Payment to ${payment.vendor}`,
                     createdBy: actionBy || 'Finance Officer'
                 });
-                console.log(`💸 Ledger: Company Payment OUTFLOW recorded — TSh ${Number(payment.amount).toLocaleString()}`);
-            } else {
-                console.warn('⚠️ Main Cash resource not found. Ledger skipped.');
             }
         } catch (ledgerErr) {
-            console.error('⚠️ Ledger error (payment still saved):', ledgerErr.message);
+            console.error('⚠️ Ledger error:', ledgerErr.message);
         }
 
         res.json({
-            message: 'Company payment marked as paid successfully!',
+            message: 'Payment marked as paid successfully!',
             payment
         });
 
     } catch (err) {
-        console.error('❌ Mark company payment as paid error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Company payment not found.' });
-        }
-        res.status(500).json({ error: 'Failed to mark company payment as paid: ' + err.message });
+        console.error('❌ Mark as paid error:', err);
+        res.status(500).json({ error: 'Failed to mark payment as paid: ' + err.message });
     }
 }
 
