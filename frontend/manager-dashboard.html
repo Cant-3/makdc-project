@@ -591,6 +591,1206 @@
             .stats-strip { grid-template-columns: 1fr; }
         }
         @media (min-width: 769px) { .sidebar-backdrop { display: none !important; } }
+        /* ===== SIDEBAR DROPDOWN ===== */
+            .sidebar-dropdown {
+                position: relative;
+            }
+            .sidebar-dropdown-toggle {
+                cursor: pointer;
+            }
+            .sidebar-dropdown-menu {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease, opacity 0.25s ease;
+                opacity: 0;
+                background: rgba(0, 0, 0, 0.25);
+                border-radius: 0 6px 6px 0;
+                margin-top: 2px;
+            }
+            .sidebar-dropdown.open .sidebar-dropdown-menu {
+                max-height: 400px;
+                opacity: 1;
+            }
+            .sidebar-dropdown.open .sidebar-dropdown-toggle .nav-arrow {
+                transform: rotate(180deg);
+            }
+            .sidebar-dropdown-menu a {
+                padding-left: 38px !important;
+                font-size: 12.5px !important;
+                border-left: 3px solid transparent !important;
+                background: transparent !important;
+            }
+            .sidebar-dropdown-menu a:hover {
+                background: rgba(245, 158, 11, 0.15) !important;
+                border-left-color: var(--gold) !important;
+            }
+
+            /* Collapsed sidebar — dropdown inakuwa flyout */
+            .sidebar.collapsed .sidebar-dropdown-toggle {
+                justify-content: center;
+            }
+            .sidebar.collapsed .sidebar-dropdown .nav-arrow {
+                display: none !important;
+            }
+            .sidebar.collapsed .sidebar-dropdown-menu {
+                position: fixed;
+                left: 78px;
+                background: #0a1628;
+                border-radius: 10px;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+                min-width: 220px;
+                max-height: none !important;
+                overflow: visible;
+                padding: 6px;
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                z-index: 99999;
+            }
+            .sidebar.collapsed .sidebar-dropdown:hover .sidebar-dropdown-menu,
+            .sidebar.collapsed .sidebar-dropdown.open .sidebar-dropdown-menu {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+            .sidebar.collapsed .sidebar-dropdown-menu a {
+                padding: 10px 14px !important;
+                border-radius: 6px;
+                white-space: nowrap;
+                border-left: none !important;
+            }
+            .sidebar.collapsed .sidebar-dropdown-menu a:hover {
+                background: rgba(245, 158, 11, 0.25) !important;
+            }
+            /* ============================================================
+            MODERN APPROVAL TABS — Navy + Gold Theme
+            ============================================================ */
+
+            /* Header ya tab */
+            .modern-tab-header {
+                background: linear-gradient(135deg, #0f1f3d 0%, #1a3a6b 100%);
+                padding: 22px 28px;
+                border-radius: 16px 16px 0 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                flex-wrap: wrap;
+                position: relative;
+                overflow: hidden;
+            }
+            .modern-tab-header::before {
+                content: '';
+                position: absolute;
+                top: -60px; right: -60px;
+                width: 200px; height: 200px;
+                background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);
+                border-radius: 50%;
+            }
+            .modern-tab-header .mth-left {
+                display: flex; align-items: center; gap: 14px;
+                position: relative; z-index: 1;
+            }
+            .modern-tab-header .mth-icon {
+                width: 48px; height: 48px;
+                border-radius: 14px;
+                background: rgba(245, 158, 11, 0.15);
+                border: 1.5px solid rgba(245, 158, 11, 0.3);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 24px;
+            }
+            .modern-tab-header h3 {
+                font-size: 18px; font-weight: 800;
+                color: white; margin: 0 0 3px 0;
+            }
+            .modern-tab-header .mth-subtitle {
+                font-size: 12px; color: rgba(255,255,255,0.65);
+                font-weight: 500;
+            }
+            .modern-tab-header .mth-badge {
+                background: rgba(245, 158, 11, 0.2);
+                border: 1px solid rgba(245, 158, 11, 0.4);
+                color: #fbbf24;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 12px; font-weight: 800;
+                display: inline-flex; align-items: center; gap: 6px;
+                position: relative; z-index: 1;
+            }
+
+            /* Info banner ya kisasa */
+            .modern-info-banner {
+                background: linear-gradient(135deg, rgba(15,31,61,0.04), rgba(15,31,61,0.01));
+                border: 1.5px solid rgba(15,31,61,0.12);
+                border-left: 4px solid #0f1f3d;
+                border-radius: 12px;
+                padding: 16px 20px;
+                margin-bottom: 20px;
+                display: flex; align-items: flex-start; gap: 14px;
+            }
+            .modern-info-banner .mib-icon {
+                width: 38px; height: 38px;
+                border-radius: 10px;
+                background: rgba(245,158,11,0.15);
+                color: #d97706;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 18px; flex-shrink: 0;
+            }
+            .modern-info-banner .mib-title {
+                font-size: 13px; font-weight: 800;
+                color: #0f1f3d; margin-bottom: 3px;
+            }
+            .modern-info-banner .mib-text {
+                font-size: 12.5px; color: #64748b;
+                line-height: 1.6;
+            }
+
+            /* Stats cards za kisasa */
+            .modern-stats-row {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 14px;
+                margin-bottom: 22px;
+            }
+            .modern-stat-card {
+                background: white;
+                border: 1.5px solid #e5e7eb;
+                border-radius: 14px;
+                padding: 18px 20px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.25s ease;
+            }
+            .modern-stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 32px rgba(15,31,61,0.1);
+                border-color: #0f1f3d;
+            }
+            .modern-stat-card::after {
+                content: '';
+                position: absolute;
+                top: 0; left: 0;
+                width: 4px; height: 100%;
+                background: #0f1f3d;
+            }
+            .modern-stat-card.gold::after { background: #f59e0b; }
+            .modern-stat-card.green::after { background: #16a34a; }
+            .modern-stat-card.red::after { background: #dc2626; }
+            .modern-stat-card .msc-icon {
+                width: 40px; height: 40px;
+                border-radius: 10px;
+                background: rgba(15,31,61,0.08);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+            .modern-stat-card.gold .msc-icon { background: rgba(245,158,11,0.12); }
+            .modern-stat-card.green .msc-icon { background: rgba(22,163,74,0.12); }
+            .modern-stat-card.red .msc-icon { background: rgba(220,38,38,0.12); }
+            .modern-stat-card .msc-label {
+                font-size: 11px; font-weight: 700;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                margin-bottom: 6px;
+            }
+            .modern-stat-card .msc-value {
+                font-size: 22px; font-weight: 900;
+                color: #0f1f3d;
+                font-family: 'Courier New', monospace;
+                letter-spacing: -0.5px;
+            }
+
+            /* Filter pills za kisasa */
+            .modern-filter-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                padding-bottom: 18px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .modern-filter-pill {
+                padding: 10px 20px;
+                background: white;
+                color: #475569;
+                border: 1.5px solid #e5e7eb;
+                border-radius: 10px;
+                font-weight: 700;
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 12.5px;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .modern-filter-pill:hover {
+                border-color: #0f1f3d;
+                color: #0f1f3d;
+            }
+            .modern-filter-pill.active {
+                background: linear-gradient(135deg, #0f1f3d, #1a3a6b);
+                color: white;
+                border-color: transparent;
+                box-shadow: 0 4px 12px rgba(15,31,61,0.25);
+            }
+
+            /* Request card za kisasa */
+            .modern-request-card {
+                background: white;
+                border: 1.5px solid #e5e7eb;
+                border-radius: 14px;
+                padding: 20px 22px;
+                margin-bottom: 14px;
+                transition: all 0.25s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .modern-request-card:hover {
+                box-shadow: 0 8px 24px rgba(15,31,61,0.08);
+                border-color: #cbd5e1;
+            }
+            .modern-request-card::before {
+                content: '';
+                position: absolute;
+                left: 0; top: 0;
+                width: 4px; height: 100%;
+                background: #0f1f3d;
+            }
+            .modern-request-card.pending::before { background: #f59e0b; }
+            .modern-request-card.approved::before { background: #16a34a; }
+            .modern-request-card.rejected::before { background: #dc2626; }
+
+            .mrc-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 14px;
+                flex-wrap: wrap;
+            }
+            .mrc-title-wrap {
+                flex: 1;
+                min-width: 220px;
+            }
+            .mrc-id-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+            }
+            .mrc-id {
+                font-family: 'Courier New', monospace;
+                font-weight: 900;
+                color: #0f1f3d;
+                font-size: 14px;
+                letter-spacing: -0.3px;
+            }
+            .mrc-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 10px;
+                font-weight: 800;
+                padding: 4px 10px;
+                border-radius: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+            }
+            .mrc-badge.navy { background: rgba(15,31,61,0.1); color: #0f1f3d; }
+            .mrc-badge.gold { background: rgba(245,158,11,0.15); color: #b45309; }
+            .mrc-badge.green { background: rgba(22,163,74,0.12); color: #15803d; }
+            .mrc-badge.red { background: rgba(220,38,38,0.12); color: #b91c1c; }
+            .mrc-title {
+                font-size: 15px;
+                font-weight: 800;
+                color: #1e293b;
+                margin-bottom: 8px;
+                line-height: 1.4;
+            }
+            .mrc-meta {
+                display: flex;
+                gap: 18px;
+                flex-wrap: wrap;
+                font-size: 12px;
+                color: #64748b;
+            }
+            .mrc-meta span strong { color: #334155; font-weight: 700; }
+
+            .mrc-amount-wrap {
+                text-align: right;
+                flex-shrink: 0;
+            }
+            .mrc-amount {
+                font-size: 24px;
+                font-weight: 900;
+                color: #0f1f3d;
+                font-family: 'Courier New', monospace;
+                letter-spacing: -0.5px;
+                line-height: 1.1;
+            }
+            .mrc-amount-label {
+                font-size: 10px;
+                color: #94a3b8;
+                text-transform: uppercase;
+                font-weight: 800;
+                letter-spacing: 0.8px;
+                margin-top: 4px;
+            }
+
+            .mrc-actions {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding-top: 14px;
+                border-top: 1px solid #f1f5f9;
+                margin-top: 14px;
+            }
+            .mrc-btn {
+                padding: 9px 18px;
+                border-radius: 8px;
+                font-weight: 700;
+                font-size: 12px;
+                cursor: pointer;
+                font-family: inherit;
+                border: none;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .mrc-btn:hover { transform: translateY(-1px); }
+            .mrc-btn.primary {
+                background: linear-gradient(135deg, #0f1f3d, #1a3a6b);
+                color: white;
+                box-shadow: 0 4px 12px rgba(15,31,61,0.25);
+            }
+            .mrc-btn.gold {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                color: white;
+                box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+            }
+            .mrc-btn.success {
+                background: linear-gradient(135deg, #16a34a, #15803d);
+                color: white;
+                box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+            }
+            .mrc-btn.danger {
+                background: rgba(220,38,38,0.08);
+                color: #dc2626;
+                border: 1.5px solid rgba(220,38,38,0.2);
+            }
+            .mrc-btn.danger:hover { background: rgba(220,38,38,0.15); }
+
+            .mrc-rejection-box {
+                background: rgba(220,38,38,0.05);
+                border-left: 3px solid #dc2626;
+                border-radius: 8px;
+                padding: 10px 14px;
+                margin-top: 12px;
+            }
+            .mrc-rejection-label {
+                font-size: 10px;
+                font-weight: 800;
+                color: #dc2626;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+                margin-bottom: 3px;
+            }
+            .mrc-rejection-text {
+                font-size: 12.5px;
+                color: #7f1d1d;
+                line-height: 1.5;
+            }
+
+            /* Empty state ya kisasa */
+            .modern-empty-state {
+                text-align: center;
+                padding: 70px 30px;
+                color: #94a3b8;
+            }
+            .modern-empty-state .mes-icon {
+                width: 90px; height: 90px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, rgba(15,31,61,0.06), rgba(15,31,61,0.02));
+                border: 2px dashed rgba(15,31,61,0.15);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 40px;
+                margin: 0 auto 20px;
+            }
+            .modern-empty-state .mes-title {
+                font-size: 17px;
+                font-weight: 800;
+                color: #475569;
+                margin-bottom: 6px;
+            }
+            .modern-empty-state .mes-desc {
+                font-size: 13px;
+                color: #94a3b8;
+            }
+
+            /* Staff table ya kisasa */
+            .modern-staff-table {
+                background: white;
+                border-radius: 14px;
+                overflow: hidden;
+                border: 1.5px solid #e5e7eb;
+            }
+            .modern-staff-table .mst-header {
+                display: grid;
+                grid-template-columns: 50px 1.5fr 1.2fr 1fr 1fr 1fr 100px 130px;
+                gap: 12px;
+                padding: 14px 20px;
+                background: linear-gradient(135deg, #0f1f3d, #1a3a6b);
+                font-size: 10px;
+                font-weight: 800;
+                color: rgba(255,255,255,0.85);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .modern-staff-table .mst-row {
+                display: grid;
+                grid-template-columns: 50px 1.5fr 1.2fr 1fr 1fr 1fr 100px 130px;
+                gap: 12px;
+                padding: 14px 20px;
+                border-bottom: 1px solid #f1f5f9;
+                align-items: center;
+                transition: background 0.15s;
+            }
+            .modern-staff-table .mst-row:hover { background: #f8fafc; }
+            .modern-staff-table .mst-row:last-child { border-bottom: none; }
+            .modern-staff-table .mst-num {
+                font-weight: 900;
+                color: #f59e0b;
+                font-size: 13px;
+            }
+            .modern-staff-table .mst-name {
+                font-weight: 700;
+                color: #1e293b;
+                font-size: 13px;
+            }
+            .modern-staff-table .mst-id {
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+                color: #0f1f3d;
+                font-weight: 700;
+            }
+
+            /* Responsive */
+            @media (max-width: 1024px) {
+                .modern-stats-row { grid-template-columns: repeat(2, 1fr); }
+                .modern-staff-table .mst-header,
+                .modern-staff-table .mst-row { grid-template-columns: 40px 1.5fr 1fr 1fr 80px; }
+                .modern-staff-table .mst-header span:nth-child(3),
+                .modern-staff-table .mst-header span:nth-child(5),
+                .modern-staff-table .mst-header span:nth-child(6),
+                .modern-staff-table .mst-row > *:nth-child(3),
+                .modern-staff-table .mst-row > *:nth-child(5),
+                .modern-staff-table .mst-row > *:nth-child(6) { display: none; }
+            }
+            @media (max-width: 600px) {
+                .modern-stats-row { grid-template-columns: 1fr; }
+                .mrc-header { flex-direction: column; }
+                .mrc-amount-wrap { text-align: left; }
+            }
+            /* Dropdown ya Vitendo (Action Menu) */
+            .action-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .action-dropdown-menu {
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 100%;
+                background: white;
+                min-width: 180px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                border-radius: 8px;
+                border: 1px solid #e2e8f0;
+                z-index: 1000;
+                padding: 6px;
+                text-align: left;
+            }
+
+            .action-dropdown-menu.show {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .action-dropdown-menu button {
+                width: 100%;
+                padding: 10px 14px;
+                border: none;
+                background: transparent;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 700;
+                color: #334155;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-family: inherit;
+                transition: all 0.2s;
+            }
+
+            .action-dropdown-menu button:hover {
+                background: #f1f5f9;
+            }
+
+            .action-dropdown-menu button.view:hover { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+            .action-dropdown-menu button.book:hover { background: rgba(15, 31, 61, 0.1); color: #0f1f3d; }
+            .action-dropdown-menu button.review:hover { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+            .action-dropdown-menu button.submit:hover { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+           /* ============================================================
+            STRATEGIC PLAN v6.0 — Document-First CSS
+            ============================================================ */
+
+            .sp-header { position: relative; background: linear-gradient(135deg, #0a1628 0%, #0f1f3d 45%, #1a3a6b 100%); border-radius: 20px; padding: 32px 36px; margin-bottom: 22px; overflow: hidden; box-shadow: 0 16px 40px rgba(15, 31, 61, 0.25); }
+            .sp-header-bg { position: absolute; inset: 0; background: radial-gradient(circle at 15% 20%, rgba(245,158,11,0.18) 0%, transparent 45%), radial-gradient(circle at 85% 80%, rgba(245,158,11,0.10) 0%, transparent 55%); pointer-events: none; }
+            .sp-header-inner { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; z-index: 1; }
+            .sp-header-left { display: flex; align-items: center; gap: 20px; }
+            .sp-brand-mark { width: 70px; height: 70px; border-radius: 18px; background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.08)); border: 1.5px solid rgba(245,158,11,0.45); display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0; }
+            .sp-eyebrow { font-size: 11px; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 6px; }
+            .sp-title { font-size: 28px; font-weight: 900; color: white; margin: 0 0 6px 0; letter-spacing: -0.5px; line-height: 1.15; }
+            .sp-subtitle { font-size: 13px; color: rgba(255,255,255,0.65); font-weight: 500; font-style: italic; }
+            .sp-header-actions { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+            .sp-btn { padding: 12px 22px; border-radius: 10px; font-size: 13px; font-weight: 800; font-family: inherit; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+            .sp-btn:hover { transform: translateY(-2px); }
+            .sp-btn-ghost { background: rgba(255,255,255,0.10); color: white; border: 1px solid rgba(255,255,255,0.25); }
+            .sp-btn-ghost:hover { background: rgba(255,255,255,0.18); }
+            .sp-btn-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #0a1628; box-shadow: 0 6px 20px rgba(245,158,11,0.35); }
+
+            .sp-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
+            .sp-kpi-card { background: white; border-radius: 16px; padding: 22px 24px; display: flex; align-items: center; gap: 18px; border: 1.5px solid #e5e7eb; position: relative; overflow: hidden; transition: all 0.25s; box-shadow: 0 4px 14px rgba(15,31,61,0.04); }
+            .sp-kpi-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: #0f1f3d; }
+            .sp-kpi-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(15,31,61,0.10); }
+            .sp-kpi-icon { width: 56px; height: 56px; border-radius: 14px; background: rgba(15,31,61,0.06); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+            .sp-kpi-label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+            .sp-kpi-value { font-size: 28px; font-weight: 900; color: #0f1f3d; font-family: 'Courier New', monospace; letter-spacing: -1px; line-height: 1; }
+            .sp-kpi-foot { font-size: 11px; color: #94a3b8; margin-top: 6px; font-weight: 600; }
+            .sp-kpi-progress::before { background: #d97706; }
+            .sp-kpi-progress .sp-kpi-icon { background: rgba(245,158,11,0.10); }
+            .sp-kpi-progress .sp-kpi-value { color: #d97706; }
+            .sp-kpi-completed::before { background: #16a34a; }
+            .sp-kpi-completed .sp-kpi-icon { background: rgba(22,163,74,0.10); }
+            .sp-kpi-completed .sp-kpi-value { color: #16a34a; }
+            .sp-kpi-health::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+            .sp-kpi-health .sp-kpi-icon { background: rgba(245,158,11,0.14); }
+            .sp-kpi-health .sp-kpi-value { color: #d97706; }
+
+            .sp-workspace { background: white; border-radius: 18px; border: 1.5px solid #e5e7eb; box-shadow: 0 8px 28px rgba(15,31,61,0.05); overflow: hidden; }
+            .sp-tabs { display: flex; gap: 0; background: #f8fafc; border-bottom: 1.5px solid #e5e7eb; padding: 0 24px; overflow-x: auto; }
+            .sp-tab-btn { padding: 16px 24px; background: transparent; border: none; border-bottom: 3px solid transparent; color: #64748b; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+            .sp-tab-btn.active { color: #0f1f3d; border-bottom-color: #f59e0b; background: white; }
+            .sp-view { display: none; padding: 26px 28px 32px; }
+            .sp-view.active { display: block; }
+
+            .sp-toolbar { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid #f1f5f9; }
+            .sp-filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+            .sp-filter-btn { padding: 8px 16px; background: #f8fafc; color: #475569; border: 1.5px solid #e5e7eb; border-radius: 8px; font-weight: 700; font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+            .sp-filter-btn.active { background: linear-gradient(135deg, #0f1f3d, #1a3a6b); color: white; border-color: transparent; }
+            .sp-search { flex: 1; min-width: 240px; }
+            .sp-search input { width: 100%; padding: 11px 16px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 13px; font-family: inherit; background: #f8fafc; }
+            .sp-search input:focus { outline: none; border-color: #f59e0b; background: white; }
+
+            .sp-info-banner { display: flex; gap: 14px; padding: 16px 20px; background: linear-gradient(135deg, rgba(15,31,61,0.04), rgba(15,31,61,0.01)); border-left: 4px solid #f59e0b; border-radius: 10px; margin-bottom: 20px; align-items: flex-start; }
+            .sp-info-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(245,158,11,0.14); color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+            .sp-info-title { font-size: 13px; font-weight: 800; color: #0f1f3d; margin-bottom: 3px; }
+            .sp-info-text { font-size: 12px; color: #64748b; line-height: 1.6; }
+
+            .sp-plan-card { background: white; border-radius: 14px; border: 1.5px solid #e5e7eb; padding: 22px 26px; margin-bottom: 14px; position: relative; overflow: hidden; transition: all 0.25s; }
+            .sp-plan-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: #0f1f3d; }
+            .sp-plan-card.status-progress::before { background: linear-gradient(180deg, #d97706, #f59e0b); }
+            .sp-plan-card.status-completed::before { background: linear-gradient(180deg, #16a34a, #15803d); }
+            .sp-plan-card.status-hold::before { background: linear-gradient(180deg, #dc2626, #b91c1c); }
+            .sp-plan-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(15,31,61,0.10); }
+
+            /* File type badges */
+            .sp-file-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; }
+            .sp-file-badge.pdf { background: rgba(220,38,38,0.10); color: #b91c1c; }
+            .sp-file-badge.docx { background: rgba(37,99,235,0.10); color: #1d4ed8; }
+            .sp-file-badge.xlsx { background: rgba(22,163,74,0.10); color: #15803d; }
+            .sp-file-badge.pptx { background: rgba(234,88,12,0.10); color: #c2410c; }
+            .sp-file-badge.other { background: rgba(100,116,139,0.10); color: #475569; }
+
+            /* Roadmap */
+            .sp-roadmap-wrap { background: white; border-radius: 14px; border: 1.5px solid #e5e7eb; overflow: hidden; }
+            .sp-roadmap-header { display: grid; grid-template-columns: 280px repeat(5, 1fr); background: linear-gradient(135deg, #0f1f3d, #1a3a6b); color: white; padding: 16px 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 3px solid #f59e0b; }
+            .sp-roadmap-header .sp-rh-year { text-align: center; color: #fbbf24; }
+            .sp-roadmap-body { padding: 12px 20px; }
+            .sp-roadmap-row { display: grid; grid-template-columns: 280px repeat(5, 1fr); align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+            .sp-roadmap-row:hover { background: #f8fafc; }
+            .sp-roadmap-label-title { font-size: 13px; font-weight: 800; color: #0f1f3d; line-height: 1.3; margin-bottom: 4px; }
+            .sp-roadmap-label-meta { font-size: 10.5px; color: #64748b; font-weight: 600; }
+            .sp-roadmap-cell { padding: 0 6px; height: 40px; display: flex; align-items: center; justify-content: center; }
+            .sp-roadmap-bar { height: 28px; border-radius: 8px; background: linear-gradient(135deg, #0f1f3d, #1a3a6b); width: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+            .sp-roadmap-bar.gold { background: linear-gradient(135deg, #f59e0b, #d97706); }
+            .sp-roadmap-bar.green { background: linear-gradient(135deg, #16a34a, #15803d); }
+            .sp-roadmap-bar.red { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+            .sp-roadmap-bar.blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+            /* Analytics */
+            .sp-analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+            .sp-analytics-card { background: white; border-radius: 14px; border: 1.5px solid #e5e7eb; padding: 22px 24px; }
+            .sp-analytics-card h4 { font-size: 13px; font-weight: 800; color: #0f1f3d; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px 0; padding-bottom: 10px; border-bottom: 2px solid #f59e0b; display: inline-block; }
+            .sp-stat-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px dashed #f1f5f9; font-size: 13px; }
+            .sp-stat-row:last-child { border-bottom: none; }
+            .sp-stat-row-label { color: #64748b; font-weight: 600; }
+            .sp-stat-row-value { color: #0f1f3d; font-weight: 800; font-family: 'Courier New', monospace; }
+            .sp-progress-bar { width: 100%; height: 10px; background: #f1f5f9; border-radius: 6px; overflow: hidden; margin-top: 8px; }
+            .sp-progress-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #0f1f3d, #1a3a6b, #f59e0b); transition: width 0.6s ease; }
+
+            /* Upload modal */
+            .sp-upload-zone { border: 2.5px dashed #cbd5e1; border-radius: 14px; padding: 40px 20px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.25s; }
+            .sp-upload-zone:hover, .sp-upload-zone.dragover { border-color: #f59e0b; background: rgba(245,158,11,0.04); }
+            .sp-upload-zone .uz-icon { font-size: 48px; margin-bottom: 12px; display: block; }
+            .sp-upload-zone .uz-title { font-size: 15px; font-weight: 800; color: #0f1f3d; margin-bottom: 4px; }
+            .sp-upload-zone .uz-sub { font-size: 12px; color: #64748b; }
+            .sp-upload-zone .uz-types { font-size: 10px; color: #94a3b8; margin-top: 12px; font-weight: 700; letter-spacing: 0.5px; }
+
+            .sp-file-preview { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: #f8fafc; border: 1.5px solid #e5e7eb; border-radius: 10px; margin-top: 14px; }
+            .sp-file-preview .fp-icon { font-size: 32px; flex-shrink: 0; }
+            .sp-file-preview .fp-info { flex: 1; min-width: 0; }
+            .sp-file-preview .fp-name { font-size: 13px; font-weight: 800; color: #0f1f3d; word-break: break-all; }
+            .sp-file-preview .fp-size { font-size: 11px; color: #64748b; margin-top: 3px; }
+            .sp-file-preview .fp-remove { width: 34px; height: 34px; border-radius: 8px; border: 1px solid rgba(220,38,38,0.2); background: rgba(220,38,38,0.1); color: #dc2626; cursor: pointer; font-size: 16px; font-weight: 900; }
+
+            /* Responsive */
+            @media (max-width: 1200px) { .sp-kpi-grid { grid-template-columns: repeat(2, 1fr); } .sp-roadmap-header, .sp-roadmap-row { grid-template-columns: 200px repeat(5, 1fr); } }
+            @media (max-width: 768px) { .sp-header { padding: 24px 20px; } .sp-title { font-size: 20px; } .sp-kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; } .sp-kpi-card { padding: 14px 16px; gap: 12px; } .sp-kpi-icon { width: 44px; height: 44px; font-size: 20px; } .sp-kpi-value { font-size: 22px; } .sp-analytics-grid { grid-template-columns: 1fr; } .sp-view { padding: 18px 16px 24px; } }
+            @media (max-width: 480px) { .sp-kpi-grid { grid-template-columns: 1fr; } }
+            /* ============================================================
+            MANAGER REPORT CSS (Copy kutoka Procurement)
+            ============================================================ */
+
+            .report-header-hero { 
+                background: linear-gradient(135deg, #0f1f3d 0%, #1a3a6b 50%, #0f1f3d 100%); 
+                border-radius: 20px; padding: 28px 32px; color: white; margin-bottom: 20px; 
+                position: relative; overflow: hidden; box-shadow: 0 15px 40px rgba(15,31,61,0.3); 
+            }
+            .report-header-hero::before { 
+                content: ''; position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; 
+                background: radial-gradient(circle, rgba(245,158,11,0.3) 0%, transparent 70%); 
+                border-radius: 50%; pointer-events: none; 
+            }
+            .report-hero-content { 
+                position: relative; z-index: 1; display: flex; justify-content: space-between; 
+                align-items: center; flex-wrap: wrap; gap: 16px; 
+            }
+            .report-hero-title { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0; }
+            .report-hero-sub { font-size: 13px; opacity: 0.8; margin-top: 6px; }
+            .report-hero-badge { 
+                background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); 
+                padding: 8px 16px; border-radius: 12px; font-weight: 700; font-size: 12px; backdrop-filter: blur(10px); 
+            }
+
+            .narrative-box { 
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); 
+                border: 1.5px solid #bbf7d0; border-left: 5px solid #16a34a; 
+                border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; 
+                box-shadow: 0 4px 15px rgba(22,163,74,0.05); 
+            }
+            .narrative-title { 
+                font-size: 14px; font-weight: 900; color: #166534; text-transform: uppercase; 
+                letter-spacing: 1.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; 
+            }
+            .narrative-text { font-size: 14.5px; line-height: 1.8; color: #1e293b; margin: 0; }
+            .narrative-text strong { color: #15803d; }
+
+            .report-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+            .report-kpi-card { 
+                background: white; border-radius: 16px; padding: 20px; border: 1px solid var(--gray-200); 
+                border-left: 4px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+                transition: all 0.3s; 
+            }
+            .report-kpi-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+            .report-kpi-icon { font-size: 24px; margin-bottom: 12px; display: block; }
+            .report-kpi-value { font-size: 24px; font-weight: 900; color: var(--primary); font-family: 'Courier New', monospace; line-height: 1.1; }
+            .report-kpi-label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+            .report-kpi-sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+            .report-section-card { 
+                background: white; border-radius: 16px; border: 1px solid var(--gray-200); 
+                box-shadow: 0 4px 20px rgba(15,23,42,0.04); margin-bottom: 20px; overflow: hidden; 
+            }
+            .report-section-header { 
+                background: linear-gradient(135deg, #0f1f3d, #1a3a6b); padding: 14px 24px; 
+                display: flex; justify-content: space-between; align-items: center; color: white; 
+            }
+            .report-section-header h3 { font-size: 15px; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px; }
+            .report-section-body { padding: 20px 24px; }
+
+            @media (max-width: 1024px) { .report-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+            @media (max-width: 600px) { .report-kpi-grid { grid-template-columns: 1fr; } .report-hero-content { flex-direction: column; align-items: flex-start; } }
+            /* ============================================================
+            FIX: Table Formatting for Manager Report
+            ============================================================ */
+
+            /* 1. Rudisha ukubwa wa jedwali kuwa compact */
+            #tab8 .data-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                table-layout: auto !important;
+            }
+
+            /* 2. Punguza padding ili maneno yasitawanyike */
+            #tab8 .data-table th,
+            #tab8 .data-table td {
+                padding: 14px 20px !important;
+                text-align: left !important;
+                vertical-align: middle !important;
+                font-size: 13px !important;
+                line-height: 1.5 !important;
+            }
+
+            /* 3. Weka rangi nzuri kwa kichwa cha jedwali */
+            #tab8 .data-table thead th {
+                background: #f8fafc !important;
+                color: #475569 !important;
+                font-size: 11px !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 1px !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+            }
+
+            /* 4. Panga namba ziwe kati (kama unataka) */
+            #tab8 .data-table tbody td:nth-child(2) {
+                text-align: center !important;
+                font-weight: 700 !important;
+                color: #0f1f3d !important;
+            }
+
+            #tab8 .data-table tbody td:nth-child(3) {
+                text-align: right !important;
+                font-family: 'Courier New', monospace !important;
+                font-weight: 700 !important;
+                color: #0f1f3d !important;
+            }
+
+            /* 5. Weka mstari mwembamba kati ya rows */
+            #tab8 .data-table tbody tr {
+                border-bottom: 1px solid #f1f5f9 !important;
+            }
+
+            #tab8 .data-table tbody tr:hover {
+                background: #f8fafc !important;
+            }
+
+            /* 6. Weka column ya kwanza (Category) iwe bold */
+            #tab8 .data-table tbody td:first-child {
+                font-weight: 700 !important;
+                color: #0f1f3d !important;
+            }
+            /* ============================================================
+            DASHBOARD HERO & KPI (Manager Overview)
+            ============================================================ */
+            .dashboard-hero { 
+                background: linear-gradient(135deg, #0f1f3d 0%, #1a3a6b 50%, #0f1f3d 100%); 
+                border-radius: 20px; padding: 28px 32px; color: white; margin-bottom: 20px; 
+                position: relative; overflow: hidden; box-shadow: 0 15px 40px rgba(15,31,61,0.3); 
+            }
+            .dashboard-hero::before { 
+                content: ''; position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; 
+                background: radial-gradient(circle, rgba(245,158,11,0.3) 0%, transparent 70%); 
+                border-radius: 50%; pointer-events: none; 
+            }
+            .hero-content { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+            .hero-title { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; margin: 0; }
+            .hero-sub { font-size: 13px; opacity: 0.8; margin-top: 6px; }
+            .hero-widget { text-align: right; }
+            .hero-widget-label { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; opacity: 0.7; text-transform: uppercase; }
+            .hero-widget-value { font-size: 32px; font-weight: 900; color: #fbbf24; font-family: 'Courier New', monospace; }
+
+            .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+            .kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); box-shadow: 0 2px 10px rgba(15,31,61,0.05); transition: all 0.25s; }
+            .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(15,31,61,0.12); }
+            .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+            .kpi-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+            .kpi-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #f8fafc; color: var(--primary); }
+            .kpi-value { font-size: 22px; font-weight: 900; color: var(--primary); font-family: 'Courier New', monospace; letter-spacing: -0.5px; }
+            .kpi-sub { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+
+            .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+            .module-card { background: white; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: 0 4px 20px rgba(15,23,42,0.04); transition: all 0.25s; }
+            .module-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(15,31,61,0.15); }
+            .module-header { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; color: white; }
+            .module-body { padding: 14px 20px; }
+
+            .activity-card { background: white; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: 0 4px 20px rgba(15,23,42,0.04); }
+            .activity-header { background: linear-gradient(135deg, #0f1f3d, #1a3a6b); padding: 14px 20px; color: white; font-size: 14px; font-weight: 800; }
+            .activity-body { padding: 8px 0; max-height: 350px; overflow-y: auto; }
+            .activity-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+            .activity-item:hover { background: #f8fafc; }
+            .activity-item:last-child { border-bottom: none; }
+            .activity-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+            .activity-info { flex: 1; min-width: 0; }
+            .activity-title { font-size: 13px; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .activity-meta { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+            .activity-amount { text-align: right; flex-shrink: 0; }
+            .activity-amount-value { font-size: 14px; font-weight: 900; font-family: 'Courier New', monospace; color: #0f1f3d; }
+            .activity-amount-status { font-size: 9px; font-weight: 800; text-transform: uppercase; margin-top: 3px; }
+
+            @media (max-width: 1024px) { .chart-grid { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+            @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } }
+            /* ============================================================
+            MODERN SIDEBAR DESIGN — Glassmorphism + Gold Accents
+            ============================================================ */
+
+            /* 1. SIDEBAR BACKGROUND */
+            .sidebar {
+                background: linear-gradient(180deg, rgba(10, 22, 40, 0.98) 0%, rgba(15, 31, 61, 0.98) 100%) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                border-right: 1px solid rgba(245, 158, 11, 0.15) !important;
+                box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3) !important;
+                padding: 24px 16px !important;
+            }
+
+            /* 2. BRAND SECTION */
+            .sidebar-brand {
+                padding: 8px 0 20px 0 !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+                margin-bottom: 20px !important;
+            }
+            .sidebar-brand .logo-img {
+                width: 80px !important;
+                height: 80px !important;
+                border: 3px solid #f59e0b !important;
+                padding: 3px !important;
+                background: white !important;
+                box-shadow: 0 8px 25px rgba(245, 158, 11, 0.25) !important;
+                transition: all 0.3s ease !important;
+            }
+            .sidebar-brand .logo-img:hover {
+                transform: scale(1.05) rotate(3deg) !important;
+                box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4) !important;
+            }
+            .sidebar-brand .brand-name {
+                font-size: 16px !important;
+                font-weight: 800 !important;
+                color: white !important;
+                letter-spacing: 0.5px !important;
+                margin-top: 8px !important;
+            }
+            .sidebar-brand .brand-name span {
+                color: #f59e0b !important;
+                display: block !important;
+                font-size: 14px !important;
+                margin-top: 2px !important;
+            }
+            .sidebar-brand .brand-motto {
+                font-size: 10.5px !important;
+                color: rgba(255, 255, 255, 0.4) !important;
+                font-style: italic !important;
+                margin-top: 6px !important;
+            }
+
+            /* 3. NAVIGATION LABEL */
+            .sidebar-label {
+                font-size: 10px !important;
+                font-weight: 800 !important;
+                color: rgba(245, 158, 11, 0.7) !important;
+                text-transform: uppercase !important;
+                letter-spacing: 2.5px !important;
+                margin: 20px 0 12px 8px !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+
+            /* 4. NAVIGATION LINKS (Default) */
+            .sidebar-nav a {
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
+                padding: 12px 14px !important;
+                color: rgba(255, 255, 255, 0.65) !important;
+                text-decoration: none !important;
+                border-radius: 10px !important;
+                font-size: 13.5px !important;
+                font-weight: 500 !important;
+                margin-bottom: 4px !important;
+                border-left: 3px solid transparent !important;
+                transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+
+            /* 5. HOVER EFFECT (Iliyoboreshwa) */
+            .sidebar-nav a:hover {
+                color: white !important;
+                background: rgba(245, 158, 11, 0.08) !important;
+                border-left-color: rgba(245, 158, 11, 0.5) !important;
+                transform: translateX(4px) !important;
+                padding-left: 18px !important;
+            }
+            .sidebar-nav a:hover .nav-text {
+                color: white !important;
+            }
+
+            /* 6. ACTIVE STATE (Ya Dhahabu) */
+            .sidebar-nav a.active {
+                color: white !important;
+                background: linear-gradient(90deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
+                border-left-color: #f59e0b !important;
+                font-weight: 700 !important;
+                box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15) !important;
+            }
+            .sidebar-nav a.active .nav-text {
+                color: white !important;
+            }
+            .sidebar-nav a.active::before {
+                content: '' !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                width: 4px !important;
+                height: 60% !important;
+                background: #f59e0b !important;
+                border-radius: 0 4px 4px 0 !important;
+                box-shadow: 0 0 12px rgba(245, 158, 11, 0.6) !important;
+            }
+
+            /* 7. ICON SIZE */
+            .sidebar-nav a span[style*="font-size:18px"] {
+                font-size: 18px !important;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
+            }
+
+            /* 8. NAV TEXT */
+            .sidebar-nav a .nav-text {
+                flex: 1 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            /* 9. BADGE */
+            .sidebar-nav a .nav-badge {
+                background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+                color: #0a1628 !important;
+                font-size: 10px !important;
+                font-weight: 900 !important;
+                padding: 2px 8px !important;
+                border-radius: 10px !important;
+                min-width: 22px !important;
+                text-align: center !important;
+                box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4) !important;
+            }
+
+            /* 10. DROPDOWN MENU */
+            .sidebar-dropdown {
+                margin-bottom: 4px !important;
+            }
+            .sidebar-dropdown-toggle {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                padding: 12px 14px !important;
+                color: rgba(255, 255, 255, 0.65) !important;
+                border-radius: 10px !important;
+                cursor: pointer !important;
+                font-size: 13.5px !important;
+                font-weight: 500 !important;
+                transition: all 0.25s !important;
+            }
+            .sidebar-dropdown-toggle:hover {
+                color: white !important;
+                background: rgba(245, 158, 11, 0.08) !important;
+            }
+            .sidebar-dropdown-toggle .nav-arrow {
+                color: rgba(255, 255, 255, 0.4) !important;
+                transition: transform 0.3s ease !important;
+            }
+            .sidebar-dropdown.open .sidebar-dropdown-toggle .nav-arrow {
+                transform: rotate(180deg) !important;
+                color: #f59e0b !important;
+            }
+            .sidebar-dropdown.open .sidebar-dropdown-toggle {
+                color: white !important;
+                background: rgba(245, 158, 11, 0.1) !important;
+            }
+
+            /* 11. DROPDOWN MENU ITEMS */
+            .sidebar-dropdown-menu {
+                max-height: 0 !important;
+                overflow: hidden !important;
+                transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s !important;
+                opacity: 0 !important;
+                margin-left: 8px !important;
+                margin-top: 4px !important;
+                border-left: 1px dashed rgba(245, 158, 11, 0.25) !important;
+                padding-left: 8px !important;
+            }
+            .sidebar-dropdown.open .sidebar-dropdown-menu {
+                max-height: 500px !important;
+                opacity: 1 !important;
+                padding: 6px 0 !important;
+            }
+            .sidebar-dropdown-menu a {
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
+                padding: 9px 14px !important;
+                font-size: 12.5px !important;
+                color: rgba(255, 255, 255, 0.55) !important;
+                border-radius: 8px !important;
+                border-left: 2px solid transparent !important;
+                margin-bottom: 2px !important;
+                transition: all 0.2s !important;
+            }
+            .sidebar-dropdown-menu a:hover {
+                color: white !important;
+                background: rgba(245, 158, 11, 0.08) !important;
+                border-left-color: #f59e0b !important;
+                padding-left: 18px !important;
+            }
+            .sidebar-dropdown-menu a span[style*="font-size:16px"] {
+                font-size: 15px !important;
+            }
+
+            /* 12. USER PROFILE CARD */
+            .sidebar-user {
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
+                padding: 14px 16px !important;
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02)) !important;
+                border-radius: 14px !important;
+                border: 1px solid rgba(245, 158, 11, 0.2) !important;
+                margin-top: 20px !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+                transition: all 0.3s !important;
+            }
+            .sidebar-user:hover {
+                border-color: rgba(245, 158, 11, 0.4) !important;
+                box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2) !important;
+                transform: translateY(-2px) !important;
+            }
+            .sidebar-user .user-avatar {
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 50% !important;
+                background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-weight: 900 !important;
+                font-size: 16px !important;
+                color: #0a1628 !important;
+                flex-shrink: 0 !important;
+                overflow: hidden !important;
+                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+                border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            }
+            .sidebar-user .user-avatar img {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+            }
+            .sidebar-user .user-info .user-name {
+                font-size: 13.5px !important;
+                font-weight: 800 !important;
+                color: white !important;
+                margin-bottom: 2px !important;
+            }
+            .sidebar-user .user-info .user-role {
+                font-size: 10.5px !important;
+                color: #fbbf24 !important;
+                font-weight: 700 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+            }
+
+            /* 13. LOGOUT BUTTON */
+            .sidebar-portal {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                margin-top: 14px !important;
+                padding: 12px 16px !important;
+                background: rgba(239, 68, 68, 0.08) !important;
+                border: 1.5px solid rgba(239, 68, 68, 0.2) !important;
+                border-radius: 12px !important;
+                color: #fca5a5 !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
+                text-decoration: none !important;
+                transition: all 0.25s !important;
+            }
+            .sidebar-portal:hover {
+                background: rgba(239, 68, 68, 0.15) !important;
+                border-color: rgba(239, 68, 68, 0.4) !important;
+                color: white !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2) !important;
+            }
+
+            /* 14. SIDEBAR BOTTOM (Footer) */
+            .sidebar-bottom {
+                margin-top: auto !important;
+                padding-top: 20px !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+                text-align: center !important;
+            }
+            .sidebar-bottom span {
+                display: block !important;
+                font-weight: 800 !important;
+                font-size: 10.5px !important;
+                color: rgba(255, 255, 255, 0.5) !important;
+                letter-spacing: 1.5px !important;
+                text-transform: uppercase !important;
+            }
+            .sidebar-bottom small {
+                color: rgba(255, 255, 255, 0.25) !important;
+                font-size: 10px !important;
+                font-style: italic !important;
+                display: block !important;
+                margin-top: 4px !important;
+            }
+
+            /* 15. SIDEBAR COLLAPSED STATE */
+            .sidebar.collapsed .sidebar-nav a {
+                justify-content: center !important;
+                padding: 12px !important;
+                border-radius: 10px !important;
+                margin-bottom: 6px !important;
+            }
+            .sidebar.collapsed .sidebar-nav a::before {
+                display: none !important;
+            }
+            .sidebar.collapsed .sidebar-dropdown-toggle {
+                justify-content: center !important;
+                padding: 12px !important;
+            }
+            .sidebar.collapsed .sidebar-user {
+                justify-content: center !important;
+                padding: 8px 0 !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .sidebar.collapsed .sidebar-user .user-avatar {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            .sidebar.collapsed .sidebar-portal {
+                padding: 10px !important;
+                font-size: 16px !important;
+            }
+            .sidebar.collapsed .sidebar-portal span {
+                display: none !important;
+            }
     </style>
 </head>
 <body data-roles="Manager">
@@ -599,88 +1799,106 @@
 
     <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar" id="sidebar">
+        <!-- Brand Logo -->
         <div class="sidebar-brand">
             <img class="logo-img" src="assets/makdc-logo.jpg" alt="MAK DC Logo"
-                 onerror="this.src='https://via.placeholder.com/80x80/0f1f3d/ffffff?text=MAK'">
+                onerror="this.src='https://via.placeholder.com/80x80/0f1f3d/ffffff?text=MAK'">
             <div class="brand-name">MAK DC Investment <span>Company LTD</span></div>
             <div class="brand-motto">"Quality service is our priority."</div>
         </div>
+        
         <div class="sidebar-rule"></div>
 
-        <p class="sidebar-label">📊 Main Navigation</p>
+        <p class="sidebar-label">📊 MAIN NAVIGATION</p>
+        
         <nav class="sidebar-nav">
-            <a class="active" href="#" onclick="switchTab('tab1'); return false;" data-tooltip="Overview" aria-label="Overview">
-                <span style="font-size:18px;">📊</span><span class="nav-text">Overview</span>
-                <span class="nav-num">01</span>
+           <!-- 1. OVERVIEW -->
+            <a class="active" href="#" onclick="switchTab('tab1'); return false;" data-tooltip="Overview">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:18px;">📊</span>
+                    <span class="nav-text">Overview</span>
+                </div>
             </a>
-            <a href="#" onclick="switchTab('tab2'); return false;" data-tooltip="Budget" aria-label="Budget">
-                <span style="font-size:18px;">💰</span><span class="nav-text">Budget</span>
-                <span class="nav-num">02</span>
+             <!-- 4. STRATEGIC PLAN -->
+            <a href="#" onclick="switchTab('tab3'); return false;" data-tooltip="Strategic Plan">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:18px;">📋</span>
+                    <span class="nav-text">Strategic Plan</span>
+                </div>
             </a>
-            <a href="#" onclick="switchTab('tab3'); return false;" data-tooltip="Strategic Plan" aria-label="Strategic Plan">
-                <span style="font-size:18px;">📋</span><span class="nav-text">Strategic Plan</span>
-                <span class="nav-num">03</span>
+            <!-- 5. BUSINESS PLANS -->
+            <a href="#" onclick="switchTab('tab4'); return false;" data-tooltip="Business Plans">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:18px;">📄</span>
+                    <span class="nav-text">Business Plans</span>
+                </div>
             </a>
-            <a href="#" onclick="switchTab('tab4'); return false;" data-tooltip="Business Plans" aria-label="Business Plans">
-                <span style="font-size:18px;">📄</span><span class="nav-text">Business Plans</span>
-                <span class="nav-num">04</span>
-            </a>
-            <a href="#" onclick="switchTab('tab5'); return false;" data-tooltip="Challenges" aria-label="Challenges">
-                <span style="font-size:18px;">🔍</span><span class="nav-text">Challenges</span>
-                <span class="nav-num">05</span>
-            </a>
-            <a href="#" onclick="switchTab('tab6'); return false;" data-tooltip="Staff Welfare" aria-label="Staff Welfare">
-                <span style="font-size:18px;">👥</span><span class="nav-text">Staff Welfare</span>
-                <span class="nav-num">06</span>
-            </a>
-            <a href="#" onclick="switchTab('tab7'); return false;" data-tooltip="Price Control" aria-label="Price Control">
-                <span style="font-size:18px;">💵</span><span class="nav-text">Price Control</span>
-                <span class="nav-num">07</span>
-            </a>
-            <a href="#" onclick="switchTab('tab8'); return false;" data-tooltip="Reports" aria-label="Reports">
-                <span style="font-size:18px;">📈</span><span class="nav-text">Reports</span>
-                <span class="nav-num">08</span>
-            </a>
-            <a href="#" onclick="switchTab('tab-company-payments'); return false;" data-tooltip="Company Payments" aria-label="Company Payments">
-                <span style="font-size:18px;">💸</span><span class="nav-text">Company Payments</span>
-                <span class="nav-num">09</span>
-                <span class="nav-badge" id="navManagerPaymentsBadge">0</span>
-            </a>
-            <a href="#" onclick="switchTab('tab-payroll'); return false;" data-tooltip="Payroll Verification" aria-label="Payroll Verification">
-                <span style="font-size:18px;">💸</span><span class="nav-text">Payroll</span>
-                <span class="nav-num">10</span>
-                <span class="nav-badge" id="navPayrollBadge">0</span>
-            </a>
-            <a href="#" onclick="switchTab('tab9'); return false;" data-tooltip="Staff Management" aria-label="Staff Management">
-                <span style="font-size:18px;">👥</span><span class="nav-text">Staff Management</span>
-                <span class="nav-num">11</span>
-                <span class="nav-badge" id="navStaffBadge">0</span>
-            </a>
-            <a href="#" onclick="switchTab('tab-accounts'); return false;" data-tooltip="Company Accounts" aria-label="Company Accounts">
-                <span style="font-size:18px;">🏦</span><span class="nav-text">Company Accounts</span>
-                <span class="nav-num">12</span>
-                <span class="nav-badge" id="managerSidebarAccountsBadge">0</span>
-            </a>
-            <a href="#" onclick="switchTab('tab-fund-transfer'); return false;" data-tooltip="Fund Transfer Verification" aria-label="Fund Transfer Verification">
-                <span style="font-size:18px;">💸</span><span class="nav-text">Fund Transfer</span>
-                <span class="nav-num">13</span>
-                <span class="nav-badge" id="navFundTransferBadge">0</span>
-            </a>
-            <a href="#" onclick="switchTab('tab-procurement-approvals'); return false;" data-tooltip="Procurement Approvals" aria-label="Procurement Approvals">
-                <span style="font-size:18px;">📋</span><span class="nav-text">Procurement Approvals</span>
-                <span class="nav-num">14</span>
-                <span class="nav-badge" id="navProcurementBadge">0</span>
+            <!-- 3. BUDGET (Dropdown) -->
+            <div class="sidebar-dropdown" id="sidebarBudgetDropdown">
+                <a href="#" onclick="toggleSidebarBudgetDropdown(event); return false;" class="sidebar-dropdown-toggle" data-tooltip="Budget Menu">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:18px;">💰</span>
+                        <span class="nav-text">Budget</span>
+                    </div>
+                    <span class="nav-arrow" style="font-size:10px; transition:transform 0.25s; color:rgba(255,255,255,0.5);">▼</span>
+                </a>
+                <div class="sidebar-dropdown-menu" id="sidebarBudgetMenu">
+                    <a href="#" onclick="switchTab('tab2'); switchBudgetMainTab('master'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">🏢</span><span class="nav-text">Master Company</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab2'); switchBudgetMainTab('my-dept'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">👤</span><span class="nav-text">My Department</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab2'); switchBudgetMainTab('history'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">📋</span><span class="nav-text">All My Budgets</span>
+                    </a>
+                </div>
+            </div>
+            <!-- 2. APPROVALS & MANAGEMENT (Dropdown) -->
+            <div class="sidebar-dropdown" id="sidebarApprovalsDropdown">
+                <a href="#" onclick="toggleSidebarDropdown(event); return false;" class="sidebar-dropdown-toggle" data-tooltip="Approvals & Management">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:18px;">📂</span>
+                        <span class="nav-text">Approvals & Management</span>
+                    </div>
+                    <span class="nav-arrow" style="font-size:10px; transition:transform 0.25s; color:rgba(255,255,255,0.5);">▼</span>
+                </a>
+                <div class="sidebar-dropdown-menu" id="sidebarApprovalsMenu">
+                    <a href="#" onclick="switchTab('tab-company-payments'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">💷</span><span class="nav-text">Company Payments</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab-payroll'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">📓</span><span class="nav-text">Payroll</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab-fund-transfer'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">💸</span><span class="nav-text">Fund Transfer</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab9'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">👥</span><span class="nav-text">Staff Management</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab-accounts'); return false;" style="padding-left: 45px;">
+                        <span style="font-size:16px;">💳</span><span class="nav-text">Company Accounts</span>
+                    </a>
+                    <a href="#" onclick="switchTab('tab-procurement-approvals'); return false;" data-tooltip="Procurement Approvals">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:18px;">📋</span>
+                            <span class="nav-text">Procurement Approvals</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <!-- 7. REPORTS -->
+            <a href="#" onclick="switchTab('tab8'); return false;" data-tooltip="Reports">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:18px;">📈</span>
+                    <span class="nav-text">Reports</span>
+                </div>
             </a>
         </nav>
+
         <div class="sidebar-rule"></div>
 
-        <p class="sidebar-label">⚡ Quick Actions</p>
-        <nav class="sidebar-nav">
-            <a href="#" onclick="refreshAll(); return false;" data-tooltip="Refresh All" aria-label="Refresh All">
-                <span style="font-size:18px;">🔄</span><span class="nav-text">Refresh All</span>
-            </a>
-        </nav>
-
+        <!-- User Info -->
         <div class="sidebar-user">
             <div class="user-avatar" id="sidebarUserAvatar">MG</div>
             <div class="user-info">
@@ -696,7 +1914,6 @@
             <small>Quality service is our priority.</small>
         </div>
     </aside>
-
     <!-- ===== PAGE ===== -->
     <div class="page-content">
         <header class="dashboard-header">
@@ -742,524 +1959,737 @@
 
         <div class="dashboard-content">
             <div class="tabs-container">
-
                 <!-- TAB 1: OVERVIEW -->
                 <div class="tab-content active" id="tab1">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--primary);"></span>
-                                <h3>📊 Department Overview</h3>
+                    
+                    <!-- HERO SECTION -->
+                    <div class="dashboard-hero">
+                        <div class="hero-content">
+                            <div>
+                                <div class="hero-title">Welcome back, <span id="dashUserName">Manager</span> 👋</div>
+                                <div class="hero-sub" id="dashDate">—</div>
                             </div>
-                            <span class="badge">Live</span>
+                            <div class="hero-widget">
+                                <div class="hero-widget-label">Pending Approvals</div>
+                                <div class="hero-widget-value" id="dashHeroPending">0</div>
+                            </div>
                         </div>
-                        <div class="section-body">
-                            <div id="overviewContent"></div>
+                    </div>
+
+                    <!-- KPI GRID -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card" style="border-left-color: #3b82f6;">
+                            <div class="kpi-header"><div class="kpi-label">Total Orders</div><div class="kpi-icon" style="background:rgba(59,130,246,0.1); color:#2563eb;">📦</div></div>
+                            <div class="kpi-value" id="kpiTotalOrders">0</div>
+                            <div class="kpi-sub">All sales orders</div>
+                        </div>
+                        <div class="kpi-card" style="border-left-color: #f59e0b;">
+                            <div class="kpi-header"><div class="kpi-label">Pending</div><div class="kpi-icon" style="background:rgba(245,158,11,0.1); color:#d97706;">⏳</div></div>
+                            <div class="kpi-value" id="kpiPendingOrders">0</div>
+                            <div class="kpi-sub">Awaiting action</div>
+                        </div>
+                        <div class="kpi-card" style="border-left-color: #22c55e;">
+                            <div class="kpi-header"><div class="kpi-label">Active Staff</div><div class="kpi-icon" style="background:rgba(34,197,94,0.1); color:#16a34a;">👥</div></div>
+                            <div class="kpi-value" id="kpiActiveStaff">0</div>
+                            <div class="kpi-sub">Total team</div>
+                        </div>
+                        <div class="kpi-card" style="border-left-color: #8b5cf6;">
+                            <div class="kpi-header"><div class="kpi-label">Payrolls Pending</div><div class="kpi-icon" style="background:rgba(139,92,246,0.1); color:#7c3aed;">💵</div></div>
+                            <div class="kpi-value" id="kpiPendingPayrolls">0</div>
+                            <div class="kpi-sub">Awaiting your verification</div>
+                        </div>
+                    </div>
+
+                    <!-- CHARTS -->
+                    <div class="chart-grid">
+                        <div class="module-card">
+                            <div class="module-header" style="background: linear-gradient(135deg, #0f1f3d, #1a3a6b);"><div style="font-size: 14px; font-weight: 800;">📈 Order Trend (7 Days)</div></div>
+                            <div style="padding: 16px; height: 280px;"><canvas id="mgrOrderTrendChart"></canvas></div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header" style="background: linear-gradient(135deg, #0f1f3d, #1a3a6b);"><div style="font-size: 14px; font-weight: 800;">📊 Status Breakdown</div></div>
+                            <div style="padding: 16px; height: 280px;"><canvas id="mgrStatusBreakdownChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- MODULE SUMMARY (3 Cards) -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+                        <div class="module-card">
+                            <div class="module-header" style="background: linear-gradient(135deg, #0f1f3d, #1a3a6b);">
+                                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;">🛒</div><div style="font-size:14px;font-weight:800;">Procurement</div></div>
+                                <div style="font-size:10px;font-weight:800;padding:4px 10px;background:rgba(255,255,255,0.15);border-radius:20px;" id="mgrModProcCount">0</div>
+                            </div>
+                            <div class="module-body">
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #e2e8f0;"><span style="font-size:11px;color:#64748b;">Pending Requests</span><span style="font-size:14px;font-weight:900;color:#d97706;" id="mgrModProcPending">0</span></div>
+                                <button onclick="switchTab('tab-procurement-approvals')" style="margin-top:10px;width:100%;padding:8px;background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:8px;font-size:11px;font-weight:700;color:#0369a1;cursor:pointer;font-family:inherit;">View Approvals →</button>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header" style="background: linear-gradient(135deg, #0f1f3d, #1a3a6b);">
+                                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;">💰</div><div style="font-size:14px;font-weight:800;">Company Accounts</div></div>
+                                <div style="font-size:10px;font-weight:800;padding:4px 10px;background:rgba(255,255,255,0.15);border-radius:20px;" id="mgrModAccCount">0</div>
+                            </div>
+                            <div class="module-body">
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #e2e8f0;"><span style="font-size:11px;color:#64748b;">Pending Verify</span><span style="font-size:14px;font-weight:900;color:#d97706;" id="mgrModAccPending">0</span></div>
+                                <button onclick="switchTab('tab-accounts')" style="margin-top:10px;width:100%;padding:8px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;font-size:11px;font-weight:700;color:#166534;cursor:pointer;font-family:inherit;">View Accounts →</button>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header" style="background: linear-gradient(135deg, #0f1f3d, #1a3a6b);">
+                                <div style="display:flex; align-items:center; gap:10px;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;">💷</div><div style="font-size:14px;font-weight:800;">Payments</div></div>
+                                <div style="font-size:10px;font-weight:800;padding:4px 10px;background:rgba(255,255,255,0.15);border-radius:20px;" id="mgrModPayCount">0</div>
+                            </div>
+                            <div class="module-body">
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #e2e8f0;"><span style="font-size:11px;color:#64748b;">Pending Verify</span><span style="font-size:14px;font-weight:900;color:#d97706;" id="mgrModPayPending">0</span></div>
+                                <button onclick="switchTab('tab-company-payments')" style="margin-top:10px;width:100%;padding:8px;background:#fef3f2;border:1.5px solid #fecaca;border-radius:8px;font-size:11px;font-weight:700;color:#991b1b;cursor:pointer;font-family:inherit;">View Payments →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECENT ACTIVITY -->
+                    <div class="activity-card">
+                        <div class="activity-header">📋 Recent Orders</div>
+                        <div class="activity-body" id="mgrRecentOrdersList">
+                            <div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">Loading...</div>
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB 2: BUDGET -->
+                <!-- TAB 2: BUDGET (MASTER PLANNING & MY DEPARTMENT) -->
                 <div class="tab-content" id="tab2">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--gold);"></span>
-                                <h3>💰 Budget Management</h3>
+                    <div class="section-card" style="border:none;background:transparent;box-shadow:none;overflow:visible;">
+                        
+                        <!-- Header -->
+                        <div class="modern-tab-header" style="background:linear-gradient(135deg,#0f1f3d,#1a3a6b);border-radius:16px 16px 0 0;">
+                            <div class="mth-left">
+                                <div class="mth-icon">💰</div>
+                                <div>
+                                    <h3>Budget Management</h3>
+                                    <div class="mth-subtitle">Plan company-wide budget & manage your department</div>
+                                </div>
                             </div>
-                            <span class="badge">Monthly → Annual</span>
                         </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Project Name <span class="required">*</span></label>
-                                    <input type="text" id="budgetProject" placeholder="Enter project name">
+
+                        <!-- Body -->
+                        <div style="background:white;border-radius:0 0 16px 16px;padding:24px 28px;border:1.5px solid #e5e7eb;border-top:none;">
+                            
+                            <!-- ================================================================ -->
+                            <!-- SUB-TABS KUU (Master, My Dept, History, Review) -->
+                            <!-- ================================================================ -->
+                            <div style="display:flex; gap:10px; margin-bottom:24px; border-bottom:2px solid #e5e7eb; padding-bottom:12px; overflow-x:auto;">
+                                <button class="sub-tab-btn active" id="btn-tab-master-budget" onclick="switchBudgetMainTab('master')" style="padding:10px 24px; border-radius:8px; border:none; font-weight:800; font-size:13px; cursor:pointer; background:#0f1f3d; color:white; transition:all 0.2s; white-space:nowrap;">
+                                    🏢 Master Company Budget
+                                </button>
+                                <button class="sub-tab-btn" id="btn-tab-my-dept-budget" onclick="switchBudgetMainTab('my-dept')" style="padding:10px 24px; border-radius:8px; border:none; font-weight:800; font-size:13px; cursor:pointer; background:#f8fafc; color:#64748b; border:1.5px solid #e5e7eb; transition:all 0.2s; white-space:nowrap;">
+                                    💰 My Department Budget
+                                </button>
+                                <button class="sub-tab-btn" id="btn-tab-all-budgets" onclick="switchBudgetMainTab('history')" style="padding:10px 24px; border-radius:8px; border:none; font-weight:800; font-size:13px; cursor:pointer; background:#f8fafc; color:#64748b; border:1.5px solid #e5e7eb; transition:all 0.2s; white-space:nowrap;">
+                                    📋 All My Budgets
+                                </button>
+                                <!-- Kitufe cha Review (kinaonekana tu ukiwa kwenye Review) -->
+                                <button class="sub-tab-btn" id="btn-tab-review-budget" onclick="switchBudgetMainTab('review')" style="display:none; padding:10px 24px; border-radius:8px; border:none; font-weight:800; font-size:13px; cursor:pointer; background:#0f1f3d; color:white; transition:all 0.2s; white-space:nowrap;">
+                                    🔍 Review Budget
+                                </button>
+                            </div>
+
+                            <!-- ================================================================ -->
+                            <!-- 1. MASTER COMPANY BUDGET -->
+                            <!-- ================================================================ -->
+                            <div id="budget-main-master" style="display:none;">
+                                
+                                <!-- Sub-tabs za ndani ya Master (Planning, History, Review) -->
+                                <div style="display:flex; gap:10px; margin-bottom:24px;">
+                                    <button class="sub-tab-btn active" id="btn-subtab-planning" onclick="switchBudgetSubTab('planning')" style="padding:8px 20px; border-radius:6px; border:none; font-weight:800; font-size:12px; cursor:pointer; background:#0f1f3d; color:white;">📝 Planning</button>
+                                    <button class="sub-tab-btn" id="btn-subtab-history" onclick="switchBudgetSubTab('history')" style="padding:8px 20px; border-radius:6px; border:none; font-weight:800; font-size:12px; cursor:pointer; background:#f8fafc; color:#64748b; border:1px solid #e5e7eb;">📋 History</button>
+                                    <button class="sub-tab-btn" id="btn-subtab-review" onclick="switchBudgetSubTab('review')" style="display:none; padding:8px 20px; border-radius:6px; border:none; font-weight:800; font-size:12px; cursor:pointer; background:#0f1f3d; color:white;">🔍 Review</button>
                                 </div>
-                                <div class="form-group">
-                                    <label>Period <span class="required">*</span></label>
-                                    <select id="budgetPeriod">
-                                        <option value="Monthly">Monthly</option>
-                                        <option value="Quarterly">Quarterly</option>
-                                        <option value="Annual">Annual</option>
-                                    </select>
+
+                                <!-- ===== MASTER PLANNING FORM ===== -->
+                                <div id="budgetSubTab-planning">
+                                    <!-- 1. BUDGET INFO -->
+                                    <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1.5fr; gap:16px; margin-bottom:24px; background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e5e7eb;">
+                                        <div class="form-group">
+                                            <label>Budget Title <span class="required">*</span></label>
+                                            <input type="text" id="masterBudgetTitle" placeholder="e.g. Q1 Operations Budget" style="padding:12px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;font-family:inherit;width:100%;">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Budget Period <span class="required">*</span></label>
+                                            <select id="masterBudgetPeriodType" onchange="handlePeriodChange()" style="padding:12px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;font-family:inherit;width:100%;background:white;">
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Quarterly">Quarterly</option>
+                                                <option value="Annual">Annual</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Year <span class="required">*</span></label>
+                                            <input type="number" id="masterBudgetYear" value="2026" style="padding:12px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;font-family:inherit;width:100%;">
+                                        </div>
+                                        <div class="form-group" id="dynamicPeriodContainer">
+                                            <label>Specific Period <span class="required">*</span></label>
+                                            <select id="masterBudgetSpecificPeriod" style="padding:12px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;font-family:inherit;width:100%;background:white;">
+                                                <option value="January">January</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. TOTAL CEILING -->
+                                    <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg, #0f1f3d 0%, #1a3a6b 100%);padding:20px 24px;border-radius:12px;margin-bottom:24px;color:white;flex-wrap:wrap;gap:16px;">
+                                        <div>
+                                            <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Total Budget Ceiling (Company-Wide)</div>
+                                            <div style="font-size:32px;font-weight:900;font-family:'Courier New',monospace;color:#fbbf24;" id="masterBudgetTotal">TSh 0</div>
+                                        </div>
+                                        <div style="background:rgba(255,255,255,0.1);padding:14px 20px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);">
+                                            <label style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.8);text-transform:uppercase;display:block;margin-bottom:6px;">Set Total Ceiling</label>
+                                            <div style="display:flex;gap:8px;">
+                                                <input type="number" id="masterBudgetCeilingInput" placeholder="e.g. 500000" oninput="resetConfirmedCeiling()" style="padding:10px 14px;border:none;border-radius:8px;font-size:14px;font-family:'Courier New',monospace;font-weight:700;color:#0f1f3d;width:180px;text-align:right;background:#ffffff;">
+                                                <button onclick="confirmCeiling()" class="mrc-btn gold" style="padding:0 16px;font-size:12px;border-radius:8px;">✔ Set</button>
+                                            </div>
+                                            <div id="ceilingConfirmStatus" style="font-size:10px; margin-top:6px; font-weight:700; color:#fca5a5; display:none;">⚠ Please click Set to confirm ceiling</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. DEPARTMENT ALLOCATIONS -->
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                                        <h4 style="font-size:14px;font-weight:800;color:#0f1f3d;margin:0;">🏢 Department Allocations</h4>
+                                        <span style="font-size:12px;color:#64748b;font-weight:600;" id="allocationStatusText">Unallocated: TSh 0</span>
+                                    </div>
+
+                                    <div style="max-height:400px; overflow-y:auto; border:1.5px solid #e5e7eb; border-radius:12px;">
+                                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                                            <thead style="position:sticky; top:0; background:#f8fafc; z-index:10; border-bottom:2px solid #e5e7eb;">
+                                                <tr>
+                                                    <th style="padding:14px 18px; font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; width:50%;">Department</th>
+                                                    <th style="padding:14px 18px; font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; text-align:right;">Allocation (TSh)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ceilingAllocationTableBody">
+                                                <!-- Rows zitajazwa na JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- 4. ACTIONS -->
+                                    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
+                                        <button class="mrc-btn primary" onclick="resetCeilingAllocations()" style="background:white;border:1.5px solid #cbd5e1;color:#475569;">
+                                            🔄 Reset
+                                        </button>
+                                        <button class="mrc-btn gold" onclick="distributeCeilingsToDepartments()" style="padding:12px 28px;font-size:14px;">
+                                            📤 Distribute to Departments
+                                        </button>
+                                    </div>
+                                    <div id="ceilingStatus" class="status-msg" style="margin-top:12px;"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Year <span class="required">*</span></label>
-                                    <input type="number" id="budgetYear" placeholder="2026" value="2026">
+
+                                <!-- ===== MASTER HISTORY ===== -->
+                                <div id="budgetSubTab-history" style="display:none;">
+                                    <div id="masterBudgetHistoryContainer"></div>
                                 </div>
-                                <div class="form-group">
-                                    <label>Allocated Budget (TSh) <span class="required">*</span></label>
-                                    <input type="number" id="budgetAllocated" placeholder="0">
-                                </div>
-                                <div class="form-group">
-                                    <label>Spent (TSh)</label>
-                                    <input type="number" id="budgetSpent" placeholder="0" value="0">
-                                </div>
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <select id="budgetDepartment">
-                                        <option value="Sales">Sales</option>
-                                        <option value="Procurement">Procurement</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="Legal">Legal</option>
-                                        <option value="Production">Production</option>
-                                        <option value="Administration">Administration</option>
-                                    </select>
+
+                                <!-- ===== MASTER REVIEW ===== -->
+                                <div id="budgetSubTab-review" style="display:none;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding:20px; background:linear-gradient(135deg, #0f1f3d, #1a3a6b); border-radius:12px; color:white;">
+                                        <div style="display:flex; align-items:center; gap:16px;">
+                                            <button onclick="switchBudgetSubTab('history')" style="background:rgba(255,255,255,0.15); border:none; color:white; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">← Back</button>
+                                            <div>
+                                                <h3 style="margin:0; font-size:20px; font-weight:900;" id="reviewBudgetTitle">Reviewing Budget</h3>
+                                                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-top:4px;" id="reviewBudgetMeta">—</div>
+                                            </div>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div style="font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); text-transform:uppercase;">Total Ceiling</div>
+                                            <div style="font-size:24px; font-weight:900; color:#fbbf24; font-family:'Courier New',monospace;" id="reviewBudgetTotal">TSh 0</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size:12px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">Department Breakdown Status</div>
+                                    <div id="reviewDepartmentContainer" style="margin-bottom:24px;"></div>
                                 </div>
                             </div>
-                            <div class="action-row">
-                                <button class="btn-action gold" onclick="submitBudget()">📤 Submit Budget</button>
-                                <button class="btn-action primary" onclick="clearBudgetForm()">🗑️ Clear</button>
+
+                            <!-- ================================================================ -->
+                            <!-- 2. MY DEPARTMENT BUDGET -->
+                            <!-- ================================================================ -->
+                            <div id="budget-main-my-dept" style="display:none;">
+                                <div class="section-card" style="margin:0; border:1px solid #e5e7eb;">
+                                    <div class="section-header" style="background: linear-gradient(135deg, #0f1f3d, #1a3a6b); border-bottom: 3px solid #f59e0b;">
+                                        <div class="header-left">
+                                            <span class="color-bar" style="background:#f59e0b;"></span>
+                                            <h3 style="color: white; margin: 0;">💰 My Department Budget</h3>
+                                        </div>
+                                        <span class="badge" id="myBudgetStatusBadge" style="background:#f59e0b;color:#0f1f3d;">—</span>
+                                    </div>
+                                    <div class="section-body">
+                                        <div id="myBudgetContent">
+                                            <div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading budget...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Breakdown Page (Inajazwa na JS) -->
+                                <div id="budgetBreakdownPage" style="display:none;">
+                                    <div style="background:linear-gradient(135deg, #0f1f3d, #1a3a6b); padding:20px 28px; border-radius:14px; color:white; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-left: 5px solid #f59e0b;">
+                                        <div>
+                                            <div style="font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Budget Breakdown</div>
+                                            <h3 style="font-size:22px; font-weight:900; margin:0;" id="bdTitle">—</h3>
+                                            <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-top:4px;" id="bdMeta">—</div>
+                                        </div>
+                                        <div style="text-align:right;">
+                                            <div style="font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); text-transform:uppercase;">Your Ceiling</div>
+                                            <div style="font-size:26px; font-weight:900; color:#fbbf24; font-family:'Courier New',monospace;" id="bdCeiling">TSh 0</div>
+                                        </div>
+                                    </div>
+                                    <div id="bdActivitiesList"></div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding:20px; background:white; border-radius:12px; border:1.5px solid #e2e8f0; flex-wrap:wrap; gap:12px;">
+                                        <div>
+                                            <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Grand Total</div>
+                                            <div style="font-size:24px; font-weight:900; color:#0f1f3d; font-family:'Courier New',monospace;" id="bdGrandTotal">TSh 0</div>
+                                        </div>
+                                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                            <button onclick="addNewActivity()" style="padding:12px 24px; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px;">➕ Add Activity</button>
+                                            <button onclick="submitBudgetBreakdown(true)" style="padding:12px 24px; background:rgba(245,158,11,0.15); color:#0f1f3d; border:1.5px solid rgba(245,158,11,0.3); border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px;">💾 Save as Draft</button>
+                                            <button onclick="closeBudgetBreakdownPage()" style="padding:12px 24px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:13px;">← Back</button>
+                                            <button onclick="openBudgetReviewModal()" style="padding:12px 28px; background:linear-gradient(135deg,#0f1f3d,#1a3a6b); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px; box-shadow:0 4px 12px rgba(15,31,61,0.3);">📤 Submit to Manager</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="budgetStatus" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <h4 style="font-size:13px;color:var(--gray-700);margin-bottom:8px;">📋 Budget Records</h4>
-                            <div id="budgetListContainer" class="list-container"></div>
+
+                            <!-- ================================================================ -->
+                            <!-- 3. ALL MY BUDGETS -->
+                            <!-- ================================================================ -->
+                            <div id="budget-main-history" style="display:none;">
+                                <div id="allBudgetsContainer" style="width:100%;">
+                                    <div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading budgets...</div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB 3: STRATEGIC PLAN -->
                 <div class="tab-content" id="tab3">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--purple);"></span>
-                                <h3>📋 5-Year Strategic Plan</h3>
+
+                    <div class="sp-header">
+                        <div class="sp-header-bg"></div>
+                        <div class="sp-header-inner">
+                            <div class="sp-header-left">
+                                <div class="sp-brand-mark">🧭</div>
+                                <div>
+                                    <div class="sp-eyebrow">Strategic Planning Suite</div>
+                                    <h2 class="sp-title">Company Strategy Command Center</h2>
+                                    <div class="sp-subtitle">Upload, review & archive strategic plans — the company's compass</div>
+                                </div>
                             </div>
-                            <span class="badge">Annual Review</span>
+                            <div class="sp-header-actions">
+                                <button class="sp-btn sp-btn-ghost" onclick="openStrategicPlanBook()">📖 Plan Book Archive</button>
+                                <button class="sp-btn sp-btn-gold" onclick="openUploadPlanModal()">📎 Upload Strategic Plan</button>
+                            </div>
                         </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Strategic Objective</label>
-                                    <input type="text" id="strategicObjective" placeholder="e.g., Market Expansion">
+                    </div>
+
+                    <div class="sp-kpi-grid" id="spKpiGrid">
+                        <div class="sp-kpi-card sp-kpi-total">
+                            <div class="sp-kpi-icon">🧭</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Total Plans</div>
+                                <div class="sp-kpi-value" id="spStatTotal">0</div>
+                                <div class="sp-kpi-foot">Uploaded documents</div>
+                            </div>
+                        </div>
+                        <div class="sp-kpi-card sp-kpi-progress">
+                            <div class="sp-kpi-icon">⏳</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Pending CEO</div>
+                                <div class="sp-kpi-value" id="spStatProgress">0</div>
+                                <div class="sp-kpi-foot">Awaiting review</div>
+                            </div>
+                        </div>
+                        <div class="sp-kpi-card sp-kpi-completed">
+                            <div class="sp-kpi-icon">✅</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Approved</div>
+                                <div class="sp-kpi-value" id="spStatCompleted">0</div>
+                                <div class="sp-kpi-foot">Signed by CEO</div>
+                            </div>
+                        </div>
+                        <div class="sp-kpi-card sp-kpi-health">
+                            <div class="sp-kpi-icon">💯</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Strategy Health</div>
+                                <div class="sp-kpi-value" id="spStatHealth">—</div>
+                                <div class="sp-kpi-foot">Approval index</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sp-workspace">
+                        <div class="sp-tabs">
+                            <button class="sp-tab-btn active" data-spview="list" onclick="switchSPView('list')">📋 Plans</button>
+                            <button class="sp-tab-btn" data-spview="roadmap" onclick="switchSPView('roadmap')">🗺️ 5-Year Roadmap</button>
+                            <button class="sp-tab-btn" data-spview="analytics" onclick="switchSPView('analytics')">📊 Analytics</button>
+                        </div>
+
+                        <div class="sp-view active" id="spView-list">
+                            <div class="sp-toolbar">
+                                <div class="sp-filter-pills">
+                                    <button class="sp-filter-btn active" data-filter="all" onclick="filterStrategicPlans('all')">All</button>
+                                    <button class="sp-filter-btn" data-filter="2026" onclick="filterStrategicPlans('2026')">2026</button>
+                                    <button class="sp-filter-btn" data-filter="2027" onclick="filterStrategicPlans('2027')">2027</button>
+                                    <button class="sp-filter-btn" data-filter="2028" onclick="filterStrategicPlans('2028')">2028</button>
+                                    <button class="sp-filter-btn" data-filter="2029" onclick="filterStrategicPlans('2029')">2029</button>
+                                    <button class="sp-filter-btn" data-filter="2030" onclick="filterStrategicPlans('2030')">2030</button>
                                 </div>
-                                <div class="form-group">
-                                    <label>Year <span class="required">*</span></label>
-                                    <select id="strategicYear">
-                                        <option value="2026">2026</option><option value="2027">2027</option>
-                                        <option value="2028">2028</option><option value="2029">2029</option>
-                                        <option value="2030">2030</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select id="strategicStatus">
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Pending">Pending</option>
-                                        <option value="On Hold">On Hold</option>
-                                    </select>
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Plan Details</label>
-                                    <textarea id="strategicDetails" placeholder="Describe the strategic plan..."></textarea>
+                                <div class="sp-search">
+                                    <input type="text" id="spSearchInput" placeholder="🔍 Search plans, objectives, or owners..." oninput="renderStrategicPlans()">
                                 </div>
                             </div>
-                            <div class="action-row">
-                                <button class="btn-action purple" onclick="submitStrategicPlan()">📤 Submit Plan</button>
-                                <button class="btn-action primary" onclick="clearStrategicForm()">🗑️ Clear</button>
+                            <div id="strategicPlansContainer">
+                                <div class="modern-empty-state">
+                                    <div class="mes-icon">⏳</div>
+                                    <div class="mes-title">Loading strategic plans...</div>
+                                </div>
                             </div>
-                            <div id="strategicStatusMsg" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <div id="strategicListContainer" class="list-container"></div>
+                        </div>
+
+                        <div class="sp-view" id="spView-roadmap">
+                            <div class="sp-info-banner">
+                                <div class="sp-info-icon">🗺️</div>
+                                <div>
+                                    <div class="sp-info-title">5-Year Strategic Roadmap</div>
+                                    <div class="sp-info-text">A visual timeline of MAK DC Investment Company's strategic direction — from 2026 to 2030.</div>
+                                </div>
+                            </div>
+                            <div id="spRoadmapContainer"></div>
+                        </div>
+
+                        <div class="sp-view" id="spView-analytics">
+                            <div class="sp-info-banner">
+                                <div class="sp-info-icon">📊</div>
+                                <div>
+                                    <div class="sp-info-title">Strategy Analytics</div>
+                                    <div class="sp-info-text">Live snapshot of document submissions, approvals, and strategy health.</div>
+                                </div>
+                            </div>
+                            <div id="spAnalyticsContainer"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB 4: BUSINESS PLANS -->
+               <!-- TAB 4: BUSINESS PLANS -->
                 <div class="tab-content" id="tab4">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--green);"></span>
-                                <h3>📄 Business Plans</h3>
+
+                    <!-- HEADER -->
+                    <div class="sp-header">
+                        <div class="sp-header-bg"></div>
+                        <div class="sp-header-inner">
+                            <div class="sp-header-left">
+                                <div class="sp-brand-mark">💼</div>
+                                <div>
+                                    <div class="sp-eyebrow">Business Planning Suite</div>
+                                    <h2 class="sp-title">Project Proposals Command Center</h2>
+                                    <div class="sp-subtitle">Upload, review & approve business plans — the company's growth engine</div>
+                                </div>
                             </div>
-                            <span class="badge">Per Project</span>
+                            <div class="sp-header-actions">
+                                <button class="sp-btn sp-btn-ghost" onclick="openBusinessPlanBook()">📖 Plan Book Archive</button>
+                                <button class="sp-btn sp-btn-gold" onclick="openUploadBusinessPlanModal()">📎 Upload Business Plan</button>
+                            </div>
                         </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Project Name <span class="required">*</span></label>
-                                    <input type="text" id="bpProjectName" placeholder="Enter project name">
+                    </div>
+
+                    <!-- KPI GRID -->
+                    <div class="sp-kpi-grid">
+                        <div class="sp-kpi-card sp-kpi-total">
+                            <div class="sp-kpi-icon">💼</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Total Plans</div>
+                                <div class="sp-kpi-value" id="bpStatTotal">0</div>
+                                <div class="sp-kpi-foot">Uploaded documents</div>
+                            </div>
+                        </div>
+                        <div class="sp-kpi-card sp-kpi-progress">
+                            <div class="sp-kpi-icon">⏳</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Pending CEO</div>
+                                <div class="sp-kpi-value" id="bpStatPending">0</div>
+                                <div class="sp-kpi-foot">Awaiting review</div>
+                            </div>
+                        </div>
+                        <div class="sp-kpi-card sp-kpi-completed">
+                            <div class="sp-kpi-icon">✅</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Approved</div>
+                                <div class="sp-kpi-value" id="bpStatApproved">0</div>
+                                <div class="sp-kpi-foot">Signed by CEO</div>
+                            </div>
+                        </div>
+                        <div class="sp-kpi-card sp-kpi-health">
+                            <div class="sp-kpi-icon">💰</div>
+                            <div class="sp-kpi-body">
+                                <div class="sp-kpi-label">Total Budget</div>
+                                <div class="sp-kpi-value" id="bpStatBudget" style="font-size:18px;">TSh 0</div>
+                                <div class="sp-kpi-foot">Approved plans</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WORKSPACE -->
+                    <div class="sp-workspace">
+                        <div class="sp-tabs">
+                            <button class="sp-tab-btn active" data-bpview="list" onclick="switchBPView('list')">📋 Plans</button>
+                            <button class="sp-tab-btn" data-bpview="roadmap" onclick="switchBPView('roadmap')">🗺️ Roadmap</button>
+                            <button class="sp-tab-btn" data-bpview="analytics" onclick="switchBPView('analytics')">📊 Analytics</button>
+                        </div>
+
+                        <div class="sp-view active" id="bpView-list">
+                            <div class="sp-toolbar">
+                                <div class="sp-filter-pills">
+                                    <button class="sp-filter-btn active" data-bpfilter="all" onclick="filterBusinessPlans('all')">All</button>
+                                    <button class="sp-filter-btn" data-bpfilter="Draft" onclick="filterBusinessPlans('Draft')">📝 Draft</button>
+                                    <button class="sp-filter-btn" data-bpfilter="Pending CEO" onclick="filterBusinessPlans('Pending CEO')">⏳ Pending</button>
+                                    <button class="sp-filter-btn" data-bpfilter="Approved" onclick="filterBusinessPlans('Approved')">✅ Approved</button>
+                                    <button class="sp-filter-btn" data-bpfilter="Rejected" onclick="filterBusinessPlans('Rejected')">❌ Rejected</button>
                                 </div>
-                                <div class="form-group">
-                                    <label>Project Type</label>
-                                    <select id="bpProjectType">
-                                        <option value="Construction">Construction</option>
-                                        <option value="Manufacturing">Manufacturing</option>
-                                        <option value="Real Estate">Real Estate</option>
-                                        <option value="Service">Service</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Estimated Budget (TSh)</label>
-                                    <input type="number" id="bpBudget" placeholder="0">
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Business Plan Details</label>
-                                    <textarea id="bpDetails" placeholder="Describe the business plan..."></textarea>
+                                <div class="sp-search">
+                                    <input type="text" id="bpSearchInput" placeholder="🔍 Search plans, projects, or owners..." oninput="renderBusinessPlans()">
                                 </div>
                             </div>
-                            <div class="action-row">
-                                <button class="btn-action green" onclick="submitBusinessPlan()">📤 Submit Plan</button>
-                                <button class="btn-action primary" onclick="clearBusinessPlanForm()">🗑️ Clear</button>
+                            <div id="businessPlansContainer">
+                                <div class="modern-empty-state">
+                                    <div class="mes-icon">⏳</div>
+                                    <div class="mes-title">Loading business plans...</div>
+                                </div>
                             </div>
-                            <div id="bpStatusMsg" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <div id="bpListContainer" class="list-container"></div>
+                        </div>
+
+                        <div class="sp-view" id="bpView-roadmap">
+                            <div class="sp-info-banner">
+                                <div class="sp-info-icon">🗺️</div>
+                                <div>
+                                    <div class="sp-info-title">Project Roadmap</div>
+                                    <div class="sp-info-text">A visual timeline of MAK DC Investment Company's projects — planned and approved.</div>
+                                </div>
+                            </div>
+                            <div id="bpRoadmapContainer"></div>
+                        </div>
+
+                        <div class="sp-view" id="bpView-analytics">
+                            <div class="sp-info-banner">
+                                <div class="sp-info-icon">📊</div>
+                                <div>
+                                    <div class="sp-info-title">Business Plan Analytics</div>
+                                    <div class="sp-info-text">Live snapshot of submissions, approvals, and project pipeline health.</div>
+                                </div>
+                            </div>
+                            <div id="bpAnalyticsContainer"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB 5: CHALLENGES -->
-                <div class="tab-content" id="tab5">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--red);"></span>
-                                <h3>🔍 Challenges &amp; Solutions</h3>
-                            </div>
-                            <span class="badge">Identify &amp; Resolve</span>
-                        </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Department <span class="required">*</span></label>
-                                    <select id="challengeDept">
-                                        <option value="Sales">Sales</option>
-                                        <option value="Procurement">Procurement</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="Legal">Legal</option>
-                                        <option value="Production">Production</option>
-                                        <option value="Administration">Administration</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Severity</label>
-                                    <select id="challengeSeverity">
-                                        <option value="Low">Low</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="High">High</option>
-                                        <option value="Critical">Critical</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select id="challengeStatusSelect">
-                                        <option value="Identified">Identified</option>
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="Resolved">Resolved</option>
-                                    </select>
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Challenge Description <span class="required">*</span></label>
-                                    <textarea id="challengeDesc" placeholder="Describe the challenge..."></textarea>
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Proposed Solution</label>
-                                    <textarea id="challengeSolution" placeholder="Describe the solution..."></textarea>
-                                </div>
-                            </div>
-                            <div class="action-row">
-                                <button class="btn-action red" onclick="submitChallenge()">📤 Report Challenge</button>
-                                <button class="btn-action primary" onclick="clearChallengeForm()">🗑️ Clear</button>
-                            </div>
-                            <div id="challengeStatusMsg" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <div id="challengeListContainer" class="list-container"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 6: STAFF WELFARE -->
-                <div class="tab-content" id="tab6">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--teal);"></span>
-                                <h3>👥 Staff Welfare &amp; Efficiency</h3>
-                            </div>
-                            <span class="badge">Benefits</span>
-                        </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Staff Name <span class="required">*</span></label>
-                                    <input type="text" id="welfareStaff" placeholder="Enter staff name">
-                                </div>
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <select id="welfareDept">
-                                        <option value="Sales">Sales</option>
-                                        <option value="Procurement">Procurement</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="Legal">Legal</option>
-                                        <option value="Production">Production</option>
-                                        <option value="Administration">Administration</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Entitlement Type</label>
-                                    <select id="welfareType">
-                                        <option value="Leave">Leave</option>
-                                        <option value="Bonus">Bonus</option>
-                                        <option value="Training">Training</option>
-                                        <option value="Promotion">Promotion</option>
-                                        <option value="Health Insurance">Health Insurance</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select id="welfareStatusSelect">
-                                        <option value="Pending">Pending</option>
-                                        <option value="Approved">Approved</option>
-                                        <option value="Completed">Completed</option>
-                                    </select>
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Details</label>
-                                    <textarea id="welfareDetails" placeholder="Details about the entitlement..."></textarea>
-                                </div>
-                            </div>
-                            <div class="action-row">
-                                <button class="btn-action teal" onclick="submitWelfare()">📤 Submit</button>
-                                <button class="btn-action primary" onclick="clearWelfareForm()">🗑️ Clear</button>
-                            </div>
-                            <div id="welfareStatusMsg" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <div id="welfareListContainer" class="list-container"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 7: PRICE CONTROL -->
-                <div class="tab-content" id="tab7">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--orange);"></span>
-                                <h3>💵 Price Control</h3>
-                            </div>
-                            <span class="badge">Monitor Fluctuations</span>
-                        </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Product <span class="required">*</span></label>
-                                    <select id="priceProduct">
-                                        <option value="Concrete Blocks - 6 inch">Concrete Blocks (6 inch)</option>
-                                        <option value="Concrete Blocks - 8 inch">Concrete Blocks (8 inch)</option>
-                                        <option value="Cement - 50kg">Cement (50kg)</option>
-                                        <option value="Sand - 1 ton">Sand (1 ton)</option>
-                                        <option value="Aggregates - 1 ton">Aggregates (1 ton)</option>
-                                        <option value="Roofing Sheets - Gauge 30">Roofing Sheets (G30)</option>
-                                        <option value="Paint - 5 litres">Paint (5L)</option>
-                                        <option value="Steel Bars - 8mm">Steel Bars (8mm)</option>
-                                        <option value="Nails - 2 inch">Nails (2 inch)</option>
-                                        <option value="Timber - 2x4">Timber (2x4)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Current Price (TSh) <span class="required">*</span></label>
-                                    <input type="number" id="priceCurrent" placeholder="0">
-                                </div>
-                                <div class="form-group">
-                                    <label>Previous Price (TSh)</label>
-                                    <input type="number" id="pricePrevious" placeholder="0">
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Notes / Reason</label>
-                                    <textarea id="priceNotes" placeholder="Reason for price change..."></textarea>
-                                </div>
-                            </div>
-                            <div class="action-row">
-                                <button class="btn-action gold" onclick="submitPriceControl()">📤 Update Price</button>
-                                <button class="btn-action primary" onclick="clearPriceForm()">🗑️ Clear</button>
-                            </div>
-                            <div id="priceStatusMsg" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <div id="priceListContainer" class="list-container"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 8: REPORTS -->
+                <!-- TAB 8: REPORTS (MANAGER) -->
                 <div class="tab-content" id="tab8">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--blue);"></span>
-                                <h3>📈 Department Reports</h3>
+                    
+                    <!-- HEADER -->
+                    <div class="report-header-hero">
+                        <div class="report-hero-content">
+                            <div>
+                                <div class="report-hero-title">📊 Manager Performance Report</div>
+                                <div class="report-hero-sub">Comprehensive analysis of approvals, operations, and team performance.</div>
                             </div>
-                            <span class="badge">Weekly, Monthly, Quarterly, Annual</span>
+                            <div class="report-hero-badge" id="mgrReportDateBadge">📅 Loading...</div>
                         </div>
-                        <div class="section-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Report Period <span class="required">*</span></label>
-                                    <select id="reportPeriod">
-                                        <option value="Weekly">Weekly</option>
-                                        <option value="Monthly">Monthly</option>
-                                        <option value="Quarterly">Quarterly</option>
-                                        <option value="Annual">Annual</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <select id="reportDept">
-                                        <option value="All">All Departments</option>
-                                        <option value="Sales">Sales</option>
-                                        <option value="Procurement">Procurement</option>
-                                        <option value="Finance">Finance</option>
-                                        <option value="Legal">Legal</option>
-                                        <option value="Production">Production</option>
-                                        <option value="Administration">Administration</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Year</label>
-                                    <input type="number" id="reportYear" placeholder="2026" value="2026">
-                                </div>
-                                <div class="form-group full-width">
-                                    <label>Report Content <span class="required">*</span></label>
-                                    <textarea id="reportText" placeholder="Write your report here..."></textarea>
-                                </div>
+                    </div>
+
+                    <!-- ACTION BAR -->
+                    <div style="background:white; padding:16px 22px; border-radius:16px; border:1px solid var(--gray-200); margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+                            <div>
+                                <label style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">Report Period</label>
+                                <select id="mgrPeriodType" onchange="toggleMgrCustomDateRange()" style="padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; background:#f8fafc; font-weight:600; cursor:pointer; min-width:180px;">
+                                    <option value="monthly">📅 This Month</option>
+                                    <option value="last-month">📅 Last Month</option>
+                                    <option value="yearly">📆 This Year</option>
+                                    <option value="weekly">🗓️ This Week</option>
+                                    <option value="custom">🎯 Custom Range</option>
+                                </select>
                             </div>
-                            <div class="action-row">
-                                <button class="btn-action blue" onclick="submitManagerReport()">📤 Submit Report</button>
-                                <button class="btn-action primary" onclick="clearReportForm()">🗑️ Clear</button>
+                            <div id="mgrCustomDateRange" style="display:none; gap:8px; align-items:flex-end;">
+                                <div><label style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">From</label><input type="date" id="mgrDateFrom" style="padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit;"></div>
+                                <div><label style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">To</label><input type="date" id="mgrDateTo" style="padding:10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit;"></div>
                             </div>
-                            <div id="reportStatusMsg" class="status-msg"></div>
-                            <hr style="margin:16px 0;border-color:var(--gray-200);">
-                            <div id="reportListContainer" class="list-container"></div>
+                            <button onclick="loadManagerReport()" style="padding:10px 24px; background:var(--gold); color:var(--primary-dark); border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(245,158,11,0.3);">🔍 Generate Report</button>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="openNarrativeModal()" style="padding:10px 20px; background:linear-gradient(135deg,#0f1f3d,#1a3a6b); color:white; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px;">📝 Add Narrative</button>
+                            <button onclick="printManagerReport()" style="padding:10px 20px; background:linear-gradient(135deg, #dc2626, #991b1b); color:white; border:none; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px;">🖨️ Print PDF</button>
+                        </div>
+                    </div>
+
+                    <!-- NARRATIVE BOX -->
+                    <div class="narrative-box" id="mgrNarrativeBox">
+                        <div class="narrative-title">📝 Executive Analysis (Manager's Narrative)</div>
+                        <p class="narrative-text" id="mgrNarrativeText">Bonyeza <strong>"Generate Report"</strong> kuona takwimu za kipindi hiki. Kisha bonyeza <strong>"Add Narrative"</strong> kuongeza maandishi yako mwenyewe.</p>
+                    </div>
+
+                    <!-- KPI GRID -->
+                    <div class="report-kpi-grid" id="mgrReportKPIGrid"></div>
+
+                    <!-- CHARTS -->
+                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px; margin-bottom:20px;">
+                        <div class="report-section-card">
+                            <div class="report-section-header"><h3>📈 Requests Trend</h3><div style="font-size:11px; opacity:0.8;" id="mgrTrendLabel">Last 7 Days</div></div>
+                            <div style="padding:16px; height:300px;"><canvas id="mgrTrendChart"></canvas></div>
+                        </div>
+                        <div class="report-section-card">
+                            <div class="report-section-header"><h3>📊 Status Breakdown</h3></div>
+                            <div style="padding:16px; height:300px;"><canvas id="mgrStatusChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- SUMMARY TABLE -->
+                    <div class="report-section-card">
+                        <div class="report-section-header"><h3>📋 Detailed Summary Table</h3></div>
+                        <div class="report-section-body" style="padding:0; overflow-x:auto;">
+                            <table class="data-table" style="width:100%; margin:0;">
+                                <thead><tr><th>Category</th><th>Total Count</th><th>Total Value (TSh)</th><th>Notes</th></tr></thead>
+                                <tbody id="mgrReportSummaryTable"><tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray-400);">⏳ Generate report to view details...</td></tr></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-
                 <!-- TAB: COMPANY PAYMENTS -->
                 <div class="tab-content" id="tab-company-payments">
-                    <div class="section-card">
-                        <div class="section-header" style="background:linear-gradient(135deg,#0f1f3d 0%,#1a3a6b 100%);">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--gold);"></span>
-                                <h3 style="color:white;">💸 Company Payments Approval</h3>
+                    <div class="section-card" style="border:none;background:transparent;box-shadow:none;">
+                        <div class="modern-tab-header">
+                            <div class="mth-left">
+                                <div class="mth-icon">💸</div>
+                                <div>
+                                    <h3>Company Payments Approval</h3>
+                                    <div class="mth-subtitle">Verify payments from Finance & forward to CEO</div>
+                                </div>
                             </div>
-                            <span class="badge" id="mgrPaymentsCountBadge" style="background:rgba(255,255,255,0.2);color:white;">0 Pending</span>
+                            <div class="mth-badge" id="mgrPaymentsCountBadge">⏳ 0 Pending</div>
                         </div>
-                        <div class="section-body">
-                            <div class="info-banner primary">
-                                <span class="info-banner-icon">ℹ️</span>
-                                <div class="info-banner-text">
-                                    <div class="info-banner-title">Verify &amp; Send to CEO</div>
-                                    Payments sent by <strong>Finance</strong> need your verification. After you verify, they'll go to <strong>CEO</strong> for final approval.
+                        <div style="background:white;border-radius:0 0 16px 16px;padding:24px 28px;border:1.5px solid #e5e7eb;border-top:none;">
+
+                            <div class="modern-info-banner">
+                                <div class="mib-icon">ℹ️</div>
+                                <div>
+                                    <div class="mib-title">Verify & Send to CEO</div>
+                                    <div class="mib-text">Payments sent by Finance need your verification. After you verify, they'll go to CEO for final approval.</div>
                                 </div>
                             </div>
 
-                            <div class="stats-strip">
-                                <div class="strip-card gold">
-                                    <div class="strip-label">⏳ Pending</div>
-                                    <div class="strip-value" id="mgrStatPending">TSh 0</div>
+                            <div class="modern-stats-row">
+                                <div class="modern-stat-card gold">
+                                    <div class="msc-icon">⏳</div>
+                                    <div class="msc-label">Pending</div>
+                                    <div class="msc-value" id="mgrStatPending">TSh 0</div>
                                 </div>
-                                <div class="strip-card indigo">
-                                    <div class="strip-label">📤 Sent to CEO</div>
-                                    <div class="strip-value" id="mgrStatSentToCeo">TSh 0</div>
+                                <div class="modern-stat-card">
+                                    <div class="msc-icon">📤</div>
+                                    <div class="msc-label">Sent to CEO</div>
+                                    <div class="msc-value" id="mgrStatSentToCeo">TSh 0</div>
                                 </div>
-                                <div class="strip-card red">
-                                    <div class="strip-label">❌ Rejected</div>
-                                    <div class="strip-value" id="mgrStatRejected">0 payments</div>
+                                <div class="modern-stat-card red">
+                                    <div class="msc-icon">❌</div>
+                                    <div class="msc-label">Rejected</div>
+                                    <div class="msc-value" id="mgrStatRejected">0</div>
                                 </div>
-                                <div class="strip-card navy">
-                                    <div class="strip-label">📊 Total</div>
-                                    <div class="strip-value" id="mgrStatTotal">0 total</div>
+                                <div class="modern-stat-card green">
+                                    <div class="msc-icon">📊</div>
+                                    <div class="msc-label">Total</div>
+                                    <div class="msc-value" id="mgrStatTotal">0</div>
                                 </div>
                             </div>
 
-                            <div class="filter-pills">
-                                <button class="mgr-cp-filter-btn filter-pill active" data-filter="pending-manager" onclick="filterManagerPayments('pending-manager')">🟡 Pending</button>
-                                <button class="mgr-cp-filter-btn filter-pill" data-filter="pending-ceo" onclick="filterManagerPayments('pending-ceo')">📤 Sent to CEO</button>
-                                <button class="mgr-cp-filter-btn filter-pill" data-filter="rejected" onclick="filterManagerPayments('rejected')">❌ Rejected</button>
-                                <button class="mgr-cp-filter-btn filter-pill" data-filter="all" onclick="filterManagerPayments('all')">📋 All</button>
+                            <div class="modern-filter-row">
+                                <button class="mgr-cp-filter-btn modern-filter-pill active" data-filter="pending-manager" onclick="filterManagerPayments('pending-manager')">🟡 Pending</button>
+                                <button class="mgr-cp-filter-btn modern-filter-pill" data-filter="pending-ceo" onclick="filterManagerPayments('pending-ceo')">📤 Sent to CEO</button>
+                                <button class="mgr-cp-filter-btn modern-filter-pill" data-filter="rejected" onclick="filterManagerPayments('rejected')">❌ Rejected</button>
+                                <button class="mgr-cp-filter-btn modern-filter-pill" data-filter="all" onclick="filterManagerPayments('all')">📋 All</button>
                             </div>
 
                             <div id="managerCompanyPaymentsContainer"></div>
                         </div>
                     </div>
                 </div>
-
                 <!-- TAB: PAYROLL VERIFICATION -->
                 <div class="tab-content" id="tab-payroll">
-                    <div class="section-card">
-                        <div class="section-header" style="background:linear-gradient(135deg,#0f1f3d 0%,#1a3a6b 100%);">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--gold);"></span>
-                                <h3 style="color:white;">💸 Payroll Verification</h3>
+                    <div class="section-card" style="border:none;background:transparent;box-shadow:none;">
+                        <div class="modern-tab-header">
+                            <div class="mth-left">
+                                <div class="mth-icon">💵</div>
+                                <div>
+                                    <h3>Payroll Verification</h3>
+                                    <div class="mth-subtitle">Verify payroll from Finance & forward to CEO</div>
+                                </div>
                             </div>
-                            <span class="badge" id="mgrPayrollCountBadge" style="background:rgba(255,255,255,0.2);color:white;">0 Pending</span>
+                            <div class="mth-badge" id="mgrPayrollCountBadge">⏳ 0 Pending</div>
                         </div>
-                        <div class="section-body">
-                            <div class="info-banner warning">
-                                <span class="info-banner-icon">ℹ️</span>
-                                <div class="info-banner-text">
-                                    <div class="info-banner-title">Payroll Verification</div>
-                                    Payrolls sent by <strong>Finance</strong> need your verification. After verifying, they'll go to <strong>CEO</strong> for final approval.
+                        <div style="background:white;border-radius:0 0 16px 16px;padding:24px 28px;border:1.5px solid #e5e7eb;border-top:none;">
+
+                            <div class="modern-info-banner">
+                                <div class="mib-icon">ℹ️</div>
+                                <div>
+                                    <div class="mib-title">Payroll Verification</div>
+                                    <div class="mib-text">Payrolls sent by Finance need your verification. After verifying, they'll go to CEO for final approval.</div>
                                 </div>
                             </div>
 
                             <div id="managerPayrollsContainer">
-                                <div style="text-align:center;padding:50px;color:var(--gray-400);">⏳ Loading payrolls...</div>
+                                <div class="modern-empty-state">
+                                    <div class="mes-icon">⏳</div>
+                                    <div class="mes-title">Loading payrolls...</div>
+                                    <div class="mes-desc">Please wait</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB 9: STAFF MANAGEMENT -->
+                <!-- TAB: STAFF MANAGEMENT -->
                 <div class="tab-content" id="tab9">
-                    <div class="section-card">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--primary);"></span>
-                                <h3>👥 Staff Management</h3>
+                    <div class="section-card" style="border:none;background:transparent;box-shadow:none;">
+                        <div class="modern-tab-header">
+                            <div class="mth-left">
+                                <div class="mth-icon">👥</div>
+                                <div>
+                                    <h3>Staff Management</h3>
+                                    <div class="mth-subtitle">Register & manage employees across departments</div>
+                                </div>
                             </div>
-                            <span class="badge">Register & Manage Employees</span>
+                            <button class="mrc-btn gold" onclick="openAddEmployeeModal()" style="position:relative;z-index:1;">➕ Add Employee</button>
                         </div>
-                        <div class="section-body">
-                            <div class="staff-stats-grid">
-                                <div class="staff-stat">
-                                    <span class="ss-icon">👥</span>
-                                    <div class="ss-value" id="staffTotalCount">0</div>
-                                    <div class="ss-label">Total Employees</div>
+                        <div style="background:white;border-radius:0 0 16px 16px;padding:24px 28px;border:1.5px solid #e5e7eb;border-top:none;">
+
+                            <div class="modern-stats-row">
+                                <div class="modern-stat-card">
+                                    <div class="msc-icon">👥</div>
+                                    <div class="msc-label">Total Employees</div>
+                                    <div class="msc-value" id="staffTotalCount">0</div>
                                 </div>
-                                <div class="staff-stat green">
-                                    <span class="ss-icon">✅</span>
-                                    <div class="ss-value" id="staffActiveCount">0</div>
-                                    <div class="ss-label">Active</div>
+                                <div class="modern-stat-card green">
+                                    <div class="msc-icon">✅</div>
+                                    <div class="msc-label">Active</div>
+                                    <div class="msc-value" id="staffActiveCount">0</div>
                                 </div>
-                                <div class="staff-stat red">
-                                    <span class="ss-icon">❌</span>
-                                    <div class="ss-value" id="staffInactiveCount">0</div>
-                                    <div class="ss-label">Inactive</div>
+                                <div class="modern-stat-card red">
+                                    <div class="msc-icon">❌</div>
+                                    <div class="msc-label">Inactive</div>
+                                    <div class="msc-value" id="staffInactiveCount">0</div>
                                 </div>
-                                <div class="staff-stat gold">
-                                    <span class="ss-icon">💰</span>
-                                    <div class="ss-value" id="staffMonthlyPayroll">TSh 0</div>
-                                    <div class="ss-label">Monthly Payroll</div>
+                                <div class="modern-stat-card gold">
+                                    <div class="msc-icon">💰</div>
+                                    <div class="msc-label">Monthly Payroll</div>
+                                    <div class="msc-value" id="staffMonthlyPayroll" style="font-size:16px;">TSh 0</div>
                                 </div>
                             </div>
 
-                            <div class="info-banner primary">
-                                <span class="info-banner-icon">🔗</span>
-                                <div class="info-banner-text">
-                                    <div class="info-banner-title">Muunganiko wa Departments</div>
-                                    Wafanyakazi unaowaunda hapa <strong>wanaonekana moja kwa moja</strong> kwa <strong>CEO</strong> (read-only) na <strong>Finance</strong> (kwa payroll).
+                            <div class="modern-info-banner">
+                                <div class="mib-icon">🔗</div>
+                                <div>
+                                    <div class="mib-title">Muunganiko wa Departments</div>
+                                    <div class="mib-text">Wafanyakazi unaowaunda hapa wanaonekana moja kwa moja kwa CEO (read-only) na Finance (kwa payroll).</div>
                                 </div>
                             </div>
 
-                            <div class="staff-filters">
-                                <input type="text" id="staffSearch" placeholder="🔍 Search employee by name, ID, or position..." oninput="renderStaffList()">
-                                <select id="staffDeptFilter" onchange="renderStaffList()">
+                            <div class="staff-filters" style="margin-bottom:18px;">
+                                <input type="text" id="staffSearch" placeholder="🔍 Search by name, ID, or position..." oninput="renderStaffList()" style="flex:1;min-width:200px;padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;">
+                                <select id="staffDeptFilter" onchange="renderStaffList()" style="padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;font-family:inherit;background:white;">
                                     <option value="">All Departments</option>
                                     <option value="Management">Management</option>
                                     <option value="Finance">Finance</option>
@@ -1270,61 +2700,75 @@
                                     <option value="Construction">Construction</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <button class="btn-action green" onclick="loadSampleEmployeesForManager()">📥 Load Sample</button>
-                                <button class="btn-action primary" onclick="openAddEmployeeModal()">➕ Add Employee</button>
+                                <button class="mrc-btn primary" onclick="loadSampleEmployeesForManager()">📥 Load Sample</button>
                             </div>
 
                             <div id="staffListContainer"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- TAB 10: COMPANY ACCOUNTS -->
+                <!-- TAB: COMPANY ACCOUNTS -->
                 <div class="tab-content" id="tab-accounts">
-                    <div class="section-card">
-                        <div class="section-header" style="background:linear-gradient(135deg,#14b8a6 0%,#0f766e 100%);">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:#14b8a6;"></span>
-                                <h3 style="color:white;">🏦 Company Accounts Approval</h3>
-                            </div>
-                            <span class="badge" style="background:rgba(255,255,255,0.2);color:white;">CEO + Manager Approval</span>
-                        </div>
-                        <div class="section-body">
-                            <div class="info-banner teal">
-                                <span class="info-banner-icon">ℹ️</span>
-                                <div class="info-banner-text">
-                                    <div class="info-banner-title">Account Approval</div>
-                                    Financial accounts require approval from both the CEO and the manager.
+                    <div class="section-card" style="border:none;background:transparent;box-shadow:none;">
+                        <div class="modern-tab-header">
+                            <div class="mth-left">
+                                <div class="mth-icon">🏦</div>
+                                <div>
+                                    <h3>Company Accounts Approval</h3>
+                                    <div class="mth-subtitle">Verify accounts from Finance — requires CEO + Manager approval</div>
                                 </div>
                             </div>
+                            <div class="mth-badge" id="managerSidebarAccountsBadge">0 Pending</div>
+                        </div>
+                        <div style="background:white;border-radius:0 0 16px 16px;padding:24px 28px;border:1.5px solid #e5e7eb;border-top:none;">
+
+                            <div class="modern-info-banner">
+                                <div class="mib-icon">ℹ️</div>
+                                <div>
+                                    <div class="mib-title">Account Approval</div>
+                                    <div class="mib-text">Financial accounts require approval from both the CEO and the manager.</div>
+                                </div>
+                            </div>
+
                             <div id="managerAccountsContainer">
-                                <div style="text-align:center;padding:50px;color:var(--gray-400);">⏳ Loading accounts...</div>
+                                <div class="modern-empty-state">
+                                    <div class="mes-icon">⏳</div>
+                                    <div class="mes-title">Loading accounts...</div>
+                                    <div class="mes-desc">Please wait</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- TAB: FUND TRANSFER -->
                 <div class="tab-content" id="tab-fund-transfer">
-                    <div class="section-card">
-                        <div class="section-header" style="background:linear-gradient(135deg,#0f1f3d 0%,#1a3a6b 100%);">
-                            <div class="header-left">
-                                <span class="color-bar" style="background:var(--gold);"></span>
-                                <h3 style="color:white;">💸 Fund Transfer Verification</h3>
+                    <div class="section-card" style="border:none;background:transparent;box-shadow:none;">
+                        <div class="modern-tab-header">
+                            <div class="mth-left">
+                                <div class="mth-icon">💸</div>
+                                <div>
+                                    <h3>Fund Transfer Verification</h3>
+                                    <div class="mth-subtitle">Verify transfers from Finance & forward to CEO</div>
+                                </div>
                             </div>
-                            <span class="badge" id="mgrFundTransferCountBadge" style="background:rgba(255,255,255,0.2);color:white;">0 Pending</span>
+                            <div class="mth-badge" id="mgrFundTransferCountBadge">⏳ 0 Pending</div>
                         </div>
-                        <div class="section-body">
-                            <div class="info-banner warning">
-                                <span class="info-banner-icon">ℹ️</span>
-                                <div class="info-banner-text">
-                                    <div class="info-banner-title">Transfer Verification</div>
-                                    Transfers sent by <strong>Finance</strong> need your verification. After verifying, they'll go to <strong>CEO</strong> for final approval.
+                        <div style="background:white;border-radius:0 0 16px 16px;padding:24px 28px;border:1.5px solid #e5e7eb;border-top:none;">
+
+                            <div class="modern-info-banner">
+                                <div class="mib-icon">ℹ️</div>
+                                <div>
+                                    <div class="mib-title">Transfer Verification</div>
+                                    <div class="mib-text">Transfers sent by Finance need your verification. After verifying, they'll go to CEO for final approval.</div>
                                 </div>
                             </div>
 
                             <div id="managerFundTransfersContainer">
-                                <div style="text-align:center;padding:50px;color:var(--gray-400);">⏳ Loading transfers...</div>
+                                <div class="modern-empty-state">
+                                    <div class="mes-icon">⏳</div>
+                                    <div class="mes-title">Loading transfers...</div>
+                                    <div class="mes-desc">Please wait</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1371,98 +2815,134 @@
             <small style="color:rgba(255,255,255,0.15);font-size:10px;">© 2026 All rights reserved.</small>
         </footer>
     </div>
-
     <!-- ===== ADD/EDIT EMPLOYEE MODAL ===== -->
     <div class="modal-overlay" id="addEmployeeModal">
-        <div class="modal-box" style="max-width:720px;">
-            <div class="modal-header">
-                <h3 id="employeeModalTitle">➕ Add New Employee</h3>
-                <button class="modal-close" onclick="closeModal('addEmployeeModal')" aria-label="Close modal">✕</button>
+        <div class="modal-box" style="max-width: 760px; padding: 0; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
+            
+            <!-- HEADER -->
+            <div style="background: linear-gradient(135deg, #0f1f3d 0%, #1a3a6b 100%); padding: 20px 28px; color: white; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%); border-radius: 50%;"></div>
+                <div style="display:flex; align-items:center; gap:16px; z-index: 1;">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(245,158,11,0.15); border: 1.5px solid rgba(245,158,11,0.3); display:flex; align-items:center; justify-content:center; font-size:24px;">👤</div>
+                    <div>
+                        <h3 id="employeeModalTitle" style="font-size: 20px; font-weight: 800; color: white; margin: 0 0 2px 0;">Add New Employee</h3>
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin: 0;">Register a new staff member</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal('addEmployeeModal')" style="color:white; background: rgba(255,255,255,0.15); border-radius: 50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; opacity:1; cursor:pointer; border:none; font-size:18px; z-index: 1;" onmouseover="this.style.background='rgba(239,68,68,0.8)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
             </div>
-            <div class="modal-body">
-                <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-                    <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
-                        <input type="text" id="empName" placeholder="Full name...">
+
+            <!-- BODY -->
+            <div style="padding: 28px; max-height: 75vh; overflow-y: auto; background: #f8fafc;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    
+                    <!-- Full Name -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Full Name <span style="color:#dc2626;">*</span></label>
+                        <input type="text" id="empName" placeholder="e.g. John Doe" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Employee ID <span class="required">*</span></label>
-                        <input type="text" id="empId" placeholder="e.g. EMP-001">
+
+                    <!-- Employee ID -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Employee ID <span style="color:#dc2626;">*</span></label>
+                        <input type="text" id="empId" placeholder="e.g. EMP-001" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Position <span class="required">*</span></label>
-                        <input type="text" id="empPosition" placeholder="e.g. Site Worker">
+
+                    <!-- Position -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Position <span style="color:#dc2626;">*</span></label>
+                        <input type="text" id="empPosition" placeholder="e.g. Site Worker" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Department <span class="required">*</span></label>
-                        <select id="empDepartment">
-                            <option value="">-- Select --</option>
-                            <option value="Management">Management</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Sales">Sales</option>
-                            <option value="Operations">Operations</option>
-                            <option value="HR">HR</option>
-                            <option value="IT">IT</option>
-                            <option value="Construction">Construction</option>
-                            <option value="Production">Production</option>
-                            <option value="Other">Other</option>
+
+                    <!-- Department -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Department <span style="color:#dc2626;">*</span></label>
+                        <select id="empDepartment" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
+                            <option value="">-- Select Department --</option>
+                            <option value="Management">🏢 Management</option>
+                            <option value="Finance">💰 Finance</option>
+                            <option value="Sales">📈 Sales</option>
+                            <option value="Operations">⚙️ Operations</option>
+                            <option value="HR">👥 HR</option>
+                            <option value="IT">💻 IT</option>
+                            <option value="Construction">🏗️ Construction</option>
+                            <option value="Production">🏭 Production</option>
+                            <option value="Other">📦 Other</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Basic Salary (TSh) <span class="required">*</span></label>
-                        <input type="number" id="empSalary" placeholder="e.g. 500000">
+
+                    <!-- Basic Salary -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Basic Salary (TSh) <span style="color:#dc2626;">*</span></label>
+                        <input type="number" id="empSalary" placeholder="e.g. 500000" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Allowances (TSh)</label>
-                        <input type="number" id="empAllowances" placeholder="0" value="0">
+
+                    <!-- Allowances -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Allowances (TSh)</label>
+                        <input type="number" id="empAllowances" placeholder="0" value="0" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Payment Mode <span class="required">*</span></label>
-                        <select id="empPaymentMode">
+
+                    <!-- Payment Mode -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Payment Mode <span style="color:#dc2626;">*</span></label>
+                        <select id="empPaymentMode" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                             <option value="Bank Transfer">🏦 Bank Transfer</option>
                             <option value="Mobile Money">📱 Mobile Money</option>
                             <option value="Cash">💵 Cash</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Employment Type <span class="required">*</span></label>
-                        <select id="empType">
+
+                    <!-- Employment Type -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Employment Type <span style="color:#dc2626;">*</span></label>
+                        <select id="empType" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                             <option value="Full-time">Full-time</option>
                             <option value="Part-time">Part-time</option>
                             <option value="Contract">Contract</option>
                             <option value="Casual">Casual</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Bank Account / Phone</label>
-                        <input type="text" id="empBankAccount" placeholder="Account number or phone">
+
+                    <!-- Bank Account / Phone -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Bank Account / Phone</label>
+                        <input type="text" id="empBankAccount" placeholder="Account number or phone" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>TIN / NIDA Number</label>
-                        <input type="text" id="empTin" placeholder="Tax ID">
+
+                    <!-- TIN / NIDA -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">TIN / NIDA Number</label>
+                        <input type="text" id="empTin" placeholder="Tax ID" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Date Joined</label>
-                        <input type="date" id="empJoinDate">
+
+                    <!-- Date Joined -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Date Joined</label>
+                        <input type="date" id="empJoinDate" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
                     </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="empStatus">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="On Leave">On Leave</option>
+
+                    <!-- Status -->
+                    <div>
+                        <label style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Status</label>
+                        <select id="empStatus" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; background: white; color: #1e293b; transition: all 0.2s;">
+                            <option value="Active">✅ Active</option>
+                            <option value="Inactive">❌ Inactive</option>
+                            <option value="On Leave">🕒 On Leave</option>
                         </select>
                     </div>
                 </div>
-                <div id="addEmployeeStatus" class="status-msg"></div>
+
+                <div id="addEmployeeStatus" class="status-msg" style="margin-top: 16px;"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('addEmployeeModal')">Cancel</button>
-                <button class="btn-submit" onclick="submitAddEmployee()">💾 Save Employee</button>
+
+            <!-- FOOTER -->
+            <div style="padding: 18px 28px; background: white; border-top: 1.5px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeModal('addEmployeeModal')" style="padding: 11px 24px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">Cancel</button>
+                <button onclick="submitAddEmployee()" style="padding: 11px 28px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 13px; box-shadow: 0 4px 12px rgba(245,158,11,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">💾 Save Employee</button>
             </div>
         </div>
     </div>
-
     <!-- ===== VIEW EMPLOYEE MODAL ===== -->
     <div class="modal-overlay" id="viewEmployeeModal">
         <div class="modal-box" style="max-width:640px;">
@@ -1617,7 +3097,84 @@
             </div>
         </div>
     </div>
+    <div class="modal-overlay" id="createReportModal" style="z-index: 5000;">
+        <div class="modal-box" style="max-width:960px; padding:0; overflow:hidden; max-height:94vh; display:flex; flex-direction:column; border-radius:16px;">
+            
+            <!-- Kichwa cha Modal -->
+            <div style="background:linear-gradient(135deg,#0a1628,#0f1f3d,#1a3a6b); padding:22px 28px; color:white; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                <div>
+                    <h3 style="margin:0; font-size:18px; font-weight:900;">📝 Create Performance Report</h3>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-top:4px;">Generate data & add your narrative</div>
+                </div>
+                <button onclick="closeModal('createReportModal')" style="background:rgba(255,255,255,0.15); border:none; color:white; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
+            </div>
 
+            <!-- Mwili wa Modal -->
+            <div style="padding:24px 28px; overflow-y:auto; flex:1; background:#f8fafc;">
+                
+                <!-- HATUA YA 1: CHAGUA TAREHE -->
+                <div style="background:white; padding:20px; border-radius:12px; border:1.5px solid #e5e7eb; margin-bottom:20px; border-left:4px solid #f59e0b;">
+                    <h4 style="margin:0 0 14px 0; font-size:14px; color:#0f1f3d; text-transform:uppercase; letter-spacing:1px;">1. Select Report Period</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; align-items:end;">
+                        <div>
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">Period Type</label>
+                            <select id="reportPeriodType" style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px;">
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly" selected>Monthly</option>
+                                <option value="Quarterly">Quarterly</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">Start Date</label>
+                            <input type="date" id="reportStartDate" style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">End Date</label>
+                            <input type="date" id="reportEndDate" style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px;">
+                        </div>
+                    </div>
+                    <button onclick="generateReportMetrics()" style="margin-top:14px; padding:10px 22px; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px;">
+                        🔄 Generate Metrics
+                    </button>
+                </div>
+
+                <!-- HATUA YA 2: METRICS (Zinajitokeza baada ya kubonyeza Generate) -->
+                <div id="reportMetricsContainer" style="display:none; margin-bottom:20px;">
+                    <!-- Metrics zitawekwa hapa na JS -->
+                </div>
+
+                <!-- HATUA YA 3: NARRATIVE -->
+                <div id="reportNarrativeContainer" style="display:none; background:white; padding:20px; border-radius:12px; border:1.5px solid #e5e7eb;">
+                    <h4 style="margin:0 0 14px 0; font-size:14px; color:#0f1f3d; text-transform:uppercase; letter-spacing:1px;">3. Your Narrative (Manager's Voice)</h4>
+                    
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:11px; font-weight:800; color:#334155; text-transform:uppercase;">Key Activities (Not captured by system)</label>
+                        <textarea id="reportKeyActivities" rows="2" placeholder="E.g., Attended board meeting, conducted staff training..." style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px; resize:vertical;"></textarea>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:11px; font-weight:800; color:#334155; text-transform:uppercase;">Executive Summary</label>
+                        <textarea id="reportExecutiveSummary" rows="3" placeholder="Summarize the overall performance..." style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px; resize:vertical;"></textarea>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:11px; font-weight:800; color:#334155; text-transform:uppercase;">Challenges Faced</label>
+                        <textarea id="reportChallenges" rows="2" placeholder="What obstacles did you face?" style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px; resize:vertical;"></textarea>
+                    </div>
+                    <div>
+                        <label style="font-size:11px; font-weight:800; color:#334155; text-transform:uppercase;">Recommendations to CEO</label>
+                        <textarea id="reportRecommendations" rows="2" placeholder="What actions do you suggest?" style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; margin-top:4px; font-family:inherit; font-size:13px; resize:vertical;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vitufe vya Chini -->
+            <div style="padding:16px 28px; background:white; border-top:1.5px solid #e5e7eb; display:flex; justify-content:flex-end; gap:12px; flex-shrink:0;">
+                <button onclick="closeModal('createReportModal')" style="padding:11px 24px; background:#f1f5f9; color:#475569; border:1.5px solid #e2e8f0; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit;">Cancel</button>
+                <button onclick="saveManagerReport('Draft')" style="padding:11px 24px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit;">💾 Save as Draft</button>
+                <button onclick="saveManagerReport('Pending CEO')" style="padding:11px 24px; background:linear-gradient(135deg,#0f1f3d,#1a3a6b); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(15,31,61,0.3);">📤 Submit to CEO</button>
+            </div>
+        </div>
+    </div>
     <!-- ===== MODERN TOAST ===== -->
     <div class="modern-toast-container" id="modernToastContainer"></div>
 
@@ -1629,7 +3186,20 @@
     <script src="assets/js/core/auth-guard.js"></script>
     <script src="assets/js/core/api.js"></script>
     <script src="assets/js/ui/toast.js"></script>
+    <!-- PDF.js Library for in-browser PDF preview (Workerless Mode) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (window.pdfjsLib) {
+            // Disable worker to avoid CORS/worker issues in localhost
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+            console.log('✅ PDF.js loaded, worker disabled for compatibility');
+        } else {
+            console.warn('⚠️ PDF.js failed to load from CDN');
+        }
+    </script>
     <script src="assets/js/ui/dashboard-common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="assets/js/dashboards/manager.js"></script>
 
 </body>

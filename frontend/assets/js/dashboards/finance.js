@@ -1427,7 +1427,9 @@ function switchTab(tabId, event) {
             closeAllSidebarDropdowns();
         }
     }
-    if (tabId === 'tab-dashboard') {loadFinanceDashboard(); loadDashboardOverview();}
+
+    // 🆕 Rekebisha mnyororo wa if/else if
+    if (tabId === 'tab-dashboard') { loadFinanceDashboard(); loadDashboardOverview(); }
     else if (tabId === 'tab-all-orders') loadFinanceDashboard();
     else if (tabId === 'tab1') loadFinanceDashboard();
     else if (tabId === 'tab-awaiting') loadFinanceDashboard();
@@ -1437,14 +1439,15 @@ function switchTab(tabId, event) {
     else if (tabId === 'tab-accounts') loadCompanyAccounts();
     else if (tabId === 'tab-fund-transfer') loadFundTransfers();
     else if (tabId === 'tab-staff-payments') loadEmployees();
-    else if (tabId === 'tab-payroll') {resetPayrollForm();populatePayrollAccounts();}
-    else if (tabId === 'tab-reports') {setReportPreparedBy();loadFinanceReport();}
+    else if (tabId === 'tab-payroll') { resetPayrollForm(); populatePayrollAccounts(); }
+    else if (tabId === 'tab-reports') { setReportPreparedBy(); loadFinanceReport(); }
     else if (tabId === 'tab-payroll-history') loadPayrollHistory();
     else if (tabId === 'tab-resources') loadFinancialResources();
-    else if (tabId === 'my-requests') loadMyRequests();
-    // Ndani ya function yako ya switchTab
-    else if (tabId === 'my-requests') {switchProcTab('my-req'); // Hii ita-load My Requests by default
-}
+    else if (tabId === 'my-requests') { switchProcTab('my-req'); loadMyRequests(); } // Imerekebishwa
+    else if (tabId === 'tab-my-budget') loadMyBudget(); 
+    else if (tabId === 'tab-all-my-budgets') loadAllBudgetsPage();
+    else if (tabId === 'tab-my-kpis') loadFinanceKpis();
+
     if (window.innerWidth <= 768) closeSidebar();
 }
 let allCompanyPayments = [];
@@ -9607,3 +9610,2011 @@ function refreshEmployees() { loadEmployees(); cpToast('🔄 Refreshed!', 'Emplo
  
 function openResourceModal() { cpToast('Coming Soon', 'Financial Resources — Feature coming soon', 'info'); }
 function openReportsHub(tab) { cpToast('Coming Soon', 'Reports — Feature coming soon', 'info'); }
+// ================================================================
+// 🆕 MY BUDGET — Finance Department View
+// 🎨 RANGI: #0f766e (Teal) + #f59e0b (Gold)
+// ================================================================
+let currentDeptBudget = null;
+let bdActivityCounter = 0;
+
+const STANDARD_ACTIVITIES = [
+    "Safari / Field Work",
+    "Mafunzo (Training)",
+    "Ujenzi / Renovation",
+    "Ununuzi wa Vifaa",
+    "Matengenezo (Maintenance)",
+    "Uendeshaji (Operations)",
+    "Masoko (Marketing)",
+    "Ushauri (Consultancy)",
+    "Nyingine (Other)"
+];
+
+const STANDARD_ITEMS = [
+    "Perdiem (Posho ya Safari)",
+    "Mafuta (Fuel)",
+    "Extraduty Allowance",
+    "Kodi ya Gari (Car Hire)",
+    "Nauli (Transport)",
+    "Malazi (Accommodation)",
+    "Chakula (Meals)",
+    "Saruji (Cement)",
+    "Mbao (Timber)",
+    "Misumari (Nails)",
+    "Rangi (Paint)",
+    "Umeme (Electricity)",
+    "Maji (Water)",
+    "Karatasi (Stationery)",
+    "Wino (Ink)",
+    "Vifaa vya Ofisi",
+    "Nyingine (Other)"
+];
+
+async function loadMyBudget() {
+    const container = document.getElementById('myBudgetContent');
+    const badge = document.getElementById('myBudgetStatusBadge');
+    
+    if (!container) return;
+
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading budget...</div>`;
+
+    try {
+        const user = Auth.getUser();
+        const departmentName = user?.department || user?.departmentName;
+
+        if (!departmentName) {
+            container.innerHTML = `<div style="text-align:center;padding:40px;"><div style="font-size:40px;margin-bottom:10px;">⚠️</div><div style="font-weight:800;color:#64748b;">No Department Assigned</div></div>`;
+            return;
+        }
+
+        const budgets = await API.getMasterBudgets();
+        
+        const myBudgets = (budgets || []).filter(b => 
+            b.allocations && b.allocations.some(a => a.department === departmentName)
+        );
+
+        if (myBudgets.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:50px 20px;">
+                    <div style="font-size:56px;margin-bottom:14px;opacity:0.6;">💰</div>
+                    <div style="font-size:17px;font-weight:800;color:#334155;margin-bottom:6px;">No Budget Assigned Yet</div>
+                    <div style="font-size:13px;color:#64748b;">Your department (<strong>${esc(departmentName)}</strong>) has not been allocated a budget yet.</div>
+                </div>`;
+            if (badge) badge.textContent = '—';
+            return;
+        }
+
+        const latest = myBudgets.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+        const myAllocation = latest.allocations.find(a => a.department === departmentName);
+        
+        currentDeptBudget = { ...latest, myAllocation };
+
+        const allocStatus = myAllocation.status;
+        let badgeText = '';
+        let buttonHtml = '';
+
+        if (allocStatus === 'draft') {
+            badgeText = '📝 Draft Saved';
+            buttonHtml = `<button onclick="openBudgetBreakdownPage()" style="...">✏️ Continue Draft</button>`;
+        } 
+        else if (allocStatus === 'submitted' || allocStatus === 'approved') {
+            badgeText = '✅ Submitted';
+            buttonHtml = `
+                <button onclick="viewSubmittedBreakdown()" style="...">👁️ View Details</button>
+                <!-- HAPA NDIPO KITUFE CHA BUDGET BOOK KINAPASWA KUWA -->
+                <button onclick="openMyDeptBudgetBook()" style="padding:12px 24px; background:linear-gradient(135deg,#16a34a,#15803d); color:white; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px; margin-left:8px; box-shadow:0 4px 12px rgba(22,163,74,0.3);">📖 Open Budget Book</button>
+                <span style="display:inline-flex; align-items:center; padding:0 16px; background:#f1f5f9; color:#94a3b8; border-radius:10px; font-weight:800; font-size:12px; margin-left:8px;">🔒 Locked</span>
+            `;
+        }
+        else {
+            badgeText = '⏳ Action Required';
+            buttonHtml = `<button onclick="openBudgetBreakdownPage()" style="...">➕ Prepare Breakdown</button>`;
+        }
+
+        if (badge) badge.textContent = badgeText;
+
+        const isSubmitted = allocStatus === 'submitted' || allocStatus === 'approved';
+        
+        // 🎨 RANGI: #0f766e + #f59e0b
+        container.innerHTML = `
+            <div style="background:linear-gradient(135deg, #0f766e, #134e4a); padding:24px 28px; border-radius:14px; color:white; margin-bottom:20px; border-left: 5px solid #f59e0b;">
+                <div style="font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px;">Ceiling Allocated</div>
+                <div style="font-size:32px; font-weight:900; font-family:'Courier New',monospace; color:#fbbf24;">TSh ${Number(myAllocation.ceilingAmount).toLocaleString()}</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-top:8px;">${esc(latest.title)} • ${esc(latest.period)}</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                <div style="background:#f8fafc; border-radius:10px; padding:16px; border:1px solid #e2e8f0; border-left: 4px solid #0f766e;">
+                    <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Status</div>
+                    <div style="font-size:14px; font-weight:800; color:${isSubmitted ? '#16a34a' : allocStatus === 'draft' ? '#d97706' : '#64748b'};">
+                        ${isSubmitted ? '✅ Submitted' : allocStatus === 'draft' ? '📝 Draft Saved' : '⏳ Pending'}
+                    </div>
+                </div>
+                <div style="background:#f8fafc; border-radius:10px; padding:16px; border:1px solid #e2e8f0; border-left: 4px solid #f59e0b;">
+                    <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Activities</div>
+                    <div style="font-size:14px; font-weight:800; color:#1e293b;">${(myAllocation.items || []).length} items listed</div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                ${buttonHtml}
+            </div>
+        `;
+
+    } catch (err) {
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:#dc2626;">❌ ${esc(err.message)}</div>`;
+    }
+}
+
+function openBudgetBreakdownPage() {
+    if (!currentDeptBudget) {
+        showToast('⚠ No budget loaded', 'error');
+        return;
+    }
+
+    const { myAllocation, title, period } = currentDeptBudget;
+    
+    document.getElementById('bdTitle').textContent = title;
+    document.getElementById('bdMeta').textContent = `${period} • ${myAllocation.department}`;
+    document.getElementById('bdCeiling').textContent = 'TSh ' + Number(myAllocation.ceilingAmount).toLocaleString();
+
+    document.getElementById('myBudgetContent').parentElement.style.display = 'none';
+    document.getElementById('budgetBreakdownPage').style.display = 'block';
+
+    const container = document.getElementById('bdActivitiesList');
+    container.innerHTML = '';
+    bdActivityCounter = 0;
+
+    if (myAllocation.items && myAllocation.items.length > 0) {
+        const grouped = {};
+        myAllocation.items.forEach(item => {
+            const key = item.activityName || 'Unnamed Activity';
+            if (!grouped[key]) grouped[key] = [];
+            grouped[key].push(item);
+        });
+
+        Object.keys(grouped).forEach(activityName => {
+            addNewActivity(activityName, grouped[activityName]);
+        });
+    } else {
+        addNewActivity();
+    }
+
+    updateGrandTotal();
+}
+
+function closeBudgetBreakdownPage() {
+    document.getElementById('budgetBreakdownPage').style.display = 'none';
+    document.getElementById('myBudgetContent').parentElement.style.display = 'block';
+}
+
+function addNewActivity(activityName = '', items = []) {
+    const container = document.getElementById('bdActivitiesList');
+    const activityId = 'bd-activity-' + (bdActivityCounter++);
+
+    const activityOptions = STANDARD_ACTIVITIES.map(act => 
+        `<option value="${act}" ${act === activityName ? 'selected' : ''}>${act}</option>`
+    ).join('');
+
+    // 🎨 RANGI: #0f766e + #f59e0b
+    const activityHtml = `
+        <div id="${activityId}" style="background:white; border-radius:14px; border:1.5px solid #e2e8f0; margin-bottom:16px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); border-left: 4px solid #0f766e;">
+            <div style="background:#f8fafc; padding:16px 20px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div style="flex:1; min-width:250px;">
+                    <label style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Activity / Kipengele</label>
+                    <select class="bd-activity-name" style="width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; font-weight:700; font-family:inherit; background:white; outline:none;">
+                        ${activityOptions}
+                        <option value="__custom__" ${!STANDARD_ACTIVITIES.includes(activityName) ? 'selected' : ''}>Nyingine (Andika Mwenyewe)...</option>
+                    </select>
+                    <input type="text" class="bd-activity-custom" value="${!STANDARD_ACTIVITIES.includes(activityName) ? esc(activityName) : ''}" placeholder="Andika jina la Activity..." style="display:${!STANDARD_ACTIVITIES.includes(activityName) ? 'block' : 'none'}; width:100%; padding:10px 14px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:14px; font-weight:700; font-family:inherit; margin-top:8px; outline:none;">
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Activity Total</div>
+                    <div class="bd-activity-total" style="font-size:20px; font-weight:900; color:#0f766e; font-family:'Courier New',monospace;">TSh 0</div>
+                </div>
+                <button onclick="document.getElementById('${activityId}').remove(); updateGrandTotal();" style="padding:8px 14px; background:rgba(239,68,68,0.1); color:#dc2626; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:12px;">🗑️ Remove</button>
+            </div>
+
+            <div style="padding:16px 20px;">
+                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding:10px; text-align:left; font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; border-bottom:1px solid #e2e8f0;">Item</th>
+                            <th style="padding:10px; text-align:left; font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; border-bottom:1px solid #e2e8f0; width:80px;">Qty</th>
+                            <th style="padding:10px; text-align:left; font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; border-bottom:1px solid #e2e8f0; width:90px;">Unit</th>
+                            <th style="padding:10px; text-align:left; font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; border-bottom:1px solid #e2e8f0; width:130px;">Unit Price</th>
+                            <th style="padding:10px; text-align:right; font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; border-bottom:1px solid #e2e8f0; width:130px;">Subtotal</th>
+                            <th style="width:40px; border-bottom:1px solid #e2e8f0;"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bd-items-body"></tbody>
+                </table>
+                <button onclick="addItemToActivity('${activityId}')" style="margin-top:12px; padding:8px 16px; background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.3); border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:12px;">➕ Add Item</button>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', activityHtml);
+
+    const activitySelect = document.querySelector(`#${activityId} .bd-activity-name`);
+    const activityCustom = document.querySelector(`#${activityId} .bd-activity-custom`);
+    if (activitySelect && activityCustom) {
+        activitySelect.addEventListener('change', function() {
+            if (this.value === '__custom__') {
+                activityCustom.style.display = 'block';
+                activityCustom.focus();
+            } else {
+                activityCustom.style.display = 'none';
+                activityCustom.value = '';
+            }
+        });
+    }
+
+    const activityEl = document.getElementById(activityId);
+    const tbody = activityEl.querySelector('.bd-items-body');
+    
+    if (items.length > 0) {
+        items.forEach(item => {
+            addItemRowToTable(tbody, item.itemName, item.quantity, item.unit, item.unitPrice);
+        });
+    } else {
+        addItemRowToTable(tbody);
+    }
+
+    updateActivityTotal(activityId);
+}
+
+function addItemToActivity(activityId) {
+    const activityEl = document.getElementById(activityId);
+    if (!activityEl) return;
+    const tbody = activityEl.querySelector('.bd-items-body');
+    addItemRowToTable(tbody);
+    updateActivityTotal(activityId);
+}
+
+function addItemRowToTable(tbody, itemName = '', quantity = '', unit = 'pcs', unitPrice = '') {
+    const row = document.createElement('tr');
+    row.style.borderBottom = '1px solid #f1f5f9';
+
+    const itemOptions = STANDARD_ITEMS.map(item => 
+        `<option value="${item}" ${item === itemName ? 'selected' : ''}>${item}</option>`
+    ).join('');
+
+    row.innerHTML = `
+        <td style="padding:8px 6px;">
+            <select class="bd-item-name" style="width:100%; padding:8px 10px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:12px; font-family:inherit; background:white; outline:none;">
+                <option value="">-- Chagua Item --</option>
+                ${itemOptions}
+                <option value="__custom__" ${itemName && !STANDARD_ITEMS.includes(itemName) ? 'selected' : ''}>Nyingine (Andika)...</option>
+            </select>
+            <input type="text" class="bd-item-custom" value="${itemName && !STANDARD_ITEMS.includes(itemName) ? esc(itemName) : ''}" placeholder="Andika jina la item..." style="display:${itemName && !STANDARD_ITEMS.includes(itemName) ? 'block' : 'none'}; width:100%; padding:6px 10px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:12px; font-family:inherit; margin-top:6px; outline:none;">
+        </td>
+        <td style="padding:8px 6px;">
+            <input type="number" class="bd-item-qty" placeholder="0" value="${quantity}" oninput="this.closest('tr').closest('tbody').closest('div[id^=bd-activity]') && updateActivityTotal(this.closest('div[id^=bd-activity]').id)" style="width:100%; padding:8px 10px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:12px; font-family:inherit; background:white; outline:none;">
+        </td>
+        <td style="padding:8px 6px;">
+            <select class="bd-item-unit" style="width:100%; padding:8px 10px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:12px; font-family:inherit; background:white; outline:none;">
+                <option value="pcs" ${unit === 'pcs' ? 'selected' : ''}>pcs</option>
+                <option value="bags" ${unit === 'bags' ? 'selected' : ''}>bags</option>
+                <option value="tons" ${unit === 'tons' ? 'selected' : ''}>tons</option>
+                <option value="kg" ${unit === 'kg' ? 'selected' : ''}>kg</option>
+                <option value="litres" ${unit === 'litres' ? 'selected' : ''}>litres</option>
+                <option value="blocks" ${unit === 'blocks' ? 'selected' : ''}>blocks</option>
+                <option value="sheets" ${unit === 'sheets' ? 'selected' : ''}>sheets</option>
+                <option value="boxes" ${unit === 'boxes' ? 'selected' : ''}>boxes</option>
+                <option value="days" ${unit === 'days' ? 'selected' : ''}>days</option>
+                <option value="person" ${unit === 'persons' ? 'selected' : ''}>person</option>
+                <option value="hours" ${unit === 'hours' ? 'selected' : ''}>hours</option>
+                <option value="months" ${unit === 'months' ? 'selected' : ''}>months</option>
+            </select>
+        </td>
+        <td style="padding:8px 6px;">
+            <input type="number" class="bd-item-price" placeholder="0" value="${unitPrice}" oninput="this.closest('tr').closest('tbody').closest('div[id^=bd-activity]') && updateActivityTotal(this.closest('div[id^=bd-activity]').id)" style="width:100%; padding:8px 10px; border:1.5px solid #e2e8f0; border-radius:6px; font-size:12px; font-family:inherit; background:white; outline:none;">
+        </td>
+        <td style="padding:8px 6px; text-align:right;">
+            <span class="bd-item-subtotal" style="font-family:'Courier New',monospace; font-weight:800; color:#0f766e; font-size:12px;">TSh 0</span>
+        </td>
+        <td style="padding:8px 6px;">
+            <button onclick="this.closest('tr').remove(); this.closest('div[id^=bd-activity]') && updateActivityTotal(this.closest('div[id^=bd-activity]').id);" style="background:rgba(239,68,68,0.1); color:#dc2626; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; font-size:12px; font-weight:700;">✕</button>
+        </td>
+    `;
+    tbody.appendChild(row);
+
+    const itemSelect = row.querySelector('.bd-item-name');
+    const itemCustom = row.querySelector('.bd-item-custom');
+    if (itemSelect && itemCustom) {
+        itemSelect.addEventListener('change', function() {
+            if (this.value === '__custom__') {
+                itemCustom.style.display = 'block';
+                itemCustom.focus();
+            } else {
+                itemCustom.style.display = 'none';
+                itemCustom.value = '';
+            }
+        });
+    }
+}
+
+function updateActivityTotal(activityId) {
+    const activityEl = document.getElementById(activityId);
+    if (!activityEl) return;
+
+    let activityTotal = 0;
+    activityEl.querySelectorAll('.bd-items-body tr').forEach(row => {
+        const qty = parseFloat(row.querySelector('.bd-item-qty')?.value) || 0;
+        const price = parseFloat(row.querySelector('.bd-item-price')?.value) || 0;
+        const subtotal = qty * price;
+        
+        const subtotalEl = row.querySelector('.bd-item-subtotal');
+        if (subtotalEl) subtotalEl.textContent = 'TSh ' + subtotal.toLocaleString();
+        
+        activityTotal += subtotal;
+    });
+
+    const totalEl = activityEl.querySelector('.bd-activity-total');
+    if (totalEl) totalEl.textContent = 'TSh ' + activityTotal.toLocaleString();
+
+    updateGrandTotal();
+}
+
+function updateGrandTotal() {
+    let grandTotal = 0;
+    document.querySelectorAll('.bd-activity-total').forEach(el => {
+        const value = parseFloat(el.textContent.replace(/[^0-9.-]+/g, '')) || 0;
+        grandTotal += value;
+    });
+    
+    const el = document.getElementById('bdGrandTotal');
+    if (el) el.textContent = 'TSh ' + grandTotal.toLocaleString();
+}
+
+function viewSubmittedBreakdown() {
+    if (!currentDeptBudget) return;
+    
+    const { myAllocation, title, period } = currentDeptBudget;
+    const items = myAllocation.items || [];
+
+    if (items.length === 0) {
+        showToast('No items to view', 'info');
+        return;
+    }
+
+    const grouped = {};
+    items.forEach(item => {
+        const key = item.activityName || 'Unnamed Activity';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(item);
+    });
+
+    let activitiesHtml = '';
+    let grandTotal = 0;
+
+    Object.keys(grouped).forEach((activityName, idx) => {
+        const activityItems = grouped[activityName];
+        let activityTotal = 0;
+        
+        const itemsHtml = activityItems.map(item => {
+            const subtotal = Number(item.quantity) * Number(item.unitPrice);
+            activityTotal += subtotal;
+            return `
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #e2e8f0; font-size:13px;">
+                    <div>
+                        <span style="font-weight:600; color:#1e293b;">${esc(item.itemName)}</span>
+                        <span style="color:#64748b; font-size:12px; margin-left:6px;">(${item.quantity} ${item.unit} × TSh ${Number(item.unitPrice).toLocaleString()})</span>
+                    </div>
+                    <span style="font-weight:700; color:#0f766e; font-family:'Courier New',monospace;">TSh ${subtotal.toLocaleString()}</span>
+                </div>
+            `;
+        }).join('');
+
+        grandTotal += activityTotal;
+
+        activitiesHtml += `
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:12px; overflow:hidden;">
+                <div style="background:#f8fafc; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0;">
+                    <div style="font-weight:800; color:#0f766e; font-size:14px;">${idx + 1}. ${esc(activityName)}</div>
+                    <div style="font-weight:900; color:#0f766e; font-family:'Courier New',monospace; font-size:14px;">TSh ${activityTotal.toLocaleString()}</div>
+                </div>
+                <div style="padding:8px 16px;">
+                    ${itemsHtml}
+                </div>
+            </div>
+        `;
+    });
+
+    let modal = document.getElementById('viewBreakdownModal');
+    if (modal) modal.remove();
+
+    modal = document.createElement('div');
+    modal.id = 'viewBreakdownModal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.7); backdrop-filter:blur(6px); z-index:50000; display:flex; align-items:center; justify-content:center; padding:20px;';
+    
+    // 🎨 RANGI: #0f766e + #f59e0b
+    modal.innerHTML = `
+        <div style="background:white; border-radius:20px; max-width:700px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.4);">
+            <div style="background:linear-gradient(135deg,#0f766e,#134e4a); padding:20px 26px; color:white; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; border-bottom: 3px solid #f59e0b;">
+                <div>
+                    <h3 style="font-size:20px; font-weight:900; margin:0 0 4px 0;">🔒 Submitted Breakdown</h3>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.7);">${esc(title)} • ${esc(period)}</div>
+                </div>
+                <button onclick="document.getElementById('viewBreakdownModal').remove()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+
+            <div style="padding:24px 26px; overflow-y:auto; flex:1; background:#f8fafc;">
+                <div style="background:rgba(245,158,11,0.08); border-left:4px solid #f59e0b; border-radius:8px; padding:12px 16px; margin-bottom:20px; font-size:13px; color:#78350f;">
+                    👁️ This is a read-only view. Your breakdown has been submitted and cannot be edited.
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+                    <div style="background:white; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0; border-left: 3px solid #0f766e;">
+                        <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Your Ceiling</div>
+                        <div style="font-size:18px; font-weight:900; color:#0f766e; font-family:'Courier New',monospace;">TSh ${Number(myAllocation.ceilingAmount).toLocaleString()}</div>
+                    </div>
+                    <div style="background:white; padding:14px 18px; border-radius:10px; border:1px solid #e2e8f0; border-left: 3px solid #16a34a;">
+                        <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Submitted</div>
+                        <div style="font-size:18px; font-weight:900; color:#16a34a; font-family:'Courier New',monospace;">TSh ${grandTotal.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">📋 Activities (${Object.keys(grouped).length})</div>
+                ${activitiesHtml}
+            </div>
+
+            <div style="padding:16px 26px; background:white; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; flex-shrink:0;">
+                <button onclick="document.getElementById('viewBreakdownModal').remove()" style="padding:12px 28px; background:linear-gradient(135deg,#0f766e,#134e4a); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px; border: 1.5px solid #f59e0b;">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+async function submitBudgetBreakdown(isDraft = false) {
+    if (!currentDeptBudget) return;
+
+    const { myAllocation, id: budgetId } = currentDeptBudget;
+    const items = [];
+
+    document.querySelectorAll('#bdActivitiesList > div').forEach(activityEl => {
+        const activitySelect = activityEl.querySelector('.bd-activity-name');
+        const activityCustom = activityEl.querySelector('.bd-activity-custom');
+        let activityName = activitySelect.value === '__custom__' 
+            ? (activityCustom?.value.trim() || 'Unnamed Activity') 
+            : activitySelect.value;
+
+        activityEl.querySelectorAll('.bd-items-body tr').forEach(row => {
+            const itemSelect = row.querySelector('.bd-item-name');
+            const itemCustom = row.querySelector('.bd-item-custom');
+            let itemName = itemSelect.value === '__custom__' 
+                ? (itemCustom?.value.trim() || '') 
+                : itemSelect.value;
+
+            const quantity = parseFloat(row.querySelector('.bd-item-qty')?.value) || 0;
+            const unit = row.querySelector('.bd-item-unit')?.value || 'pcs';
+            const unitPrice = parseFloat(row.querySelector('.bd-item-price')?.value) || 0;
+
+            if (itemName && quantity > 0) {
+                items.push({ activityName, itemName, quantity, unit, unitPrice, totalCost: quantity * unitPrice });
+            }
+        });
+    });
+
+    if (items.length === 0) {
+        showToast('⚠ Add at least one item with quantity', 'error');
+        return;
+    }
+
+    const totalAllocated = items.reduce((sum, i) => sum + i.totalCost, 0);
+    const ceiling = Number(myAllocation.ceilingAmount);
+
+    if (!isDraft && totalAllocated > ceiling) {
+        showToast(`⚠ Over budget! Total (TSh ${totalAllocated.toLocaleString()}) exceeds ceiling (TSh ${ceiling.toLocaleString()})`, 'error');
+        return;
+    }
+
+    if (!isDraft) {
+        const confirmed = confirm(`Submit ${items.length} items totaling TSh ${totalAllocated.toLocaleString()} to your Manager?`);
+        if (!confirmed) return;
+    }
+
+    const btn = document.querySelector(isDraft 
+        ? 'button[onclick="submitBudgetBreakdown(true)"]' 
+        : 'button[onclick="openBudgetReviewModal()"]');
+    let originalHtml = '';
+    if (btn) {
+        originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Saving...';
+        btn.style.opacity = '0.7';
+    }
+
+    try {
+        await API.submitDepartmentBreakdown(budgetId, myAllocation.department, { 
+            items: items,
+            status: isDraft ? 'draft' : 'submitted'
+        });
+        
+        showBudgetSuccessDialog(
+            isDraft ? '💾 Draft Saved!' : '✅ Breakdown Submitted!', 
+            isDraft 
+                ? 'Your work has been saved as a draft. You can continue later.' 
+                : 'Your breakdown has been successfully sent to the Manager for review.'
+        );
+
+        closeBudgetBreakdownPage();
+        loadMyBudget();
+
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            btn.style.opacity = '1';
+        }
+    }
+}
+
+function openBudgetReviewModal() {
+    if (!currentDeptBudget) return;
+
+    const { myAllocation } = currentDeptBudget;
+    const ceiling = Number(myAllocation.ceilingAmount);
+
+    const activities = [];
+    let grandTotal = 0;
+
+    document.querySelectorAll('#bdActivitiesList > div').forEach(activityEl => {
+        const activitySelect = activityEl.querySelector('.bd-activity-name');
+        const activityCustom = activityEl.querySelector('.bd-activity-custom');
+        let activityName = activitySelect.value === '__custom__' 
+            ? (activityCustom?.value.trim() || 'Unnamed Activity') 
+            : activitySelect.value;
+
+        const items = [];
+        let activityTotal = 0;
+
+        activityEl.querySelectorAll('.bd-items-body tr').forEach(row => {
+            const itemSelect = row.querySelector('.bd-item-name');
+            const itemCustom = row.querySelector('.bd-item-custom');
+            let itemName = itemSelect.value === '__custom__' 
+                ? (itemCustom?.value.trim() || '') 
+                : itemSelect.value;
+
+            const quantity = parseFloat(row.querySelector('.bd-item-qty')?.value) || 0;
+            const unit = row.querySelector('.bd-item-unit')?.value || 'pcs';
+            const unitPrice = parseFloat(row.querySelector('.bd-item-price')?.value) || 0;
+            const subtotal = quantity * unitPrice;
+
+            if (itemName && quantity > 0) {
+                items.push({ itemName, quantity, unit, unitPrice, subtotal });
+                activityTotal += subtotal;
+            }
+        });
+
+        if (items.length > 0) {
+            activities.push({ activityName, items, activityTotal });
+            grandTotal += activityTotal;
+        }
+    });
+
+    if (activities.length === 0) {
+        showToast('⚠ Add at least one activity with items', 'error');
+        return;
+    }
+
+    const activitiesHtml = activities.map((act, idx) => `
+        <div style="background:white; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:12px; overflow:hidden;">
+            <div style="background:#f8fafc; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0;">
+                <div style="font-weight:800; color:#0f766e; font-size:14px;">${idx + 1}. ${esc(act.activityName)}</div>
+                <div style="font-weight:900; color:#0f766e; font-family:'Courier New',monospace; font-size:14px;">TSh ${act.activityTotal.toLocaleString()}</div>
+            </div>
+            <div style="padding:8px 16px;">
+                ${act.items.map(item => `
+                    <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:12px; border-bottom:1px dashed #f1f5f9;">
+                        <span style="color:#475569;">${esc(item.itemName)} <span style="color:#94a3b8;">(${item.quantity} ${item.unit} × TSh ${item.unitPrice.toLocaleString()})</span></span>
+                        <span style="font-weight:700; color:#1e293b; font-family:'Courier New',monospace;">TSh ${item.subtotal.toLocaleString()}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+
+    let modal = document.getElementById('budgetReviewModal');
+    if (modal) modal.remove();
+
+    modal = document.createElement('div');
+    modal.id = 'budgetReviewModal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.7); backdrop-filter:blur(6px); z-index:50000; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; transition:opacity 0.3s;';
+    
+    // 🎨 RANGI: #0f766e + #f59e0b
+    modal.innerHTML = `
+        <div style="background:white; border-radius:20px; max-width:750px; width:100%; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.4); transform:scale(0.95); transition:transform 0.3s;">
+            <div style="background:linear-gradient(135deg,#0f766e,#134e4a); padding:20px 28px; color:white; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; border-bottom: 3px solid #f59e0b;">
+                <div>
+                    <h3 style="font-size:20px; font-weight:900; margin:0 0 4px 0;">👁️ Review Your Breakdown</h3>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.7);">Please verify everything is correct before submitting</div>
+                </div>
+                <button onclick="document.getElementById('budgetReviewModal').remove()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+
+            <div style="padding:24px 28px; overflow-y:auto; flex:1; background:#f8fafc;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+                    <div style="background:white; padding:16px 20px; border-radius:10px; border:1px solid #e2e8f0; border-left: 3px solid #0f766e;">
+                        <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Your Ceiling</div>
+                        <div style="font-size:20px; font-weight:900; color:#0f766e; font-family:'Courier New',monospace;">TSh ${ceiling.toLocaleString()}</div>
+                    </div>
+                    <div style="background:white; padding:16px 20px; border-radius:10px; border:1px solid #e2e8f0; border-left: 3px solid ${grandTotal > ceiling ? '#dc2626' : '#16a34a'};">
+                        <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Your Total</div>
+                        <div style="font-size:20px; font-weight:900; color:${grandTotal > ceiling ? '#dc2626' : '#16a34a'}; font-family:'Courier New',monospace;">TSh ${grandTotal.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                ${grandTotal > ceiling 
+                    ? `<div style="background:rgba(239,68,68,0.08); border-left:4px solid #dc2626; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:13px; color:#7f1d1d;">
+                        ❌ <strong>Over Budget!</strong> Your total (TSh ${grandTotal.toLocaleString()}) exceeds your ceiling by TSh ${(grandTotal - ceiling).toLocaleString()}. Please adjust before submitting.
+                    </div>` 
+                    : `<div style="background:rgba(34,197,94,0.08); border-left:4px solid #16a34a; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:13px; color:#14532d;">
+                        ✅ <strong>Within Budget!</strong> You have TSh ${(ceiling - grandTotal).toLocaleString()} remaining.
+                    </div>`
+                }
+
+                <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">📋 Activities (${activities.length})</div>
+                ${activitiesHtml}
+            </div>
+
+            <div style="padding:16px 28px; background:white; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; gap:12px; flex-shrink:0;">
+                <button onclick="document.getElementById('budgetReviewModal').remove()" style="padding:12px 24px; background:#f1f5f9; color:#475569; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:13px;">← Edit</button>
+                <button onclick="confirmAndSubmitBudget()" ${grandTotal > ceiling ? 'disabled' : ''} style="padding:12px 28px; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px; box-shadow:0 4px 12px rgba(245,158,11,0.3); ${grandTotal > ceiling ? 'opacity:0.5; cursor:not-allowed;' : ''}">✅ Confirm & Submit to Manager</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.querySelector('div').style.transform = 'scale(1)';
+    }, 10);
+}
+
+async function confirmAndSubmitBudget() {
+    if (!currentDeptBudget) return;
+
+    const modal = document.getElementById('budgetReviewModal');
+    if (modal) modal.remove();
+
+    setTimeout(() => {
+        submitBudgetBreakdown();
+    }, 100);
+}
+
+function showBudgetSuccessDialog(title, message) {
+    const existing = document.getElementById('budgetSuccessModal');
+    if (existing) existing.remove();
+
+    // 🎨 RANGI: #0f766e + #f59e0b
+    const modalHTML = `
+        <div class="modal-overlay show" id="budgetSuccessModal" style="z-index: 60000;">
+            <div style="background:white; border-radius:20px; max-width:400px; width:100%; text-align:center; padding:32px 28px; box-shadow:0 25px 60px rgba(0,0,0,0.3); animation: modalIn 0.3s ease;">
+                <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg, #0f766e, #134e4a); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; box-shadow:0 8px 24px rgba(15,118,110,0.4); border: 3px solid #f59e0b;">
+                    <span style="font-size:40px; color:#f59e0b;">✔</span>
+                </div>
+                <h3 style="font-size:22px; font-weight:900; color:#0f766e; margin:0 0 10px 0;">${title}</h3>
+                <p style="font-size:14px; color:#64748b; line-height:1.6; margin:0 0 24px 0;">${message}</p>
+                <button onclick="document.getElementById('budgetSuccessModal').remove()" 
+                        style="width:100%; padding:14px; background:linear-gradient(135deg, #0f766e, #134e4a); color:white; border:none; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; transition:transform 0.2s; border: 1.5px solid #f59e0b;"
+                        onmouseover="this.style.transform='translateY(-2px)'" 
+                        onmouseout="this.style.transform='translateY(0)'">
+                    Understood
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+// ===== FINANCE: RENDER BUDGETS FILTERS =====
+function renderBudgetsFilters() {
+    const container = document.getElementById('allBudgetsContainer');
+    if (!container) return;
+
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let y = 2023; y <= currentYear + 2; y++) years.push(y);
+    years.sort((a, b) => b - a);
+
+    const primary = '#0f766e';
+    const accent = '#f59e0b';
+
+    container.innerHTML = `
+        <div id="budgetsStatsGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px;"></div>
+        <div style="background:white; border-radius:12px; padding:16px 20px; border:1px solid #e2e8f0; margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="budgetSearchInput" placeholder="🔍 Search budget..." oninput="filterBudgets()" style="flex:1; min-width:200px; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; outline:none;">
+            <div style="position:relative; display:flex; align-items:center;">
+                <input type="date" id="budgetDateFilter" onchange="filterBudgets()" style="padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; background:white; outline:none; cursor:pointer; color:#334155; font-weight:600;">
+                <button onclick="clearDateFilter()" id="clearDateBtn" style="display:none; position:absolute; right:8px; background:#f1f5f9; border:none; width:22px; height:22px; border-radius:50%; cursor:pointer; color:#64748b; font-size:12px; font-weight:800;">✕</button>
+            </div>
+            <select id="budgetStatusFilter" onchange="filterBudgets()" style="padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; background:white; outline:none; cursor:pointer;">
+                <option value="">🚦 All Status</option>
+                <option value="pending">⏳ Pending</option>
+                <option value="submitted">✅ Submitted</option>
+                <option value="approved">🟢 Approved</option>
+                <option value="rejected">❌ Rejected</option>
+            </select>
+            <button onclick="resetBudgetsFilters()" style="padding:10px 18px; background:rgba(239,68,68,0.1); color:#dc2626; border:1px solid rgba(239,68,68,0.2); border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; font-family:inherit;">🔄 Reset</button>
+        </div>
+        <div id="budgetsListContainer"></div>
+    `;
+    renderBudgetsStats();
+    renderBudgetsList();
+}
+
+function filterBudgets() {
+    currentBudgetFilter.search = (document.getElementById('budgetSearchInput')?.value || '').toLowerCase().trim();
+    const dateVal = document.getElementById('budgetDateFilter')?.value || '';
+    currentBudgetFilter.date = dateVal; 
+    currentBudgetFilter.status = document.getElementById('budgetStatusFilter')?.value || '';
+    const clearBtn = document.getElementById('clearDateBtn');
+    if(clearBtn) clearBtn.style.display = dateVal ? 'block' : 'none';
+    renderBudgetsList();
+}
+
+function clearDateFilter() {
+    const dateInput = document.getElementById('budgetDateFilter');
+    if (dateInput) dateInput.value = '';
+    filterBudgets();
+}
+function renderBudgetsList() {
+    const container = document.getElementById('budgetsListContainer');
+    if (!container) return;
+
+    let filtered = [...allMyBudgets];
+
+    // Filter by Search
+    if (currentBudgetFilter.search) {
+        const s = currentBudgetFilter.search;
+        filtered = filtered.filter(b =>
+            (b.title || '').toLowerCase().includes(s) ||
+            (b.period || '').toLowerCase().includes(s) ||
+            (b.createdBy || '').toLowerCase().includes(s)
+        );
+    }
+
+    // Filter by Custom Date
+    if (currentBudgetFilter.date) {
+        const selectedDate = new Date(currentBudgetFilter.date);
+        const selectedYearMonth = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
+        filtered = filtered.filter(b => {
+            if (!b.createdAt) return false;
+            const bDate = new Date(b.createdAt);
+            const bYearMonth = `${bDate.getFullYear()}-${String(bDate.getMonth() + 1).padStart(2, '0')}`;
+            return bYearMonth === selectedYearMonth;
+        });
+    }
+
+    // Filter by Status
+    if (currentBudgetFilter.status) {
+        filtered = filtered.filter(b => {
+            const s = b.myAllocation?.status || 'pending';
+            if (currentBudgetFilter.status === 'pending') return s === 'pending-department' || s === 'pending';
+            if (currentBudgetFilter.status === 'submitted') return s === 'submitted';
+            if (currentBudgetFilter.status === 'approved') return s === 'approved';
+            if (currentBudgetFilter.status === 'rejected') return s === 'rejected';
+            return true;
+        });
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:60px 20px;background:white;border-radius:14px;border:1px solid #e2e8f0;">
+                <div style="font-size:56px;margin-bottom:14px;opacity:0.5;">📭</div>
+                <div style="font-size:17px;font-weight:800;color:#334155;margin-bottom:6px;">No Budgets Found</div>
+                <div style="font-size:13px;color:#64748b;">${allMyBudgets.length === 0 ? 'No budgets yet. Wait for Manager allocation.' : 'Try adjusting your filters.'}</div>
+            </div>`;
+        return;
+    }
+
+    const primary = '#0f766e';
+    const accent = '#14b8a6';
+
+    container.innerHTML = `
+        <div style="background:white; border-radius:14px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+            
+            <div class="budget-list-header" style="display:grid; grid-template-columns: 2fr 1fr 1fr 100px 160px; gap:16px; padding:16px 24px; background:#f8fafc; border-bottom:2px solid #e2e8f0; font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">
+                <div>Budget Details</div>
+                <div>Period</div>
+                <div>Ceiling Amount</div>
+                <div>Status</div>
+                <div style="text-align:right;">Actions</div>
+            </div>
+
+            <div id="budgetListBody">
+                ${filtered.map(b => {
+                    const alloc = b.myAllocation || {};
+                    const status = alloc.status || 'pending';
+                    const ceiling = Number(alloc.ceilingAmount || 0);
+                    const itemCount = (alloc.items || []).length;
+                    const createdDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+                    const statusInfo = {
+                        'pending': { icon: '⏳', label: 'Pending', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                        'pending-department': { icon: '⏳', label: 'Pending', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                        'draft': { icon: '📝', label: 'Draft', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
+                        'submitted': { icon: '✅', label: 'Submitted', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
+                        'approved': { icon: '🟢', label: 'Approved', color: '#16a34a', bg: 'rgba(22,163,74,0.1)' },
+                        'rejected': { icon: '❌', label: 'Rejected', color: '#dc2626', bg: 'rgba(239,68,68,0.1)' }
+                    }[status] || { icon: '❓', label: status, color: '#64748b', bg: 'rgba(100,116,139,0.1)' };
+
+                    // --- ACTION BUTTONS ---
+                    let btnAction = `
+                        <button data-id="${b.id}" onclick="viewBudgetDetailsFromAll(this.dataset.id)" style="padding:6px 12px; background:white; color:${primary}; border:1.5px solid ${primary}; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit;">
+                            👁 View
+                        </button>`;
+                    
+                    if (status === 'pending' || status === 'pending-department') {
+                        btnAction += `
+                            <button data-id="${b.id}" data-status="${status}" onclick="openBudgetForDepartment(this.dataset.id, this.dataset.status)" style="padding:6px 12px; background:linear-gradient(135deg,${primary},#134e4a); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; margin-left:4px;">
+                                ➕ Add
+                            </button>`;
+                    } else if (status === 'draft') {
+                        btnAction += `
+                            <button data-id="${b.id}" onclick="openBudgetForDepartment(this.dataset.id, 'draft')" style="padding:6px 12px; background:linear-gradient(135deg,${accent},#0d9488); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; margin-left:4px;">
+                                ✏️ Edit
+                            </button>`;
+                    } else if (status === 'submitted' || status === 'approved') {
+                        // KITUFE CHA BOOK KINAONEKANA HAPA
+                        btnAction = `
+                            <button data-id="${b.id}" onclick="viewBudgetDetailsFromAll(this.dataset.id)" style="padding:6px 12px; background:linear-gradient(135deg,${primary},#134e4a); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; border:1.5px solid ${accent};">
+                                📋 Breakdown
+                            </button>
+                            <button data-id="${b.id}" onclick="openBudgetBookForDept(this.dataset.id)" style="padding:6px 12px; background:linear-gradient(135deg,#16a34a,#15803d); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; margin-left:4px; box-shadow:0 2px 8px rgba(22,163,74,0.3);">
+                                📖 Book
+                            </button>`;
+                    }
+
+                    const rejectionHtml = (status === 'rejected' && alloc.rejectionReason) ? `
+                        <div style="font-size:10px; color:#dc2626; margin-top:4px; background:rgba(220,38,38,0.05); padding:4px 8px; border-radius:4px; border-left:2px solid #dc2626;">
+                            <strong>Reason:</strong> ${esc(alloc.rejectionReason)}
+                        </div>
+                    ` : '';
+
+                    return `
+                        <div class="budget-row" style="display:grid; grid-template-columns: 2fr 1fr 1fr 100px 160px; gap:16px; padding:16px 24px; border-bottom:1px solid #f1f5f9; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <div>
+                                <div style="font-weight:900; color:${primary}; font-size:14px; margin-bottom:2px;">${esc(b.title)}</div>
+                                <div style="font-size:11px; color:#64748b; display:flex; align-items:center; gap:6px;">
+                                    <span>🏢 ${esc(b.department)}</span>
+                                    <span>•</span>
+                                    <span>👤 ${esc(b.createdBy || '—')}</span>
+                                </div>
+                                ${rejectionHtml}
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:700; color:#334155;">${esc(b.period)}</div>
+                                <div style="font-size:10px; color:#94a3b8;">📆 ${createdDate}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:14px; font-weight:900; color:${primary}; font-family:'Courier New',monospace;">TSh ${ceiling.toLocaleString()}</div>
+                                <div style="font-size:10px; color:#94a3b8; font-weight:600;">${itemCount} ${itemCount === 1 ? 'Item' : 'Items'}</div>
+                            </div>
+                            <div>
+                                <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; background:${statusInfo.bg}; color:${statusInfo.color}; text-transform:uppercase;">
+                                    ${statusInfo.icon} ${statusInfo.label}
+                                </span>
+                            </div>
+                            <div style="text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                                ${btnAction}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+        <style>
+            @media (max-width: 900px) {
+                .budget-list-header { display: none !important; }
+                .budget-row { 
+                    display: flex !important; 
+                    flex-direction: column !important; 
+                    align-items: flex-start !important; 
+                    gap: 10px !important; 
+                    padding: 16px !important;
+                    border-left: 4px solid ${primary} !important;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    border: 1px solid #e2e8f0;
+                    background: white;
+                }
+                .budget-row > div { width: 100%; text-align: left !important; }
+                .budget-row > div:last-child { justify-content: flex-start !important; margin-top: 8px; }
+            }
+        </style>
+    `;
+}
+// ================================================================
+// 🆕 ALL MY BUDGETS (Finance Version - Teal Theme)
+// ================================================================
+let allMyBudgets = [];
+let currentBudgetFilter = { search: '', date: '', status: '' };
+
+// 1. LOAD ALL MY BUDGETS
+async function loadAllMyBudgets() {
+    const container = document.getElementById('allBudgetsContainer');
+    if (!container) return;
+
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading your budgets...</div>`;
+
+    try {
+        const user = Auth.getUser();
+        const myDept = user?.department || user?.departmentName;
+
+        if (!myDept) {
+            container.innerHTML = `<div style="text-align:center;padding:40px;color:#dc2626;">⚠️ Hauna Department iliyowekwa kwenye profile yako.</div>`;
+            return;
+        }
+
+        const budgets = await API.getMasterBudgets();
+        const list = Array.isArray(budgets) ? budgets : [];
+
+        allMyBudgets = list.filter(b => 
+            b.allocations && b.allocations.some(a => a.department === myDept)
+        ).map(b => {
+            const myAllocation = b.allocations.find(a => a.department === myDept);
+            return { ...b, myAllocation, department: myDept };
+        });
+
+        allMyBudgets.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        renderBudgetsFilters();
+    } catch (err) {
+        console.error('loadAllMyBudgets error:', err);
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px;color:#dc2626;">
+                <div style="font-size:40px;margin-bottom:10px;">❌</div>
+                <div style="font-weight:800;">Imeshindwa Kupakia Budgets</div>
+                <div style="font-size:12px;color:#64748b;margin-top:8px;">${err.message}</div>
+                <button onclick="loadAllMyBudgets()" style="margin-top:16px;padding:10px 20px;background:#0f766e;color:white;border:none;border-radius:8px;cursor:pointer;">🔄 Jaribu Tena</button>
+            </div>`;
+    }
+}
+
+// 2. RENDER STATS
+function renderBudgetsStats() {
+    const statsContainer = document.getElementById('budgetsStatsGrid');
+    if (!statsContainer) return;
+
+    const total = allMyBudgets.length;
+    const pending = allMyBudgets.filter(b => 
+        b.myAllocation?.status === 'pending-department' || 
+        b.myAllocation?.status === 'pending'
+    ).length;
+    const submitted = allMyBudgets.filter(b => 
+        b.myAllocation?.status === 'submitted' || 
+        b.myAllocation?.status === 'approved'
+    ).length;
+    const rejected = allMyBudgets.filter(b => 
+        b.myAllocation?.status === 'rejected'
+    ).length;
+
+    const totalValue = allMyBudgets.reduce((sum, b) => 
+        sum + Number(b.myAllocation?.ceilingAmount || 0), 0
+    );
+
+    statsContainer.innerHTML = `
+        <div style="background:white; border-radius:14px; padding:18px 20px; border-left:4px solid #0f766e; border:1px solid #e2e8f0;">
+            <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">📊 Total</div>
+            <div style="font-size:24px; font-weight:900; color:#0f766e; font-family:'Courier New',monospace;">${total}</div>
+            <div style="font-size:10px; color:#94a3b8; margin-top:2px;">TSh ${totalValue.toLocaleString()}</div>
+        </div>
+        <div style="background:white; border-radius:14px; padding:18px 20px; border-left:4px solid #f59e0b; border:1px solid #e2e8f0;">
+            <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">⏳ Pending</div>
+            <div style="font-size:24px; font-weight:900; color:#f59e0b; font-family:'Courier New',monospace;">${pending}</div>
+            <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Awaiting</div>
+        </div>
+        <div style="background:white; border-radius:14px; padding:18px 20px; border-left:4px solid #16a34a; border:1px solid #e2e8f0;">
+            <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">✅ Approved</div>
+            <div style="font-size:24px; font-weight:900; color:#16a34a; font-family:'Courier New',monospace;">${submitted}</div>
+            <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Approved</div>
+        </div>
+        <div style="background:white; border-radius:14px; padding:18px 20px; border-left:4px solid #dc2626; border:1px solid #e2e8f0;">
+            <div style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">❌ Rejected</div>
+            <div style="font-size:24px; font-weight:900; color:#dc2626; font-family:'Courier New',monospace;">${rejected}</div>
+            <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Rejected</div>
+        </div>
+    `;
+}
+
+// 3. RENDER FILTERS & LAYOUT
+function renderBudgetsFilters() {
+    const container = document.getElementById('allBudgetsContainer');
+    if (!container) return;
+
+    const primary = '#0f766e';
+    const accent = '#14b8a6';
+
+    container.innerHTML = `
+        <div id="budgetsStatsGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px;"></div>
+        <div style="background:white; border-radius:12px; padding:16px 20px; border:1px solid #e2e8f0; margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="budgetSearchInput" placeholder="🔍 Search budget..." oninput="filterBudgets()" style="flex:1; min-width:200px; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; outline:none;">
+            <div style="position:relative; display:flex; align-items:center;">
+                <input type="date" id="budgetDateFilter" onchange="filterBudgets()" style="padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; background:white; outline:none; cursor:pointer; color:#334155; font-weight:600;">
+                <button onclick="clearDateFilter()" id="clearDateBtn" style="display:none; position:absolute; right:8px; background:#f1f5f9; border:none; width:22px; height:22px; border-radius:50%; cursor:pointer; color:#64748b; font-size:12px; font-weight:800;" title="Clear Date">✕</button>
+            </div>
+            <select id="budgetStatusFilter" onchange="filterBudgets()" style="padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:inherit; background:white; outline:none; cursor:pointer;">
+                <option value="">🚦 All Status</option>
+                <option value="pending">⏳ Pending</option>
+                <option value="submitted">✅ Submitted</option>
+                <option value="approved">🟢 Approved</option>
+                <option value="rejected">❌ Rejected</option>
+            </select>
+            <button onclick="resetBudgetsFilters()" style="padding:10px 18px; background:rgba(239,68,68,0.1); color:#dc2626; border:1px solid rgba(239,68,68,0.2); border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; font-family:inherit;">🔄 Reset</button>
+        </div>
+        <div id="budgetsListContainer"></div>
+    `;
+
+    renderBudgetsStats();
+    renderBudgetsList();
+}
+
+// 4. RENDER BUDGETS LIST
+function renderBudgetsList() {
+    const container = document.getElementById('budgetsListContainer');
+    if (!container) return;
+
+    let filtered = [...allMyBudgets];
+
+    // Filter by Search
+    if (currentBudgetFilter.search) {
+        const s = currentBudgetFilter.search;
+        filtered = filtered.filter(b =>
+            (b.title || '').toLowerCase().includes(s) ||
+            (b.period || '').toLowerCase().includes(s) ||
+            (b.createdBy || '').toLowerCase().includes(s)
+        );
+    }
+
+    // Filter by Custom Date
+    if (currentBudgetFilter.date) {
+        const selectedDate = new Date(currentBudgetFilter.date);
+        const selectedYearMonth = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
+        filtered = filtered.filter(b => {
+            if (!b.createdAt) return false;
+            const bDate = new Date(b.createdAt);
+            const bYearMonth = `${bDate.getFullYear()}-${String(bDate.getMonth() + 1).padStart(2, '0')}`;
+            return bYearMonth === selectedYearMonth;
+        });
+    }
+
+    // Filter by Status
+    if (currentBudgetFilter.status) {
+        filtered = filtered.filter(b => {
+            const s = b.myAllocation?.status || 'pending';
+            if (currentBudgetFilter.status === 'pending') return s === 'pending-department' || s === 'pending';
+            if (currentBudgetFilter.status === 'submitted') return s === 'submitted';
+            if (currentBudgetFilter.status === 'approved') return s === 'approved';
+            if (currentBudgetFilter.status === 'rejected') return s === 'rejected';
+            return true;
+        });
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:60px 20px;background:white;border-radius:14px;border:1px solid #e2e8f0;">
+                <div style="font-size:56px;margin-bottom:14px;opacity:0.5;">📭</div>
+                <div style="font-size:17px;font-weight:800;color:#334155;margin-bottom:6px;">No Budgets Found</div>
+                <div style="font-size:13px;color:#64748b;">${allMyBudgets.length === 0 ? 'No budgets yet. Wait for Manager allocation.' : 'Try adjusting your filters.'}</div>
+            </div>`;
+        return;
+    }
+
+    const primary = '#0f766e';
+    const accent = '#14b8a6';
+
+    container.innerHTML = `
+        <div style="background:white; border-radius:14px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+            
+            <div class="budget-list-header" style="display:grid; grid-template-columns: 2fr 1fr 1fr 100px 160px; gap:16px; padding:16px 24px; background:#f8fafc; border-bottom:2px solid #e2e8f0; font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">
+                <div>Budget Details</div>
+                <div>Period</div>
+                <div>Ceiling Amount</div>
+                <div>Status</div>
+                <div style="text-align:right;">Actions</div>
+            </div>
+
+            <div id="budgetListBody">
+                ${filtered.map(b => {
+                    const alloc = b.myAllocation || {};
+                    const status = alloc.status || 'pending';
+                    const ceiling = Number(alloc.ceilingAmount || 0);
+                    const itemCount = (alloc.items || []).length;
+                    const createdDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+                    const statusInfo = {
+                        'pending': { icon: '⏳', label: 'Pending', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                        'pending-department': { icon: '⏳', label: 'Pending', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+                        'draft': { icon: '📝', label: 'Draft', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
+                        'submitted': { icon: '✅', label: 'Submitted', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
+                        'approved': { icon: '🟢', label: 'Approved', color: '#16a34a', bg: 'rgba(22,163,74,0.1)' },
+                        'rejected': { icon: '❌', label: 'Rejected', color: '#dc2626', bg: 'rgba(239,68,68,0.1)' }
+                    }[status] || { icon: '❓', label: status, color: '#64748b', bg: 'rgba(100,116,139,0.1)' };
+
+                    // --- ACTION BUTTONS ---
+                    let btnAction = `
+                        <button data-id="${b.id}" onclick="viewBudgetDetailsFromAll(this.dataset.id)" style="padding:6px 12px; background:white; color:${primary}; border:1.5px solid ${primary}; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit;">
+                            👁 View
+                        </button>`;
+                    
+                    if (status === 'pending' || status === 'pending-department') {
+                        btnAction += `
+                            <button data-id="${b.id}" data-status="${status}" onclick="openBudgetForDepartment(this.dataset.id, this.dataset.status)" style="padding:6px 12px; background:linear-gradient(135deg,${primary},#134e4a); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; margin-left:4px;">
+                                ➕ Add
+                            </button>`;
+                    } else if (status === 'draft') {
+                        btnAction += `
+                            <button data-id="${b.id}" onclick="openBudgetForDepartment(this.dataset.id, 'draft')" style="padding:6px 12px; background:linear-gradient(135deg,${accent},#0d9488); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; margin-left:4px;">
+                                ✏️ Edit
+                            </button>`;
+                    } else if (status === 'submitted' || status === 'approved') {
+                        btnAction = `
+                            <button data-id="${b.id}" onclick="viewBudgetDetailsFromAll(this.dataset.id)" style="padding:6px 12px; background:linear-gradient(135deg,${primary},#134e4a); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; border:1.5px solid ${accent};">
+                                📋 Breakdown
+                            </button>
+                            <button data-id="${b.id}" onclick="openBudgetBookForDept(this.dataset.id)" style="padding:6px 12px; background:linear-gradient(135deg,#16a34a,#15803d); color:white; border:none; border-radius:6px; font-weight:700; font-size:11px; cursor:pointer; font-family:inherit; margin-left:4px; box-shadow:0 2px 8px rgba(22,163,74,0.3);">
+                                📖 Book
+                            </button>`;
+                    }
+
+                    const rejectionHtml = (status === 'rejected' && alloc.rejectionReason) ? `
+                        <div style="font-size:10px; color:#dc2626; margin-top:4px; background:rgba(220,38,38,0.05); padding:4px 8px; border-radius:4px; border-left:2px solid #dc2626;">
+                            <strong>Reason:</strong> ${esc(alloc.rejectionReason)}
+                        </div>
+                    ` : '';
+
+                    return `
+                        <div class="budget-row" style="display:grid; grid-template-columns: 2fr 1fr 1fr 100px 160px; gap:16px; padding:16px 24px; border-bottom:1px solid #f1f5f9; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <div>
+                                <div style="font-weight:900; color:${primary}; font-size:14px; margin-bottom:2px;">${esc(b.title)}</div>
+                                <div style="font-size:11px; color:#64748b; display:flex; align-items:center; gap:6px;">
+                                    <span>🏢 ${esc(b.department)}</span>
+                                    <span>•</span>
+                                    <span>👤 ${esc(b.createdBy || '—')}</span>
+                                </div>
+                                ${rejectionHtml}
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:700; color:#334155;">${esc(b.period)}</div>
+                                <div style="font-size:10px; color:#94a3b8;">📆 ${createdDate}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:14px; font-weight:900; color:${primary}; font-family:'Courier New',monospace;">TSh ${ceiling.toLocaleString()}</div>
+                                <div style="font-size:10px; color:#94a3b8; font-weight:600;">${itemCount} ${itemCount === 1 ? 'Item' : 'Items'}</div>
+                            </div>
+                            <div>
+                                <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; background:${statusInfo.bg}; color:${statusInfo.color}; text-transform:uppercase;">
+                                    ${statusInfo.icon} ${statusInfo.label}
+                                </span>
+                            </div>
+                            <div style="text-align:right; display:flex; gap:4px; justify-content:flex-end;">
+                                ${btnAction}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+        <style>
+            @media (max-width: 900px) {
+                .budget-list-header { display: none !important; }
+                .budget-row { 
+                    display: flex !important; 
+                    flex-direction: column !important; 
+                    align-items: flex-start !important; 
+                    gap: 10px !important; 
+                    padding: 16px !important;
+                    border-left: 4px solid ${primary} !important;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    border: 1px solid #e2e8f0;
+                    background: white;
+                }
+                .budget-row > div { width: 100%; text-align: left !important; }
+                .budget-row > div:last-child { justify-content: flex-start !important; margin-top: 8px; }
+            }
+        </style>
+    `;
+}
+
+// 5. FILTERS & UTILS
+function filterBudgets() {
+    currentBudgetFilter.search = (document.getElementById('budgetSearchInput')?.value || '').toLowerCase().trim();
+    const dateVal = document.getElementById('budgetDateFilter')?.value || '';
+    currentBudgetFilter.date = dateVal; 
+    currentBudgetFilter.status = document.getElementById('budgetStatusFilter')?.value || '';
+    
+    const clearBtn = document.getElementById('clearDateBtn');
+    if(clearBtn) clearBtn.style.display = dateVal ? 'block' : 'none';
+
+    renderBudgetsList();
+}
+
+function clearDateFilter() {
+    const dateInput = document.getElementById('budgetDateFilter');
+    if (dateInput) dateInput.value = '';
+    filterBudgets();
+}
+
+function resetBudgetsFilters() {
+    if(document.getElementById('budgetSearchInput')) document.getElementById('budgetSearchInput').value = '';
+    if(document.getElementById('budgetDateFilter')) document.getElementById('budgetDateFilter').value = '';
+    if(document.getElementById('budgetStatusFilter')) document.getElementById('budgetStatusFilter').value = '';
+    
+    const clearBtn = document.getElementById('clearDateBtn');
+    if(clearBtn) clearBtn.style.display = 'none';
+    
+    filterBudgets();
+    showToast('🔄 Filters reset', 'info');
+}
+
+// 6. ENTRY POINT
+function loadAllBudgetsPage() {
+    renderBudgetsFilters();
+    setTimeout(() => {
+        loadAllMyBudgets();
+    }, 100);
+}
+
+// 7. OPEN BUDGET & VIEW DETAILS
+async function openBudgetForDepartment(budgetId, status) {
+    try {
+        const b = await API.getMasterBudgetById(budgetId);
+        if (!b) { showToast('❌ Budget not found', 'error'); return; }
+
+        const user = Auth.getUser();
+        const myDept = user?.department || user?.departmentName;
+        const myAllocation = b.allocations.find(a => a.department === myDept);
+
+        if (!myAllocation) {
+            showToast('❌ You have no allocation in this budget', 'error');
+            return;
+        }
+
+        currentDeptBudget = { ...b, myAllocation };
+        openBudgetBreakdownPage(); // Hii function inatakiwa iwepo kwenye finance.js
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+    }
+}
+
+async function viewBudgetDetailsFromAll(budgetId) {
+    try {
+        const b = await API.getMasterBudgetById(budgetId);
+        if (!b) return;
+
+        const user = Auth.getUser();
+        const myDept = user?.department || user?.departmentName;
+        const myAllocation = b.allocations.find(a => a.department === myDept);
+
+        if (!myAllocation) {
+            showToast('❌ You have no allocation in this budget', 'error');
+            return;
+        }
+
+        currentDeptBudget = { ...b, myAllocation };
+        viewSubmittedBreakdown(); // Hii function inatakiwa iwepo kwenye finance.js
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+    }
+}
+// ================================================================
+// 🆕 OPEN DEPARTMENT BUDGET BOOK (Premium Redesign - No Stats)
+// ================================================================
+async function openMyDeptBudgetBook(budgetData = null) {
+    const b = budgetData || currentDeptBudget;
+
+    if (!b || !b.myAllocation) {
+        showToast('⚠ No budget data available to generate book', 'error');
+        return;
+    }
+
+    const alloc = b.myAllocation;
+    
+    // Hesabu jumla ya matumizi
+    let totalItemsCost = 0;
+    if (alloc.items && alloc.items.length > 0) {
+        totalItemsCost = alloc.items.reduce((sum, item) => sum + Number(item.totalCost || 0), 0);
+    }
+
+    // 🆕 Panga vitu kwa Makundi ya Shughuli (Group by ActivityName)
+    const groupedActivities = {};
+    (alloc.items || []).forEach(item => {
+        const actName = item.activityName || 'General Activity';
+        if (!groupedActivities[actName]) {
+            groupedActivities[actName] = {
+                items: [],
+                total: 0
+            };
+        }
+        groupedActivities[actName].items.push(item);
+        groupedActivities[actName].total += Number(item.totalCost || 0);
+    });
+
+    // Tengeneza HTML ya Makundi (Cards)
+    let activitiesHtml = '';
+    let activityIndex = 1;
+
+    Object.keys(groupedActivities).forEach(actName => {
+        const group = groupedActivities[actName];
+        
+        // Tengeneza HTML ya vitu vilivyomo ndani ya shughuli hii
+        const itemsRows = group.items.map((item, idx) => `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding:10px 14px; font-size:12px; color:#64748b; text-align:center; width:40px;">${idx + 1}</td>
+                <td style="padding:10px 14px; font-size:13px; color:#0f172a; font-weight:500;">
+                    ${esc(item.itemName)}
+                </td>
+                <td style="padding:10px 14px; font-size:12px; color:#475569; text-align:center; width:100px;">${item.quantity} ${item.unit}</td>
+                <td style="padding:10px 14px; font-size:12px; color:#475569; text-align:right; width:120px;">TSh ${Number(item.unitPrice).toLocaleString()}</td>
+                <td style="padding:10px 14px; font-size:13px; color:#0f172a; font-weight:700; text-align:right; width:130px;">TSh ${Number(item.totalCost).toLocaleString()}</td>
+            </tr>
+        `).join('');
+
+        activitiesHtml += `
+            <div style="margin-bottom:25px; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; page-break-inside:avoid; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <!-- Kichwa cha Shughuli -->
+                <div style="background:#f8fafc; padding:14px 18px; border-bottom:2px solid #0f172a; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="background:#0f172a; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;">${activityIndex++}</span>
+                        <strong style="font-size:14px; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px;">${esc(actName)}</strong>
+                    </div>
+                    <div style="font-size:13px; font-weight:800; color:#16a34a; background:rgba(22,163,74,0.1); padding:4px 10px; border-radius:6px;">
+                        TSh ${group.total.toLocaleString()}
+                    </div>
+                </div>
+                
+                <!-- Jedwali la Vitu ndani ya Shughuli -->
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead style="background:#ffffff; border-bottom:1px solid #e2e8f0;">
+                        <tr>
+                            <th style="padding:8px 14px; text-align:center; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">#</th>
+                            <th class="lang-sw" style="padding:8px 14px; text-align:left; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Kitu / Maelezo</th>
+                            <th class="lang-en" style="display:none; padding:8px 14px; text-align:left; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Item / Description</th>
+                            <th class="lang-sw" style="padding:8px 14px; text-align:center; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Idadi</th>
+                            <th class="lang-en" style="display:none; padding:8px 14px; text-align:center; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Qty</th>
+                            <th class="lang-sw" style="padding:8px 14px; text-align:right; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Bei</th>
+                            <th class="lang-en" style="display:none; padding:8px 14px; text-align:right; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Unit Price</th>
+                            <th class="lang-sw" style="padding:8px 14px; text-align:right; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Jumla</th>
+                            <th class="lang-en" style="display:none; padding:8px 14px; text-align:right; font-size:10px; color:#94a3b8; font-weight:800; text-transform:uppercase;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsRows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
+
+    // Unda Modal
+    let modal = document.getElementById('myBudgetBookModal');
+    if (modal) modal.remove();
+
+    modal = document.createElement('div');
+    modal.id = 'myBudgetBookModal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.85); z-index:60000; display:flex; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto;';
+    
+    modal.innerHTML = `
+        <div style="background:white; border-radius:12px; max-width:1000px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,0.5); position:relative; margin: 20px auto; overflow:hidden;">
+            
+            <!-- Action Bar (Top) - Hidden on Print -->
+            <div class="no-print" style="background:#1e293b; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #cbd5e1;">
+                <div style="color:white; font-size:14px; font-weight:600;">📄 Preview Mode</div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    
+                    <!-- Language Toggle -->
+                    <div style="display:flex; background:#334155; border-radius:8px; padding:4px; margin-right:16px;">
+                        <button id="btnLangSw" onclick="toggleBookLanguage('sw')" style="padding:8px 16px; border:none; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer; background:#0f172a; color:white; transition:0.2s;">🇹🇿 Kiswahili</button>
+                        <button id="btnLangEn" onclick="toggleBookLanguage('en')" style="padding:8px 16px; border:none; border-radius:6px; font-weight:800; font-size:12px; cursor:pointer; background:transparent; color:#94a3b8; transition:0.2s;">🇬🇧 English</button>
+                    </div>
+
+                    <button onclick="printBudgetBook()" style="padding:10px 20px; background:#16a34a; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+                        🖨️ Print / Save as PDF
+                    </button>
+                    <button onclick="document.getElementById('myBudgetBookModal').remove()" style="padding:10px 20px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
+                        ✕ Close
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Area -->
+            <div id="budgetBookPrintArea" style="padding:50px 60px; background:white;">
+                
+                <!-- Header -->
+                <div style="text-align:center; border-bottom:4px double #0f172a; padding-bottom:25px; margin-bottom:30px;">
+                    <img src="assets/makdc-logo.jpg" alt="Logo" style="height:90px; margin-bottom:15px;">
+                    <h1 style="font-size:26px; font-weight:900; color:#0f172a; margin:0; font-family: 'Times New Roman', serif; letter-spacing:1px;">MAK DC INVESTMENT COMPANY LTD</h1>
+                    <h2 class="lang-sw" style="font-size:18px; font-weight:700; color:#334155; margin:10px 0 5px 0; text-transform:uppercase; letter-spacing:2px;">KITABU RASMI CHA BAJETI YA IDARA</h2>
+                    <h2 class="lang-en" style="display:none; font-size:18px; font-weight:700; color:#334155; margin:10px 0 5px 0; text-transform:uppercase; letter-spacing:2px;">OFFICIAL DEPARTMENTAL BUDGET BOOK</h2>
+                    
+                    <div style="font-size:14px; margin-top:15px; color:#475569; font-weight:600;">
+                        <span class="lang-sw">Idara:</span><span class="lang-en" style="display:none;">Department:</span>
+                        <span style="color:#0f172a;">${esc(alloc.department)}</span>
+                        &nbsp;|&nbsp; 
+                        <span class="lang-sw">Kipindi:</span><span class="lang-en" style="display:none;">Period:</span>
+                        <span style="color:#0f172a;">${esc(b.period)}</span>
+                        &nbsp;|&nbsp; 
+                        <span class="lang-sw">Mwaka:</span><span class="lang-en" style="display:none;">Year:</span>
+                        <span style="color:#0f172a;">${b.year || '—'}</span>
+                    </div>
+                </div>
+
+                <!-- Narrative Section -->
+                <div style="margin-bottom:35px; background:#f8fafc; padding:30px; border-radius:10px; border-left:6px solid #0f172a; box-shadow:0 4px 15px rgba(0,0,0,0.02); page-break-inside:avoid;">
+                    
+                    <!-- Swahili Narrative -->
+                    <div class="lang-sw">
+                        <h3 style="font-size:16px; font-weight:900; color:#0f172a; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">Muhtasari wa Bajeti</h3>
+                        <p style="font-size:14px; line-height:1.8; margin-bottom:15px; text-align:justify; color:#334155;">
+                            Hiki ni Kitabu Rasmi cha Bajeti kwa ajili ya idara ya <strong>${esc(alloc.department)}</strong> kwa kipindi cha <strong>${esc(b.period)}</strong>. Kitabu hiki kinaeleza kwa kina jinsi kiasi cha <strong>TSh ${Number(alloc.ceilingAmount).toLocaleString()}</strong> kilichotengwa na Menejimenti kwa ajili ya idara hii kimetumika. 
+                        </p>
+                        <p style="font-size:14px; line-height:1.8; margin-bottom:15px; text-align:justify; color:#334155;">
+                            Bajeti hii imeandaliwa kwa kuzingatia mahitaji halisi ya uendeshaji wa idara ili kuhakikisha kuwa malengo ya kimkakati yanafikiwa kwa wakati. Jumla ya matumizi yaliyopendekezwa na kupitishwa ni <strong>TSh ${totalItemsCost.toLocaleString()}</strong>. Kiasi hiki kimetumika katika shughuli mbalimbali muhimu zikiwemo safari za kikazi, ununuzi wa vifaa vya ofisi, na uendeshaji wa jumla. 
+                        </p>
+                        <p style="font-size:14px; line-height:1.8; text-align:justify; color:#334155;">
+                            Tunatarajia kuwa utekelezaji wa bajeti hii utaleta tija na kuongeza ufanisi katika utendaji kazi wa kila siku. Hati hii imesainiwa na kupelekwa kwa Ofisi ya Mkurugenzi Mtendaji (CEO) kwa ajili ya uhakiki wa mwisho na matumizi.
+                        </p>
+                    </div>
+
+                    <!-- English Narrative -->
+                    <div class="lang-en" style="display:none;">
+                        <h3 style="font-size:16px; font-weight:900; color:#0f172a; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px;">Executive Summary</h3>
+                        <p style="font-size:14px; line-height:1.8; margin-bottom:15px; text-align:justify; color:#334155;">
+                            This document serves as the Official Budget Book for the <strong>${esc(alloc.department)}</strong> for the period of <strong>${esc(b.period)}</strong>. It provides a detailed breakdown of how the allocated ceiling of <strong>TSh ${Number(alloc.ceilingAmount).toLocaleString()}</strong> is being utilized to support the department's operational needs.
+                        </p>
+                        <p style="font-size:14px; line-height:1.8; margin-bottom:15px; text-align:justify; color:#334155;">
+                            The budget has been carefully prepared to align with the strategic goals of the company. The total proposed and approved expenditure amounts to <strong>TSh ${totalItemsCost.toLocaleString()}</strong>. These funds are allocated to essential activities including field operations, procurement of necessary office supplies, and general administrative operations.
+                        </p>
+                        <p style="font-size:14px; line-height:1.8; text-align:justify; color:#334155;">
+                            We anticipate that the execution of this budget will significantly improve efficiency and productivity within the department. This document is hereby submitted for final review and utilization by the Office of the Chief Executive Officer (CEO).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Table Section (Grouped Activities) -->
+                <div class="lang-sw">
+                    <h3 style="font-size:16px; font-weight:900; color:#0f172a; margin-bottom:20px; border-bottom:2px solid #cbd5e1; padding-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Mgawanyo wa Kina wa Matumizi</h3>
+                </div>
+                <div class="lang-en" style="display:none;">
+                    <h3 style="font-size:16px; font-weight:900; color:#0f172a; margin-bottom:20px; border-bottom:2px solid #cbd5e1; padding-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Detailed Breakdown of Expenses</h3>
+                </div>
+                
+                <!-- Hapa ndipo Kadi za Shughuli (Activity Cards) zinatokea -->
+                ${activitiesHtml || '<p style="text-align:center; color:#64748b; padding:20px;">Hakuna data ya matumizi.</p>'}
+
+                <!-- Overall Grand Total Box -->
+                <div style="margin-top:20px; background:#0f172a; border-radius:10px; padding:20px 30px; display:flex; justify-content:space-between; align-items:center; page-break-inside:avoid;">
+                    <div>
+                        <div class="lang-sw" style="font-size:12px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">Jumla Kuu ya Matumizi Yote</div>
+                        <div class="lang-en" style="display:none; font-size:12px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">Overall Grand Total</div>
+                    </div>
+                    <div style="font-size:28px; font-weight:900; color:#2ecc71; font-family:'Courier New', monospace;">
+                        TSh ${totalItemsCost.toLocaleString()}
+                    </div>
+                </div>
+
+                <!-- Signatures -->
+                <div style="display:flex; justify-content:space-between; margin-top:80px; page-break-inside:avoid;">
+                    <div style="text-align:center; width:250px;">
+                        <div class="lang-sw" style="font-size:12px; font-weight:bold; color:#475569; margin-bottom:50px;">Imeandaliwa Na:</div>
+                        <div class="lang-en" style="display:none; font-size:12px; font-weight:bold; color:#475569; margin-bottom:50px;">Prepared By:</div>
+                        <div style="border-bottom:2px solid #000; height:30px;"></div>
+                        <div style="font-size:13px; font-weight:bold; margin-top:10px;">${esc(b.createdBy || 'Manager')}</div>
+                        <div class="lang-sw" style="font-size:11px; color:#64748b;">(Meneja)</div>
+                        <div class="lang-en" style="display:none; font-size:11px; color:#64748b;">(Manager)</div>
+                    </div>
+                    <div style="text-align:center; width:250px;">
+                        <div class="lang-sw" style="font-size:12px; font-weight:bold; color:#475569; margin-bottom:50px;">Imeidhinishwa Na:</div>
+                        <div class="lang-en" style="display:none; font-size:12px; font-weight:bold; color:#475569; margin-bottom:50px;">Approved By:</div>
+                        <div style="border-bottom:2px solid #000; height:30px;"></div>
+                        <div style="font-size:13px; font-weight:bold; margin-top:10px;">CEO</div>
+                        <div class="lang-sw" style="font-size:11px; color:#64748b;">(Mkurugenzi Mtendaji)</div>
+                        <div class="lang-en" style="display:none; font-size:11px; color:#64748b;">(Chief Executive Officer)</div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="text-align:center; margin-top:60px; font-size:10px; color:#94a3b8; border-top:1px solid #e2e8f0; padding-top:15px;">
+                    <span class="lang-sw">Hati hii imetengenezwa na mfumo wa kompyuta. Ilizalishwa tarehe ${new Date().toLocaleString()}.</span>
+                    <span class="lang-en" style="display:none;">This is a computer-generated document. Generated on ${new Date().toLocaleString()}.</span>
+                    <br>MAK DC Investment Company LTD &copy; ${new Date().getFullYear()}
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    window.currentBookLang = 'sw'; // Lugha ya kwanza ni Kiswahili
+}
+function toggleBookLanguage(lang) {
+    window.currentBookLang = lang;
+    
+    // Chagua vitu vyote vyenye class ya lugha
+    const swElements = document.querySelectorAll('#myBudgetBookModal .lang-sw');
+    const enElements = document.querySelectorAll('#myBudgetBookModal .lang-en');
+    
+    const btnSw = document.getElementById('btnLangSw');
+    const btnEn = document.getElementById('btnLangEn');
+
+    if (lang === 'sw') {
+        // Onyesha Kiswahili, Ficha Kiingereza
+        swElements.forEach(el => {
+            el.style.display = (el.tagName === 'TD' || el.tagName === 'TH') ? 'table-cell' : (el.tagName === 'TR' ? 'table-row' : 'block');
+        });
+        enElements.forEach(el => el.style.display = 'none');
+        
+        // Badilisha rangi ya vitufe
+        if(btnSw) { btnSw.style.background = '#0f172a'; btnSw.style.color = 'white'; }
+        if(btnEn) { btnEn.style.background = 'transparent'; btnEn.style.color = '#94a3b8'; }
+    } else {
+        // Onyesha Kiingereza, Ficha Kiswahili
+        swElements.forEach(el => el.style.display = 'none');
+        enElements.forEach(el => {
+            el.style.display = (el.tagName === 'TD' || el.tagName === 'TH') ? 'table-cell' : (el.tagName === 'TR' ? 'table-row' : 'block');
+        });
+        
+        // Badilisha rangi ya vitufe
+        if(btnEn) { btnEn.style.background = '#0f172a'; btnEn.style.color = 'white'; }
+        if(btnSw) { btnSw.style.background = 'transparent'; btnSw.style.color = '#94a3b8'; }
+    }
+}
+function printBudgetBook() {
+    // 1. Chukua maudhui ya kitabu
+    const printContents = document.getElementById('budgetBookPrintArea').innerHTML;
+    const lang = window.currentBookLang || 'sw';
+
+    // 2. Fungua dirisha jipya la kuchapisha (Window mpya inazuia CSS ya dashboard kuingilia)
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    
+    // 3. Andika HTML kamili kwenye dirisha jipya
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Budget Book - MAK DC</title>
+            <style>
+                /* CSS Maalum kwa ajili ya PDF/Print */
+                @page {
+                    size: A4 portrait;
+                    margin: 15mm;
+                }
+                body {
+                    font-family: 'Inter', Arial, sans-serif;
+                    color: #0f172a;
+                    background: white;
+                    margin: 0;
+                    padding: 0;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                
+                /* Ficha vitufe vyote vya rangi na sehemu zisizohitajika */
+                .no-print, button, .action-bar {
+                    display: none !important;
+                }
+
+                /* Mpangilio wa lugha */
+                .lang-sw { display: ${lang === 'sw' ? 'block' : 'none'} !important; }
+                .lang-en { display: ${lang === 'en' ? 'block' : 'none'} !important; }
+                
+                /* Kwa ajili ya vitu vya ndani ya table */
+                td.lang-sw, th.lang-sw { display: ${lang === 'sw' ? 'table-cell' : 'none'} !important; }
+                td.lang-en, th.lang-en { display: ${lang === 'en' ? 'table-cell' : 'none'} !important; }
+
+                /* Kila kadi ya shughuli isivunjike katikati */
+                .activity-card {
+                    page-break-inside: avoid;
+                    margin-bottom: 20px !important;
+                }
+                
+                /* Jedwali lisitoke nje ya ukurasa */
+                table {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    border-collapse: collapse !important;
+                }
+                
+                /* Rudisha ukubwa wa picha na fonts */
+                img { max-width: 100%; height: auto; }
+            </style>
+        </head>
+        <body>
+            ${printContents}
+        </body>
+        </html>
+    `);
+
+    // 4. Subiri kidogo kisha chapisha
+    setTimeout(() => {
+        printWindow.document.close(); // Muhimu kwa baadhi ya browsers
+        printWindow.focus();
+        printWindow.print();
+        // printWindow.close(); // Kama unataka ifunge baada ya kuchapisha, ondoa alama ya //
+    }, 500);
+}
+async function openBudgetBookForDept(budgetId) {
+    try {
+        // 1. Vuta taarifa za bajeti husika
+        const budget = await API.getMasterBudgetById(budgetId);
+        if (!budget) {
+            showToast('⚠ Budget not found', 'error');
+            return;
+        }
+
+        // 2. Tafuta mgao (allocation) wa idara yako kwenye bajeti hiyo
+        const user = Auth.getUser();
+        const myDept = user?.department || user?.departmentName;
+        const myAllocation = budget.allocations.find(a => a.department === myDept);
+
+        if (!myAllocation) {
+            showToast('❌ You have no allocation in this budget', 'error');
+            return;
+        }
+
+        // 3. Weka data kwenye variable ya muda
+        const tempBudgetData = { ...budget, myAllocation };
+
+        // 4. Fungua Kitabu kwa kutumia data hiyo
+        await openMyDeptBudgetBook(tempBudgetData);
+
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+    }
+}
+// ================================================================
+// 🆕 FINANCE KPI DASHBOARD
+// 🎨 RANGI: #0f766e (Teal) + #f59e0b (Gold)
+// ================================================================
+let isLoadingFinanceKpis = false;
+let allFinanceKpisData = [];
+let currentUpdateFinanceKpiId = null;
+let currentFinanceKpiData = null;
+
+// ===== LOAD KPIs =====
+async function loadFinanceKpis() {
+    const container = document.getElementById('financeKpiContainer');
+    const periodLabel = document.getElementById('financeKpiPeriodLabel');
+    if (!container) return;
+
+    if (isLoadingFinanceKpis) return;
+    isLoadingFinanceKpis = true;
+
+    const periodSelect = document.getElementById('filterFinanceKpiPeriod');
+    if (periodSelect && periodSelect.options.length === 0) {
+        populateFinanceKpiPeriodSelector();
+    }
+
+    const selectedPeriod = periodSelect?.value;
+    const now = new Date();
+    const currentPeriod = selectedPeriod || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    container.innerHTML = `
+        <div style="text-align: center; padding: 50px; color: #64748b;">
+            <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">⏳</div>
+            <div style="font-weight: 700;">Loading targets for ${currentPeriod}...</div>
+        </div>`;
+
+    try {
+        const user = Auth.getUser();
+        // 🆕 FIX: Tumia userId au id tu. Usijaribu kunasa employeeId kama haipo kwenye auth session.
+        const empId = user.userId || user.id; 
+        
+        if (!empId) throw new Error("User ID not found in session.");
+
+        // Vuta KPI zote za mtumiaji huyu
+        const kpis = await API.getEmployeeKpis({ 
+            employeeId: Number(empId), 
+            period: currentPeriod,
+            status: 'released'
+        });
+
+        let rawData = kpis || [];
+
+        // 🆕 FIX: Kichujio cha Usalama (Frontend Filter)
+        // Hii inahakikisha kwamba hata kama API imerudisha data ya wote, 
+        // Finance anaona zake tu (kwa kulinganisha jina au ID)
+        const myFullName = (user.fullName || '').toLowerCase().trim();
+        allFinanceKpisData = rawData.filter(kpi => {
+            // Kama API inarudisha employeeName au assignedTo, chuja hapa
+            if (kpi.employeeName) {
+                return kpi.employeeName.toLowerCase().trim() === myFullName;
+            }
+            if (kpi.employeeId) {
+                return String(kpi.employeeId) === String(empId);
+            }
+            return true; // Kama haina taarifa hizo, iachie (API ndio inapaswa kuchuja)
+        });
+
+        if (allFinanceKpisData.length === 0) {
+            periodLabel.textContent = 'No Targets';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🎯</div>
+                    <div style="font-size: 16px; font-weight: 800; color: #475569;">No Targets Assigned</div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 4px;">CEO has not assigned any KPIs for <strong>${currentPeriod}</strong>.</div>
+                </div>
+            `;
+            return;
+        }
+
+        periodLabel.textContent = allFinanceKpisData[0].periodLabel || currentPeriod;
+        renderFinanceKpiTable(allFinanceKpisData);
+
+    } catch (err) {
+        console.error("KPI Load Error:", err);
+        container.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc2626;">❌ Failed to load KPIs: ${err.message}</div>`;
+    } finally {
+        isLoadingFinanceKpis = false; 
+    }
+}
+
+// ===== RENDER TABLE =====
+function renderFinanceKpiTable(kpis) {
+    const container = document.getElementById('financeKpiContainer');
+    if (!container) return;
+
+    if (kpis.length === 0) {
+        container.innerHTML = `<div style="text-align: center; padding: 40px; color: #64748b;">No targets match your search.</div>`;
+        return;
+    }
+
+    // 🎨 RANGI ZA FINANCE
+    const PRIMARY = '#0f766e';
+    const ACCENT = '#f59e0b';
+
+    let rowsHtml = '';
+
+    kpis.forEach((kpi) => {
+        let percentage = 0;
+        let statusColor = '#64748b'; 
+        let statusText = 'Pending';
+        let bgStatus = '#f1f5f9';
+        let isOver = false;
+
+        if (kpi.actualValue !== null && kpi.actualValue !== undefined) {
+            if (kpi.metricType === 'WASTE_PERCENT') {
+                percentage = kpi.actualValue <= kpi.targetValue ? 100 : (kpi.targetValue / kpi.actualValue) * 100;
+            } else {
+                percentage = (kpi.actualValue / kpi.targetValue) * 100;
+            }
+            percentage = Math.round(percentage);
+            
+            if (percentage > 100) {
+                isOver = true;
+                statusColor = ACCENT;
+                bgStatus = 'rgba(245,158,11,0.15)';
+                statusText = `🔥 Over (${percentage}%)`;
+            } else if (percentage >= 100) {
+                statusColor = '#16a34a'; bgStatus = '#f0fdf4'; statusText = 'Achieved';
+            } else if (percentage >= 80) {
+                statusColor = '#f59e0b'; bgStatus = '#fffbeb'; statusText = 'On Track';
+            } else {
+                statusColor = '#dc2626'; bgStatus = '#fef2f2'; statusText = 'Below Target';
+            }
+        }
+        
+        const barWidth = Math.min(percentage, 100);
+        const valText = kpi.actualValue !== null ? kpi.actualValue.toLocaleString() : '—';
+        const tarText = kpi.targetValue ? kpi.targetValue.toLocaleString() : '—';
+
+        // History from notes
+        let historyHtml = '';
+        if (kpi.notes && kpi.notes.includes('[')) {
+            const historyLines = kpi.notes.split('\n').filter(l => l.includes('['));
+            const recentHistory = historyLines.slice(-3).reverse();
+            historyHtml = `
+                <div style="margin-top: 8px; background: #f8fafc; padding: 8px 12px; border-radius: 8px; border-left: 3px solid ${PRIMARY};">
+                    <div style="font-size: 9px; font-weight: 800; color: ${PRIMARY}; text-transform: uppercase; margin-bottom: 4px;">📅 Recent Progress Log</div>
+                    ${recentHistory.map(line => `<div style="font-size: 11px; color: #475569; margin-bottom: 2px;">${esc(line.trim())}</div>`).join('')}
+                </div>
+            `;
+        }
+
+        rowsHtml += `
+            <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                <td style="padding: 16px; font-weight: 800; color: #1e293b; font-size: 14px;">
+                    ${kpi.metricLabel}
+                    ${historyHtml}
+                </td>
+                <td style="padding: 16px; text-align: center;">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; padding: 4px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <span style="font-size: 13px; font-weight: 800; color: #64748b;">${tarText}</span>
+                        <span style="color: #cbd5e1; font-size: 14px;">➔</span>
+                        <span style="font-size: 13px; font-weight: 900; color: ${statusColor};">${valText}</span>
+                        <span style="font-size: 10px; font-weight: 700; color: #94a3b8; margin-left: 2px;">${kpi.metricUnit}</span>
+                    </div>
+                </td>
+                <td style="padding: 16px; width: 200px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: #334155; margin-bottom: 6px;">
+                        <span>Progress</span>
+                        <span style="color: ${statusColor};">${percentage}%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${barWidth}%; height: 100%; background: ${statusColor}; border-radius: 3px;"></div>
+                    </div>
+                </td>
+                <td style="padding: 16px; text-align: right;">
+                    <span style="display: inline-block; padding: 4px 10px; border-radius: 12px; background: ${bgStatus}; color: ${statusColor}; font-size: 10px; font-weight: 800; text-transform: uppercase;">
+                        ${statusText}
+                    </span>
+                </td>
+                <td style="padding: 16px; text-align: center;">
+                    <button onclick="openUpdateFinanceActualModal(${kpi.id}, '${kpi.metricLabel}', '${kpi.metricUnit}', ${kpi.actualValue || 0}, ${kpi.targetValue || 0}, \`${(kpi.notes || '').replace(/`/g, '\\`')}\`)" 
+                            style="padding: 6px 12px; background: rgba(15,118,110,0.1); color: ${PRIMARY}; border: 1px solid rgba(15,118,110,0.2); border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; font-family: inherit;">
+                        ✏️ Update
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    container.innerHTML = `
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                    <tr>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Metric</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Target ➔ Actual</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Completion</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; text-align: right;">Status</th>
+                        <th style="padding: 14px 16px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+// ===== FILTER =====
+function filterFinanceKpis() {
+    const searchTerm = (document.getElementById('searchFinanceKpi')?.value || '').toLowerCase().trim();
+    const statusFilter = document.getElementById('filterFinanceKpiStatus')?.value || '';
+
+    const filteredData = allFinanceKpisData.filter(kpi => {
+        const matchName = kpi.metricLabel.toLowerCase().includes(searchTerm);
+        
+        let matchStatus = true;
+        if (statusFilter) {
+            let percentage = 0;
+            let statusKey = 'pending';
+            if (kpi.actualValue !== null && kpi.actualValue !== undefined) {
+                if (kpi.metricType === 'WASTE_PERCENT') {
+                    percentage = kpi.actualValue <= kpi.targetValue ? 100 : (kpi.targetValue / kpi.actualValue) * 100;
+                } else {
+                    percentage = (kpi.actualValue / kpi.targetValue) * 100;
+                }
+                percentage = Math.round(percentage);
+                if (percentage >= 100) statusKey = 'achieved';
+                else if (percentage >= 80) statusKey = 'ontrack';
+                else statusKey = 'below';
+            }
+            matchStatus = statusKey === statusFilter;
+        }
+
+        return matchName && matchStatus;
+    });
+
+    renderFinanceKpiTable(filteredData);
+}
+
+// ===== PERIOD SELECTOR =====
+function populateFinanceKpiPeriodSelector() {
+    const select = document.getElementById('filterFinanceKpiPeriod');
+    if (!select) return;
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    let options = '';
+
+    for (let year = currentYear; year >= currentYear - 1; year--) {
+        for (let m = 11; m >= 0; m--) {
+            const monthValue = `${year}-${String(m + 1).padStart(2, '0')}`;
+            const label = `${monthNames[m]} ${year}`;
+            const isCurrent = (year === currentYear && m === now.getMonth());
+            
+            options += `<option value="${monthValue}" ${isCurrent ? 'selected' : ''}>${label}</option>`;
+        }
+    }
+
+    select.innerHTML = options;
+}
+
+// ===== UPDATE ACTUAL MODAL =====
+function openUpdateFinanceActualModal(kpiId, metricLabel, metricUnit, currentActual, targetValue, historyNotes) {
+    currentUpdateFinanceKpiId = kpiId;
+    currentFinanceKpiData = { currentActual, targetValue, metricUnit };
+    
+    document.getElementById('financeUaKpiName').textContent = metricLabel;
+    document.getElementById('financeUaKpiUnit').textContent = metricUnit;
+    document.getElementById('financeUaTargetDisplay').textContent = `${Number(targetValue).toLocaleString()} ${metricUnit}`;
+    document.getElementById('financeUaIncrementValue').value = '';
+    document.getElementById('financeUaNotes').value = '';
+    document.getElementById('financeUaLivePreview').style.display = 'none';
+    
+    // Historia
+    const historyContainer = document.getElementById('financeUaHistory');
+    if (historyNotes && historyNotes.includes('[')) {
+        const historyLines = historyNotes.split('\n').filter(l => l.includes('[')).reverse();
+        historyContainer.innerHTML = historyLines.map(line => `
+            <div style="font-size: 11.5px; color: #475569; padding: 6px 0; border-bottom: 1px dashed #e2e8f0;">
+                ${line}
+            </div>
+        `).join('');
+    } else {
+        historyContainer.innerHTML = `<div style="font-size: 12px; color: #94a3b8; font-style: italic;">No history yet.</div>`;
+    }
+
+    document.getElementById('financeUaStatus').className = 'status-msg';
+    document.getElementById('financeUaStatus').textContent = '';
+    
+    const btn = document.getElementById('financeUaSaveBtn');
+    btn.disabled = false;
+    btn.textContent = '🚀 Save Progress';
+
+    document.getElementById('updateFinanceActualModal').classList.add('show');
+}
+
+function updateFinancePreviewTotal() {
+    const increment = parseFloat(document.getElementById('financeUaIncrementValue').value) || 0;
+    const previewDiv = document.getElementById('financeUaLivePreview');
+    const display = document.getElementById('financeUaNewTotalDisplay');
+
+    if (increment > 0) {
+        const newTotal = currentFinanceKpiData.currentActual + increment;
+        display.textContent = `${newTotal.toLocaleString()} ${currentFinanceKpiData.metricUnit}`;
+        previewDiv.style.display = 'block';
+    } else {
+        previewDiv.style.display = 'none';
+    }
+}
+
+async function saveFinanceActualValue() {
+    const statusDiv = document.getElementById('financeUaStatus');
+    const saveBtn = document.getElementById('financeUaSaveBtn');
+    const incrementValue = parseFloat(document.getElementById('financeUaIncrementValue').value);
+    const notes = document.getElementById('financeUaNotes').value.trim();
+
+    if (isNaN(incrementValue) || incrementValue <= 0) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ Please enter a valid number greater than 0.';
+        return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ Saving...';
+    saveBtn.style.opacity = '0.7';
+
+    try {
+        await API.updateEmployeeKpi(currentUpdateFinanceKpiId, { 
+            incrementValue: incrementValue,
+            notes: notes 
+        });
+
+        statusDiv.className = 'status-msg success';
+        statusDiv.textContent = '✓ Progress saved successfully!';
+
+        setTimeout(() => {
+            closeModal('updateFinanceActualModal');
+            loadFinanceKpis();
+        }, 800);
+
+    } catch (err) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ ' + err.message;
+        saveBtn.disabled = false;
+        saveBtn.textContent = '🚀 Save Progress';
+        saveBtn.style.opacity = '1';
+    }
+}

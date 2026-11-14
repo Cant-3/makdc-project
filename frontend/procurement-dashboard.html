@@ -496,6 +496,18 @@
                     <a onclick="switchSidebarTab('sub-report-annual', event)">📊 Master Report</a>
                 </div>
             </div>
+            <div class="sidebar-nav-group" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
+                    <span>💰</span>
+                    <span class="nav-text">Budget</span>
+                    <span class="nav-arrow">▼</span>
+                </div>
+                <div class="sidebar-submenu">
+                    <a onclick="switchSidebarTab('tab-my-budget', event)">📊 My Current Budget</a>
+                    <!-- 🆕 Ongeza hii -->
+                    <a onclick="switchSidebarTab('tab-all-my-budgets', event)">📋 All My Budgets</a>
+                </div>
+            </div>
             <div class="sidebar-nav-group">
                 <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
                     <span>⛽</span><span class="nav-text">Fuel Management</span><span class="nav-arrow">▼</span>
@@ -503,6 +515,13 @@
                 <div class="sidebar-submenu">
                     <a onclick="switchSidebarTab('sub-fuel-management', event)">⛽ Fuel Dashboard</a>
                 </div>
+            </div>
+            <!-- My KPIs Link -->
+            <div class="sidebar-nav-group" style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                <a class="sidebar-nav-parent" onclick="switchSidebarTab('tab-my-kpis', event)" data-tooltip="My Targets">
+                    <span>🎯</span>
+                    <span class="nav-text">My Targets (KPIs)</span>
+                </a>
             </div>
         </nav>
         <div class="sidebar-user">
@@ -766,7 +785,7 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== SUB-TAB: ALL ASSETS ===== -->
+             <!-- ===== SUB-TAB: ALL ASSETS ===== -->
             <div class="tab-content" id="sub-all-assets">
                 <div class="section-card">
                     <div class="section-header">
@@ -1021,8 +1040,111 @@
                     </div>
                 </div>
             </div>
-        </div> <!-- FUNGA DASHBOARD-CONTENT HAPA -->
-        
+            <!-- ===== TAB: MY CURRENT BUDGET (Procurement) ===== -->
+            <div class="tab-content" id="tab-my-budget">
+                <div class="section-card">
+                    <div class="section-header" style="background: linear-gradient(135deg, #022908, #034d13); border-bottom: 3px solid #f59e0b;">
+                        <div class="header-left">
+                            <span class="color-bar" style="background:#f59e0b;"></span>
+                            <h3 style="color: white; margin: 0;">💰 My Department Budget</h3>
+                        </div>
+                        <span class="badge" id="myBudgetStatusBadge" style="background:#f59e0b;color:#022908;">—</span>
+                    </div>
+                    <div class="section-body">
+                        <div id="myBudgetContent">
+                            <div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading budget...</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="budgetBreakdownPage" style="display:none;">
+                    <div style="background:linear-gradient(135deg, #022908, #034d13); padding:20px 28px; border-radius:14px; color:white; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; border-left: 5px solid #f59e0b;">
+                        <div>
+                            <div style="font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px;">Budget Breakdown</div>
+                            <h3 style="font-size:22px; font-weight:900; margin:0;" id="bdTitle">—</h3>
+                            <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-top:4px;" id="bdMeta">—</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:11px; font-weight:800; color:rgba(255,255,255,0.6); text-transform:uppercase;">Your Ceiling</div>
+                            <div style="font-size:26px; font-weight:900; color:#f59e0b; font-family:'Courier New',monospace;" id="bdCeiling">TSh 0</div>
+                        </div>
+                    </div>
+                    <div id="bdActivitiesList"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; padding:20px; background:white; border-radius:12px; border:1.5px solid #e2e8f0; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Grand Total</div>
+                            <div style="font-size:24px; font-weight:900; color:#022908; font-family:'Courier New',monospace;" id="bdGrandTotal">TSh 0</div>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button onclick="addNewActivity()" style="padding:12px 24px; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px;">➕ Add Activity</button>
+                            <button onclick="submitBudgetBreakdown(true)" style="padding:12px 24px; background:rgba(245,158,11,0.15); color:#022908; border:1.5px solid rgba(245,158,11,0.3); border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px;">💾 Save as Draft</button>
+                            <button onclick="closeBudgetBreakdownPage()" style="padding:12px 24px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:13px;">← Back</button>
+                            <button onclick="openBudgetReviewModal()" style="padding:12px 28px; background:linear-gradient(135deg,#022908,#034d13); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; font-size:13px; box-shadow:0 4px 12px rgba(2,41,8,0.3);">📤 Submit to Manager</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 🆕 TAB: ALL MY BUDGETS (Procurement) -->
+            <div class="tab-content" id="tab-all-my-budgets">
+                <div class="section-card">
+                    <div class="section-header" style="background:linear-gradient(135deg,#022908 0%,#034d13 100%); border-bottom:3px solid #f59e0b;">
+                        <h2 style="color:white;">💰 All My Budgets</h2>
+                        <span class="badge" style="background:#f59e0b;color:#022908;">Full History</span>
+                    </div>
+                    <div class="section-body" style="padding:24px; overflow-x:auto;">
+                        <div id="allBudgetsContainer" style="width: 100%; min-width: 800px;">
+                            <div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading budgets...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ===== TAB: MY KPIs (Procurement) ===== -->
+            <div class="tab-content" id="tab-my-kpis">
+                <div class="section-card" style="border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                    
+                    <!-- Header -->
+                    <div class="section-header" style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); border-bottom: 3px solid #f59e0b; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2 style="color: white; margin: 0; font-size: 18px;">🎯 My Performance Targets</h2>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin: 4px 0 0 0;">Track your KPIs and update progress</p>
+                        </div>
+                        <span class="badge" style="background: #f59e0b; color: #022908; font-weight: 800;" id="procurementKpiPeriodLabel">Loading...</span>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="section-body" style="padding: 24px;">
+
+                        <!-- Filters Row -->
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <input type="text" id="searchProcurementKpi" placeholder="🔍 Search metric..." 
+                                oninput="filterProcurementKpis()" 
+                                style="flex: 1; min-width: 200px; padding: 10px 16px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none;">
+                            
+                            <select id="filterProcurementKpiPeriod" onchange="loadProcurementKpis()" 
+                                    style="padding: 10px 16px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: white; outline: none; cursor: pointer;">
+                            </select>
+                            
+                            <select id="filterProcurementKpiStatus" onchange="filterProcurementKpis()" 
+                                    style="padding: 10px 16px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: white; outline: none; cursor: pointer;">
+                                <option value="">🚦 All Status</option>
+                                <option value="achieved">✅ Achieved</option>
+                                <option value="ontrack">🟡 On Track</option>
+                                <option value="below">❌ Below Target</option>
+                                <option value="pending">⏳ Pending</option>
+                            </select>
+                        </div>
+
+                        <!-- Table Container -->
+                        <div id="procurementKpiContainer" style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;">
+                            <div style="text-align: center; padding: 50px; color: #64748b;">
+                                <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">⏳</div>
+                                <div style="font-weight: 700;">Loading your targets...</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>         
         <!-- ===== FOOTER ===== -->
         <footer class="site-footer">
             <p>MAK DC Investment Company — Procurement &amp; Store Dashboard</p>
@@ -1536,7 +1658,72 @@
             <div class="confirm-actions"><button class="btn-cancel" id="confirmCancelBtn" onclick="closeConfirm(false)">Cancel</button><button class="btn-confirm" id="confirmOkBtn" onclick="closeConfirm(true)">Yes, Confirm</button></div>
         </div>
     </div>
+    <!-- ===== MODAL: UPDATE PROCUREMENT KPI ACTUAL ===== -->
+    <div class="modal-overlay" id="updateProcurementActualModal">
+        <div class="modal-box" style="max-width: 480px; padding: 0; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.3);">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 24px; color: white; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(245,158,11,0.3) 0%, transparent 70%); border-radius: 50%;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1;">
+                    <div>
+                        <div style="font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #fbbf24; margin-bottom: 4px;">Update Progress</div>
+                        <h3 id="procurementUaKpiName" style="margin: 0; font-size: 20px; font-weight: 900;">—</h3>
+                    </div>
+                    <button onclick="closeModal('updateProcurementActualModal')" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>
+                </div>
+            </div>
+            
+            <div style="padding: 24px; background: #ffffff;">
+                
+                <!-- Target Info -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                    <div style="font-size: 12px; color: #64748b; font-weight: 700;">Current Target</div>
+                    <div style="font-size: 15px; font-weight: 900; color: #022908;" id="procurementUaTargetDisplay">—</div>
+                </div>
 
+                <!-- Input -->
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;">Add Progress (Increment)</label>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                        <input type="number" id="procurementUaIncrementValue" placeholder="0" oninput="updateProcurementPreviewTotal()" 
+                            style="flex: 1; padding: 14px 16px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 18px; font-weight: 800; color: #022908; outline: none;">
+                        <span style="font-size: 13px; font-weight: 800; color: #64748b;" id="procurementUaKpiUnit">units</span>
+                    </div>
+                </div>
+
+                <!-- Live Preview -->
+                <div id="procurementUaLivePreview" style="display: none; background: #f0fdf4; border: 1.5px dashed #86efac; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 11px; font-weight: 800; color: #16a34a; text-transform: uppercase;">New Total Will Be</div>
+                    <div style="font-size: 24px; font-weight: 900; color: #15803d;" id="procurementUaNewTotalDisplay">0</div>
+                </div>
+
+                <!-- Notes -->
+                <div style="margin-bottom: 20px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;">What did you do? (Optional)</label>
+                    <textarea id="procurementUaNotes" placeholder="Describe the work done..." 
+                            style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-family: inherit; margin-top: 6px; min-height: 60px; resize: vertical;"></textarea>
+                </div>
+
+                <!-- History -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
+                    <div style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">🕒 Progress Log</div>
+                    <div id="procurementUaHistory" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 12px; color: #94a3b8; font-style: italic;">No history yet.</div>
+                    </div>
+                </div>
+
+                <div id="procurementUaStatus" class="status-msg" style="margin-top: 12px;"></div>
+            </div>
+            
+            <div style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeModal('updateProcurementActualModal')" 
+                        style="padding: 12px 24px; background: white; color: #475569; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit;">Cancel</button>
+                <button id="procurementUaSaveBtn" onclick="saveProcurementActualValue()" 
+                        style="padding: 12px 28px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(245,158,11,0.3);">🚀 Save Progress</button>
+            </div>
+        </div>
+    </div>
     <div class="modal-overlay" id="tenderModal">
         <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden;">
             <div style="background:linear-gradient(135deg,#022908 0%,#034d13 100%);padding:20px 26px;color:white;display:flex;justify-content:space-between;align-items:center;">

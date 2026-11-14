@@ -53,20 +53,20 @@ function requireRole(...allowedRoles) {
 }
 
 // ================================================================
-// REQUIRE SUPER ADMIN — Super Admin pekee
+// REQUIRE SUPER ADMIN — Ruhusu SuperAdmin, CEO, na Manager
 // ================================================================
 function requireSuperAdmin(req, res, next) {
     if (!req.user) {
         return res.status(401).json({ error: 'Unahitaji kuingia kwanza.' });
     }
 
-    if (req.user.role !== 'SuperAdmin') {
-        return res.status(403).json({ error: 'Super Admin pekee anaweza kufanya hivi.' });
+    // 🆕 Rekebisha: Tumia req.user.role (sio user.role)
+    if (!['SuperAdmin', 'CEO', 'Manager'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Huna ruhusa ya kufanya hivi' });
     }
 
     next();
 }
-
 // ================================================================
 // OPTIONAL AUTH — Kama token ipo, ithibitishe. Kama haipo, endelea
 // ================================================================

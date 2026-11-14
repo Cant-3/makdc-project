@@ -1010,6 +1010,252 @@ CREATE TABLE "tenders" (
     CONSTRAINT "tenders_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "master_budgets" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "period" TEXT NOT NULL,
+    "year" INTEGER NOT NULL,
+    "total_amount" DECIMAL(15,2) NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending-departments',
+    "created_by" TEXT NOT NULL,
+    "created_by_id" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "rejection_reason" TEXT,
+    "approved_by" TEXT,
+
+    CONSTRAINT "master_budgets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "budget_allocations" (
+    "id" SERIAL NOT NULL,
+    "budget_id" INTEGER NOT NULL,
+    "department" TEXT NOT NULL,
+    "icon" TEXT,
+    "ceiling_amount" DECIMAL(15,2) NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending-department',
+
+    CONSTRAINT "budget_allocations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "budget_activities" (
+    "id" SERIAL NOT NULL,
+    "allocation_id" INTEGER NOT NULL,
+    "activity_name" TEXT NOT NULL,
+    "item_name" TEXT,
+    "quantity" DOUBLE PRECISION NOT NULL,
+    "unit" TEXT NOT NULL,
+    "unit_price" DECIMAL(15,2) NOT NULL,
+    "total_cost" DECIMAL(15,2) NOT NULL,
+
+    CONSTRAINT "budget_activities_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "strategic_plans" (
+    "id" SERIAL NOT NULL,
+    "strategic_id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "year" TEXT NOT NULL,
+    "department" TEXT,
+    "summary" TEXT,
+    "file_name" TEXT,
+    "file_type" TEXT,
+    "file_size" INTEGER,
+    "file_data" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'Draft',
+    "manager_id" INTEGER,
+    "manager_name" TEXT,
+    "created_by" TEXT,
+    "submitted_to_ceo_at" TIMESTAMP(3),
+    "submitted_to_ceo_by" TEXT,
+    "ceo_remarks" TEXT,
+    "ceo_approved_at" TIMESTAMP(3),
+    "ceo_approved_by" TEXT,
+    "ceo_approved_by_id" INTEGER,
+    "ceo_rejected_at" TIMESTAMP(3),
+    "ceo_rejected_by" TEXT,
+    "ceo_rejected_by_id" INTEGER,
+    "ceo_rejection_reason" TEXT,
+    "revision_notes" TEXT,
+    "revision_requested_at" TIMESTAMP(3),
+    "revision_requested_by" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "strategic_plans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "business_plans" (
+    "id" SERIAL NOT NULL,
+    "business_plan_id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "project_type" TEXT NOT NULL,
+    "department" TEXT,
+    "summary" TEXT,
+    "estimated_budget" DECIMAL(15,2),
+    "currency" TEXT NOT NULL DEFAULT 'TZS',
+    "expected_revenue" DECIMAL(15,2),
+    "expected_roi" DECIMAL(5,2),
+    "break_even_months" INTEGER,
+    "start_date" DATE,
+    "end_date" DATE,
+    "file_name" TEXT,
+    "file_type" TEXT,
+    "file_size" INTEGER,
+    "file_data" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'Draft',
+    "created_by" TEXT,
+    "created_by_id" INTEGER,
+    "submitted_to_ceo_at" TIMESTAMP(3),
+    "submitted_to_ceo_by" TEXT,
+    "ceo_remarks" TEXT,
+    "ceo_approved_at" TIMESTAMP(3),
+    "ceo_approved_by" TEXT,
+    "ceo_approved_by_id" INTEGER,
+    "ceo_rejected_at" TIMESTAMP(3),
+    "ceo_rejected_by" TEXT,
+    "ceo_rejection_reason" TEXT,
+    "revision_notes" TEXT,
+    "revision_requested_at" TIMESTAMP(3),
+    "revision_requested_by" TEXT,
+    "budget_id" INTEGER,
+    "procurement_id" INTEGER,
+    "tender_id" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "business_plans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "manager_reports" (
+    "id" SERIAL NOT NULL,
+    "report_id" TEXT NOT NULL,
+    "period_type" TEXT NOT NULL,
+    "start_date" TIMESTAMP(3) NOT NULL,
+    "end_date" TIMESTAMP(3) NOT NULL,
+    "metrics" JSONB NOT NULL,
+    "key_activities" TEXT,
+    "executive_summary" TEXT,
+    "challenges" TEXT,
+    "recommendations" TEXT,
+    "file_name" TEXT,
+    "file_type" TEXT,
+    "file_size" INTEGER,
+    "file_data" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'Draft',
+    "created_by" TEXT NOT NULL,
+    "created_by_id" INTEGER,
+    "submitted_at" TIMESTAMP(3),
+    "ceo_feedback" TEXT,
+    "ceo_reviewed_at" TIMESTAMP(3),
+    "ceo_reviewed_by" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "manager_reports_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "employee_kpis" (
+    "id" SERIAL NOT NULL,
+    "employee_id" INTEGER NOT NULL,
+    "employee_name" TEXT NOT NULL,
+    "department" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "metric_type" TEXT NOT NULL,
+    "metric_label" TEXT NOT NULL,
+    "metric_unit" TEXT NOT NULL,
+    "target_value" DOUBLE PRECISION NOT NULL,
+    "period" TEXT NOT NULL,
+    "period_label" TEXT NOT NULL,
+    "periodType" TEXT NOT NULL DEFAULT 'monthly',
+    "status" TEXT NOT NULL DEFAULT 'draft',
+    "released_at" TIMESTAMP(3),
+    "released_by" TEXT,
+    "released_by_id" INTEGER,
+    "actual_value" DOUBLE PRECISION,
+    "calculated_at" TIMESTAMP(3),
+    "created_by" TEXT NOT NULL,
+    "created_by_id" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "notes" TEXT,
+
+    CONSTRAINT "employee_kpis_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "kpi_history" (
+    "id" SERIAL NOT NULL,
+    "kpi_id" INTEGER NOT NULL,
+    "action" TEXT NOT NULL,
+    "old_value" JSONB,
+    "new_value" JSONB,
+    "performed_by" TEXT NOT NULL,
+    "performed_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "kpi_history_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "internal_messages" (
+    "id" SERIAL NOT NULL,
+    "sender_id" INTEGER NOT NULL,
+    "sender_name" TEXT NOT NULL,
+    "sender_role" TEXT,
+    "receiver_id" INTEGER NOT NULL,
+    "receiver_name" TEXT NOT NULL,
+    "cc_ids" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "cc_names" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "subject" TEXT NOT NULL,
+    "body" TEXT NOT NULL,
+    "type" TEXT NOT NULL DEFAULT 'information',
+    "priority" TEXT NOT NULL DEFAULT 'normal',
+    "status" TEXT NOT NULL DEFAULT 'unread',
+    "attachments" JSONB DEFAULT '[]',
+    "has_attachments" BOOLEAN NOT NULL DEFAULT false,
+    "is_minute" BOOLEAN NOT NULL DEFAULT false,
+    "assigned_to" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "assigned_to_names" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "assigned_by" TEXT,
+    "assigned_at" TIMESTAMP(3),
+    "reply_to_id" INTEGER,
+    "is_starred" BOOLEAN NOT NULL DEFAULT false,
+    "is_archived" BOOLEAN NOT NULL DEFAULT false,
+    "is_deleted" BOOLEAN NOT NULL DEFAULT false,
+    "read_at" TIMESTAMP(3),
+    "attended_at" TIMESTAMP(3),
+    "attended_by" TEXT,
+    "closed_at" TIMESTAMP(3),
+    "closed_by" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "internal_messages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "internal_message_attendance" (
+    "id" SERIAL NOT NULL,
+    "message_id" INTEGER NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "user_name" TEXT NOT NULL,
+    "user_role" TEXT,
+    "action" TEXT NOT NULL,
+    "comment" TEXT,
+    "assigned_to" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
+    "assigned_names" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "internal_message_attendance_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_employee_id_key" ON "users"("employee_id");
 
@@ -1256,6 +1502,72 @@ CREATE INDEX "procurement_status_history_request_id_idx" ON "procurement_status_
 -- CreateIndex
 CREATE UNIQUE INDEX "tenders_tender_number_key" ON "tenders"("tender_number");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "strategic_plans_strategic_id_key" ON "strategic_plans"("strategic_id");
+
+-- CreateIndex
+CREATE INDEX "strategic_plans_status_idx" ON "strategic_plans"("status");
+
+-- CreateIndex
+CREATE INDEX "strategic_plans_year_idx" ON "strategic_plans"("year");
+
+-- CreateIndex
+CREATE INDEX "strategic_plans_manager_id_idx" ON "strategic_plans"("manager_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "business_plans_business_plan_id_key" ON "business_plans"("business_plan_id");
+
+-- CreateIndex
+CREATE INDEX "business_plans_status_idx" ON "business_plans"("status");
+
+-- CreateIndex
+CREATE INDEX "business_plans_project_type_idx" ON "business_plans"("project_type");
+
+-- CreateIndex
+CREATE INDEX "business_plans_department_idx" ON "business_plans"("department");
+
+-- CreateIndex
+CREATE INDEX "business_plans_created_by_id_idx" ON "business_plans"("created_by_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "manager_reports_report_id_key" ON "manager_reports"("report_id");
+
+-- CreateIndex
+CREATE INDEX "employee_kpis_employee_id_period_status_idx" ON "employee_kpis"("employee_id", "period", "status");
+
+-- CreateIndex
+CREATE INDEX "employee_kpis_department_period_idx" ON "employee_kpis"("department", "period");
+
+-- CreateIndex
+CREATE INDEX "employee_kpis_role_period_idx" ON "employee_kpis"("role", "period");
+
+-- CreateIndex
+CREATE INDEX "employee_kpis_status_idx" ON "employee_kpis"("status");
+
+-- CreateIndex
+CREATE INDEX "kpi_history_kpi_id_idx" ON "kpi_history"("kpi_id");
+
+-- CreateIndex
+CREATE INDEX "kpi_history_action_idx" ON "kpi_history"("action");
+
+-- CreateIndex
+CREATE INDEX "internal_messages_receiver_id_idx" ON "internal_messages"("receiver_id");
+
+-- CreateIndex
+CREATE INDEX "internal_messages_sender_id_idx" ON "internal_messages"("sender_id");
+
+-- CreateIndex
+CREATE INDEX "internal_messages_status_idx" ON "internal_messages"("status");
+
+-- CreateIndex
+CREATE INDEX "internal_messages_is_minute_idx" ON "internal_messages"("is_minute");
+
+-- CreateIndex
+CREATE INDEX "internal_message_attendance_message_id_idx" ON "internal_message_attendance"("message_id");
+
+-- CreateIndex
+CREATE INDEX "internal_message_attendance_user_id_idx" ON "internal_message_attendance"("user_id");
+
 -- AddForeignKey
 ALTER TABLE "orders" ADD CONSTRAINT "orders_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -1375,3 +1687,15 @@ ALTER TABLE "asset_maintenance" ADD CONSTRAINT "asset_maintenance_asset_id_fkey"
 
 -- AddForeignKey
 ALTER TABLE "asset_depreciation_logs" ADD CONSTRAINT "asset_depreciation_logs_asset_id_fkey" FOREIGN KEY ("asset_id") REFERENCES "assets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "budget_allocations" ADD CONSTRAINT "budget_allocations_budget_id_fkey" FOREIGN KEY ("budget_id") REFERENCES "master_budgets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "budget_activities" ADD CONSTRAINT "budget_activities_allocation_id_fkey" FOREIGN KEY ("allocation_id") REFERENCES "budget_allocations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "kpi_history" ADD CONSTRAINT "kpi_history_kpi_id_fkey" FOREIGN KEY ("kpi_id") REFERENCES "employee_kpis"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "internal_message_attendance" ADD CONSTRAINT "internal_message_attendance_message_id_fkey" FOREIGN KEY ("message_id") REFERENCES "internal_messages"("id") ON DELETE CASCADE ON UPDATE CASCADE;

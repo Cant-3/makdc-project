@@ -25,8 +25,8 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // ================================================================
 // REQUEST LOGGER
@@ -75,10 +75,13 @@ const payrollRoutes = require('./routes/payroll.routes');
 const financialResourceRoutes = require('./routes/financialResource.routes');
 const transactionRoutes = require('./routes/transaction.routes');
 const companyPaymentRoutes = require('./routes/companyPayment.routes');
-
-// 🆕 Analytics & Visitor Tracker
+const budgetRoutes = require('./routes/budgetRoutes'); 
 const visitorTracker = require('./middleware/visitorTracker');
 const analyticsRoutes = require('./routes/analytics');
+const strategicPlansRoutes = require('./routes/strategicPlans.routes');
+const businessPlanRoutes = require('./routes/businessPlan.routes');
+const managerReportRoutes = require('./routes/managerReport.routes');
+const kpiRoutes = require('./routes/kpi.routes');
 
 // ================================================================
 // ROUTES — MOUNTING
@@ -86,8 +89,6 @@ const analyticsRoutes = require('./routes/analytics');
 
 // 🆕 Visitor Tracker (weka KWANZA ili irekodi kila request)
 app.use(visitorTracker);
-
-// Routes zote za API
 app.use('/api/company-payments', companyPaymentRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/hero', heroRoutes);
@@ -117,7 +118,12 @@ app.use('/api/procurement', require('./routes/procurement.routes'));
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/assets', require('./routes/asset.routes'));
 app.use('/api/tenders', require('./routes/tender.routes'));
-
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/strategic-plans', strategicPlansRoutes);
+app.use('/api/business-plans', businessPlanRoutes);
+app.use('/api/manager-reports', managerReportRoutes);
+app.use('/api/kpis', kpiRoutes);
+app.use('/api/messages', require('./routes/message.routes'));
 
 
 // ================================================================

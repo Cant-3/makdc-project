@@ -1077,4 +1077,274 @@ const API = {
     issueFuel(data) {
         return this.post('/procurement/fuel/issue', data);
     },
-};
+    // ================================================================
+    // MASTER BUDGET ENDPOINTS
+    // ================================================================
+
+    // ===== Master Budget CRUD =====
+    createMasterBudget(data) {
+        return this.post('/budgets/master', data);
+    },
+
+    getMasterBudgets() {
+        return this.get('/budgets/master');
+    },
+
+    getMasterBudgetById(id) {
+        return this.get(`/budgets/master/${id}`);
+    },
+
+    updateMasterBudget(id, data) {
+        return this.put(`/budgets/master/${id}`, data);
+    },
+
+    // 🆕 Badilisha status (generic — kwa checkAndSetPendingManager, rejectCEOBudget, n.k.)
+    updateMasterBudgetStatus(id, data) {
+        return this.put(`/budgets/master/${id}/status`, data);
+    },
+
+    // ===== Department Budget (Step 2) =====
+    getMyDepartmentBudget() {
+        return this.get('/budgets/department/me');
+    },
+
+    getDepartmentBudgetByMasterId(masterBudgetId, department) {
+        return this.get(`/budgets/master/${masterBudgetId}/department/${encodeURIComponent(department)}`);
+    },
+
+    submitDepartmentBreakdown(masterBudgetId, department, data) {
+        return this.post(`/budgets/master/${masterBudgetId}/department/${encodeURIComponent(department)}/submit`, data);
+    },
+
+    // ===== Manager Review (Step 3) =====
+    forwardMasterBudgetToCeo(masterBudgetId) {
+        const user = Auth.getUser();
+        return this.put(`/budgets/master/${masterBudgetId}/forward-to-ceo`, {
+            forwardedBy: user?.fullName || 'Manager',
+            forwardedById: user?.id,
+            forwardedAt: new Date().toISOString()
+        });
+    },
+
+    returnMasterBudgetToDepartments(masterBudgetId, reason) {
+        return this.put(`/budgets/master/${masterBudgetId}/return`, { reason });
+    },
+
+    // ===== CEO Approval (Step 4) =====
+    // 🆕 Badilisha jina ili ifanane na code inayoitwa (ceo.js)
+    ceoApproveMasterBudget(masterBudgetId, notes) {
+        const user = Auth.getUser();
+        return this.put(`/budgets/master/${masterBudgetId}/approve`, {
+            notes,
+            approvedBy: user?.fullName || 'CEO',
+            approvedById: user?.id,
+            approvedAt: new Date().toISOString()
+        });
+    },
+
+    // Keep old name kwa backward compatibility (kama ipo kwenye code nyingine)
+    approveMasterBudget(masterBudgetId, notes) {
+        return this.ceoApproveMasterBudget(masterBudgetId, notes);
+    },
+
+    rejectMasterBudget(masterBudgetId, reason) {
+        const user = Auth.getUser();
+        return this.put(`/budgets/master/${masterBudgetId}/reject`, {
+            reason,
+            rejectedBy: user?.fullName || 'CEO',
+            rejectedById: user?.id,
+            rejectedAt: new Date().toISOString()
+        });
+    },
+        // ============================================================
+    // 🧭 STRATEGIC PLANS (Manager → CEO)
+    // ============================================================
+    getStrategicPlans() {
+        return this.get('/strategic-plans');
+    },
+
+    getStrategicPlanById(id) {
+        return this.get(`/strategic-plans/${id}`);
+    },
+
+    createStrategicPlan(data) {
+        return this.post('/strategic-plans', data);
+    },
+
+    updateStrategicPlan(id, data) {
+        return this.put(`/strategic-plans/${id}`, data);
+    },
+
+    deleteStrategicPlan(id) {
+        return this.delete(`/strategic-plans/${id}`);
+    },
+
+    // Manager submits to CEO
+    submitStrategicPlanToCeo(id) {
+        return this.put(`/strategic-plans/${id}/submit-to-ceo`);
+    },
+
+    // CEO actions
+    ceoApproveStrategicPlan(id, remarks) {
+        return this.put(`/strategic-plans/${id}/ceo-approve`, { remarks });
+    },
+
+    ceoRejectStrategicPlan(id, reason) {
+        return this.put(`/strategic-plans/${id}/ceo-reject`, { reason });
+    },
+
+    ceoRequestRevision(id, notes) {
+        return this.put(`/strategic-plans/${id}/ceo-request-revision`, { notes });
+    },
+    // ============================================================
+    // 💼 BUSINESS PLANS
+    // ============================================================
+    getBusinessPlans(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.get(`/business-plans${query ? '?' + query : ''}`);
+    },
+
+    getBusinessPlanById(id) {
+        return this.get(`/business-plans/${id}`);
+    },
+
+    createBusinessPlan(data) {
+        return this.post('/business-plans', data);
+    },
+
+    updateBusinessPlan(id, data) {
+        return this.put(`/business-plans/${id}`, data);
+    },
+
+    deleteBusinessPlan(id) {
+        return this.delete(`/business-plans/${id}`);
+    },
+
+    // Manager → CEO
+    submitBusinessPlanToCeo(id) {
+        return this.put(`/business-plans/${id}/submit-to-ceo`);
+    },
+
+    // CEO actions
+    ceoApproveBusinessPlan(id, remarks) {
+        return this.put(`/business-plans/${id}/ceo-approve`, { remarks });
+    },
+
+    ceoRejectBusinessPlan(id, reason) {
+        return this.put(`/business-plans/${id}/ceo-reject`, { reason });
+    },
+
+    ceoRequestBusinessPlanRevision(id, notes) {
+        return this.put(`/business-plans/${id}/ceo-request-revision`, { notes });
+    },
+
+    // Post-approval
+    linkBusinessPlanToBudget(id, budgetId) {
+        return this.put(`/business-plans/${id}/link-budget`, { budgetId });
+    },
+
+    linkBusinessPlanToProcurement(id, procurementId) {
+        return this.put(`/business-plans/${id}/link-procurement`, { procurementId });
+    },
+
+    linkBusinessPlanToTender(id, tenderId) {
+        return this.put(`/business-plans/${id}/link-tender`, { tenderId });
+    },
+    // ============================================================
+    // 📊 MANAGER REPORTS
+    // ============================================================
+    generateReportMetrics(startDate, endDate) {
+    const query = new URLSearchParams({ startDate, endDate }).toString();
+    return this.get(`/manager-reports/metrics?${query}`);
+    },
+
+    createManagerReport(data) {
+        return this.post('/manager-reports', data);
+    },
+
+    getManagerReports() {
+        return this.get('/manager-reports');
+    },
+
+    getManagerReportById(id) {
+        return this.get(`/manager-reports/${id}`);
+    },
+
+    reviewManagerReport(id, feedback) {
+        return this.put(`/manager-reports/${id}/review`, { feedback });
+    },
+        // ============================================================
+    // 📊 KPI & PERFORMANCE MANAGEMENT
+    // ============================================================
+    
+    getAvailableMetrics(department) {
+        return this.get(`/kpis/metrics/${encodeURIComponent(department)}`);
+    },
+
+    createEmployeeKpi(data) {
+        return this.post('/kpis/employee', data);
+    },
+
+    releaseEmployeeKpis(kpiIds, releasedBy, releasedById) {
+        return this.put('/kpis/employee/release', { kpiIds, releasedBy, releasedById });
+    },
+
+    updateEmployeeKpi(id, data) {
+        return this.put(`/kpis/employee/${id}`, data);
+    },
+
+    getEmployeeKpis(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.get(`/kpis/employee${query ? '?' + query : ''}`);
+    },
+        // ============================================================
+    // 📬 INTERNAL MAIL SYSTEM
+    // ============================================================
+    sendInternalMail(data) {
+        return this.post('/messages', data);
+    },
+
+    saveMailDraft(data) {
+        return this.post('/messages/draft', data);
+    },
+
+    getMailboxMessages(type) {
+        return this.get(`/messages/list?type=${type}`);
+    },
+
+    getInternalMailById(id) {
+        return this.get(`/messages/${id}`);
+    },
+
+    markMailAsRead(id) {
+        return this.put(`/messages/${id}/read`);
+    },
+
+    attendMail(id, data) {
+        return this.put(`/messages/${id}/attend`, data);
+    },
+
+    closeMail(id, data) {
+        return this.put(`/messages/${id}/close`, data);
+    },
+
+    replyInternalMail(id, data) {
+        return this.post(`/messages/${id}/reply`, data);
+    },
+
+    starMail(id) {
+        return this.put(`/messages/${id}/star`);
+    },
+
+    archiveMail(id) {
+        return this.put(`/messages/${id}/archive`);
+    },
+
+    deleteMail(id) {
+        return this.delete(`/messages/${id}`);
+    },
+
+    getMailUnreadCount() {
+        return this.get('/messages/unread-count');
+    }
+}

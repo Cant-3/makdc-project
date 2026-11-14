@@ -9,7 +9,6 @@ try {
 } catch (e) {
     auth = null;
 }
-
 const protect = auth && auth.protect ? auth.protect : (req, res, next) => next();
 const authorize = auth && auth.authorize ? auth.authorize : () => (req, res, next) => next();
 

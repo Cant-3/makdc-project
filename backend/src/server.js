@@ -2,6 +2,11 @@ require('dotenv').config();
 
 const app = require('./app');
 
+// ================================================================
+// 🆕 ANZISHA CRON JOBS (Auto-Calculate KPI kila siku)
+// ================================================================
+require('./jobs/dailyKpiCalculation'); 
+
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 

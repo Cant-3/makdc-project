@@ -820,12 +820,12 @@ model ProductionUsage {
 // ================================================================
 model StockItem {
   id              Int      @id @default(autoincrement())
-  itemCode        String?  @unique @map("item_code")   // 🆕 e.g., STK-2026-0001
+  itemCode        String?  @unique @map("item_code") 
   itemName        String   @map("item_name")
   category        String?
-  subCategory     String?  @map("sub_category")        // 🆕
+  subCategory     String?  @map("sub_category")  
   specification   String?
-  description     String?                              // 🆕
+  description     String?                             
 
   // QUANTITY (Float ili kuruhusu 1.5 kg)
   quantity        Float    @default(0)
@@ -1254,4 +1254,366 @@ model Tender {
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   @@map("tenders")
+}
+// ================================================================
+// MASTER BUDGET MODELS
+// ================================================================
+
+model MasterBudget {
+  id           Int      @id @default(autoincrement())
+  title        String
+  period       String
+  year         Int
+  totalAmount  Decimal  @map("total_amount") @db.Decimal(15, 2)
+  status       String   @default("pending-departments") 
+  // statuses: draft, pending-departments, pending-manager, pending-ceo, approved, rejected
+  createdBy    String   @map("created_by")
+  createdById  Int?     @map("created_by_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  rejectionReason String? @map("rejection_reason")
+  approvedBy      String? @map("approved_by")
+
+
+  allocations  BudgetAllocation[]
+
+  @@map("master_budgets")
+}
+
+model BudgetAllocation {
+  id           Int          @id @default(autoincrement())
+  budgetId     Int          @map("budget_id")
+  department   String
+  icon         String?
+  ceilingAmount Decimal     @map("ceiling_amount") @db.Decimal(15, 2)
+  status       String       @default("pending-department") 
+  
+  budget       MasterBudget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  
+  // 🆕 Ongeza hii
+  items        BudgetActivity[]
+
+  @@map("budget_allocations")
+}
+model BudgetActivity {
+  id             Int              @id @default(autoincrement())
+  allocationId   Int              @map("allocation_id")
+  activityName   String           @map("activity_name")
+  itemName       String?          @map("item_name")
+  quantity       Float
+  unit           String
+  unitPrice      Decimal          @map("unit_price") @db.Decimal(15, 2)
+  totalCost      Decimal          @map("total_cost") @db.Decimal(15, 2)
+  
+  allocation     BudgetAllocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+
+  @@map("budget_activities")
+}
+// ================================================================
+// 🧭 STRATEGIC PLANS (Manager → CEO)
+// ================================================================
+model StrategicPlan {
+  id                   Int       @id @default(autoincrement())
+  strategicId          String    @unique @map("strategic_id")     // e.g., SP-1731234567890
+  title                String
+  year                 String
+  department           String?
+  summary              String?   @db.Text
+  
+  // FILE (base64 au path)
+  fileName             String?   @map("file_name")
+  fileType             String?   @map("file_type")
+  fileSize             Int?      @map("file_size")
+  fileData             String?   @map("file_data")
+  
+  // STATUS & WORKFLOW
+  status               String    @default("Draft")
+  // statuses: Draft, Pending CEO, Approved by CEO, Rejected by CEO, Revision Requested
+  
+  // MANAGER (creator)
+  managerId            Int?      @map("manager_id")
+  managerName          String?   @map("manager_name")
+  createdBy            String?   @map("created_by")
+  
+  // SUBMIT TO CEO
+  submittedToCeoAt     DateTime? @map("submitted_to_ceo_at")
+  submittedToCeoBy     String?   @map("submitted_to_ceo_by")
+  
+  // CEO APPROVAL
+  ceoRemarks           String?   @map("ceo_remarks")
+  ceoApprovedAt        DateTime? @map("ceo_approved_at")
+  ceoApprovedBy        String?   @map("ceo_approved_by")
+  ceoApprovedById      Int?      @map("ceo_approved_by_id")
+  
+  // CEO REJECTION
+  ceoRejectedAt        DateTime? @map("ceo_rejected_at")
+  ceoRejectedBy        String?   @map("ceo_rejected_by")
+  ceoRejectedById      Int?      @map("ceo_rejected_by_id")
+  ceoRejectionReason   String?   @map("ceo_rejection_reason")
+  
+  // REVISION REQUEST
+  revisionNotes        String?   @map("revision_notes")
+  revisionRequestedAt  DateTime? @map("revision_requested_at")
+  revisionRequestedBy  String?   @map("revision_requested_by")
+  
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  
+  @@index([status])
+  @@index([year])
+  @@index([managerId])
+  @@map("strategic_plans")
+}
+// ================================================================
+// 💼 BUSINESS PLANS — Document-first workflow
+// Manager → CEO → Post-Approval Integrations
+// ================================================================
+model BusinessPlan {
+  id                  Int      @id @default(autoincrement())
+  businessPlanId      String   @unique @map("business_plan_id")   // e.g., BP-1731234567890
+  
+  // ===== METADATA =====
+  title               String
+  projectType         String   @map("project_type")   // Construction, Manufacturing, Real Estate, Service, Other
+  department          String?
+  summary             String?  @db.Text
+  
+  // ===== FINANCIALS =====
+  estimatedBudget     Decimal? @map("estimated_budget") @db.Decimal(15, 2)
+  currency            String   @default("TZS")
+  expectedRevenue     Decimal? @map("expected_revenue") @db.Decimal(15, 2)
+  expectedRoi         Decimal? @map("expected_roi") @db.Decimal(5, 2)
+  breakEvenMonths     Int?     @map("break_even_months")
+  
+  // ===== TIMELINE =====
+  startDate           DateTime? @map("start_date") @db.Date
+  endDate             DateTime? @map("end_date") @db.Date
+  
+  // ===== FILE =====
+  fileName            String?   @map("file_name")
+  fileType            String?   @map("file_type")
+  fileSize            Int?      @map("file_size")
+  fileData            String?   @map("file_data") @db.Text
+  
+  // ===== WORKFLOW STATUS =====
+  status              String   @default("Draft")
+  // Draft | Pending CEO | Approved | Rejected | Revision Requested | Active | Archived
+  
+  // ===== CREATOR =====
+  createdBy           String?  @map("created_by")
+  createdById         Int?     @map("created_by_id")
+  
+  // ===== SUBMIT TO CEO =====
+  submittedToCeoAt    DateTime? @map("submitted_to_ceo_at")
+  submittedToCeoBy    String?   @map("submitted_to_ceo_by")
+  
+  // ===== CEO APPROVAL =====
+  ceoRemarks          String?   @map("ceo_remarks")
+  ceoApprovedAt       DateTime? @map("ceo_approved_at")
+  ceoApprovedBy       String?   @map("ceo_approved_by")
+  ceoApprovedById     Int?      @map("ceo_approved_by_id")
+  
+  // ===== CEO REJECTION =====
+  ceoRejectedAt       DateTime? @map("ceo_rejected_at")
+  ceoRejectedBy       String?   @map("ceo_rejected_by")
+  ceoRejectionReason  String?   @map("ceo_rejection_reason")
+  
+  // ===== REVISION =====
+  revisionNotes       String?   @map("revision_notes")
+  revisionRequestedAt DateTime? @map("revision_requested_at")
+  revisionRequestedBy String?   @map("revision_requested_by")
+  
+  // ===== POST-APPROVAL INTEGRATIONS =====
+  budgetId            Int?      @map("budget_id")
+  procurementId       Int?      @map("procurement_id")
+  tenderId            Int?      @map("tender_id")
+  
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  @@index([status])
+  @@index([projectType])
+  @@index([department])
+  @@index([createdById])
+  @@map("business_plans")
+}
+// ================================================================
+// 📊 MANAGER REPORTS
+// ================================================================
+model ManagerReport {
+  id                Int       @id @default(autoincrement())
+  reportId          String    @unique @map("report_id") // Mfano: REP-2026-001
+  
+  // Tarehe zilizochaguliwa na Manager
+  periodType        String    @map("period_type") // Weekly, Monthly, Custom
+  startDate         DateTime  @map("start_date")
+  endDate           DateTime  @map("end_date")
+  
+  // Takwimu (Metrics zilizosomwa na mfumo)
+  metrics           Json      // Itahifadhi Orders, Approvals, Staff, n.k.
+  
+  // Maandishi ya Manager (Narrative)
+  keyActivities     String?   @db.Text @map("key_activities")
+  executiveSummary  String?   @db.Text @map("executive_summary")
+  challenges        String?   @db.Text
+  recommendations   String?   @db.Text
+  
+  // Viambatisho
+  fileName          String?   @map("file_name")
+  fileType          String?   @map("file_type")
+  fileSize          Int?      @map("file_size")
+  fileData          String?   @db.Text @map("file_data")
+  
+  // Status & Feedback
+  status            String    @default("Draft") // Draft, Pending CEO, Reviewed
+  createdBy         String    @map("created_by")
+  createdById       Int?      @map("created_by_id")
+  submittedAt       DateTime? @map("submitted_at")
+  
+  // CEO Feedback
+  ceoFeedback       String?   @db.Text @map("ceo_feedback")
+  ceoReviewedAt     DateTime? @map("ceo_reviewed_at")
+  ceoReviewedBy     String?   @map("ceo_reviewed_by")
+  
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("manager_reports")
+}
+// ================================================================
+// 📊 KPI & PERFORMANCE SYSTEM
+// ================================================================
+
+model EmployeeKpi {
+  id           Int       @id @default(autoincrement())
+  employeeId   Int       @map("employee_id")
+  employeeName String    @map("employee_name")
+  department   String
+  role         String
+
+  // Metric Definition
+  metricType   String    @map("metric_type")    // "OUTPUT_UNITS", "WASTE_PERCENT", etc.
+  metricLabel  String    @map("metric_label")   // "Output Units", "Waste %", etc.
+  metricUnit   String    @map("metric_unit")    // "units", "%", "TSh", etc.
+
+  // Target
+  targetValue  Float     @map("target_value")
+
+  // Period
+  period       String                              // "2026-11", "2026-Q4", "2026"
+  periodLabel  String    @map("period_label")    // "November 2026"
+  periodType   String    @default("monthly")      // monthly, quarterly, yearly
+
+  // Status Workflow: draft → released → active → archived
+  status       String    @default("draft")
+
+  // Release Info
+  releasedAt   DateTime? @map("released_at")
+  releasedBy   String?   @map("released_by")
+  releasedById Int?      @map("released_by_id")
+
+  // Actual Value (auto-calculated daily)
+  actualValue  Float?    @map("actual_value")
+  calculatedAt DateTime? @map("calculated_at")
+
+  // Metadata
+  createdBy    String    @map("created_by")
+  createdById  Int       @map("created_by_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  notes        String?
+
+  // Relations
+  history      KpiHistory[]
+
+  @@index([employeeId, period, status])
+  @@index([department, period])
+  @@index([role, period])
+  @@index([status])
+  @@map("employee_kpis")
+}
+
+model KpiHistory {
+  id          Int      @id @default(autoincrement())
+  kpiId       Int      @map("kpi_id")
+  action      String   // "created", "updated", "released", "calculated", "archived"
+  oldValue    Json?    @map("old_value")
+  newValue    Json?    @map("new_value")
+  performedBy String   @map("performed_by")
+  performedAt DateTime @default(now()) @map("performed_at")
+
+  // Relation
+  kpi         EmployeeKpi @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@index([kpiId])
+  @@index([action])
+  @@map("kpi_history")
+}
+model InternalMessage {
+  id              Int      @id @default(autoincrement())
+  senderId        Int      @map("sender_id")
+  senderName      String   @map("sender_name")
+  senderRole      String?  @map("sender_role")
+  receiverId      Int      @map("receiver_id")
+  receiverName    String   @map("receiver_name")
+  
+  ccIds           Int[]    @default([]) @map("cc_ids")        // 👈 Badilisha kuwa Int[]
+  ccNames         String[] @default([]) @map("cc_names")      // 👈 Badilisha kuwa String[]
+  
+  subject         String
+  body            String   @db.Text
+  type            String   @default("information")
+  priority        String   @default("normal")
+  status          String   @default("unread")
+  
+  attachments     Json?    @default("[]")
+  hasAttachments  Boolean  @default(false) @map("has_attachments")
+  
+  isMinute        Boolean  @default(false) @map("is_minute")
+  assignedTo      Int[]    @default([]) @map("assigned_to")       // 👈 Badilisha kuwa Int[]
+  assignedToNames String[] @default([]) @map("assigned_to_names") // 👈 Badilisha kuwa String[]
+  assignedBy      String?  @map("assigned_by")
+  assignedAt      DateTime? @map("assigned_at")
+  
+  replyToId       Int?     @map("reply_to_id")
+  isStarred       Boolean  @default(false) @map("is_starred")
+  isArchived      Boolean  @default(false) @map("is_archived")
+  isDeleted       Boolean  @default(false) @map("is_deleted")
+  
+  readAt          DateTime? @map("read_at")
+  attendedAt      DateTime? @map("attended_at")
+  attendedBy      String?   @map("attended_by")
+  closedAt        DateTime? @map("closed_at")
+  closedBy        String?   @map("closed_by")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  attendance      InternalMessageAttendance[]
+
+  @@index([receiverId])
+  @@index([senderId])
+  @@index([status])
+  @@index([isMinute])
+  @@map("internal_messages")
+}
+
+model InternalMessageAttendance {
+  id              Int      @id @default(autoincrement())
+  messageId       Int      @map("message_id")
+  userId          Int      @map("user_id")
+  userName        String   @map("user_name")
+  userRole        String?  @map("user_role")
+  action          String
+  comment         String?  @db.Text
+  assignedTo      Int[]    @default([]) @map("assigned_to")       // 👈 Badilisha kuwa Int[]
+  assignedNames   String[] @default([]) @map("assigned_names")    // 👈 Badilisha kuwa String[]
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  message         InternalMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  @@index([messageId])
+  @@index([userId])
+  @@map("internal_message_attendance")
 }

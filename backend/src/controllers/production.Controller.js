@@ -499,10 +499,19 @@ exports.createProductionBatch = async (req, res) => {
             message: `Batch ${batchNo} imeundwa: ${good} ${product.unit} nzuri, ${damaged} zilizoharibika`,
             batch: result
         });
-    } catch (err) {
-        console.error('Create batch error:', err);
-        res.status(500).json({ error: err.message });
-    }
+        // Ndani ya createProductionBatch, baada ya res.status(201).json({...}):
+
+        // 🆕 Rekebisha KPI za mhandisi huyu (Background)
+        const kpiController = require('./kpi.controller');
+        const periodOfBatch = new Date(productionDate || new Date()).toISOString().slice(0, 7); // Mfano "2026-11"
+
+        kpiController.recalculateEngineerKpis(userId, periodOfBatch)
+            .then(() => console.log(`KPI updated for user ${userId} on ${periodOfBatch}`))
+            .catch(err => console.error("KPI recalculation failed:", err));
+        } catch (err) {
+            console.error('Create batch error:', err);
+            res.status(500).json({ error: err.message });
+        }
 };
 exports.submitQC = async (req, res) => {
     try {
@@ -511,11 +520,9 @@ exports.submitQC = async (req, res) => {
         
         const userId = req.user?.id ? parseInt(req.user.id) : 1;
         
-        // 🆕 Tafuta jina halisi la mtumiaji kutoka database
         const dbUser = await prisma.user.findUnique({ where: { id: userId } });
         const userName = dbUser ? dbUser.fullName : 'Production Manager'; 
 
-        // ... code zilizosalia zinabaki vile vile ...
         if (!result || !notes) return res.status(400).json({ error: 'Result and notes are required' });
 
         const batch = await prisma.productionBatch.findUnique({
@@ -525,9 +532,9 @@ exports.submitQC = async (req, res) => {
         if (!batch) return res.status(404).json({ error: 'Batch not found' });
         if (batch.qcStatus === 'passed') return res.status(400).json({ error: 'Batch already passed QC' });
 
-        const dateStr = new Date().toISOString().slice(0,10).replace(/-/g, '');
-        const count = await prisma.productionBatch.count({ where: { qcStatus: { not: null } } });
-        const noticeNo = `QC-${dateStr}-${String(count + 1).padStart(3, '0')}`;
+        // 🆕 FIX: Tengeneza Notice No kwa kutumia Batch No na Timestamp ili isigongane na nyingine
+        const timestamp = Date.now().toString().slice(-4); // Namba 4 za mwisho za muda
+        const noticeNo = `QC-${batch.batchNo.replace('BATCH-', '')}-${timestamp}`;
 
         const resultTx = await prisma.$transaction(async (tx) => {
             if (result === 'passed') {
@@ -540,7 +547,6 @@ exports.submitQC = async (req, res) => {
                         qcCheckedAt: new Date(),
                         qcNoticeNo: noticeNo,           
                         qcInspectorName: userName,      
-                        
                     }
                 });
                 return updatedBatch;
@@ -566,7 +572,7 @@ exports.submitQC = async (req, res) => {
                 });
                 return updatedBatch;
             }
-        }, { timeout: 15000 });
+        }, { timeout: 30000,maxWait: 10000 });
 
         res.json({ message: `QC ${result.toUpperCase()}! Notice issued: ${noticeNo}`, batch: resultTx });
     } catch (err) {
