@@ -826,6 +826,124 @@
         .timeline-step.completed:not(:last-child)::after {
             background: var(--primary);
         }
+        /* ===== MOBILE RESPONSIVE (CEO DASHBOARD) ===== */
+@media (max-width: 768px) {
+    /* 1. Fanya Sidebar iwe nyembamba na ipangike vizuri */
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        position: relative;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 3px solid var(--green);
+    }
+    
+    /* 2. Ficha baadhi ya vitu kwenye mobile ili kuokoa nafasi */
+    .sidebar-bottom {
+        display: none;
+    }
+    
+    /* 3. Panga Nav Links vizuri */
+    .sidebar-nav a {
+        padding: 12px 14px;
+        font-size: 14px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        justify-content: flex-start;
+        gap: 12px;
+    }
+    
+    .sidebar-nav a .nav-num {
+        display: none; /* Ficha namba kwenye mobile */
+    }
+    
+    /* 4. Panga Submenu */
+    .sidebar-submenu a {
+        padding: 10px 14px 10px 40px;
+        font-size: 13px;
+    }
+    
+    /* 5. Fanya Brand iwe katikati */
+    .sidebar-brand .logo-img {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 8px auto;
+    }
+    
+    .sidebar-brand .brand-name {
+        font-size: 14px;
+    }
+    
+    /* 6. Panga User Info */
+    .sidebar-user {
+        margin-top: 12px;
+        padding: 10px;
+    }
+    
+    /* 7. Dashboard Content */
+    .dashboard-content {
+        padding: 16px 12px;
+    }
+    
+    /* 8. Panga Kadi za KPI (ziwe 2 kwa mstari) */
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    
+    .stat-card {
+        padding: 14px !important;
+    }
+    
+    .stat-number {
+        font-size: 18px !important;
+    }
+    
+    /* 9. Panga Grafu (ziwe 1 kwa mstari) */
+    div[style*="grid-template-columns: 2fr 1fr"],
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    /* 10. Fanya Header iwe ndogo */
+    .dashboard-header {
+        padding: 10px 16px;
+        flex-wrap: wrap;
+    }
+    
+    .header-title {
+        font-size: 13px;
+    }
+    
+    /* 11. Ficha baadhi ya vitu kwenye header */
+    .header-right .mail-header-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .ud-info {
+        display: none; /* Ficha jina kwenye header */
+    }
+}
+
+/* ===== TABLET RESPONSIVE (768px - 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
+        min-width: 240px;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    div[style*="grid-template-columns: 2fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+}
     </style>
 </head>
 <body data-roles="CEO">
@@ -851,7 +969,7 @@
                 <div class="sidebar-nav-parent" onclick="toggleSidebarDropdown(this, event)">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span style="font-size:18px;">🏢</span>
-                        <span class="nav-text">Company Overview</span>
+                        <span class="nav-text">Makdc Activity due</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="nav-arrow">▼</span>
@@ -859,16 +977,16 @@
                 </div>
                 <div class="sidebar-submenu">
                     <a href="#" onclick="switchTab('tab-company-pulse', event); return false;">
-                        <span class="nav-text">🛡 Company Pulse</span>
+                        <span class="nav-text">🛡 Live Activty feed</span>
                     </a>
                     <a href="#" onclick="switchTab('tab-kpis', event); return false;">
-                        <span class="nav-text">📈 Key Performance (KPIs)</span>
+                        <span class="nav-text">📈 Key Performance</span>
                     </a>
                 </div>
             </div>
             <a href="#" onclick="switchTab('tab-employees'); return false;" data-tooltip="Employees">
                 <span style="font-size:18px;">👥</span><span class="nav-text">Employees</span>
-                <span class="nav-num">02</span>
+                <span class="nav-num"></span>
                 <span class="nav-badge" id="ceoSidebarEmpBadge">0</span>
             </a>
             <div class="sidebar-nav-group">
@@ -917,19 +1035,28 @@
                    
                 </div>
             </div>
+            <!-- Reports -->
             <a href="#" onclick="switchTab('tab-reports'); return false;" data-tooltip="Reports">
-                <span style="font-size:18px;">📑</span><span class="nav-text">Reports</span>
+                <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                    <span style="font-size:18px;">📑</span>
+                    <span class="nav-text">Reports</span>
+                </div>
             </a>
-            <a href="#" onclick="switchTab('tab-track-orders'); return false;" data-tooltip="Track Orders">
-                <span style="font-size:18px;">🔍</span><span class="nav-text">Track Orders</span>
-            </a>
-        </nav>
-        <div class="sidebar-rule"></div>
 
-        <p class="sidebar-label">⚡ Quick Actions</p>
-        <nav class="sidebar-nav">
+            <!-- Track Orders -->
+            <a href="#" onclick="switchTab('tab-track-orders'); return false;" data-tooltip="Track Orders">
+                <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                    <span style="font-size:18px;">🔍</span>
+                    <span class="nav-text">Track Orders</span>
+                </div>
+            </a>
+
+            <!-- Refresh All -->
             <a href="#" onclick="refreshAll(); return false;" data-tooltip="Refresh All">
-                <span style="font-size:18px;">🔄</span><span class="nav-text">Refresh All</span>
+                <div style="display:flex; align-items:center; gap:12px; width:100%;">
+                    <span style="font-size:18px;">🔄</span>
+                    <span class="nav-text">Refresh All</span>
+                </div>
             </a>
         </nav>
 

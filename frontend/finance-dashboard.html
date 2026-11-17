@@ -5965,28 +5965,45 @@
                 
                 <!-- Order Info Box -->
                 <div style="background: #f8fafc; border-radius: 10px; padding: 16px; border-left: 4px solid #14b8a6; margin-bottom: 20px;">
-                    <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Order ID</div>
-                    <div id="setupOrderIdDisplay" style="font-family: monospace; font-weight: 800; color: #0f766e; font-size: 15px;">—</div>
-                    
-                    <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 12px; margin-bottom: 4px;">Customer</div>
-                    <div id="setupCustomerName" style="font-weight: 700; color: #1e293b; font-size: 13px;">—</div>
-                    
-                    <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-top: 12px; margin-bottom: 4px;">Total Amount</div>
-                    <div id="setupAmount" style="font-weight: 900; color: #16a34a; font-size: 18px;">—</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Order ID</div>
+                            <div id="setupOrderIdDisplay" style="font-family: monospace; font-weight: 800; color: #0f766e; font-size: 15px;">—</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Total Amount</div>
+                            <div id="setupAmount" style="font-weight: 900; color: #16a34a; font-size: 18px;">—</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Customer</div>
+                        <div id="setupCustomerName" style="font-weight: 700; color: #1e293b; font-size: 13px;">—</div>
+                    </div>
                 </div>
 
                 <!-- Payment Type -->
                 <div style="margin-bottom: 16px;">
                     <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Payment Type *</label>
-                    <select id="setupPaymentType" style="width: 100%; padding: 12px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; background: white;">
+                    <select id="setupPaymentType" onchange="togglePaymentFields()" style="width: 100%; padding: 12px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; background: white;">
                         <option value="prepaid">💰 Prepaid (Customer pays first)</option>
                         <option value="postpaid">📅 Postpaid (Pay on delivery)</option>
                     </select>
                 </div>
 
+                <!-- Payment Method -->
+                <div id="setupPaymentMethodGroup" style="margin-bottom: 16px;">
+                    <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Payment Method *</label>
+                    <select id="setupPaymentMethod" onchange="toggleAccountField()" style="width: 100%; padding: 12px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; background: white;">
+                        <option value="">— Select Method —</option>
+                        <option value="bank">🏦 Bank Transfer</option>
+                        <option value="mobile">📱 Mobile Money</option>
+                        <option value="cash">💵 Cash</option>
+                    </select>
+                </div>
+
                 <!-- Payment Account (for Prepaid) -->
-                <div style="margin-bottom: 16px;">
-                    <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Payment Account (If Prepaid)</label>
+                <div id="setupPaymentAccountGroup" style="margin-bottom: 16px;">
+                    <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Collection Account (If Prepaid)</label>
                     <select id="setupPaymentAccount" style="width: 100%; padding: 12px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; background: white;">
                         <option value="">— Select Collection Account —</option>
                     </select>

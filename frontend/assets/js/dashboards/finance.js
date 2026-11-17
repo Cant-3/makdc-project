@@ -567,30 +567,47 @@ function renderFinanceOrderView(order) {
         ${order.notes ? `<div style="margin-top:16px;padding:12px 16px;background:rgba(245,158,11,0.06);border-left:3px solid #f59e0b;border-radius:8px;font-size:12px;color:#78350f;line-height:1.6;"><strong style="display:block;margin-bottom:4px;text-transform:uppercase;font-size:10px;letter-spacing:1px;">📝 Notes</strong>${esc(order.notes)}</div>` : ''}
     `;
 }
-
 let currentSetupOrderId = null;
-
+async function getOperationsAccounts() {
+    try {
+        const accounts = await API.getApprovedAccounts().catch(() => []);
+        return (accounts || []).filter(a => a.purpose === 'operations');
+    } catch (err) {
+        console.error('Error fetching operations accounts:', err);
+        return [];
+    }
+}
+async function getCollectionsAccounts() {
+    try {
+        const accounts = await API.getApprovedAccounts().catch(() => []);
+        return (accounts || []).filter(a => a.purpose === 'collections');
+    } catch (err) {
+        console.error('Error fetching collections accounts:', err);
+        return [];
+    }
+}
 async function openSetupPaymentModal(orderId) {
     currentSetupOrderId = orderId;
 
-    // 1. Onyesha Modal MARA MOJA (Bila kusubiri API)
     let modal = document.getElementById('setupPaymentModal');
     if (!modal) {
-        // ... (Weka hapa ule msimbo wako wote wa HTML wa kutengeneza modal kama ulivyokuwa awali) ...
-        // (Nimeacha sehemu hii ili isichukue nafasi, nakili kutoka kwenye code yako ya awali)
+        cpToast('Error', 'Modal haipo kwenye ukurasa.', 'error');
+        return;
     }
 
-    // Weka maandishi ya "Loading" kwanza
-    document.getElementById('setupOrderIdDisplay').textContent = orderId;
-    document.getElementById('setupCustomerName').textContent = '⏳ Inatafuta taarifa...';
-    document.getElementById('setupAmount').textContent = 'TSh ...';
-    
+    // Weka maandishi ya "Loading"
+    const elOrderId = document.getElementById('setupOrderIdDisplay');
+    const elCustomer = document.getElementById('setupCustomerName');
+    const elAmount = document.getElementById('setupAmount');
     const accSelect = document.getElementById('setupPaymentAccount');
-    accSelect.innerHTML = '<option value="">⏳ Inatafuta akaunti...</option>';
-    
-    document.getElementById('setupPaymentModal').classList.add('show');
 
-    // 2. Sasa vuta data kwa nyuma (Background)
+    if (elOrderId) elOrderId.textContent = orderId;
+    if (elCustomer) elCustomer.textContent = '⏳ Inatafuta taarifa...';
+    if (elAmount) elAmount.textContent = 'TSh ...';
+    if (accSelect) accSelect.innerHTML = '<option value="">⏳ Inatafuta akaunti...</option>';
+    
+    modal.classList.add('show');
+
     try {
         const [order, allAccounts] = await Promise.all([
             API.getOrder(orderId).catch(() => null),
@@ -603,65 +620,61 @@ async function openSetupPaymentModal(orderId) {
             return;
         }
 
-        // 3. Filter: Collections PEKEE
         const accounts = (allAccounts || []).filter(a => a.purpose === 'collections');
 
-        // 4. Jaza Taarifa za Order
-        document.getElementById('setupCustomerName').textContent = `${order.customerName || '—'} • ${order.phone || '—'}`;
-        document.getElementById('setupAmount').textContent = 'TSh ' + Number(order.totalAmount || 0).toLocaleString();
+        if (elCustomer) elCustomer.textContent = `${order.customerName || '—'} • ${order.phone || '—'}`;
+        if (elAmount) elAmount.textContent = 'TSh ' + Number(order.totalAmount || 0).toLocaleString();
 
-        // 5. Jaza Akaunti
-        accSelect.innerHTML = '<option value="">— Select Collection Account —</option>';
-        if (accounts && accounts.length > 0) {
-            accounts.forEach(acc => {
-                const opt = document.createElement('option');
-                opt.value = acc.id;
-                const icon = acc.type === 'Bank' ? '🏦' : acc.type === 'Mobile Money' ? '📱' : '💵';
-                opt.textContent = `${icon} ${acc.name} — ${acc.accountNumber}`;
-                accSelect.appendChild(opt);
-            });
-        } else {
-            accSelect.innerHTML = '<option value="">⚠ Hakuna akaunti ya Collections</option>';
+        if (accSelect) {
+            accSelect.innerHTML = '<option value="">— Select Collection Account —</option>';
+            if (accounts && accounts.length > 0) {
+                accounts.forEach(acc => {
+                    const opt = document.createElement('option');
+                    opt.value = acc.id;
+                    const icon = acc.type === 'Bank' ? '🏦' : acc.type === 'Mobile Money' ? '📱' : '💵';
+                    opt.textContent = `${icon} ${acc.name} — ${acc.accountNumber}`;
+                    accSelect.appendChild(opt);
+                });
+            } else {
+                accSelect.innerHTML = '<option value="">⚠ Hakuna akaunti ya Collections</option>';
+            }
         }
+
+        // Reset fields
+        document.getElementById('setupPaymentType').value = 'prepaid';
+        document.getElementById('setupPaymentMethod').value = '';
+        document.getElementById('setupPaymentDeadline').value = '';
+        document.getElementById('setupPaymentInstructions').value = '';
+        togglePaymentFields();
 
     } catch (err) {
         cpToast('Failed', err.message, 'error');
         closeModal('setupPaymentModal');
     }
 }
-async function getOperationsAccounts() {
-    try {
-        const accounts = await API.getApprovedAccounts().catch(() => []);
-        return (accounts || []).filter(a => a.purpose === 'operations');
-    } catch (err) {
-        console.error('Error fetching operations accounts:', err);
-        return [];
-    }
-}
-
-async function getCollectionsAccounts() {
-    try {
-        const accounts = await API.getApprovedAccounts().catch(() => []);
-        return (accounts || []).filter(a => a.purpose === 'collections');
-    } catch (err) {
-        console.error('Error fetching collections accounts:', err);
-        return [];
-    }
-}
 async function confirmSetupPayment() {
     const paymentType = document.getElementById('setupPaymentType').value;
+    const paymentMethod = document.getElementById('setupPaymentMethod').value;
     const paymentAccountId = document.getElementById('setupPaymentAccount').value;
     const paymentInstructions = document.getElementById('setupPaymentInstructions').value.trim() || null;
     const paymentDeadline = document.getElementById('setupPaymentDeadline').value || null;
 
-    if (paymentType === 'prepaid' && !paymentAccountId) {
-        cpToast('Required', 'Please select a company account for prepaid.', 'warning');
-        return;
+    // Validation
+    if (paymentType === 'prepaid') {
+        if (!paymentMethod) {
+            cpToast('Required', 'Please select a payment method.', 'warning');
+            return;
+        }
+        if (paymentMethod !== 'cash' && !paymentAccountId) {
+            cpToast('Required', 'Please select a collection account.', 'warning');
+            return;
+        }
     }
 
     try {
         await API.setupPayment(currentSetupOrderId, {
             paymentType,
+            paymentMethod,
             paymentAccountId: paymentAccountId ? parseInt(paymentAccountId) : null,
             paymentInstructions,
             paymentDeadline
@@ -674,9 +687,7 @@ async function confirmSetupPayment() {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 let currentVerifyOrderId = null;
-
 async function openVerifyPaymentModal(orderId) {
     currentVerifyOrderId = orderId;
 
@@ -737,7 +748,6 @@ async function openVerifyPaymentModal(orderId) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function confirmVerifyPayment() {
     const ref = document.getElementById('verifyPaymentRef').value.trim();
     if (!ref) {
@@ -755,7 +765,6 @@ async function confirmVerifyPayment() {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function loadReceipts() {
     const container = document.getElementById('receiptsContainer');
     if (!container) return;
@@ -771,12 +780,10 @@ async function loadReceipts() {
         container.innerHTML = `<div style="text-align:center;padding:50px;color:var(--red);">Error: ${esc(err.message)}</div>`;
     }
 }
-
 function filterReceipts() {
     currentReceiptFilter = (document.getElementById('receiptSearchInput')?.value || '').toLowerCase().trim();
     renderReceiptsList();
 }
-
 function renderReceiptsList() {
     const container = document.getElementById('receiptsContainer');
     if (!container) return;
@@ -813,7 +820,6 @@ function renderReceiptsList() {
         `).join('')}
     </div>`;
 }
-
 async function viewOrderReceipt(orderId) {
     try {
         const order = await API.getOrder(orderId);
@@ -824,7 +830,6 @@ async function viewOrderReceipt(orderId) {
         showToast('Failed: ' + err.message, 'error');
     }
 }
-
 async function loadCompanyAccounts() {
     const container = document.getElementById('accountsContainer');
     if (!container) return;
@@ -912,7 +917,6 @@ async function loadCompanyAccounts() {
         container.innerHTML = `<div style="text-align:center;padding:50px;color:var(--red);">Error: ${esc(err.message)}</div>`;
     }
 }
-
 async function sendAccountToManager(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -946,7 +950,6 @@ async function sendAccountToManager(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function editDraftAccount(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -980,7 +983,6 @@ async function editDraftAccount(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function editRejectedAccount(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -1010,7 +1012,6 @@ async function editRejectedAccount(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function deleteDraftAccount(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -1037,7 +1038,6 @@ async function deleteDraftAccount(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function managerVerifyAccount(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -1064,7 +1064,6 @@ async function managerVerifyAccount(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function ceoApproveAccount(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -1092,7 +1091,6 @@ async function ceoApproveAccount(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function rejectAccount(id) {
     try {
         const accounts = await API.getAccounts().catch(() => []);
@@ -1456,7 +1454,6 @@ let allCompanyPayments = [];
 let currentCPFilter = { search: '', status: '', type: '' };
 let currentEditCPId = null;
 let cpFormAttachments = [];
-
 const CP_TYPES = {
     procurement: { icon: '🛒', label: 'Procurement' },
     salary:      { icon: '👥', label: 'Salary' },
@@ -1505,7 +1502,6 @@ const CP_STATUS = {
     'paid':            { icon: '✅', label: 'Paid',            color: '#16a34a' },
     'rejected':        { icon: '❌', label: 'Rejected',        color: '#dc2626' }
 };
-
 async function loadCompanyPayments() {
     const container = document.getElementById('companyPaymentsContainer');
     if (!container) return;
@@ -1528,7 +1524,6 @@ async function loadCompanyPayments() {
         container.innerHTML = `<div style="text-align:center;padding:50px;color:var(--red);">Error: ${esc(err.message)}</div>`;
     }
 }
-
 function renderCompanyPaymentStats() {
     const dr = allCompanyPayments.filter(p => p.status === 'draft');
     const pm = allCompanyPayments.filter(p => p.status === 'pending-manager');
@@ -1557,14 +1552,12 @@ function renderCompanyPaymentStats() {
     setText('cpCountPaidMonth', paidMonth.length + ' payment' + (paidMonth.length === 1 ? '' : 's'));
     setText('cpCountBadge', allCompanyPayments.length);
 }
-
 function filterCompanyPayments() {
     currentCPFilter.search = (document.getElementById('companyPaymentSearch')?.value || '').toLowerCase().trim();
     currentCPFilter.status = document.getElementById('companyPaymentStatusFilter')?.value || '';
     currentCPFilter.type = document.getElementById('companyPaymentTypeFilter')?.value || '';
     renderCompanyPaymentsList();
 }
-
 function renderCompanyPaymentsList() {
     const container = document.getElementById('companyPaymentsContainer');
     if (!container) return;
@@ -1687,7 +1680,6 @@ function renderCompanyPaymentsList() {
         `;
     }).join('');
 }
-
 function renderCPTimeline(p) {
     const steps = [];
 
@@ -1730,7 +1722,6 @@ function renderCPTimeline(p) {
 
     return wrapTimeline(steps);
 }
-
 function wrapTimeline(steps) {
     return `
         <div class="cp-timeline">
@@ -1747,7 +1738,6 @@ function wrapTimeline(steps) {
         </div>
     `;
 }
-
 async function persistCompanyPayment(payment) {
     try {
         // 1. Jaribu API kwanza
@@ -1781,13 +1771,11 @@ async function persistCompanyPayment(payment) {
     localStorage.setItem('makdc_company_payments', JSON.stringify(list));
     console.log('💾 Payment saved to localStorage (fallback)');
 }
-
 function openAddCompanyPaymentModal() {
     currentEditCPId = null;
     cpFormAttachments = [];
     showCompanyPaymentForm('Add Company Payment', {});
 }
-
 function openEditCompanyPaymentModal(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) {
@@ -1807,7 +1795,6 @@ function openEditCompanyPaymentModal(id) {
     const title = p.status === 'rejected' ? 'Edit & Resubmit Payment' : 'Edit Company Payment';
     showCompanyPaymentForm(title, p);
 }
-
 async function showCompanyPaymentForm(title, data) {
     let modal = document.getElementById('companyPaymentFormModal');
     if (!modal) {
@@ -1964,7 +1951,6 @@ async function showCompanyPaymentForm(title, data) {
 
     document.getElementById('companyPaymentFormModal').classList.add('show');
 }
-
 function generateCPReference() {
     const year = new Date().getFullYear();
     const count = allCompanyPayments.length + 1;
@@ -2066,7 +2052,6 @@ async function sendCompanyPaymentToManager(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-
 async function resubmitRejectedPayment(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) return;
@@ -2109,7 +2094,6 @@ async function resubmitRejectedPayment(id) {
         cpToast('Failed', err.message, 'error');
     }
 }
-// 🆕 Pata Operations Accounts PEKEE (na balance)
 async function getOperationsAccounts() {
     try {
         const accounts = await API.getApprovedAccounts().catch(() => []);
@@ -2119,8 +2103,6 @@ async function getOperationsAccounts() {
         return [];
     }
 }
-
-// 🆕 Pata Collections Accounts PEKEE (na balance)
 async function getCollectionsAccounts() {
     try {
         const accounts = await API.getApprovedAccounts().catch(() => []);
@@ -2130,12 +2112,9 @@ async function getCollectionsAccounts() {
         return [];
     }
 }
-
-// 🆕 Format balance vizuri
 function formatBalance(amount, currency = 'TZS') {
     return `${currency} ${Number(amount || 0).toLocaleString()}`;
 }
-// 🆕 Populate Payroll Account Selector
 async function populatePayrollAccounts() {
     const select = document.getElementById('payrollAccount');
     if (!select) return;
@@ -2163,8 +2142,6 @@ async function populatePayrollAccounts() {
         console.error('populatePayrollAccounts error:', err);
     }
 }
-
-// 🆕 Update Payroll Balance Display
 function updatePayrollBalance() {
     const select = document.getElementById('payrollAccount');
     const box = document.getElementById('payrollBalanceBox');
@@ -9100,9 +9077,6 @@ async function viewFinanceRequest(id) {
         cpToast('Error', err.message, 'error');
     }
 }
-// ================================================================
-// MESSAGES (Finance) - OPEN / CLOSE & LOAD
-// ================================================================
 function openFinanceMessages(reqId, reqTitle) {
     currentFinanceMsgReqId = reqId;
     let modal = document.getElementById('messagesModal');
@@ -9117,7 +9091,6 @@ function openFinanceMessages(reqId, reqTitle) {
     // Pakia ujumbe
     loadFinanceMessages(reqId);
 }
-
 function closeMessages() {
     const modal = document.getElementById('messagesModal');
     if (modal) modal.style.display = 'none';
@@ -9186,7 +9159,6 @@ function openProcVerify(id) {
     document.getElementById('pv_ref').value = '';
     document.getElementById('procVerifyModal').classList.add('show');
 }
-
 async function submitProcVerify() {
     const id = document.getElementById('pv_req_id').value;
     const ref = document.getElementById('pv_ref').value;
@@ -9206,9 +9178,6 @@ async function submitProcVerify() {
         cpToast('Kosa', e.message, 'error'); 
     }
 }
-// ================================================================
-// SEND MESSAGE
-// ================================================================
 async function sendMessage(btn) {
     const subject = document.getElementById('msgSubject').value.trim();
     const body = document.getElementById('msgBody').value.trim();
@@ -9237,10 +9206,6 @@ async function sendMessage(btn) {
         btn.disabled = false;
     }
 }
-
-// ================================================================
-// TYPING INDICATOR (Hiari)
-// ================================================================
 function handleTypingInput() {
     const indicator = document.getElementById('typingIndicator');
     if (indicator) {
@@ -9333,7 +9298,6 @@ function closeDeptRequestModal() {
     document.getElementById('deptRequestModal').classList.remove('show');
 }
 let __pendingDeptPayload = null;
-
 function showDeptRequestPreview(payload) {
     __pendingDeptPayload = payload;
     
@@ -9370,15 +9334,11 @@ function showDeptRequestPreview(payload) {
     
     document.getElementById('previewDeptRequestModal').classList.add('show');
 }
-
 function closeDeptRequestPreview() {
     const modal = document.getElementById('previewDeptRequestModal');
     if (modal) modal.classList.remove('show');
     __pendingDeptPayload = null;
 }
-// ================================================================
-// PROCUREMENT HUB (SUB-TABS)
-// ================================================================
 function switchProcTab(tabName, event) {
     // 1. Ficha zote
     document.querySelectorAll('.proc-subtab').forEach(el => el.style.display = 'none');
@@ -9411,10 +9371,6 @@ function switchProcTab(tabName, event) {
         loadProcurementFinanceRequests();
     }
 }
-
-// ================================================================
-// LOAD ALL DEPARTMENT REQUESTS (Kwa ajili ya Finance kuona)
-// ================================================================
 async function loadAllDeptRequests() {
     const tbody = document.getElementById('allRequestsTableBody');
     if (!tbody) return;
@@ -9455,10 +9411,6 @@ async function loadAllDeptRequests() {
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#dc2626;">❌ ${esc(err.message)}</td></tr>`;
     }
 }
-
-// ================================================================
-// LOAD PROCUREMENT PAYMENTS (Zilizofika kwa Finance)
-// ================================================================
 async function loadProcurementFinanceRequests() {
     const container = document.getElementById('procurementPaymentsContainer');
     if (!container) return;
@@ -9609,16 +9561,10 @@ async function setupPaymentForRequest(reqId) {
 }
 function refreshAll() { loadFinanceDashboard(); cpToast('🔄 Refreshed!', 'Dashboard refreshed.', 'info'); }
 function refreshEmployees() { loadEmployees(); cpToast('🔄 Refreshed!', 'Employees refreshed.', 'info'); }
- 
 function openResourceModal() { cpToast('Coming Soon', 'Financial Resources — Feature coming soon', 'info'); }
 function openReportsHub(tab) { cpToast('Coming Soon', 'Reports — Feature coming soon', 'info'); }
-// ================================================================
-// 🆕 MY BUDGET — Finance Department View
-// 🎨 RANGI: #0f766e (Teal) + #f59e0b (Gold)
-// ================================================================
 let currentDeptBudget = null;
 let bdActivityCounter = 0;
-
 const STANDARD_ACTIVITIES = [
     "Safari / Field Work",
     "Mafunzo (Training)",
@@ -9630,7 +9576,6 @@ const STANDARD_ACTIVITIES = [
     "Ushauri (Consultancy)",
     "Nyingine (Other)"
 ];
-
 const STANDARD_ITEMS = [
     "Perdiem (Posho ya Safari)",
     "Mafuta (Fuel)",
@@ -9650,7 +9595,6 @@ const STANDARD_ITEMS = [
     "Vifaa vya Ofisi",
     "Nyingine (Other)"
 ];
-
 async function loadMyBudget() {
     const container = document.getElementById('myBudgetContent');
     const badge = document.getElementById('myBudgetStatusBadge');
@@ -9746,7 +9690,6 @@ async function loadMyBudget() {
         container.innerHTML = `<div style="text-align:center;padding:40px;color:#dc2626;">❌ ${esc(err.message)}</div>`;
     }
 }
-
 function openBudgetBreakdownPage() {
     if (!currentDeptBudget) {
         showToast('⚠ No budget loaded', 'error');
@@ -9783,12 +9726,10 @@ function openBudgetBreakdownPage() {
 
     updateGrandTotal();
 }
-
 function closeBudgetBreakdownPage() {
     document.getElementById('budgetBreakdownPage').style.display = 'none';
     document.getElementById('myBudgetContent').parentElement.style.display = 'block';
 }
-
 function addNewActivity(activityName = '', items = []) {
     const container = document.getElementById('bdActivitiesList');
     const activityId = 'bd-activity-' + (bdActivityCounter++);
@@ -9863,7 +9804,6 @@ function addNewActivity(activityName = '', items = []) {
 
     updateActivityTotal(activityId);
 }
-
 function addItemToActivity(activityId) {
     const activityEl = document.getElementById(activityId);
     if (!activityEl) return;
@@ -9871,7 +9811,6 @@ function addItemToActivity(activityId) {
     addItemRowToTable(tbody);
     updateActivityTotal(activityId);
 }
-
 function addItemRowToTable(tbody, itemName = '', quantity = '', unit = 'pcs', unitPrice = '') {
     const row = document.createElement('tr');
     row.style.borderBottom = '1px solid #f1f5f9';
@@ -9934,7 +9873,6 @@ function addItemRowToTable(tbody, itemName = '', quantity = '', unit = 'pcs', un
         });
     }
 }
-
 function updateActivityTotal(activityId) {
     const activityEl = document.getElementById(activityId);
     if (!activityEl) return;
@@ -9956,7 +9894,6 @@ function updateActivityTotal(activityId) {
 
     updateGrandTotal();
 }
-
 function updateGrandTotal() {
     let grandTotal = 0;
     document.querySelectorAll('.bd-activity-total').forEach(el => {
@@ -9967,7 +9904,6 @@ function updateGrandTotal() {
     const el = document.getElementById('bdGrandTotal');
     if (el) el.textContent = 'TSh ' + grandTotal.toLocaleString();
 }
-
 function viewSubmittedBreakdown() {
     if (!currentDeptBudget) return;
     
@@ -10068,7 +10004,6 @@ function viewSubmittedBreakdown() {
 
     document.body.appendChild(modal);
 }
-
 async function submitBudgetBreakdown(isDraft = false) {
     if (!currentDeptBudget) return;
 
@@ -10153,7 +10088,6 @@ async function submitBudgetBreakdown(isDraft = false) {
         }
     }
 }
-
 function openBudgetReviewModal() {
     if (!currentDeptBudget) return;
 
@@ -10276,7 +10210,6 @@ function openBudgetReviewModal() {
         modal.querySelector('div').style.transform = 'scale(1)';
     }, 10);
 }
-
 async function confirmAndSubmitBudget() {
     if (!currentDeptBudget) return;
 
@@ -10287,7 +10220,6 @@ async function confirmAndSubmitBudget() {
         submitBudgetBreakdown();
     }, 100);
 }
-
 function showBudgetSuccessDialog(title, message) {
     const existing = document.getElementById('budgetSuccessModal');
     if (existing) existing.remove();
@@ -10313,7 +10245,6 @@ function showBudgetSuccessDialog(title, message) {
 
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
-// ===== FINANCE: RENDER BUDGETS FILTERS =====
 function renderBudgetsFilters() {
     const container = document.getElementById('allBudgetsContainer');
     if (!container) return;
@@ -10348,7 +10279,6 @@ function renderBudgetsFilters() {
     renderBudgetsStats();
     renderBudgetsList();
 }
-
 function filterBudgets() {
     currentBudgetFilter.search = (document.getElementById('budgetSearchInput')?.value || '').toLowerCase().trim();
     const dateVal = document.getElementById('budgetDateFilter')?.value || '';
@@ -13171,5 +13101,32 @@ async function submitFinanceReportToCEO(btn) {
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
+    }
+}
+// ================================================================
+// 🆕 TOGGLE PAYMENT FIELDS
+// ================================================================
+function togglePaymentFields() {
+    const type = document.getElementById('setupPaymentType').value;
+    const methodGroup = document.getElementById('setupPaymentMethodGroup');
+    const accountGroup = document.getElementById('setupPaymentAccountGroup');
+
+    if (type === 'postpaid') {
+        methodGroup.style.display = 'none';
+        accountGroup.style.display = 'none';
+    } else {
+        methodGroup.style.display = 'block';
+        accountGroup.style.display = 'block';
+    }
+}
+
+function toggleAccountField() {
+    const method = document.getElementById('setupPaymentMethod').value;
+    const accountGroup = document.getElementById('setupPaymentAccountGroup');
+
+    if (method === 'cash') {
+        accountGroup.style.display = 'none';
+    } else {
+        accountGroup.style.display = 'block';
     }
 }
