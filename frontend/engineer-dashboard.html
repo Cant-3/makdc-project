@@ -585,6 +585,1041 @@
         .sidebar-submenu a:hover::before { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
         .sidebar-submenu a.active { color: white; background: linear-gradient(90deg, rgba(46, 204, 113, 0.20) 0%, rgba(46, 204, 113, 0.03) 100%); border-left-color: #2ecc71; font-weight: 700; }
         .sidebar-submenu a.active::before { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; width: 8px; height: 8px; }
+        /* ============================================================
+        MAIL CENTER — ENGINEER THEME
+        Rangi: #1a7f5a (Primary Green) + #0f2942 (Navy) + #f59e0b (Gold)
+        ============================================================ */
+
+        /* Mail Header Button */
+        .mail-header-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(46, 204, 113, 0.3); /* Border ya kijani kibichi */
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-right: 12px; /* 🆕 Nafasi kati ya mail na jina */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* 🆕 Kivuli kidogo */
+        }
+
+        .mail-header-btn:hover {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            transform: translateY(-2px); /* 🆕 Inapanda kidogo ukigusa */
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+        }
+        .mail-header-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, #ef4444, #dc2626); /* Rangi nyekundu ya kisasa */
+            color: white;
+            font-size: 10px;
+            font-weight: 900;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #0f2942; /* Border inayofanana na background ya header */
+            padding: 0 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Mail Shell */
+        .mail-shell-horizontal {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(15, 31, 61, 0.06);
+        }
+        .dashboard-header .header-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; /* 🆕 Nafasi zaidi */
+        }
+
+        /* Top Toolbar */
+        .mail-top-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--gray-200);
+            flex-shrink: 0;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .mail-brand-horizontal {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mail-brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid #1a7f5a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(26, 127, 90, 0.15);
+        }
+        .mail-brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .mail-btn-primary,
+        .mail-btn-secondary {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .mail-btn-primary {
+            background: linear-gradient(135deg, #1a7f5a, #0f2942);
+            color: white;
+            box-shadow: 0 4px 12px rgba(26, 127, 90, 0.3);
+        }
+        .mail-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 127, 90, 0.4);
+        }
+        .mail-btn-secondary {
+            background: white;
+            color: #0f2942;
+            border: 1.5px solid var(--gray-300);
+        }
+        .mail-btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: #1a7f5a;
+        }
+
+        /* Horizontal Nav */
+        .mail-horizontal-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 20px;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            overflow-x: auto;
+            flex-shrink: 0;
+            scrollbar-width: thin;
+        }
+        .mail-horizontal-nav::-webkit-scrollbar { height: 4px; }
+        .mail-horizontal-nav::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+
+        .mhn-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-500);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+        .mhn-item:hover { background: var(--gray-100); color: var(--gray-800); }
+        .mhn-item.active {
+            background: rgba(26, 127, 90, 0.08);
+            color: #1a7f5a;
+            box-shadow: inset 0 0 0 1.5px rgba(26, 127, 90, 0.25);
+        }
+        .mhn-badge {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 7px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .mhn-badge.red { background: var(--red); color: white; }
+        .mhn-badge.gold { background: var(--gold); color: #0f2942; }
+        .mhn-badge.purple { background: var(--purple); color: white; }
+
+        /* Main Content */
+        .mail-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        /* List Header */
+        .mail-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--gray-200);
+            flex-shrink: 0;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .mail-list-header h2 {
+            font-size: 19px;
+            font-weight: 900;
+            color: #0f2942;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+        .mail-topbar-count {
+            font-size: 11px;
+            font-weight: 800;
+            color: #1a7f5a;
+            background: rgba(26, 127, 90, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .mail-search-wrap { position: relative; width: 300px; max-width: 100%; }
+        .mail-search-wrap input {
+            width: 100%;
+            padding: 10px 16px 10px 38px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 22px;
+            font-size: 13px;
+            font-family: inherit;
+            background: var(--gray-50);
+            outline: none;
+            transition: all 0.2s;
+            color: var(--gray-800);
+        }
+        .mail-search-wrap input:focus {
+            border-color: #1a7f5a;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(26, 127, 90, 0.08);
+        }
+        .mail-search-wrap .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+
+        /* List Scroll */
+        .mail-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            background: var(--gray-50);
+        }
+        .mail-list-scroll::-webkit-scrollbar { width: 8px; }
+        .mail-list-scroll::-webkit-scrollbar-track { background: var(--gray-50); }
+        .mail-list-scroll::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+        /* Mail Item */
+        .mail-item {
+            display: flex;
+            gap: 14px;
+            padding: 16px 20px;
+            background: white;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            align-items: flex-start;
+        }
+        .mail-item:hover {
+            box-shadow: 0 8px 24px rgba(26, 127, 90, 0.08);
+            border-color: var(--gray-300);
+            transform: translateY(-1px);
+        }
+        .mail-item.unread {
+            background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%);
+            border-left: 4px solid #1a7f5a;
+        }
+        .mail-item .mi-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1a7f5a, #0f2942);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 900;
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Empty State */
+        .mail-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 30px;
+            text-align: center;
+            color: var(--gray-400);
+        }
+        .mail-empty-icon {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(26, 127, 90, 0.06), rgba(26, 127, 90, 0.02));
+            border: 2px dashed rgba(26, 127, 90, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 46px;
+            margin-bottom: 22px;
+        }
+        .mail-empty-title { font-size: 18px; font-weight: 900; color: var(--gray-600); margin-bottom: 6px; }
+        .mail-empty-desc { font-size: 13px; color: var(--gray-400); }
+
+        /* Detail Overlay & Topbar */
+        .mail-detail-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--gray-100);
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .mail-detail-overlay.show { display: flex; }
+        .mail-detail-topbar {
+            padding: 14px 24px;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(26, 127, 90, 0.04);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .mail-back-btn {
+            padding: 8px 16px;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--gray-600);
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .mail-back-btn:hover { background: var(--gray-200); color: #0f2942; }
+        .mail-detail-actions { display: flex; gap: 8px; align-items: center; }
+        .mail-icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1.5px solid var(--gray-200);
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .mail-icon-btn:hover { background: var(--gray-50); border-color: #1a7f5a; transform: translateY(-2px); }
+        .mail-icon-btn.danger { border-color: #fecaca; background: #fef2f2; }
+        .mail-icon-btn.danger:hover { background: #fee2e2; border-color: var(--red); }
+
+        /* Action Buttons */
+        .mail-detail-actions .btn-act-reply,
+        .mail-detail-actions .btn-act-attend,
+        .mail-detail-actions .btn-act-close {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .mail-detail-actions .btn-act-reply { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1 !important; }
+        .mail-detail-actions .btn-act-reply:hover { background: #e2e8f0; }
+        .mail-detail-actions .btn-act-attend { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+        .mail-detail-actions .btn-act-attend:hover { transform: translateY(-1px); }
+        .mail-detail-actions .btn-act-close { background: rgba(239, 68, 68, 0.08); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2) !important; }
+        .mail-detail-actions .btn-act-close:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .mail-detail-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+        }
+        .mail-detail-scroll::-webkit-scrollbar { width: 8px; }
+        .mail-detail-scroll::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+        /* ============================================================
+        🎨 PREMIUM DETAIL LAYOUT (2 COLUMNS)
+        ============================================================ */
+        .mail-detail-modern {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 20px;
+            height: calc(100vh - 180px);
+            padding: 4px;
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1100px) {
+            .mail-detail-modern { grid-template-columns: 1fr; height: auto; }
+            .md-workflow-panel { order: 2; max-height: 500px; }
+            .md-message-panel { order: 1; }
+        }
+
+        /* Workflow Panel */
+        .md-workflow-panel {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border: 1.5px solid var(--gray-200);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(26, 127, 90, 0.05);
+        }
+        .md-wf-header {
+            background: linear-gradient(135deg, #1a7f5a 0%, #0f2942 100%);
+            padding: 20px 22px;
+            border-bottom: 3px solid #2ecc71;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        .md-wf-header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(46, 204, 113, 0.15);
+            border: 1.5px solid rgba(46, 204, 113, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .md-wf-header-title h3 {
+            font-size: 16px;
+            font-weight: 900;
+            color: white;
+            margin: 0 0 2px;
+            letter-spacing: -0.3px;
+        }
+        .md-wf-header-title p {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+            font-weight: 600;
+        }
+        .md-wf-body { flex: 1; overflow-y: auto; padding: 24px 20px; }
+        .md-wf-body::-webkit-scrollbar { width: 6px; }
+        .md-wf-body::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+
+        /* Message Panel */
+        .md-message-panel {
+            background: white;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(26, 127, 90, 0.05);
+        }
+        .md-msg-header {
+            padding: 28px 32px 24px;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            border-bottom: 1.5px solid var(--gray-200);
+            flex-shrink: 0;
+        }
+        .md-msg-subject {
+            font-size: 24px;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.3;
+            margin: 0 0 20px;
+            letter-spacing: -0.5px;
+            word-wrap: break-word;
+        }
+        .md-msg-meta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .md-msg-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #1a7f5a, #0f2942);
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            flex-shrink: 0;
+            border: 2.5px solid #2ecc71;
+            box-shadow: 0 4px 15px rgba(26, 127, 90, 0.15);
+        }
+        .md-msg-sender-info { flex: 1; min-width: 0; }
+        .md-msg-sender-name { font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 3px; }
+        .md-msg-receiver { font-size: 12.5px; color: var(--gray-500); font-weight: 600; }
+.md-msg-receiver strong { color: #1a7f5a; font-weight: 800; }
+.md-msg-date {
+    padding: 8px 16px;
+    background: white;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gray-500);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.md-msg-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-left: 12px;
+}
+.md-msg-status.unread { background: #dbeafe; color: #1d4ed8; }
+.md-msg-status.read { background: #dcfce7; color: #15803d; }
+.md-msg-status.closed { background: #ede9fe; color: #6d28d9; }
+.md-msg-status.pending { background: #fef3c7; color: #b45309; }
+.md-msg-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px;
+    font-size: 14.5px;
+    line-height: 1.85;
+    color: #1e293b;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: white;
+}
+.md-msg-body::-webkit-scrollbar { width: 8px; }
+.md-msg-body::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+/* Timeline */
+.md-timeline { display: flex; flex-direction: column; gap: 16px; }
+.md-tl-empty {
+    text-align: center;
+    padding: 50px 20px;
+    background: white;
+    border: 2px dashed var(--gray-200);
+    border-radius: 14px;
+}
+.md-tl-empty-icon { font-size: 48px; opacity: 0.3; margin-bottom: 12px; }
+.md-tl-empty-title { font-size: 14px; font-weight: 800; color: var(--gray-500); margin-bottom: 4px; }
+.md-tl-empty-desc { font-size: 12px; color: var(--gray-400); }
+.md-tl-item {
+    background: white;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative;
+    transition: all 0.25s ease;
+    animation: mdTlFadeIn 0.4s ease;
+}
+@keyframes mdTlFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.md-tl-item:hover {
+    box-shadow: 0 8px 24px rgba(26, 127, 90, 0.08);
+    transform: translateY(-2px);
+    border-color: var(--gray-300);
+}
+.md-tl-item.created { border-left: 4px solid #2ecc71; }
+.md-tl-item.assigned { border-left: 4px solid #f59e0b; }
+.md-tl-item.attended { border-left: 4px solid #2ecc71; }
+.md-tl-item.closed { border-left: 4px solid #8b5cf6; }
+.md-tl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.md-tl-user-block { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.md-tl-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a7f5a, #0f2942);
+    color: #2ecc71;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+.md-tl-user-info { min-width: 0; flex: 1; }
+.md-tl-name { font-size: 13px; font-weight: 800; color: var(--gray-800); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.md-tl-role { font-size: 10px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.md-tl-action-badge {
+    font-size: 9px;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.md-tl-action-badge.created { background: #dcfce7; color: #15803d; }
+.md-tl-action-badge.assigned { background: #fef3c7; color: #b45309; }
+.md-tl-action-badge.attended { background: #dcfce7; color: #15803d; }
+.md-tl-action-badge.closed { background: #ede9fe; color: #6d28d9; }
+.md-tl-time { font-size: 10px; font-weight: 700; color: var(--gray-400); margin-top: 4px; }
+.md-tl-comment {
+    background: #f8fafc;
+    border-left: 3px solid #f59e0b;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 12.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-top: 10px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+.md-tl-assign-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #fffbeb;
+    border: 1px dashed #fbbf24;
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: #92400e;
+    font-weight: 700;
+    flex-wrap: wrap;
+}
+.md-tl-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.md-tl-attach-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.md-tl-attach-btn:hover {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+}
+
+/* Attachments Glow Button */
+.btn-attachments-glow {
+    padding: 8px 16px;
+    background: #fffbeb;
+    color: #b45309;
+    border: 1.5px solid #fcd34d;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    animation: pulseGlow 2s infinite;
+}
+.btn-attachments-glow:hover { background: #fef3c7; transform: translateY(-2px); }
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+/* ============================================================
+   COMPOSE MAIL MODAL
+   ============================================================ */
+.mc-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 41, 66, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.mc-overlay.show { display: flex; }
+.mc-modal {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 760px;
+    max-height: 94vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+    animation: mcSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes mcSlideUp {
+    from { transform: translateY(40px) scale(0.97); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.mc-header {
+    background: linear-gradient(135deg, #1a7f5a, #0f2942);
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #2ecc71;
+    flex-shrink: 0;
+    gap: 12px;
+}
+.mc-header-left { display: flex; align-items: center; gap: 14px; }
+.mc-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(46, 204, 113, 0.2);
+    border: 1.5px solid rgba(46, 204, 113, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+.mc-header-text h3 { color: white; font-size: 18px; font-weight: 900; margin: 0 0 2px; }
+.mc-header-text p { color: rgba(255, 255, 255, 0.6); font-size: 11.5px; margin: 0; font-weight: 600; }
+.mc-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.mc-close:hover { background: var(--red); transform: rotate(90deg); }
+.mc-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: var(--gray-50);
+}
+.mc-body::-webkit-scrollbar { width: 8px; }
+.mc-body::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+.mc-field { display: flex; flex-direction: column; gap: 7px; }
+.mc-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.mc-label .req { color: #dc2626; }
+.mc-input, .mc-textarea, .mc-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    color: var(--gray-800);
+    outline: none;
+    transition: all 0.2s;
+}
+.mc-input:focus, .mc-textarea:focus, .mc-select:focus {
+    border-color: #1a7f5a;
+    box-shadow: 0 0 0 4px rgba(26, 127, 90, 0.1);
+}
+.mc-textarea { resize: vertical; min-height: 130px; line-height: 1.7; }
+
+/* Multi Select */
+.ms-wrap { position: relative; }
+.ms-box {
+    min-height: 48px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 10px;
+    background: white;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    cursor: text;
+    transition: all 0.2s;
+}
+.ms-box:focus-within {
+    border-color: #1a7f5a;
+    box-shadow: 0 0 0 4px rgba(26, 127, 90, 0.1);
+}
+.ms-input {
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 120px;
+    padding: 5px;
+    font-size: 14px;
+    font-family: inherit;
+    background: transparent;
+}
+.ms-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #1a7f5a, #0f2942);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(26, 127, 90, 0.25);
+    animation: tagPop 0.2s ease;
+}
+@keyframes tagPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.ms-tag .rm {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.ms-tag .rm:hover { background: var(--red); }
+.ms-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+.ms-dropdown.show { display: block; }
+.ms-user {
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-50);
+    transition: background 0.15s;
+}
+.ms-user:hover { background: #f0fdf4; }
+.ms-user:last-child { border-bottom: none; }
+.ms-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a7f5a, #0f2942);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+.ms-user-info { flex: 1; min-width: 0; }
+.ms-user-name { font-size: 13.5px; font-weight: 800; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-user-role {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--gray-500);
+    background: var(--gray-100);
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 5px;
+    margin-top: 2px;
+    text-transform: uppercase;
+}
+.ms-empty { padding: 22px; text-align: center; color: var(--gray-400); font-size: 13px; font-weight: 600; }
+
+.mc-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.mc-footer {
+    padding: 18px 24px;
+    background: white;
+    border-top: 1.5px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.mc-footer-hint { font-size: 11.5px; color: var(--gray-400); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.mc-footer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.mc-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+.mc-btn:hover { transform: translateY(-2px); }
+.mc-btn-cancel { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+.mc-btn-draft { background: #fffbeb; color: #b45309; border: 1.5px solid #fcd34d; }
+.mc-btn-send { background: linear-gradient(135deg, #2ecc71, #1a7f5a); color: white; box-shadow: 0 6px 20px rgba(26, 127, 90, 0.4); }
+
+/* Attach Zone */
+.mc-attach-zone {
+    border: 2px dashed var(--gray-300);
+    border-radius: 14px;
+    padding: 26px;
+    text-align: center;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.mc-attach-zone:hover { border-color: #1a7f5a; background: #f0fdf4; }
+.mc-attach-icon { font-size: 34px; margin-bottom: 8px; display: block; }
+.mc-attach-title { font-size: 14px; font-weight: 800; color: var(--gray-800); margin-bottom: 3px; }
+.mc-attach-hint { font-size: 11.5px; color: var(--gray-400); font-weight: 600; }
+.mc-attach-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mc-attach-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: white;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-700);
+    box-shadow: 0 2px 8px rgba(26, 127, 90, 0.04);
+}
+.mc-attach-chip .rm {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    border: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mc-attach-chip .rm:hover { background: var(--red); color: white; }
+
+/* Mail Attachment Item */
+.mail-attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 6px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    font-size: 12px;
+}
+.mail-attachment-item .remove-attach {
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    font-weight: 800;
+}
     </style>
 </head>
 <body data-role="Engineer">
@@ -643,7 +1678,7 @@
                 <a href="#" class="sub-menu-item" onclick="switchTab('tab6', event); return false;"><span class="nav-text">Damaged products</span></a>
             </div>
 
-            <!-- 4. PRODUCTION REPORTS -->
+           <!-- 4. PRODUCTION REPORTS -->
             <a href="#" class="has-submenu" onclick="toggleSubmenu(event, 'sub-rep')" data-tooltip="Production Reports">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <span style="font-size:18px;">📈</span><span class="nav-text">Production reports</span>
@@ -654,7 +1689,13 @@
                 </div>
             </a>
             <div class="submenu-container" id="sub-rep">
-                <a href="#" class="sub-menu-item" onclick="switchTab('tab7', event); return false;"><span class="nav-text">Trends Reports</span></a>
+                <a href="#" class="sub-menu-item" onclick="switchTab('tab7', event); return false;">
+                    <span class="nav-text">📊 Generate Reports</span>
+                </a>
+                <!-- 🆕 Ongeza hii hapa -->
+                <a href="#" class="sub-menu-item" onclick="switchTab('tab-my-submitted-reports', event); return false;">
+                    <span class="nav-text">📤 My Submitted Reports</span>
+                </a>
             </div>
             <!-- PROCUREMENT DROPDOWN -->
             <a href="#" class="has-submenu" onclick="toggleSubmenu(event, 'sub-proc')" data-tooltip="Procurement">
@@ -725,6 +1766,11 @@
                 <div class="header-title">MAK DC Investment <span>Company LTD</span> | Production Department</div>
             </div>
             <div class="header-right">
+                <!-- Kitufe cha Mail -->
+                <button onclick="switchTab('tab-mail-center')" class="mail-header-btn" title="Mail Center">
+                    📩
+                    <span id="mailHeaderBadge" class="mail-header-badge">0</span>
+                </button>
                 <div class="user-dropdown-wrap" id="userDropdownWrap">
                     <button class="user-dropdown-trigger" onclick="toggleUserDropdown(event)">
                         <div class="ud-avatar" id="udAvatar"><span id="udInitials">EN</span></div>
@@ -773,7 +1819,7 @@
                                 📊 Production Overview
                             </div>
                             <div style="font-size: 30px; font-weight: 900; letter-spacing: -0.5px; line-height: 1.1;">
-                                Karibu, <span id="heroEngineerName">Engineer</span>
+                                Welcome Back, <span id="heroEngineerName">Engineer</span>
                             </div>
                             <div style="font-size: 14px; opacity: 0.85; margin-top: 8px;" id="heroDate">
                                 Loading...
@@ -982,7 +2028,6 @@
                     </div>
                 </div>
             </div>
-            
             <!-- ===== MODAL: RECEIVE MATERIAL ===== -->
             <div class="modal-overlay" id="receiveMaterialModal">
                 <div class="modal-box" style="max-width: 550px; padding: 0; overflow: hidden; border-radius: 16px;">
@@ -1041,7 +2086,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- ===== TAB 3: PRODUCTION ===== -->
             <div class="tab-content" id="tab3">
                 <div class="dashboard-stats compact-stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 16px;">
@@ -1140,7 +2184,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- ===== TAB 4: STOCK ===== -->
             <div class="tab-content" id="tab4">
                 <div class="dashboard-stats compact-stats" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
@@ -1204,7 +2247,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- ===== TAB 5: RELEASE TO SALES ===== -->
             <div class="tab-content" id="tab5">
                 <div class="dashboard-stats compact-stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 16px;">
@@ -1336,6 +2378,13 @@
                             <h3>📈 Generate Production Report</h3>
                         </div>
                     </div>
+                    <!-- Weka hii ndani ya tab7, mfano juu ya kadi za summary -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                        <h2 style="font-size: 20px; font-weight: 900; color: var(--gray-800); margin: 0;">📊 Production Reports</h2>
+                        <button onclick="openSubmitReportModal()" style="padding: 12px 24px; background: linear-gradient(135deg, #1a7f5a, #0f2942); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit; font-size: 14px; box-shadow: 0 4px 12px rgba(26,127,90,0.3); display: flex; align-items: center; gap: 8px;">
+                            📤 Send Report to CEO
+                        </button>
+                    </div>
                     <div class="section-body">
                         <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr auto; align-items: end;">
                             <div class="form-group">
@@ -1381,7 +2430,6 @@
                         <div class="section-body" style="padding: 20px;">
                             <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Executive Summary</h4>
                             <div id="reportNarrative" style="font-size: 14px; line-height: 1.8; text-align: justify;">
-                                <!-- JavaScript itaandika maelezo hapa -->
                             </div>
                         </div>
                     </div>
@@ -1481,7 +2529,6 @@
                 </div>
 
             </div>
-
             <!-- ===== TAB: MY REQUESTS ===== -->
             <div class="tab-content" id="my-requests">
                 <div class="section-card">
@@ -1563,6 +2610,103 @@
                     <div class="section-body" style="padding:24px; overflow-x:auto;">
                         <div id="allBudgetsContainer" style="width: 100%; min-width: 800px;">
                             <div style="text-align:center;padding:40px;color:#64748b;">⏳ Loading budgets...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-mail-center">
+                <div class="mail-shell-horizontal">
+                    <!-- TOP TOOLBAR -->
+                    <div class="mail-top-toolbar">
+                        <div class="mail-brand-horizontal">
+                            <div class="mail-brand-logo">
+                                <img src="assets/makdc-logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/30'">
+                            </div>
+                            <div>
+                                <h3 style="font-size: 16px; font-weight: 900; color: #1a7f5a; margin: 0;">MAK DC Mail</h3>
+                                <p style="font-size: 11px; color: #64748b; margin: 0; font-weight: 600;">Production Department</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button class="mail-btn-secondary" onclick="openMinuteComposeModal()">📝 New Minute</button>
+                            <button class="mail-btn-primary" onclick="openComposeMailModal()">✏️ Compose</button>
+                        </div>
+                    </div>
+
+                    <!-- HORIZONTAL NAVIGATION -->
+                    <div class="mail-horizontal-nav">
+                        <button onclick="switchMailBox('inbox')" id="mail-nav-inbox" class="mhn-item active">
+                            📥 Inbox <span id="inboxBadge" class="mhn-badge red">0</span>
+                        </button>
+                        <button onclick="switchMailBox('starred')" id="mail-nav-starred" class="mhn-item">
+                            ⭐ Starred
+                        </button>
+                        <button onclick="switchMailBox('pending')" id="mail-nav-pending" class="mhn-item">
+                            ⏳ Pending <span id="pendingBadge" class="mhn-badge gold">0</span>
+                        </button>
+                        <button onclick="switchMailBox('minutes')" id="mail-nav-minutes" class="mhn-item">
+                            📝 Minutes <span id="minutesBadge" class="mhn-badge purple">0</span>
+                        </button>
+                        <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 10px;"></div>
+                        <button onclick="switchMailBox('sent')" id="mail-nav-sent" class="mhn-item">📤 Sent</button>
+                        <button onclick="switchMailBox('drafts')" id="mail-nav-drafts" class="mhn-item">📁 Drafts</button>
+                    </div>
+
+                    <!-- MAIN CONTENT AREA -->
+                    <div class="mail-main-content">
+                        <!-- LIST VIEW -->
+                        <div id="mailListView" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                            <div class="mail-list-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <h2 id="mailListTitle">Inbox</h2>
+                                    <span class="mail-topbar-count" id="mailListCount">0 messages</span>
+                                </div>
+                                <button onclick="refreshCurrentMailbox()" 
+                                        style="padding: 10px 16px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">
+                                    🔄 Refresh
+                                </button>
+                                <div class="mail-search-wrap" style="width: 300px;">
+                                    <span class="search-icon">🔍</span>
+                                    <input type="text" id="mailSearchInput" oninput="filterMailList()" placeholder="Search mail...">
+                                </div>
+                            </div>
+                            
+                            <div id="mailListContainer" class="mail-list-scroll">
+                                <!-- List items zitajaa hapa kupitia JS -->
+                            </div>
+                        </div>
+
+                        <!-- DETAIL VIEW -->
+                        <div id="mailDetailView" class="mail-detail-overlay">
+                            <div class="mail-detail-topbar">
+                                <button class="mail-back-btn" onclick="closeMailDetailView()">
+                                    ← Back to <span id="mailBackLabel">Inbox</span>
+                                </button>
+                                <div class="mail-detail-actions">
+                                    <button id="btnStarMail" class="mail-icon-btn" onclick="toggleStarCurrentMail()" title="Star">⭐</button>
+                                    <button id="btnArchiveMail" class="mail-icon-btn" onclick="toggleArchiveCurrentMail()" title="Archive">📁</button>
+                                    <button id="btnDeleteMail" class="mail-icon-btn danger" onclick="deleteCurrentMail()" title="Delete">🗑️</button>
+                                </div>
+                            </div>
+                            <div id="mailDetailBody" class="mail-detail-scroll"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ===== TAB: MY SUBMITTED REPORTS ===== -->
+            <div class="tab-content" id="tab-my-submitted-reports">
+                <div class="section-card">
+                    <div class="section-header" style="background: linear-gradient(135deg, #1a7f5a, #0f2942);">
+                        <div class="header-left">
+                            <span style="font-size: 20px;">📤</span>
+                            <h3 style="color: white; margin: 0;">My Submitted Reports</h3>
+                        </div>
+                        <button onclick="loadMySubmittedReports()" class="btn-action" style="background: white; border: none; color: #1a7f5a;">🔄 Refresh</button>
+                    </div>
+                    <div class="section-body" id="mySubmittedReportsContainer">
+                        <div style="text-align: center; padding: 40px; color: var(--gray-400);">
+                            ⏳ Loading your reports...
                         </div>
                     </div>
                 </div>
@@ -2077,6 +3221,256 @@
             <div class="modern-modal-footer">
                 <button class="modern-btn-cancel" onclick="closeDeptRequestPreview(); openDeptRequestModal();">← Edit</button>
                 <button id="previewDeptConfirmBtn" class="modern-btn-primary" style="background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="confirmDeptRequestSubmit()">✅ Confirm & Send to Procurement</button>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================
+     MODAL: COMPOSE MAIL (ENGINEER)
+     ============================================================ -->
+    <div class="mc-overlay" id="composeMailModal">
+        <div class="mc-modal">
+            <div class="mc-header">
+                <div class="mc-header-left">
+                    <div class="mc-header-icon">✏️</div>
+                    <div class="mc-header-text">
+                        <h3>Compose Message</h3>
+                        <p>Send internal message</p>
+                    </div>
+                </div>
+                <button class="mc-close" onclick="closeComposeModal()">✕</button>
+            </div>
+            <div class="mc-body">
+                <div class="mc-field">
+                    <label class="mc-label">To <span class="req">*</span></label>
+                    <div class="ms-wrap">
+                        <div class="ms-box" id="sendToBox" onclick="document.getElementById('sendToInput').focus()">
+                            <input type="text" class="ms-input" id="sendToInput" placeholder="Type name...">
+                        </div>
+                        <div class="ms-dropdown" id="sendToDropdown"></div>
+                    </div>
+                </div>
+
+                <div class="mc-field">
+                    <label class="mc-label">CC (Optional)</label>
+                    <div class="ms-wrap">
+                        <div class="ms-box" id="ccBox" onclick="document.getElementById('ccInput').focus()">
+                            <input type="text" class="ms-input" id="ccInput" placeholder="Type name...">
+                        </div>
+                        <div class="ms-dropdown" id="ccDropdown"></div>
+                    </div>
+                </div>
+
+                <div class="mc-row2">
+                    <div class="mc-field">
+                        <label class="mc-label">Type</label>
+                        <select class="mc-select" id="mailType">
+                            <option value="information">📄 Information</option>
+                            <option value="request">📋 Request</option>
+                            <option value="action">⚡ Action Required</option>
+                            <option value="urgent">🚨 Urgent</option>
+                        </select>
+                    </div>
+                    <div class="mc-field">
+                        <label class="mc-label">Priority</label>
+                        <select class="mc-select" id="mailPriority">
+                            <option value="normal">🟢 Normal</option>
+                            <option value="high">🟡 High</option>
+                            <option value="urgent">🔴 Urgent</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mc-field">
+                    <label class="mc-label">Subject <span class="req">*</span></label>
+                    <input type="text" class="mc-input" id="mailSubject" placeholder="Enter subject...">
+                </div>
+
+                <div class="mc-field">
+                    <label class="mc-label">Message <span class="req">*</span></label>
+                    <textarea class="mc-textarea" id="mailBody" placeholder="Write your message here..."></textarea>
+                </div>
+
+                <div class="mc-field">
+                    <label class="mc-label">Attachments</label>
+                    <div class="mc-attach-zone" onclick="document.getElementById('mailFileInput').click()">
+                        <span class="mc-attach-icon">📎</span>
+                        <div class="mc-attach-title">Click to attach files</div>
+                        <div class="mc-attach-hint">Max 10MB per file</div>
+                    </div>
+                    <input type="file" id="mailFileInput" multiple style="display:none;" onchange="handleMailAttachments(event)">
+                    <div class="mc-attach-list" id="mailAttachList"></div>
+                </div>
+            </div>
+            <div class="mc-footer">
+                <div class="mc-footer-hint">🔒 Secure internal messaging</div>
+                <div class="mc-footer-actions">
+                    <button class="mc-btn mc-btn-cancel" onclick="closeComposeModal()">Cancel</button>
+                    <button class="mc-btn mc-btn-draft" onclick="saveMailDraft()">💾 Save Draft</button>
+                    <button class="mc-btn mc-btn-send" onclick="sendMail()">📤 Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+     MODAL: MINUTE COMPOSE (ENGINEER)
+     ============================================================ -->
+    <div class="mc-overlay" id="minuteComposeModal">
+        <div class="mc-modal">
+            <div class="mc-header">
+                <div class="mc-header-left">
+                    <div class="mc-header-icon">📝</div>
+                    <div class="mc-header-text">
+                        <h3>Create Minute</h3>
+                        <p>Assign task to someone</p>
+                    </div>
+                </div>
+                <button class="mc-close" onclick="closeModal('minuteComposeModal')">✕</button>
+            </div>
+            <div class="mc-body">
+                <div class="mc-field">
+                    <label class="mc-label">Subject <span class="req">*</span></label>
+                    <input type="text" class="mc-input" id="minuteSubject" placeholder="Minute subject...">
+                </div>
+                <div class="mc-field">
+                    <label class="mc-label">Assign To <span class="req">*</span></label>
+                    <select class="mc-select" id="minuteAssignTo">
+                        <option value="">-- Select Person --</option>
+                    </select>
+                </div>
+                <div class="mc-field">
+                    <label class="mc-label">Instructions <span class="req">*</span></label>
+                    <textarea class="mc-textarea" id="minuteBody" placeholder="What should they do?"></textarea>
+                </div>
+                <div class="mc-field">
+                    <label class="mc-label">Attachments</label>
+                    <div class="mc-attach-zone" onclick="document.getElementById('minuteFileInput').click()">
+                        <span class="mc-attach-icon">📎</span>
+                        <div class="mc-attach-title">Click to attach files</div>
+                        <div class="mc-attach-hint">Max 25MB per file</div>
+                    </div>
+                    <input type="file" id="minuteFileInput" multiple style="display:none;" onchange="handleMinuteAttachments(event)">
+                    <div class="mc-attach-list" id="minuteAttachList"></div>
+                </div>
+            </div>
+            <div class="mc-footer">
+                <div class="mc-footer-hint">📝 Creates a task for the assignee</div>
+                <div class="mc-footer-actions">
+                    <button class="mc-btn mc-btn-cancel" onclick="closeModal('minuteComposeModal')">Cancel</button>
+                    <button class="mc-btn mc-btn-send" onclick="sendMinute()">📤 Create Minute</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================
+     MODAL: ATTEND & ASSIGN
+     ============================================================ -->
+    <div class="modal-overlay" id="attendMailModal">
+    <div class="modal-box" style="max-width: 620px; padding: 0; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #1a7f5a, #0f2942); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:42px; height:42px; border-radius:10px; background:rgba(46,204,113,0.2); border:1px solid rgba(46,204,113,0.4); display:flex; align-items:center; justify-content:center; font-size:20px;">✅</div>
+                <div>
+                    <div style="font-size:16px; font-weight:800;">Attend & Assign</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.7);" id="attendMailSubject">—</div>
+                </div>
+            </div>
+            <button onclick="closeModal('attendMailModal')" style="background:rgba(255,255,255,0.2); border:none; color:white; width:32px; height:32px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
+        </div>
+        <div style="padding: 22px 26px; max-height: 60vh; overflow-y: auto;">
+            <div class="mc-field">
+                <label class="mc-label">Comment / Notes</label>
+                <textarea class="mc-textarea" id="attendComment" placeholder="Write what you've done or your response..." style="min-height: 100px;"></textarea>
+            </div>
+            <div class="mc-field" style="margin-top: 16px;">
+                <label class="mc-label">Assign To (Optional)</label>
+                <select class="mc-select" id="attendAssignTo">
+                    <option value="">-- No assignment, just comment --</option>
+                </select>
+            </div>
+            <div class="mc-field" style="margin-top: 16px;">
+                <label class="mc-label">Attachments (Optional)</label>
+                <div class="mc-attach-zone" onclick="document.getElementById('attendFileInput').click()">
+                    <span class="mc-attach-icon">📎</span>
+                    <div class="mc-attach-title">Click to attach files</div>
+                    <div class="mc-attach-hint">Max 10MB per file</div>
+                </div>
+                <input type="file" id="attendFileInput" multiple style="display:none;" onchange="handleAttendAttachments(event)">
+                <div class="mc-attach-list" id="attendAttachList"></div>
+            </div>
+        </div>
+        <div style="padding: 14px 26px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="closeModal('attendMailModal')" style="padding:10px 20px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit;">Cancel</button>
+            <button id="attendSubmitBtn" onclick="submitAttend()" style="padding:10px 24px; background:linear-gradient(135deg, #2ecc71, #1a7f5a); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(46,204,113,0.3);">✅ Submit</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- ============================================================
+     MODAL: CLOSE WORKFLOW
+     ============================================================ -->
+    <div class="modal-overlay" id="closeWorkflowModal">
+        <div class="modal-box" style="max-width: 620px; padding: 0; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #7f1d1d, #dc2626); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:42px; height:42px; border-radius:10px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; font-size:20px;">🔒</div>
+                    <div>
+                        <div style="font-size:16px; font-weight:800;">Close Workflow</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.7);" id="closeMailSubject">—</div>
+                    </div>
+                </div>
+                <button onclick="closeModal('closeWorkflowModal')" style="background:rgba(255,255,255,0.2); border:none; color:white; width:32px; height:32px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
+            </div>
+            <div style="padding: 22px 26px; max-height: 60vh; overflow-y: auto;">
+                <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #78350f; margin-bottom: 16px;">
+                    ⚠️ Closing this message means the workflow is complete. No further actions can be taken.
+                </div>
+                <div class="mc-field">
+                    <label class="mc-label">What was done? <span class="req">*</span></label>
+                    <textarea class="mc-textarea" id="closeComment" placeholder="Explain what was accomplished..." style="min-height: 100px;"></textarea>
+                </div>
+                <div class="mc-field" style="margin-top: 16px;">
+                    <label class="mc-label">Assign To (Optional)</label>
+                    <select class="mc-select" id="closeAssignTo">
+                        <option value="">-- No assignment, just close --</option>
+                    </select>
+                </div>
+                <div class="mc-field" style="margin-top: 16px;">
+                    <label class="mc-label">Attachments (Optional)</label>
+                    <div class="mc-attach-zone" onclick="document.getElementById('closeFileInput').click()">
+                        <span class="mc-attach-icon">📎</span>
+                        <div class="mc-attach-title">Click to attach files</div>
+                        <div class="mc-attach-hint">Max 10MB per file</div>
+                    </div>
+                    <input type="file" id="closeFileInput" multiple style="display:none;" onchange="handleCloseAttachments(event)">
+                    <div class="mc-attach-list" id="closeAttachList"></div>
+                </div>
+            </div>
+            <div style="padding: 14px 26px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeModal('closeWorkflowModal')" style="padding:10px 20px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit;">Cancel</button>
+                <button id="closeSubmitBtn" onclick="submitCloseWorkflow()" style="padding:10px 24px; background:linear-gradient(135deg, #dc2626, #b91c1c); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(220,38,38,0.3);">🔒 Close Workflow</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+     MODAL: VIEW ATTACHMENTS
+     ============================================================ -->
+    <div class="modal-overlay" id="viewAttachmentsModal">
+        <div class="modal-box" style="max-width: 550px; padding: 0; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #1a7f5a, #0f2942); padding: 22px 26px; display: flex; justify-content: space-between; align-items: center; color: white;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:42px; height:42px; border-radius:10px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); display:flex; align-items:center; justify-content:center; font-size:20px;">📎</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 900;">Attachments</h3>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.7);" id="attachmentsCount">0 file(s) attached</div>
+                    </div>
+                </div>
+                <button onclick="closeModal('viewAttachmentsModal')" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>
+            </div>
+            <div id="attachmentsListBody" style="padding: 24px 28px; max-height: 60vh; overflow-y: auto; background: #f8fafc;"></div>
+            <div style="padding: 18px 28px; background: white; border-top: 1.5px solid #e2e8f0; display:flex; justify-content:flex-end;">
+                <button onclick="closeModal('viewAttachmentsModal')" style="padding: 12px 28px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit;">Close</button>
             </div>
         </div>
     </div>

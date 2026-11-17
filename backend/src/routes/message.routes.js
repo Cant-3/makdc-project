@@ -8,7 +8,6 @@ const { authenticate } = require('../middleware/auth');
 // HELPERS
 // ================================================================
 
-// Pata majina ya users kutoka IDs
 async function getUsersByIds(ids = []) {
     if (!ids || ids.length === 0) return [];
     const users = await prisma.user.findMany({
@@ -29,7 +28,7 @@ async function recordAttendance(messageId, user, action, comment = null, assigne
     return prisma.internalMessageAttendance.create({
         data: {
             messageId,
-            userId: user.userId, // 🆕 Badilisha user.id iwe user.userId
+            userId: user.userId,
             userName: user.fullName,
             userRole: user.role,
             action,
@@ -44,40 +43,39 @@ async function recordAttendance(messageId, user, action, comment = null, assigne
 // ROUTES
 // ================================================================
 
-// 0. UNREAD COUNT
+// 0. UNREAD COUNT (Imerekebishwa: array_contains -> has)
 router.get('/unread-count', authenticate, async (req, res) => {
     try {
         const userId = req.user.userId;
 
-        const inbox = await prisma.internalMessage.count({
-            where: { receiverId: userId, status: 'unread', isDeleted: false, isArchived: false }
-        });
-
-        const pending = await prisma.internalMessage.count({
-            where: {
-                status: { in: ['unread', 'read', 'in-progress'] },
-                isDeleted: false,
-                OR: [
-                    { receiverId: userId },
-                    { assignedTo: { array_contains: userId } }
-                ]
-            }
-        });
-
-        const drafts = await prisma.internalMessage.count({
-            where: { senderId: userId, status: 'draft', isDeleted: false }
-        });
-
-        const minutes = await prisma.internalMessage.count({
-            where: {
-                isMinute: true, isDeleted: false,
-                status: { in: ['unread', 'read', 'in-progress'] },
-                OR: [
-                    { receiverId: userId },
-                    { assignedTo: { array_contains: userId } }
-                ]
-            }
-        });
+        const [inbox, pending, drafts, minutes] = await Promise.all([
+            prisma.internalMessage.count({
+                where: { receiverId: userId, status: 'unread', isDeleted: false, isArchived: false }
+            }),
+            prisma.internalMessage.count({
+                where: {
+                    status: { in: ['unread', 'read', 'in-progress'] },
+                    isDeleted: false,
+                    OR: [
+                        { receiverId: userId },
+                        { assignedTo: { has: userId } } // ✅ Badilishwa
+                    ]
+                }
+            }),
+            prisma.internalMessage.count({
+                where: { senderId: userId, status: 'draft', isDeleted: false }
+            }),
+            prisma.internalMessage.count({
+                where: {
+                    isMinute: true, isDeleted: false,
+                    status: { in: ['unread', 'read', 'in-progress'] },
+                    OR: [
+                        { receiverId: userId },
+                        { assignedTo: { has: userId } } // ✅ Badilishwa
+                    ]
+                }
+            })
+        ]);
 
         res.json({ inbox, pending, drafts, minutes });
     } catch (error) {
@@ -107,11 +105,9 @@ router.post('/', authenticate, async (req, res) => {
 
         const createdMessages = [];
 
-        // Pata majina ya CC
         const ccUsers = await getUsersByIds(cc || []);
         const ccNames = ccUsers.map(u => u.fullName);
 
-        // Assignees: kama ni minute tumia assignedTo, kama ni mail ya kawaida tumia receivers
         const assigneeIds = isMinute ? assignedTo : receivers;
         const assigneeUsers = await getUsersByIds(assigneeIds);
         const assigneeNames = assigneeUsers.map(u => u.fullName);
@@ -122,7 +118,7 @@ router.post('/', authenticate, async (req, res) => {
 
             const newMessage = await prisma.internalMessage.create({
                 data: {
-                    senderId: sender.userId, // 🆕 Badilisha sender.id iwe sender.userId
+                    senderId: sender.userId,
                     senderName: sender.fullName,
                     senderRole: sender.role,
                     receiverId: receiverId,
@@ -168,8 +164,7 @@ router.post('/draft', authenticate, async (req, res) => {
         const { receivers, cc, subject, body, type, priority, attachments, isMinute, assignedTo } = req.body;
         const sender = req.user;
 
-        // Kwa draft, kama hakuna receiver, tumia sender mwenyewe (placeholder)
-        const firstReceiver = receivers && receivers.length > 0 ? receivers[0] : sender.userId; // 🆕 Badilisha sender.id iwe sender.userId
+        const firstReceiver = receivers && receivers.length > 0 ? receivers[0] : sender.userId;
         const receiverUser = await prisma.user.findUnique({ where: { id: firstReceiver } });
 
         const ccUsers = await getUsersByIds(cc || []);
@@ -181,7 +176,7 @@ router.post('/draft', authenticate, async (req, res) => {
 
         const draft = await prisma.internalMessage.create({
             data: {
-                senderId: sender.userId, // 🆕 Badilisha sender.id iwe sender.userId
+                senderId: sender.userId,
                 senderName: sender.fullName,
                 senderRole: sender.role,
                 receiverId: firstReceiver,
@@ -208,7 +203,7 @@ router.post('/draft', authenticate, async (req, res) => {
     }
 });
 
-// 3. VUTA ORODHA YA UJUMBE
+// 3. VUTA ORODHA YA UJUMBE (Imerekebishwa: array_contains -> has)
 router.get('/list', authenticate, async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -226,7 +221,7 @@ router.get('/list', authenticate, async (req, res) => {
                 status: { in: ['unread', 'read', 'in-progress'] },
                 OR: [
                     { receiverId: userId },
-                    { assignedTo: { array_contains: userId } }
+                    { assignedTo: { has: userId } } // ✅ Badilishwa
                 ]
             };
         } else if (type === 'drafts') {
@@ -243,7 +238,25 @@ router.get('/list', authenticate, async (req, res) => {
 
         const messages = await prisma.internalMessage.findMany({
             where: whereClause,
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                senderId: true,
+                senderName: true,
+                senderRole: true,
+                receiverId: true,
+                receiverName: true,
+                subject: true,
+                body: true,
+                type: true,
+                priority: true,
+                status: true,
+                isStarred: true,
+                isArchived: true,
+                isMinute: true,
+                hasAttachments: true,
+                createdAt: true
+            }
         });
 
         res.json(messages);
@@ -253,12 +266,64 @@ router.get('/list', authenticate, async (req, res) => {
     }
 });
 
-// 4. VUTA UJUMBE MMOJA
+// ================================================================
+// 🆕 ROUTE MPYA IMEWEKWA HAPA JUU ILI ISIGONGANE NA /:id
+// ================================================================
+// 4b. VUTA ATTACHMENTS PEKEE
+router.get('/:id/attachments', authenticate, async (req, res) => {
+    try {
+        const message = await prisma.internalMessage.findUnique({
+            where: { id: parseInt(req.params.id) },
+            select: { attachments: true, hasAttachments: true }
+        });
+
+        if (!message) return res.status(404).json({ error: 'Message not found' });
+
+        const safeAttachments = Array.isArray(message.attachments) ? message.attachments : [];
+        
+        res.json({ attachments: safeAttachments });
+    } catch (error) {
+        console.error('Attachments error:', error);
+        res.status(500).json({ error: 'Failed to fetch attachments: ' + error.message });
+    }
+});
+
+// 4. VUTA UJUMBE MMOJA (BILA attachments — kwa haraka)
 router.get('/:id', authenticate, async (req, res) => {
     try {
         const message = await prisma.internalMessage.findUnique({
             where: { id: parseInt(req.params.id) },
-            include: { attendance: { orderBy: { createdAt: 'asc' } } }
+            select: {
+                id: true,
+                senderId: true,
+                senderName: true,
+                senderRole: true,
+                receiverId: true,
+                receiverName: true,
+                ccIds: true,
+                ccNames: true,
+                subject: true,
+                body: true,
+                type: true,
+                priority: true,
+                isMinute: true,
+                isStarred: true,
+                isArchived: true,
+                hasAttachments: true,
+                status: true,
+                replyToId: true,
+                assignedTo: true,
+                assignedToNames: true,
+                assignedBy: true,
+                assignedAt: true,
+                attendedAt: true,
+                attendedBy: true,
+                closedAt: true,
+                closedBy: true,
+                readAt: true,
+                createdAt: true,
+                attendance: { orderBy: { createdAt: 'asc' } }
+            }
         });
 
         if (!message) return res.status(404).json({ error: 'Message not found' });
@@ -292,7 +357,7 @@ router.put('/:id/read', authenticate, async (req, res) => {
 router.put('/:id/attend', authenticate, async (req, res) => {
     try {
         const messageId = parseInt(req.params.id);
-        const { comment, assignTo } = req.body;
+        const { comment, assignTo, attachments } = req.body; // 🆕 Ongeza attachments hapa
 
         const message = await prisma.internalMessage.findUnique({ where: { id: messageId } });
         if (!message) return res.status(404).json({ error: 'Message not found' });
@@ -317,6 +382,13 @@ router.put('/:id/attend', authenticate, async (req, res) => {
             updateData.assignedAt = new Date();
         }
 
+        // 🆕 Kama kuna attachments mpya, ongeza kwenye array ya zamani
+        if (attachments && attachments.length > 0) {
+            const oldAttachments = message.attachments || [];
+            updateData.attachments = [...oldAttachments, ...attachments];
+            updateData.hasAttachments = true;
+        }
+
         const updated = await prisma.internalMessage.update({
             where: { id: messageId },
             data: updateData
@@ -331,12 +403,12 @@ router.put('/:id/attend', authenticate, async (req, res) => {
         res.status(500).json({ error: 'Failed to attend: ' + error.message });
     }
 });
-
 // 7. CLOSE
 router.put('/:id/close', authenticate, async (req, res) => {
     try {
         const messageId = parseInt(req.params.id);
-        const { comment } = req.body;
+        // 🆕 Ongeza assignTo na attachments hapa
+        const { comment, assignTo, attachments } = req.body; 
 
         const message = await prisma.internalMessage.findUnique({ where: { id: messageId } });
         if (!message) return res.status(404).json({ error: 'Message not found' });
@@ -345,14 +417,39 @@ router.put('/:id/close', authenticate, async (req, res) => {
         const canClose = assignedToIds.includes(req.user.userId) || message.receiverId === req.user.userId || message.senderId === req.user.userId;
         if (!canClose) return res.status(403).json({ error: 'Only assignees or creator can close' });
 
+        const updateData = {
+            status: 'closed',
+            closedAt: new Date(),
+            closedBy: req.user.fullName
+        };
+
+        // 🆕 Kama kuna mtu ana-assigniwa wakati wa kufunga
+        if (assignTo && assignTo.length > 0) {
+            const assignees = await getUsersByIds(assignTo);
+            updateData.assignedTo = assignTo;
+            updateData.assignedToNames = assignees.map(u => u.fullName);
+            updateData.assignedBy = req.user.fullName;
+            updateData.assignedAt = new Date();
+        }
+
+        // 🆕 Kama kuna attachments mpya
+        if (attachments && attachments.length > 0) {
+            const oldAttachments = message.attachments || [];
+            updateData.attachments = [...oldAttachments, ...attachments];
+            updateData.hasAttachments = true;
+        }
+
         await prisma.internalMessage.update({
             where: { id: messageId },
-            data: { status: 'closed', closedAt: new Date(), closedBy: req.user.fullName }
+            data: updateData
         });
 
-        await recordAttendance(messageId, req.user, 'closed', comment || 'Closed');
+        // Rekodi kwenye attendance
+        await recordAttendance(messageId, req.user, 'closed', comment || 'Closed', assignTo || null);
+        
         res.json({ success: true });
     } catch (error) {
+        console.error('Close error:', error);
         res.status(500).json({ error: 'Failed to close: ' + error.message });
     }
 });

@@ -124,6 +124,7 @@ app.use('/api/business-plans', businessPlanRoutes);
 app.use('/api/manager-reports', managerReportRoutes);
 app.use('/api/kpis', kpiRoutes);
 app.use('/api/messages', require('./routes/message.routes'));
+app.use('/api/reports', require('./routes/report.routes'));
 
 
 // ================================================================

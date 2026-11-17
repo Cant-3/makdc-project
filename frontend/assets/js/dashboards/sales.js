@@ -1,10 +1,4 @@
-// ================================================================
-// MAK DC INVESTMENT — SALES & MARKETING DASHBOARD
-// ================================================================
-// VERSION: 2.1 (Fixed All My Budgets Loading Issue + Code Cleanup)
-// ================================================================
 
-// ===== STATE =====
 let currentUser = null;
 let currentDeptUser = null;
 let currentProfilePic = null;
@@ -307,15 +301,9 @@ function switchSidebarTab(targetId, event) {
 
     // Sub-tab parents
     const subTabParents = {
-        'sub-all-orders': 'tab1',
-        'sub-create-order': 'tab1',
-        'sub-waiting-approval': 'tab1',
-        'sub-approved': 'tab1',
-        'sub-rejected': 'tab1',
-        'sub-pending-delivery': 'tab-delivery',
-        'sub-in-transit': 'tab-delivery',
-        'sub-delivered': 'tab-delivery',
-        'sub-self-pickup': 'tab-delivery'
+        'sub-all-orders': 'tab1','sub-create-order': 'tab1','sub-waiting-approval': 'tab1',
+        'sub-approved': 'tab1','sub-rejected': 'tab1','sub-pending-delivery': 'tab-delivery',
+        'sub-in-transit': 'tab-delivery','sub-delivered': 'tab-delivery','sub-self-pickup': 'tab-delivery'
     };
 
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -343,8 +331,7 @@ function switchSidebarTab(targetId, event) {
         const link = event.target.closest('.sidebar-submenu a');
         if (link) link.classList.add('active');
     }
-
-    // Load data per tab
+    if (tabId === 'tab-my-submitted-reports') loadMySubmittedReports();
     if (targetId === 'sub-create-order') {
         loadProductsForSales().then(() => {
             const tbody = document.getElementById('itemsTableBody');
@@ -4867,5 +4854,1603 @@ async function saveSalesActualValue() {
         saveBtn.disabled = false;
         saveBtn.textContent = '🚀 Save Progress';
         saveBtn.style.opacity = '1';
+    }
+}
+// ================================================================
+// MAIL SYSTEM — SALES DASHBOARD
+// ================================================================
+
+let allMailUsers = [];
+let mailListCache = {};
+let mailListCacheTime = {};
+const MAIL_CACHE_TTL = 30000;
+let selectedSendTo = [];
+let selectedCC = [];
+let currentMailAttachments = [];
+let currentMailBoxType = 'inbox';
+let cachedMailList = [];
+let currentMailId = null;
+
+// ================= 1. LOAD BADGES =================
+async function loadMailBadges() {
+    try {
+        const counts = await API.getMailUnreadCount().catch(() => null);
+        
+        if (counts) {
+            if(document.getElementById('inboxBadge')) document.getElementById('inboxBadge').textContent = counts.inbox || 0;
+            if(document.getElementById('pendingBadge')) document.getElementById('pendingBadge').textContent = counts.pending || 0;
+            if(document.getElementById('minutesBadge')) document.getElementById('minutesBadge').textContent = counts.minutes || 0;
+            
+            if(document.getElementById('mailHeaderBadge')) {
+                const total = (counts.inbox || 0) + (counts.pending || 0);
+                const badge = document.getElementById('mailHeaderBadge');
+                if (total > 0) {
+                    badge.textContent = total;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+    } catch (err) { 
+        console.error('Badge error:', err); 
+    }
+}
+
+// ================= 2. SWITCH MAILBOX =================
+async function switchMailBox(type) {
+    currentMailBoxType = type;
+    closeMailDetailView(); 
+    
+    const titles = {
+        'inbox': 'Inbox', 'pending': 'Pending Actions', 'minutes': 'Minutes',
+        'sent': 'Sent Messages', 'drafts': 'Drafts', 'starred': 'Starred', 'documents': 'Attachments'
+    };
+    document.getElementById('mailListTitle').textContent = titles[type] || 'Inbox';
+
+    const navIds = ['inbox', 'pending', 'minutes', 'sent', 'drafts', 'starred'];
+    navIds.forEach(nav => {
+        const btn = document.getElementById(`mail-nav-${nav}`);
+        if (btn) btn.classList.remove('active');
+    });
+    
+    const activeBtn = document.getElementById(`mail-nav-${type}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    await loadMailboxMessages(type);
+}
+
+// ================= 3. LOAD MESSAGES =================
+async function loadMailboxMessages(type) {
+    const container = document.getElementById('mailListContainer');
+
+    const now = Date.now();
+    if (mailListCache[type] && (now - (mailListCacheTime[type] || 0) < MAIL_CACHE_TTL)) {
+        cachedMailList = mailListCache[type];
+        renderMailList(cachedMailList);
+        return;
+    }
+
+    container.innerHTML = `<div style="text-align: center; padding: 60px; color: #6e7a5e;"><div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">⏳</div><div style="font-weight: 700;">Fetching messages...</div></div>`;
+
+    try {
+        const messages = await API.getMailboxMessages(type);
+        cachedMailList = messages || [];
+
+        mailListCache[type] = cachedMailList;
+        mailListCacheTime[type] = now;
+
+        if (cachedMailList.length === 0) {
+            container.innerHTML = `<div class="mail-empty"><div class="mail-empty-icon">📭</div><div class="mail-empty-title">No Messages Found</div><div class="mail-empty-desc">Your ${type} is empty.</div></div>`;
+            return;
+        }
+        renderMailList(cachedMailList);
+    } catch (err) {
+        console.error('Mail load error:', err);
+        container.innerHTML = `<div style="text-align: center; padding: 40px; background: #fef2f2; border-radius: 12px; color: #b91c1c;"><div style="font-size: 30px; margin-bottom: 10px;">❌</div><div style="font-weight: 800;">Failed to load messages</div><div style="font-size: 13px;">${err.message}</div></div>`;
+    }
+}
+
+// ================= 4. RENDER MAIL LIST =================
+function renderMailList(messages) {
+    const container = document.getElementById('mailListContainer');
+    const countEl = document.getElementById('mailListCount');
+    
+    if (countEl) countEl.textContent = `${messages.length} message${messages.length !== 1 ? 's' : ''}`;
+    
+    if (messages.length === 0) {
+        container.innerHTML = `
+            <div class="mail-empty">
+                <div class="mail-empty-icon">📭</div>
+                <div class="mail-empty-title">No Messages</div>
+                <div class="mail-empty-desc">Your ${currentMailBoxType} is empty.</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = messages.map(msg => {
+        const isUnread = msg.status === 'unread';
+        const isClosed = msg.status === 'closed';
+        const isPending = msg.status === 'pending' || (msg.assignedTo && msg.assignedTo.length > 0 && !isClosed);
+        
+        const displayName = currentMailBoxType === 'sent' 
+            ? (msg.receiverName || 'Unknown')
+            : (msg.senderName || 'Unknown');
+        const prefix = currentMailBoxType === 'sent' ? 'To: ' : '';
+        
+        const dateStr = msg.createdAt 
+            ? new Date(msg.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+            : '';
+            
+        const initials = (displayName || 'U').substring(0, 2).toUpperCase();
+        
+        const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#14b8a6'];
+        const colorIndex = displayName.length % colors.length;
+        const avatarColor = colors[colorIndex];
+
+        let badges = '';
+        if (msg.isMinute) {
+            badges += `<span style="font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgba(139,92,246,0.15); color: #7c3aed; letter-spacing: 0.5px;">📝 MINUTE</span>`;
+        }
+        if (isClosed) {
+            badges += `<span style="font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgba(100,116,139,0.15); color: #475569; letter-spacing: 0.5px;">🔒 CLOSED</span>`;
+        } else if (isPending) {
+            badges += `<span style="font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgba(245,158,11,0.15); color: #b45309; letter-spacing: 0.5px;">⏳ IN PROGRESS</span>`;
+        }
+        if (msg.isStarred) {
+            badges += `<span style="font-size: 14px;">⭐</span>`;
+        }
+        
+        return `
+            <div class="mail-item ${isUnread ? 'unread' : ''}" onclick="viewMailDetail('${msg.id}')">
+                <div class="mi-avatar" style="background: ${avatarColor}15; color: ${avatarColor}; border: 1.5px solid ${avatarColor}30;">
+                    ${initials}
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 10px;">
+                        <div style="font-size: 14.5px; font-weight: ${isUnread ? '900' : '700'}; color: #3a4130; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${prefix}${esc(displayName)}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 800; color: #9aa38b; flex-shrink: 0; background: #eef0ea; padding: 3px 8px; border-radius: 6px;">
+                            ${dateStr}
+                        </div>
+                    </div>
+                    <div style="font-size: 14px; font-weight: ${isUnread ? '800' : '600'}; color: #252a1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px;">
+                        ${esc(msg.subject || '(No Subject)')}
+                    </div>
+                    <div style="font-size: 13px; color: #6e7a5e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5;">
+                        ${esc((msg.body || '').substring(0, 120))}${(msg.body || '').length > 120 ? '...' : ''}
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 6px; flex-shrink: 0; margin-left: 8px;">
+                    ${badges}
+                    ${isUnread ? '<div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);"></div>' : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ================= 5. FILTER MAIL LIST =================
+let mailFilterTimeout;
+function filterMailList() {
+    clearTimeout(mailFilterTimeout);
+    mailFilterTimeout = setTimeout(() => {
+        const query = (document.getElementById('mailSearchInput')?.value || '').toLowerCase().trim();
+
+        if (!query) {
+            renderMailList(cachedMailList);
+            return;
+        }
+
+        const filtered = cachedMailList.filter(msg =>
+            (msg.subject && msg.subject.toLowerCase().includes(query)) ||
+            (msg.senderName && msg.senderName.toLowerCase().includes(query)) ||
+            (msg.receiverName && msg.receiverName.toLowerCase().includes(query)) ||
+            (msg.body && msg.body.toLowerCase().includes(query))
+        );
+
+        renderMailList(filtered);
+    }, 300);
+}
+
+// ================= 6. VIEW MAIL DETAIL =================
+async function viewMailDetail(id) {
+    currentMailId = id;
+    document.getElementById('mailListView').style.display = 'none';
+    document.getElementById('mailDetailView').style.display = 'flex';
+    
+    const backLabel = document.getElementById('mailBackLabel');
+    if (backLabel) backLabel.textContent = document.getElementById('mailListTitle')?.textContent || 'Inbox';
+    
+    const body = document.getElementById('mailDetailBody');
+    
+    body.innerHTML = `
+        <div style="text-align: center; padding: 60px; color: var(--gray-500);">
+            <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">⏳</div>
+            <div style="font-weight: 700;">Loading message...</div>
+        </div>
+    `;
+
+    try {
+        let msg = await API.getInternalMailById(id); 
+        if (!msg) {
+            body.innerHTML = `<div style="color: var(--red); text-align: center; padding: 40px; font-weight: 800;">❌ Message not found.</div>`;
+            return;
+        }
+        
+        if (!window.mailCache) window.mailCache = {};
+        window.mailCache[id] = msg;
+
+        if (currentMailBoxType === 'inbox' && msg.status === 'unread') {
+            (async () => {
+                try {
+                    await API.markMailAsRead(id);
+                    loadMailBadges();
+                    msg.status = 'read';
+                } catch (e) { console.warn('Mark read error:', e); }
+            })();
+        }
+        
+        const isClosed = msg.status === 'closed' || msg.status === 'draft';
+        
+        let totalAtts = 0;
+        if (msg.attachments && Array.isArray(msg.attachments)) totalAtts += msg.attachments.length;
+        if (msg.attendance && Array.isArray(msg.attendance)) {
+            msg.attendance.forEach(att => {
+                if (att.attachments && Array.isArray(att.attachments)) totalAtts += att.attachments.length;
+            });
+        }
+
+        const attButton = `
+            <button class="btn-attachments-glow" onclick="openAttachmentsModal('${id}')">
+                📎 Attachments (${totalAtts})
+            </button>
+        `;
+
+        let actionButtons = `
+            ${attButton}
+            <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 8px;"></div>
+            <button class="btn-act-reply" onclick="openReplyModal('${id}')">↩️ Reply</button>
+        `;
+        
+        if (!isClosed) {
+            actionButtons += `
+                <button class="btn-act-attend" onclick="openAttendModal('${id}')">✅ Attend & Assign</button>
+                <button class="btn-act-close" onclick="closeCurrentMail()">🔒 Close Workflow</button>
+            `;
+        } else {
+            actionButtons += `<div style="padding: 8px 14px; background: #f5f3ff; color: #6d28d9; border: 1px solid #ede9fe; border-radius: 8px; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center;">🔒 Closed</div>`;
+        }
+
+        const detailActions = document.querySelector('.mail-detail-actions');
+        if (detailActions) {
+            detailActions.innerHTML = `
+                ${actionButtons}
+                <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 8px;"></div>
+                <button id="btnStarMail" class="mail-icon-btn" onclick="toggleStarCurrentMail()" title="Star">⭐</button>
+                <button id="btnArchiveMail" class="mail-icon-btn" onclick="toggleArchiveCurrentMail()" title="Archive">📁</button>
+                <button id="btnDeleteMail" class="mail-icon-btn danger" onclick="deleteCurrentMail()" title="Delete">🗑️</button>
+            `;
+        }
+
+        body.innerHTML = `
+            <div class="mail-detail-modern">
+                
+                <!-- ================= LEFT: WORKFLOW PANEL ================= -->
+                <div class="md-workflow-panel">
+                    <div class="md-wf-header">
+                        <div class="md-wf-header-icon">🔄</div>
+                        <div class="md-wf-header-title">
+                            <h3>Workflow History</h3>
+                            <p>Actions & assignments</p>
+                        </div>
+                    </div>
+                    <div class="md-wf-body">
+                        ${renderWorkflowChain(msg)}
+                    </div>
+                </div>
+
+                <!-- ================= RIGHT: MESSAGE PANEL ================= -->
+                <div class="md-message-panel">
+                    <div class="md-msg-header">
+                        <h2 class="md-msg-subject">${esc(msg.subject || '(No Subject)')}</h2>
+                        
+                        <div class="md-msg-meta-row">
+                            <div class="md-msg-avatar">${(msg.senderName || 'U').substring(0, 2).toUpperCase()}</div>
+                            <div class="md-msg-sender-info">
+                                <div class="md-msg-sender-name">${esc(msg.senderName || 'Unknown')}</div>
+                                <div class="md-msg-receiver">
+                                    To: <strong>${esc(msg.receiverName || '—')}</strong>
+                                    <span class="md-msg-status ${msg.status}">${(msg.status || '').toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <div class="md-msg-date">
+                                📅 ${new Date(msg.createdAt).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md-msg-body">
+                        ${esc(msg.body || '')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+    } catch (err) {
+        console.error('View Mail Error:', err);
+        body.innerHTML = `<div style="color: var(--red); text-align: center; padding: 40px; font-weight: 800;">❌ Failed to load: ${esc(err.message)}</div>`;
+    }
+}
+
+// ================= 7. RENDER WORKFLOW CHAIN =================
+function renderWorkflowChain(msg) {
+    const attendance = msg.attendance || [];
+    
+    if (attendance.length === 0) {
+        return `
+            <div class="md-tl-empty">
+                <div class="md-tl-empty-icon">📭</div>
+                <div class="md-tl-empty-title">No Workflow Yet</div>
+                <div class="md-tl-empty-desc">Actions will appear here.</div>
+            </div>`;
+    }
+
+    const sorted = [...attendance].sort((a, b) => 
+        new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+    );
+
+    return `
+        <div class="md-timeline">
+            ${sorted.map((att) => {
+                const action = (att.action || 'attended').toLowerCase();
+                const userName = att.userName || 'System';
+                const userRole = att.userRole || att.role || 'User';
+                const initials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const timeStr = formatTimeAgo(att.createdAt);
+                
+                let actionClass = 'attended';
+                let actionLabel = 'Attended';
+                if (action.includes('created') || action === 'send') { 
+                    actionClass = 'created'; actionLabel = 'Created'; 
+                } else if (action.includes('assign')) { 
+                    actionClass = 'assigned'; actionLabel = 'Assigned'; 
+                } else if (action.includes('close')) { 
+                    actionClass = 'closed'; actionLabel = 'Closed'; 
+                }
+
+                let assignHtml = '';
+                if (att.assignedTo && att.assignedTo.length > 0) {
+                    const names = att.assignedNames && att.assignedNames.length > 0 
+                        ? att.assignedNames : ['Unknown'];
+                    assignHtml = `
+                        <div class="md-tl-assign-pill">
+                            ➡️ Assigned to: <strong>${names.map(n => esc(n)).join(', ')}</strong>
+                        </div>`;
+                }
+
+                let attHtml = '';
+                if (att.attachments && att.attachments.length > 0) {
+                    attHtml = `<div class="md-tl-attachments">`;
+                    att.attachments.forEach(file => {
+                        attHtml += `
+                            <button onclick="downloadMailAttachment('${file.data}', '${esc(file.name)}')" class="md-tl-attach-btn">
+                                📎 ${esc(file.name)}
+                            </button>`;
+                    });
+                    attHtml += `</div>`;
+                }
+
+                return `
+                    <div class="md-tl-item ${actionClass}">
+                        <div class="md-tl-header">
+                            <div class="md-tl-user-block">
+                                <div class="md-tl-avatar">${initials}</div>
+                                <div class="md-tl-user-info">
+                                    <div class="md-tl-name">${esc(userName)}</div>
+                                    <div class="md-tl-role">${esc(userRole)}</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="md-tl-action-badge ${actionClass}">${actionLabel}</div>
+                                <div class="md-tl-time">${timeStr}</div>
+                            </div>
+                        </div>
+
+                        ${att.comment ? `<div class="md-tl-comment">${esc(att.comment)}</div>` : ''}
+                        ${assignHtml}
+                        ${attHtml}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+// ================= 8. HELPERS =================
+function formatTimeAgo(dateStr) {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '—';
+    
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHr = Math.floor(diffMs / 3600000);
+    const diffDay = Math.floor(diffMs / 86400000);
+    
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHr < 24) return `${diffHr}h ago`;
+    if (diffDay < 7) return `${diffDay}d ago`;
+    
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function closeMailDetailView() {
+    document.getElementById('mailListView').style.display = 'flex';
+    document.getElementById('mailDetailView').style.display = 'none';
+    currentMailId = null;
+}
+
+function refreshCurrentMailbox() {
+    if (!currentMailBoxType) return;
+    delete mailListCache[currentMailBoxType];
+    delete mailListCacheTime[currentMailBoxType];
+    loadMailboxMessages(currentMailBoxType);
+    showToast('🔄 Refreshed', 'info');
+}
+
+// ================= 9. HOOK INTO switchSidebarTab =================
+(function hookMailCenter() {
+    const _orig = window.switchSidebarTab;
+    if (typeof _orig !== 'function' || _orig.__mailHooked) return;
+    const wrapped = function(tabId, event) {
+        const result = _orig.call(this, tabId, event);
+        if (tabId === 'tab-mail-center') {
+            if (!document.getElementById('tab-mail-center').classList.contains('active')) {
+                switchMailBox('inbox');
+            }
+            loadMailBadges();
+        }
+        return result;
+    };
+    wrapped.__mailHooked = true;
+    window.switchSidebarTab = wrapped;
+})();
+// ================================================================
+// MAIL SYSTEM — HELPER STATE
+// ================================================================
+let currentMinuteAttachments = [];
+let currentAttendAttachments = [];
+let currentCloseAttachments = [];
+
+// ================================================================
+// 10. COMPOSE MAIL
+// ================================================================
+async function openComposeMailModal() {
+    selectedSendTo = [];
+    selectedCC = [];
+    currentMailAttachments = [];
+    
+    document.getElementById('mailType').value = 'information';
+    document.getElementById('mailPriority').value = 'normal';
+    document.getElementById('mailSubject').value = '';
+    document.getElementById('mailBody').value = '';
+    document.getElementById('mailAttachList').innerHTML = '';
+    
+    renderTags('sendTo');
+    renderTags('cc');
+    
+    document.getElementById('composeMailModal').classList.add('show');
+
+    if (allMailUsers.length === 0) {
+        try {
+            const users = await API.getUsers();
+            const currentUser = Auth.getUser();
+            allMailUsers = (users || []).filter(u => u.id !== currentUser.userId && u.role !== 'SuperAdmin');
+        } catch (err) {
+            console.error("Failed to load users:", err);
+            showToast('⚠ Imeshindwa kupata orodha ya watumiaji.', 'warning');
+        }
+    }
+
+    setupMailSearch('sendTo');
+    setupMailSearch('cc');
+}
+
+function closeComposeModal() {
+    document.getElementById('composeMailModal').classList.remove('show');
+}
+
+function setupMailSearch(type) {
+    const input = document.getElementById(`${type}Input`);
+    const dropdown = document.getElementById(`${type}Dropdown`);
+
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+
+    newInput.addEventListener('focus', () => {
+        dropdown.classList.add('show');
+        renderDropdown(type, '');
+    });
+
+    newInput.addEventListener('input', function() {
+        dropdown.classList.add('show');
+        renderDropdown(type, this.value.toLowerCase().trim());
+    });
+
+    newInput.addEventListener('blur', function() {
+        setTimeout(() => { dropdown.classList.remove('show'); }, 200);
+    });
+}
+
+function renderDropdown(type, query) {
+    const dropdown = document.getElementById(`${type}Dropdown`);
+    const selected = type === 'sendTo' ? selectedSendTo : selectedCC;
+
+    let filtered = allMailUsers.filter(u => !selected.find(s => s.id === u.id));
+    
+    if (query) {
+        filtered = filtered.filter(u =>
+            (u.fullName && u.fullName.toLowerCase().includes(query)) ||
+            (u.role && u.role.toLowerCase().includes(query)) ||
+            (u.department && u.department.toLowerCase().includes(query))
+        );
+    }
+
+    if (filtered.length === 0) {
+        dropdown.innerHTML = `<div class="ms-empty">No users found${query ? ` for "${esc(query)}"` : ''}</div>`;
+        return;
+    }
+
+    dropdown.innerHTML = filtered.map(user => {
+        const initials = user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        const roleLabel = user.role || user.department || 'User';
+        
+        return `
+            <div class="ms-user" onmousedown="event.preventDefault(); addTag('${user.id}', '${type}')">
+                <div class="ms-avatar">${initials}</div>
+                <div class="ms-user-info">
+                    <div class="ms-user-name">${esc(user.fullName)}</div>
+                    <div class="ms-user-role">${esc(roleLabel)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addTag(userId, type) {
+    const user = allMailUsers.find(u => String(u.id) === String(userId));
+    if (!user) return;
+
+    if (type === 'sendTo') {
+        if (!selectedSendTo.find(u => u.id === userId)) {
+            selectedSendTo.push(user);
+            renderTags('sendTo');
+        }
+    } else {
+        if (!selectedCC.find(u => u.id === userId)) {
+            selectedCC.push(user);
+            renderTags('cc');
+        }
+    }
+
+    document.getElementById(`${type}Input`).value = '';
+    document.getElementById(`${type}Dropdown`).classList.remove('show');
+    document.getElementById(`${type}Input`).focus();
+}
+
+function removeTag(userId, type) {
+    if (type === 'sendTo') {
+        selectedSendTo = selectedSendTo.filter(u => u.id !== userId);
+        renderTags('sendTo');
+    } else {
+        selectedCC = selectedCC.filter(u => u.id !== userId);
+        renderTags('cc');
+    }
+}
+
+function renderTags(type) {
+    const box = document.getElementById(`${type}Box`);
+    const input = document.getElementById(`${type}Input`);
+    const selected = type === 'sendTo' ? selectedSendTo : selectedCC;
+
+    box.querySelectorAll('.ms-tag').forEach(tag => tag.remove());
+
+    selected.forEach(user => {
+        const tag = document.createElement('div');
+        tag.className = 'ms-tag';
+        tag.innerHTML = `
+            ${esc(user.fullName.split(' ')[0])}
+            <button class="rm" onclick="event.stopPropagation(); removeTag('${user.id}', '${type}')">✕</button>
+        `;
+        box.insertBefore(tag, input);
+    });
+}
+
+function handleMailAttachments(event) {
+    const files = Array.from(event.target.files);
+    const list = document.getElementById('mailAttachList');
+
+    files.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('⚠ Too Large: ' + file.name, 'error');
+            return;
+        }
+        if (currentMailAttachments.find(f => f.name === file.name && f.size === file.size)) return;
+        currentMailAttachments.push(file);
+    });
+
+    list.innerHTML = currentMailAttachments.map((file, index) => `
+        <div class="mc-attach-chip">
+            <span>📎</span>
+            <span>${file.name}</span>
+            <button onclick="event.stopPropagation(); removeMailAttachment(${index})" class="rm">✕</button>
+        </div>
+    `).join('');
+    event.target.value = '';
+}
+
+function removeMailAttachment(index) {
+    currentMailAttachments.splice(index, 1);
+    document.getElementById('mailAttachList').innerHTML = currentMailAttachments.map((file, idx) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeMailAttachment(${idx})" class="rm">✕</button></div>
+    `).join('');
+}
+
+async function sendMail() {
+    const subject = document.getElementById('mailSubject').value.trim();
+    const body = document.getElementById('mailBody').value.trim();
+    const type = document.getElementById('mailType').value;
+    const priority = document.getElementById('mailPriority').value;
+    const btn = document.querySelector('#composeMailModal button[onclick="sendMail()"]');
+    
+    if (selectedSendTo.length === 0) return showToast('Please select at least one recipient', 'error');
+    if (!subject) return showToast('Please enter a subject', 'error');
+    if (!body) return showToast('Please write a message', 'error');
+
+    const originalBtn = btn.innerHTML;
+    btn.innerHTML = '⏳ Sending...'; btn.disabled = true;
+
+    try {
+        const attachmentPromises = currentMailAttachments.map(file => new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+            reader.readAsDataURL(file);
+        }));
+        const attachmentData = await Promise.all(attachmentPromises);
+
+        const payload = {
+            receivers: selectedSendTo.map(u => u.id),
+            cc: selectedCC.map(u => u.id),
+            subject, body, type, priority,
+            attachments: attachmentData,
+            isMinute: false
+        };
+
+        await API.sendInternalMail(payload);
+
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        showToast('✅ Message sent successfully!', 'success');
+        closeComposeModal();
+        loadMailBadges();
+        if (currentMailBoxType === 'sent') loadMailboxMessages('sent');
+        
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+        btn.innerHTML = originalBtn; btn.disabled = false;
+    }
+}
+
+async function saveMailDraft() {
+    const subject = document.getElementById('mailSubject').value.trim();
+    const body = document.getElementById('mailBody').value.trim();
+    
+    if (!subject && !body) return showToast('Write something to save', 'error');
+
+    try {
+        const attachmentPromises = currentMailAttachments.map(file => new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+            reader.readAsDataURL(file);
+        }));
+        const attachmentData = await Promise.all(attachmentPromises);
+
+        const payload = {
+            receivers: selectedSendTo.map(u => u.id),
+            cc: selectedCC.map(u => u.id),
+            subject: subject || '(No Subject)', 
+            body,
+            type: document.getElementById('mailType').value,
+            priority: document.getElementById('mailPriority').value,
+            attachments: attachmentData,
+            isMinute: false
+        };
+
+        await API.saveMailDraft(payload);
+        showToast('💾 Draft saved!', 'success');
+        closeComposeModal();
+        if (currentMailBoxType === 'drafts') loadMailboxMessages('drafts');
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+    }
+}
+
+// ================================================================
+// 11. MINUTE COMPOSE
+// ================================================================
+async function openMinuteComposeModal() {
+    document.getElementById('minuteSubject').value = '';
+    document.getElementById('minuteBody').value = '';
+    currentMinuteAttachments = [];
+    document.getElementById('minuteAttachList').innerHTML = '';
+    
+    const select = document.getElementById('minuteAssignTo');
+    select.innerHTML = '<option value="">-- Select Person --</option>';
+    
+    if (allMailUsers.length === 0) {
+        try {
+            const users = await API.getUsers();
+            const curUser = Auth.getUser();
+            allMailUsers = (users || []).filter(u => u.id !== curUser.userId && u.role !== 'SuperAdmin');
+        } catch (err) {
+            console.error("Failed to load users:", err);
+        }
+    }
+    
+    allMailUsers.forEach(u => {
+        select.insertAdjacentHTML('beforeend', `<option value="${u.id}">${u.fullName} (${u.role})</option>`);
+    });
+
+    document.getElementById('minuteComposeModal').classList.add('show');
+}
+
+function handleMinuteAttachments(event) {
+    const files = Array.from(event.target.files);
+    const list = document.getElementById('minuteAttachList');
+
+    files.forEach(file => {
+        if (file.size > 25 * 1024 * 1024) {
+            showToast('⚠ Too Large: ' + file.name, 'error');
+            return;
+        }
+        if (currentMinuteAttachments.find(f => f.name === file.name && f.size === file.size)) return;
+        currentMinuteAttachments.push(file);
+    });
+
+    list.innerHTML = currentMinuteAttachments.map((file, index) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeMinuteAttachment(${index})" class="rm">✕</button></div>
+    `).join('');
+    event.target.value = '';
+}
+
+function removeMinuteAttachment(index) {
+    currentMinuteAttachments.splice(index, 1);
+    document.getElementById('minuteAttachList').innerHTML = currentMinuteAttachments.map((file, idx) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeMinuteAttachment(${idx})" class="rm">✕</button></div>
+    `).join('');
+}
+
+async function sendMinute() {
+    const subject = document.getElementById('minuteSubject').value.trim();
+    const assignToId = document.getElementById('minuteAssignTo').value;
+    const body = document.getElementById('minuteBody').value.trim();
+    
+    if (!subject || !assignToId || !body) return showToast('Please fill all required fields', 'error');
+
+    const btn = document.querySelector('#minuteComposeModal button[onclick="sendMinute()"]');
+    const originalBtn = btn.innerHTML;
+    btn.innerHTML = '⏳ Creating...'; btn.disabled = true;
+
+    try {
+        const attachmentPromises = currentMinuteAttachments.map(file => new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+            reader.readAsDataURL(file);
+        }));
+        const attachmentData = await Promise.all(attachmentPromises);
+
+        const payload = {
+            receivers: [parseInt(assignToId)],
+            subject, body, attachments: attachmentData,
+            type: 'minute', isMinute: true,
+            assignedTo: [parseInt(assignToId)]
+        };
+
+        await API.sendInternalMail(payload);
+        
+        showToast('✅ Minute created and assigned!', 'success');
+        closeModal('minuteComposeModal');
+        loadMailBadges();
+        if (currentMailBoxType === 'minutes') loadMailboxMessages('minutes');
+        
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+        btn.innerHTML = originalBtn; btn.disabled = false;
+    }
+}
+
+// ================================================================
+// 12. ATTEND MODAL
+// ================================================================
+async function openAttendModal(mailId) {
+    let msg = window.mailCache && window.mailCache[mailId] ? window.mailCache[mailId] : null;
+    
+    const subjectEl = document.getElementById('attendMailSubject');
+    if (subjectEl) subjectEl.textContent = msg ? esc(msg.subject || '(No Subject)') : 'Message';
+
+    document.getElementById('attendComment').value = '';
+    document.getElementById('attendAttachList').innerHTML = '';
+    currentAttendAttachments = [];
+
+    const select = document.getElementById('attendAssignTo');
+    select.innerHTML = '<option value="">-- No assignment, just comment --</option>';
+    
+    try {
+        let users = allMailUsers;
+        if (!users || users.length === 0) {
+            users = await API.getUsers();
+            const curUser = Auth.getUser();
+            allMailUsers = (users || []).filter(u => u.id !== curUser.userId && u.role !== 'SuperAdmin');
+        }
+        
+        allMailUsers.forEach(u => {
+            select.insertAdjacentHTML('beforeend', `<option value="${u.id}">${esc(u.fullName)} • ${esc(u.role || u.department || 'User')}</option>`);
+        });
+    } catch (err) { console.warn(err); }
+
+    document.getElementById('attendMailModal').classList.add('show');
+}
+
+function handleAttendAttachments(event) {
+    const files = Array.from(event.target.files);
+    const list = document.getElementById('attendAttachList');
+
+    files.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('⚠ Too Large: ' + file.name, 'error');
+            return;
+        }
+        if (currentAttendAttachments.find(f => f.name === file.name && f.size === file.size)) return;
+        currentAttendAttachments.push(file);
+    });
+
+    list.innerHTML = currentAttendAttachments.map((file, index) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeAttendAttachment(${index})" class="rm">✕</button></div>
+    `).join('');
+    
+    event.target.value = '';
+}
+
+function removeAttendAttachment(index) {
+    currentAttendAttachments.splice(index, 1);
+    document.getElementById('attendAttachList').innerHTML = currentAttendAttachments.map((file, idx) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeAttendAttachment(${idx})" class="rm">✕</button></div>
+    `).join('');
+}
+
+async function submitAttend() {
+    const mailId = currentMailId;
+    if (!mailId) return;
+
+    const comment = (document.getElementById('attendComment')?.value || '').trim();
+    const assignToVal = document.getElementById('attendAssignTo')?.value;
+    const assignTo = assignToVal ? [parseInt(assignToVal)] : [];
+    const btn = document.getElementById('attendSubmitBtn');
+
+    if (!comment && assignTo.length === 0) {
+        showToast('Tafadhali andika maoni au chagua mtu.', 'warning');
+        return;
+    }
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Processing...';
+
+    try {
+        let attachmentData = [];
+        if (currentAttendAttachments.length > 0) {
+            const promises = currentAttendAttachments.map(file => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+                reader.readAsDataURL(file);
+            }));
+            attachmentData = await Promise.all(promises);
+        }
+
+        await API.attendMail(mailId, { comment, assignTo, attachments: attachmentData });
+
+        showToast('✅ Maoni yamewekwa.', 'success');
+        document.getElementById('attendMailModal')?.classList.remove('show');
+
+        if (window.mailCache && window.mailCache[mailId]) delete window.mailCache[mailId];
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        await viewMailDetail(mailId);
+        loadMailBadges();
+        if (currentMailBoxType) loadMailboxMessages(currentMailBoxType);
+
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+}
+
+// ================================================================
+// 13. CLOSE WORKFLOW
+// ================================================================
+async function closeCurrentMail() {
+    if (!currentMailId) return;
+    
+    let msg = window.mailCache && window.mailCache[currentMailId] ? window.mailCache[currentMailId] : null;
+    
+    const subjectEl = document.getElementById('closeMailSubject');
+    if (subjectEl) subjectEl.textContent = msg ? esc(msg.subject || '(No Subject)') : 'Message';
+
+    document.getElementById('closeComment').value = '';
+    document.getElementById('closeAttachList').innerHTML = '';
+    currentCloseAttachments = [];
+
+    const select = document.getElementById('closeAssignTo');
+    select.innerHTML = '<option value="">-- No assignment, just close --</option>';
+    
+    try {
+        let users = allMailUsers;
+        if (!users || users.length === 0) {
+            users = await API.getUsers();
+            const curUser = Auth.getUser();
+            allMailUsers = (users || []).filter(u => u.id !== curUser.userId && u.role !== 'SuperAdmin');
+        }
+        
+        allMailUsers.forEach(u => {
+            select.insertAdjacentHTML('beforeend', `<option value="${u.id}">${esc(u.fullName)} • ${esc(u.role || u.department || 'User')}</option>`);
+        });
+    } catch (err) { console.warn(err); }
+
+    document.getElementById('closeWorkflowModal').classList.add('show');
+}
+
+function handleCloseAttachments(event) {
+    const files = Array.from(event.target.files);
+    const list = document.getElementById('closeAttachList');
+
+    files.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('⚠ Too Large: ' + file.name, 'error');
+            return;
+        }
+        if (currentCloseAttachments.find(f => f.name === file.name && f.size === file.size)) return;
+        currentCloseAttachments.push(file);
+    });
+
+    list.innerHTML = currentCloseAttachments.map((file, index) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeCloseAttachment(${index})" class="rm">✕</button></div>
+    `).join('');
+    
+    event.target.value = '';
+}
+
+function removeCloseAttachment(index) {
+    currentCloseAttachments.splice(index, 1);
+    document.getElementById('closeAttachList').innerHTML = currentCloseAttachments.map((file, idx) => `
+        <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeCloseAttachment(${idx})" class="rm">✕</button></div>
+    `).join('');
+}
+
+async function submitCloseWorkflow() {
+    const comment = (document.getElementById('closeComment')?.value || '').trim();
+    const assignToVal = document.getElementById('closeAssignTo')?.value;
+    const assignTo = assignToVal ? [parseInt(assignToVal)] : [];
+    const btn = document.getElementById('closeSubmitBtn');
+
+    if (!comment) {
+        showToast('Tafadhali andika kile kilichofanyika.', 'warning');
+        return;
+    }
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Closing...';
+
+    try {
+        let attachmentData = [];
+        if (currentCloseAttachments.length > 0) {
+            const promises = currentCloseAttachments.map(file => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+                reader.readAsDataURL(file);
+            }));
+            attachmentData = await Promise.all(promises);
+        }
+
+        await API.closeMail(currentMailId, { comment, assignTo, attachments: attachmentData });
+
+        showToast('✅ Workflow imefungwa.', 'success');
+        document.getElementById('closeWorkflowModal')?.classList.remove('show');
+
+        if (window.mailCache && window.mailCache[currentMailId]) delete window.mailCache[currentMailId];
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        await viewMailDetail(currentMailId);
+        loadMailBadges();
+        if (currentMailBoxType) loadMailboxMessages(currentMailBoxType);
+
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+}
+
+// ================================================================
+// 14. REPLY
+// ================================================================
+async function openReplyModal(originalId) {
+    const msg = await API.getInternalMailById(originalId);
+    if (!msg) return;
+
+    let modal = document.getElementById('replyMailModal');
+    if (modal) modal.remove();
+
+    document.body.insertAdjacentHTML('beforeend', `
+        <div class="modal-overlay show" id="replyMailModal">
+            <div class="modal-box" style="max-width: 600px; padding: 0; overflow: hidden; border-radius: 16px;">
+                <div style="background: linear-gradient(135deg, #3d5a3d, #2a3d2a); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800;">↩️ Reply: ${esc(msg.subject)}</h3>
+                    <button onclick="document.getElementById('replyMailModal').remove()" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>
+                </div>
+                <div style="padding: 24px; background: #f8fafc;">
+                    <textarea id="replyBody" rows="6" placeholder="Write your reply here..." style="width: 100%; padding: 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                <div style="padding: 16px 24px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button onclick="document.getElementById('replyMailModal').remove()" style="padding: 10px 20px; background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit;">Cancel</button>
+                    <button onclick="submitReply('${originalId}')" style="padding: 10px 24px; background: linear-gradient(135deg, #c9a227, #e0b93a); color: #2a3d2a; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: inherit;">📤 Send Reply</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+async function submitReply(originalId) {
+    const body = document.getElementById('replyBody').value.trim();
+    if (!body) return showToast('Reply body is required', 'error');
+
+    const btn = document.querySelector(`#replyMailModal button[onclick="submitReply('${originalId}')"]`);
+    const originalBtn = btn.innerHTML;
+    btn.innerHTML = '⏳ Sending...'; btn.disabled = true;
+
+    try {
+        await API.replyInternalMail(originalId, { body, attachments: [] });
+
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        if (window.mailCache && window.mailCache[originalId]) {
+            delete window.mailCache[originalId];
+        }
+
+        showToast('✅ Reply sent successfully!', 'success');
+        document.getElementById('replyMailModal').remove();
+        loadMailBadges();
+        if (currentMailId == originalId) viewMailDetail(originalId);
+    } catch (err) {
+        showToast('❌ ' + err.message, 'error');
+        btn.innerHTML = originalBtn; btn.disabled = false;
+    }
+}
+
+// ================================================================
+// 15. STAR / ARCHIVE / DELETE
+// ================================================================
+async function toggleStarCurrentMail() {
+    if (!currentMailId) return;
+    try {
+        const res = await API.starMail(currentMailId);
+        document.getElementById('btnStarMail').textContent = res.isStarred ? '⭐' : '☆';
+        showToast(res.isStarred ? '⭐ Message starred' : 'Star removed', 'success');
+        loadMailboxMessages(currentMailBoxType);
+    } catch (err) { showToast('❌ ' + err.message, 'error'); }
+}
+
+async function toggleArchiveCurrentMail() {
+    if (!currentMailId) return;
+    try {
+        const res = await API.archiveMail(currentMailId);
+        document.getElementById('btnArchiveMail').textContent = res.isArchived ? '📂' : '📁';
+        showToast(res.isArchived ? '📂 Message archived' : 'Message unarchived', 'success');
+        loadMailboxMessages(currentMailBoxType);
+    } catch (err) { showToast('❌ ' + err.message, 'error'); }
+}
+
+async function deleteCurrentMail() {
+    if (!currentMailId) return;
+    if (!confirm('Delete this message? It will move to trash.')) return;
+    try {
+        await API.deleteMail(currentMailId);
+        showToast('🗑️ Message moved to trash.', 'success');
+        closeMailDetailView();
+        loadMailboxMessages(currentMailBoxType);
+        loadMailBadges();
+    } catch (err) { showToast('❌ ' + err.message, 'error'); }
+}
+
+// ================================================================
+// 16. ATTACHMENTS VIEWER
+// ================================================================
+function openAttachmentsModal(id) {
+    const msg = window.mailCache[id];
+    if (!msg) {
+        showToast('❌ Message data not found.', 'error');
+        return;
+    }
+
+    let allFiles = [];
+
+    if (msg.attachments && Array.isArray(msg.attachments) && msg.attachments.length > 0) {
+        msg.attachments.forEach(att => {
+            allFiles.push({ ...att, source: 'Original Message' });
+        });
+    }
+
+    if (msg.attendance && Array.isArray(msg.attendance) && msg.attendance.length > 0) {
+        msg.attendance.forEach(att => {
+            if (att.attachments && Array.isArray(att.attachments) && att.attachments.length > 0) {
+                att.attachments.forEach(file => {
+                    allFiles.push({ ...file, source: `Reply by ${att.userName}` });
+                });
+            }
+        });
+    }
+
+    let filesHtml = '';
+    
+    if (allFiles.length === 0) {
+        filesHtml = `
+            <div style="text-align:center; padding: 30px; color:#94a3b8;">
+                <div style="font-size: 50px; margin-bottom: 10px; opacity: 0.3;">📭</div>
+                <div style="font-weight:800; font-size: 15px; color:#475569;">No attachments found</div>
+                <div style="font-size:12px; margin-top:4px;">Files attached to this message will appear here.</div>
+            </div>
+        `;
+    } else {
+        filesHtml = allFiles.map(att => {
+            const ext = (att.name || '').split('.').pop().toLowerCase();
+            const icon = ext === 'pdf' ? '📕' : ['jpg','jpeg','png','gif'].includes(ext) ? '🖼️' : '📄';
+            const sizeStr = att.size ? (att.size / 1024).toFixed(1) + ' KB' : 'Unknown size';
+            
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:white; border:1.5px solid #e2e8f0; padding:14px 18px; border-radius:12px; margin-bottom:10px;">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width: 40px; height: 40px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                            ${icon}
+                        </div>
+                        <div>
+                            <div style="font-weight:800; color:#0f172a; font-size:14px;">${esc(att.name)}</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:2px;">${sizeStr} • <span style="color:#3d5a3d; font-weight:800;">${esc(att.source)}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="downloadMailAttachment('${att.data}', '${esc(att.name)}')" style="padding:8px 16px; background:#f0fdf4; color:#16a34a; border:1.5px solid #bbf7d0; border-radius:8px; font-weight:800; cursor:pointer; font-size:12px;">
+                        ⬇️ Download
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    document.getElementById('attachmentsCount').textContent = `${allFiles.length} file(s) attached`;
+    document.getElementById('attachmentsListBody').innerHTML = filesHtml;
+    document.getElementById('viewAttachmentsModal').classList.add('show');
+}
+
+function downloadMailAttachment(fileData, fileName) {
+    if (!fileData) return showToast('File data is missing', 'error');
+    
+    const a = document.createElement('a');
+    a.href = fileData;
+    a.download = fileName || 'attachment';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    
+    showToast('⬇️ Downloading ' + fileName, 'info');
+}
+
+// ================================================================
+// 17. POLLING — CHECK FOR NEW MESSAGES
+// ================================================================
+setInterval(() => {
+    if (document.getElementById('tab-mail-center')?.classList.contains('active')) {
+        loadMailBadges();
+    }
+}, 30000);
+// ================================================================
+// 18. INIT MAIL BADGES ON LOAD
+// ================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        loadMailBadges().catch(() => {});
+    }, 3000);
+});
+// ================================================================
+// 🆕 SEND REPORT TO CEO — AUTO-FILL + NARRATIVE
+// ================================================================
+async function openSubmitReportModal() {
+    let modal = document.getElementById('submitReportModal');
+    if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="modal-overlay" id="submitReportModal" style="z-index: 10000;">
+                <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden; border-radius: 16px; display: flex; flex-direction: column; max-height: 92vh;">
+                    
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #0a1929 0%, #1a7f5a 100%); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                        <div style="font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 20px;">📤</span> Send Report to CEO
+                        </div>
+                        <button onclick="closeModal('submitReportModal')" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer;">✕</button>
+                    </div>
+
+                    <!-- Body -->
+                    <div style="padding: 24px; overflow-y: auto; flex: 1;">
+                        <div id="submitReportStatus" class="status-msg" style="display:none; margin-bottom: 16px;"></div>
+                        
+                        <!-- SEHEMU YA KUGENERATE DATA (Hii ndio ilikosekana) -->
+                        <div style="margin-bottom: 20px; background: #f8fafc; padding: 16px; border-radius: 10px; border: 1.5px solid #e2e8f0;">
+                            <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Step 1: Select Month & Year</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; margin-bottom: 12px;">
+                                <select id="repMonth" style="width: 100%; padding: 10px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-family: inherit; outline: none;">
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <input type="number" id="repYear" value="${new Date().getFullYear()}" style="width: 100%; padding: 10px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-family: inherit; outline: none;">
+                            </div>
+                            <button onclick="generateReportData(this)" style="width: 100%; padding: 12px; background: #1a7f5a; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                                🔄 Generate Data from System
+                            </button>
+                        </div>
+
+                        <!-- Title & Period -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Report Title *</label>
+                                <input type="text" id="repTitle" placeholder="Waiting for generation..." style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; background: #f8fafc;">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Period *</label>
+                                <input type="text" id="repPeriod" placeholder="Waiting for generation..." style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; background: #f8fafc;">
+                            </div>
+                        </div>
+
+                        <!-- Narrative -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Executive Narrative (Maelezo ya Ziada) *</label>
+                            <textarea id="repNarrative" placeholder="Click 'Generate Data' first..." style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; margin-top: 6px; min-height: 150px; resize: vertical; line-height: 1.6; background: #f8fafc;"></textarea>
+                            <div style="font-size: 10px; color: var(--gray-400); margin-top: 4px;">You can edit this narrative before submitting.</div>
+                        </div>
+
+                        <!-- Metrics -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px;">Key Metrics (Auto-Generated)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px;">
+                                <input type="text" id="metricBatches" placeholder="Total Batches" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; background: #f8fafc;">
+                                <input type="text" id="metricProduced" placeholder="Total Produced" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; background: #f8fafc;">
+                                <input type="text" id="metricDamaged" placeholder="Damaged" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; background: #f8fafc;">
+                                <input type="text" id="metricWaste" placeholder="Waste %" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; background: #f8fafc;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="padding: 16px 24px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0;">
+                        <button onclick="closeModal('submitReportModal')" style="padding: 10px 20px; background: white; border: 1px solid var(--gray-300); color: var(--gray-700); border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit;">Cancel</button>
+                        <button onclick="submitReportToCEO(this)" style="padding: 10px 24px; background: linear-gradient(135deg, #1a7f5a, #0f2942); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: inherit;">📤 Submit Report</button>
+                    </div>
+                </div>
+            </div>
+        `);
+        modal = document.getElementById('submitReportModal');
+    }
+
+    // Reset form
+    document.getElementById('repTitle').value = '';
+    document.getElementById('repPeriod').value = '';
+    document.getElementById('repNarrative').value = '';
+    document.getElementById('metricBatches').value = '';
+    document.getElementById('metricProduced').value = '';
+    document.getElementById('metricDamaged').value = '';
+    document.getElementById('metricWaste').value = '';
+    document.getElementById('submitReportStatus').style.display = 'none';
+    
+    modal.classList.add('show');
+}
+async function submitReportToCEO(btn) {
+    const statusDiv = document.getElementById('submitReportStatus');
+    const title = document.getElementById('repTitle').value.trim();
+    const period = document.getElementById('repPeriod').value.trim();
+    const narrative = document.getElementById('repNarrative').value.trim();
+    const user = Auth.getUser();
+
+    if (!title || !period || !narrative) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ Please generate or fill in the data first.';
+        return;
+    }
+
+    // Kukusanya Metrics
+    const metrics = {
+        totalBatches: document.getElementById('metricBatches').value.trim(),
+        totalProduced: document.getElementById('metricProduced').value.trim(),
+        totalDamaged: document.getElementById('metricDamaged').value.trim(),
+        wastePercent: document.getElementById('metricWaste').value.trim()
+    };
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Submitting...';
+    btn.disabled = true;
+
+    try {
+        await API.submitDepartmentReport({
+            department: user.department || 'Production',
+            title: title,
+            period: period,
+            summary: narrative,
+            metrics: metrics
+        });
+
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg success';
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.style.color = '#15803d';
+        statusDiv.textContent = '✓ Report submitted successfully to CEO!';
+        
+        setTimeout(() => {
+            closeModal('submitReportModal');
+            showToast('Report sent to CEO successfully!', 'success');
+        }, 1500);
+
+    } catch (err) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ ' + err.message;
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+async function generateReportData() {
+    const month = document.getElementById('repMonth').value;
+    const year = document.getElementById('repYear').value;
+    const btn = event.target;
+    
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Fetching data...';
+    btn.disabled = true;
+
+    try {
+        // 1. Tengeneza tarehe za mwanzo na mwisho wa mwezi
+        const startDate = `${year}-${month}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+        
+        // Jina la Mwezi kwa ajili ya kuandika
+        const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
+        const periodLabel = `${monthName} ${year}`;
+
+        // 2. Vuta data kutoka API (Tunatumia API zilizopo kwenye mfumo wako)
+        const [summaryData, damagedData] = await Promise.all([
+            API.getProductionSummary({ startDate, endDate }),
+            API.getDamagedProducts({ startDate, endDate }) // Kama una API hii
+        ]);
+
+        if (!summaryData || !summaryData.totals) {
+            throw new Error("Hakuna data ya uzalishaji kwa mwezi huu.");
+        }
+
+        const t = summaryData.totals;
+        
+        // 3. Jaza Title na Period
+        document.getElementById('repTitle').value = `Production Report - ${periodLabel}`;
+        document.getElementById('repPeriod').value = periodLabel;
+
+        // 4. Jaza Metrics
+        document.getElementById('metricBatches').value = t.totalBatches || 0;
+        document.getElementById('metricProduced').value = (t.totalProduced || 0).toLocaleString() + ' units';
+        document.getElementById('metricDamaged').value = (t.totalDamaged || 0).toLocaleString() + ' units';
+        document.getElementById('metricWaste').value = (t.wastePercent || 0) + '%';
+
+        // 5. Tengeneza Narrative (Maelezo) kiotomatiki
+        let narrative = `During the month of ${periodLabel}, the Production Department operated ${t.totalBatches || 0} production batches. `;
+        narrative += `A total of ${(t.totalProduced || 0).toLocaleString()} units were produced. `;
+        
+        if (t.totalDamaged > 0) {
+            narrative += `Unfortunately, ${(t.totalDamaged || 0).toLocaleString()} units (${t.wastePercent || 0}%) were damaged or rejected, which is a slight concern. Management should investigate the causes of these damages to reduce future losses. `;
+        } else {
+            narrative += `Excellent performance! There were zero damaged items recorded during this period. `;
+        }
+
+        if (t.totalReleased > 0) {
+            narrative += `Out of the good items, ${(t.totalReleased || 0).toLocaleString()} units have been successfully inspected and released to the Sales department for marketing. `;
+        }
+        
+        if (t.pendingRelease > 0) {
+            narrative += `However, ${(t.pendingRelease || 0).toLocaleString()} units are still waiting for QC clearance or release to the market.`;
+        } else {
+            narrative += `All items that passed QC have been successfully released to Sales.`;
+        }
+
+        document.getElementById('repNarrative').value = narrative;
+
+        // Weka rangi nyeupe kuonyesha data imejazwa
+        document.getElementById('repTitle').style.background = 'white';
+        document.getElementById('repPeriod').style.background = 'white';
+        document.getElementById('repNarrative').style.background = 'white';
+        document.getElementById('metricBatches').style.background = 'white';
+        document.getElementById('metricProduced').style.background = 'white';
+        document.getElementById('metricDamaged').style.background = 'white';
+        document.getElementById('metricWaste').style.background = 'white';
+
+        showToast('✓ Data imejazwa kikamilifu. Unaweza kuhariri kabla ya kutuma.', 'success');
+
+    } catch (err) {
+        console.error('Generate error:', err);
+        showToast('⚠ ' + err.message, 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+async function loadMySubmittedReports() {
+    const container = document.getElementById('mySubmittedReportsContainer');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--gray-400);">⏳ Loading your reports...</div>';
+
+    try {
+        const user = Auth.getUser();
+        const allReports = await API.getDepartmentReports();
+        
+        const myReports = (allReports || []).filter(r => 
+            r.submittedById === user.userId || 
+            r.submittedBy === user.fullName
+        ).sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)); 
+
+        if (myReports.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:var(--gray-400);">
+                    <span style="font-size:56px; display:block; margin-bottom:14px; opacity:0.6;">📭</span>
+                    <div style="font-size:16px; font-weight:800; color:var(--gray-600);">No Reports Submitted Yet</div>
+                    <div style="font-size:13px; margin-top:6px;">Reports you submit to the CEO will appear here.</div>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = myReports.map(r => {
+            const dateStr = new Date(r.submittedAt).toLocaleDateString('en-GB', { 
+                day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+            });
+
+            const isUnread = r.status === 'unread';
+            const statusBg = isUnread ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.15)';
+            const statusColor = isUnread ? '#b45309' : '#15803d';
+            const statusText = isUnread ? '🆕 Unread by CEO' : '✅ Reviewed by CEO';
+
+            return `
+                <div style="background: white; border: 1.5px solid var(--gray-200); border-left: 4px solid #c9a227; border-radius: 12px; padding: 20px; margin-bottom: 12px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);" onmouseover="this.style.boxShadow='0 8px 24px rgba(0,0,0,0.06)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.02)'">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <div style="font-size: 16px; font-weight: 800; color: #2a3d2a; margin-bottom: 4px;">${esc(r.title)}</div>
+                            <div style="font-size: 12px; color: var(--gray-500); display: flex; gap: 12px; flex-wrap: wrap;">
+                                <span>📅 ${dateStr}</span>
+                                <span>🏢 ${esc(r.department)}</span>
+                                <span>📆 Period: ${esc(r.period)}</span>
+                            </div>
+                        </div>
+                        <span style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 10px; background: ${statusBg}; color: ${statusColor}; text-transform: uppercase;">
+                            ${statusText}
+                        </span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--gray-600); line-height: 1.6; background: var(--gray-50); padding: 12px; border-radius: 8px; border-left: 3px solid #3d5a3d; margin-bottom: 12px;">
+                        <div style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; margin-bottom: 4px;">Summary</div>
+                        ${esc(r.summary).substring(0, 200)}${r.summary && r.summary.length > 200 ? '...' : ''}
+                    </div>
+                    <button onclick="viewMySubmittedReport(${r.id})" style="padding: 8px 16px; background: #c9a227; color: #2a3d2a; border: none; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;" onmouseover="this.style.background='#b08d22'" onmouseout="this.style.background='#c9a227'">
+                        👁️ View Full Report
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error('Load my reports error:', err);
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:#dc2626;">❌ Failed to load reports: ${esc(err.message)}</div>`;
+    }
+}
+async function viewMySubmittedReport(id) {
+    try {
+        const allReports = await API.getDepartmentReports();
+        const report = allReports.find(r => r.id === id);
+
+        if (!report) {
+            showToast('Report not found', 'error');
+            return;
+        }
+
+        let modal = document.getElementById('viewMyReportModal');
+        if (!modal) {
+            document.body.insertAdjacentHTML('beforeend', `
+                <div class="modal-overlay" id="viewMyReportModal" style="z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);">
+                    <div class="modal-box" style="max-width: 800px; padding: 0; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column; border-radius: 12px; background: white;">
+                        <div style="background: linear-gradient(135deg, #3d5a3d 0%, #2a3d2a 100%); border-bottom: 3px solid #c9a227; padding: 16px 24px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                            <div style="font-size: 16px; font-weight: 700;">📄 Report Details</div>
+                            <button onclick="closeModal('viewMyReportModal')" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 36px; height: 36px; border-radius: 6px; font-size: 18px; cursor: pointer;">✕</button>
+                        </div>
+                        <div id="viewMyReportBody" style="padding: 32px; overflow-y: auto; flex: 1;"></div>
+                    </div>
+                </div>
+            `);
+            modal = document.getElementById('viewMyReportModal');
+        }
+
+        const dateStr = new Date(report.submittedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+        let metricsHtml = '';
+        
+        if (report.metrics && Object.keys(report.metrics).length > 0) {
+            metricsHtml = `
+                <div style="margin-top: 20px; background: #f8fafc; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <h4 style="font-size: 12px; font-weight: 800; color: #c9a227; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">📊 Key Metrics</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        ${Object.entries(report.metrics).map(([key, value]) => `
+                            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 800;">${esc(key)}</div>
+                                <div style="font-size: 15px; font-weight: 800; color: #2a3d2a; margin-top: 4px;">${esc(value)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('viewMyReportBody').innerHTML = `
+            <div style="margin-bottom: 24px; border-bottom: 2px solid #f1f5f9; padding-bottom: 16px;">
+                <h1 style="font-size: 22px; font-weight: 900; color: #2a3d2a; margin: 0 0 8px 0;">${esc(report.title)}</h1>
+                <div style="display: flex; gap: 16px; font-size: 13px; color: #64748b; font-weight: 600;">
+                    <span>📅 ${dateStr}</span>
+                    <span>🏢 ${esc(report.department)}</span>
+                    <span>📆 ${esc(report.period)}</span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <h4 style="font-size: 12px; font-weight: 800; color: #c9a227; text-transform: uppercase; margin-top: 0; margin-bottom: 8px;">📝 Executive Narrative</h4>
+                <div style="font-size: 14px; line-height: 1.8; color: #334155; white-space: pre-wrap;">${esc(report.summary)}</div>
+            </div>
+
+            ${metricsHtml}
+
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8;">
+                Submitted by: <strong>${esc(report.submittedBy)}</strong>
+            </div>
+        `;
+
+        modal.classList.add('show');
+    } catch (err) {
+        console.error('View my report error:', err);
+        showToast('Failed to load report details', 'error');
     }
 }

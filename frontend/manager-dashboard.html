@@ -23,6 +23,36 @@
             --purple: #8b5cf6; --orange: #f59e0b; --teal: #14b8a6;
             --pink: #ec4899; --indigo: #6366f1;
         }
+                .nav-link-btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:10px 16px;
+            margin-top:15px;
+            margin-bottom:10px;
+            border-radius:12px;
+            text-decoration:none;
+            font-size:12px;
+            font-weight:700;
+            letter-spacing:0.8px;
+            color:var(--ink);
+            background:linear-gradient(
+                135deg,
+                var(--gold-light) 0%,
+                var(--gold) 100%
+            );
+            box-shadow:0 6px 18px rgba(212,160,23,0.25);
+            transition:all .3s ease;
+        }
+
+        .nav-link-btn:hover{
+            transform:translateY(-2px);
+            box-shadow:0 10px 24px rgba(212,160,23,0.45);
+        }
+
+        .nav-link-btn:active{
+            transform:translateY(0);
+        }
         html { scroll-behavior: smooth; }
         body { font-family: 'Inter', sans-serif; min-height: 100vh; background: var(--gray-50); display: flex; flex-direction: row; }
 
@@ -1791,6 +1821,290 @@
             .sidebar.collapsed .sidebar-portal span {
                 display: none !important;
             }
+             /* ============================================================
+           MAIL SYSTEM
+           ============================================================ */
+
+            /* Mail Header Button */
+            .mail-header-btn { position: relative; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.15); color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: all 0.2s; }
+            .mail-header-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--mail-accent); transform: scale(1.05); }
+            .mail-header-badge { position: absolute; top: -4px; right: -4px; background: var(--red); color: white; font-size: 10px; font-weight: 900; min-width: 20px; height: 20px; border-radius: 10px; display: none; align-items: center; justify-content: center; border: 2px solid #022908; padding: 0 4px; }
+
+            /* Mail Shell */
+            .mail-shell-horizontal { display: flex; flex-direction: column; height: calc(100vh - 120px); background: #ffffff; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: 0 10px 40px rgba(2, 41, 8, 0.06); }
+
+            /* Top Toolbar */
+            .mail-top-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%); border-bottom: 1px solid var(--gray-200); flex-shrink: 0; gap: 16px; flex-wrap: wrap; }
+            .mail-brand-horizontal { display: flex; align-items: center; gap: 12px; }
+            .mail-brand-logo { width: 40px; height: 40px; border-radius: 10px; background: white; border: 2px solid var(--mail-primary); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 8px rgba(2, 41, 8, 0.15); }
+            .mail-brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+            .mail-btn-primary, .mail-btn-secondary { padding: 10px 20px; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+            .mail-btn-primary { background: linear-gradient(135deg, var(--mail-primary), var(--mail-primary-dark)); color: white; box-shadow: 0 4px 12px rgba(2, 41, 8, 0.3); }
+            .mail-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2, 41, 8, 0.4); }
+            .mail-btn-secondary { background: white; color: var(--mail-primary-dark); border: 1.5px solid var(--gray-300); }
+            .mail-btn-secondary:hover { background: var(--gray-50); border-color: var(--mail-primary); }
+
+            /* Horizontal Nav */
+            .mail-horizontal-nav { display: flex; align-items: center; gap: 4px; padding: 10px 20px; background: white; border-bottom: 1px solid var(--gray-200); overflow-x: auto; flex-shrink: 0; scrollbar-width: thin; scrollbar-color: var(--gray-300) transparent; }
+            .mail-horizontal-nav::-webkit-scrollbar { height: 4px; }
+            .mail-horizontal-nav::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+            .mhn-item { display: flex; align-items: center; gap: 7px; padding: 8px 14px; background: transparent; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--gray-500); cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; position: relative; }
+            .mhn-item:hover { background: var(--gray-100); color: var(--gray-800); }
+            .mhn-item.active { background: rgba(2, 41, 8, 0.08); color: var(--mail-primary); box-shadow: inset 0 0 0 1.5px rgba(2, 41, 8, 0.25); }
+            .mhn-badge { font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 10px; min-width: 18px; text-align: center; line-height: 1.4; }
+            .mhn-badge.red { background: var(--red); color: white; }
+            .mhn-badge.gold { background: var(--gold); color: var(--primary-dark); }
+            .mhn-badge.purple { background: var(--purple); color: white; }
+
+            /* Main Content */
+            .mail-main-content { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; background: #ffffff; }
+            .mail-list-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--gray-200); flex-shrink: 0; gap: 12px; flex-wrap: wrap; }
+            .mail-list-header h2 { font-size: 19px; font-weight: 900; color: var(--mail-primary-dark); margin: 0; letter-spacing: -0.3px; }
+            .mail-topbar-count { font-size: 11px; font-weight: 800; color: var(--mail-primary); background: rgba(2, 41, 8, 0.1); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+            .mail-search-wrap { position: relative; width: 300px; max-width: 100%; }
+            .mail-search-wrap input { width: 100%; padding: 10px 16px 10px 38px; border: 1.5px solid var(--gray-200); border-radius: 22px; font-size: 13px; font-family: inherit; background: var(--gray-50); outline: none; transition: all 0.2s; color: var(--gray-800); }
+            .mail-search-wrap input:focus { border-color: var(--mail-primary); background: white; box-shadow: 0 0 0 4px rgba(2, 41, 8, 0.08); }
+            .mail-search-wrap .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--gray-400); pointer-events: none; }
+
+            /* List Scroll */
+            .mail-list-scroll { flex: 1; overflow-y: auto; padding: 12px 16px; background: var(--gray-50); }
+            .mail-list-scroll::-webkit-scrollbar { width: 8px; }
+            .mail-list-scroll::-webkit-scrollbar-track { background: var(--gray-50); }
+            .mail-list-scroll::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+            /* Mail Item */
+            .mail-item { display: flex; gap: 14px; padding: 16px 20px; background: white; border: 1.5px solid var(--gray-200); border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; position: relative; align-items: flex-start; }
+            .mail-item:hover { box-shadow: 0 8px 24px rgba(2, 41, 8, 0.08); border-color: var(--gray-300); transform: translateY(-1px); }
+            .mail-item.unread { background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); border-left: 4px solid var(--mail-primary); }
+            .mail-item .mi-avatar { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--mail-primary), var(--mail-primary-dark)); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0; position: relative; letter-spacing: 0.5px; }
+
+            /* Empty State */
+            .mail-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 30px; text-align: center; color: var(--gray-400); }
+            .mail-empty-icon { width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, rgba(2, 41, 8, 0.06), rgba(2, 41, 8, 0.02)); border: 2px dashed rgba(2, 41, 8, 0.2); display: flex; align-items: center; justify-content: center; font-size: 46px; margin-bottom: 22px; }
+            .mail-empty-title { font-size: 18px; font-weight: 900; color: var(--gray-600); margin-bottom: 6px; }
+            .mail-empty-desc { font-size: 13px; color: var(--gray-400); }
+
+            /* Detail Overlay & Topbar */
+            .mail-detail-overlay { position: absolute; inset: 0; background: var(--gray-100); z-index: 20; display: none; flex-direction: column; overflow: hidden; }
+            .mail-detail-overlay.show { display: flex; }
+            .mail-detail-topbar { padding: 14px 24px; background: white; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(2, 41, 8, 0.04); gap: 12px; flex-wrap: wrap; }
+            .mail-back-btn { padding: 8px 16px; background: var(--gray-100); border: none; border-radius: 8px; font-weight: 800; font-size: 13px; color: var(--gray-600); cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+            .mail-back-btn:hover { background: var(--gray-200); color: var(--mail-primary-dark); }
+            .mail-detail-actions { display: flex; gap: 8px; align-items: center; }
+            .mail-icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--gray-200); background: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+            .mail-icon-btn:hover { background: var(--gray-50); border-color: var(--mail-primary); transform: translateY(-2px); }
+            .mail-icon-btn.danger { border-color: #fecaca; background: #fef2f2; }
+            .mail-icon-btn.danger:hover { background: #fee2e2; border-color: var(--red); }
+
+            /* Detail Action Buttons */
+            .mail-detail-actions .btn-act-reply, .mail-detail-actions .btn-act-attend, .mail-detail-actions .btn-act-close { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: none; transition: all 0.2s; font-family: inherit; }
+            .mail-detail-actions .btn-act-reply { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1 !important; }
+            .mail-detail-actions .btn-act-reply:hover { background: #e2e8f0; }
+            .mail-detail-actions .btn-act-attend { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+            .mail-detail-actions .btn-act-attend:hover { transform: translateY(-1px); }
+            .mail-detail-actions .btn-act-close { background: rgba(239, 68, 68, 0.08); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2) !important; }
+            .mail-detail-actions .btn-act-close:hover { background: rgba(239, 68, 68, 0.15); }
+
+            .mail-detail-scroll { flex: 1; overflow-y: auto; padding: 24px; position: relative; }
+            .mail-detail-scroll::-webkit-scrollbar { width: 8px; }
+            .mail-detail-scroll::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+            /* ===== PREMIUM DETAIL LAYOUT (2 Columns) ===== */
+            .mail-detail-modern { display: grid; grid-template-columns: 420px 1fr; gap: 20px; height: calc(100vh - 180px); padding: 4px; }
+            @media (max-width: 1100px) {
+                .mail-detail-modern { grid-template-columns: 1fr; height: auto; }
+                .md-workflow-panel { order: 2; max-height: 500px; }
+                .md-message-panel { order: 1; }
+            }
+
+            /* Workflow Panel */
+            .md-workflow-panel { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1.5px solid #e2e8f0; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 30px rgba(2, 41, 8, 0.05); }
+            .md-wf-header { background: linear-gradient(135deg, #022908 0%, #034d13 100%); padding: 20px 22px; border-bottom: 3px solid #f59e0b; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+            .md-wf-header-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); border: 1.5px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+            .md-wf-header-title h3 { font-size: 16px; font-weight: 900; color: white; margin: 0 0 2px; letter-spacing: -0.3px; }
+            .md-wf-header-title p { font-size: 11px; color: rgba(255, 255, 255, 0.6); margin: 0; font-weight: 600; }
+            .md-wf-body { flex: 1; overflow-y: auto; padding: 24px 20px; }
+            .md-wf-body::-webkit-scrollbar { width: 6px; }
+            .md-wf-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+            /* Message Panel */
+            .md-message-panel { background: white; border: 1.5px solid #e2e8f0; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 30px rgba(2, 41, 8, 0.05); }
+            .md-msg-header { padding: 28px 32px 24px; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); border-bottom: 1.5px solid #e2e8f0; flex-shrink: 0; }
+            .md-msg-subject { font-size: 24px; font-weight: 900; color: #0f172a; line-height: 1.3; margin: 0 0 20px; letter-spacing: -0.5px; word-wrap: break-word; }
+            .md-msg-meta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+            .md-msg-avatar { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #022908, #034d13); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; flex-shrink: 0; border: 2.5px solid #f59e0b; box-shadow: 0 4px 15px rgba(2, 41, 8, 0.15); }
+            .md-msg-sender-info { flex: 1; min-width: 0; }
+            .md-msg-sender-name { font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 3px; }
+            .md-msg-receiver { font-size: 12.5px; color: #64748b; font-weight: 600; }
+            .md-msg-receiver strong { color: #022908; font-weight: 800; }
+            .md-msg-date { padding: 8px 16px; background: white; border: 1.5px solid #e2e8f0; border-radius: 20px; font-size: 11px; font-weight: 800; color: #64748b; white-space: nowrap; flex-shrink: 0; }
+            .md-msg-status { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px; margin-left: 12px; }
+            .md-msg-status.unread { background: #dbeafe; color: #1d4ed8; }
+            .md-msg-status.read { background: #dcfce7; color: #15803d; }
+            .md-msg-status.closed { background: #ede9fe; color: #6d28d9; }
+            .md-msg-status.pending { background: #fef3c7; color: #b45309; }
+            .md-msg-body { flex: 1; overflow-y: auto; padding: 32px; font-size: 14.5px; line-height: 1.85; color: #1e293b; white-space: pre-wrap; word-wrap: break-word; background: white; }
+            .md-msg-body::-webkit-scrollbar { width: 8px; }
+            .md-msg-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+            /* New Timeline */
+            .md-timeline { display: flex; flex-direction: column; gap: 16px; }
+            .md-tl-empty { text-align: center; padding: 50px 20px; background: white; border: 2px dashed #e2e8f0; border-radius: 14px; }
+            .md-tl-empty-icon { font-size: 48px; opacity: 0.3; margin-bottom: 12px; }
+            .md-tl-empty-title { font-size: 14px; font-weight: 800; color: #64748b; margin-bottom: 4px; }
+            .md-tl-empty-desc { font-size: 12px; color: #94a3b8; }
+            .md-tl-item { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px; position: relative; transition: all 0.25s ease; animation: mdTlFadeIn 0.4s ease; }
+            @keyframes mdTlFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+            .md-tl-item:hover { box-shadow: 0 8px 24px rgba(2, 41, 8, 0.08); transform: translateY(-2px); border-color: #cbd5e1; }
+            .md-tl-item.created { border-left: 4px solid #3b82f6; }
+            .md-tl-item.assigned { border-left: 4px solid #f59e0b; }
+            .md-tl-item.attended { border-left: 4px solid #16a34a; }
+            .md-tl-item.closed { border-left: 4px solid #6d28d9; }
+            .md-tl-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+            .md-tl-user-block { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+            .md-tl-avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #022908, #034d13); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; }
+            .md-tl-user-info { min-width: 0; flex: 1; }
+            .md-tl-name { font-size: 13px; font-weight: 800; color: #1e293b; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .md-tl-role { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+            .md-tl-action-badge { font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.6px; flex-shrink: 0; white-space: nowrap; }
+            .md-tl-action-badge.created { background: #dbeafe; color: #1d4ed8; }
+            .md-tl-action-badge.assigned { background: #fef3c7; color: #b45309; }
+            .md-tl-action-badge.attended { background: #dcfce7; color: #15803d; }
+            .md-tl-action-badge.closed { background: #ede9fe; color: #6d28d9; }
+            .md-tl-time { font-size: 10px; font-weight: 700; color: #94a3b8; margin-top: 4px; }
+            .md-tl-comment { background: #f8fafc; border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 12.5px; color: #334155; line-height: 1.6; margin-top: 10px; word-wrap: break-word; white-space: pre-wrap; }
+            .md-tl-assign-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 12px; background: #fffbeb; border: 1px dashed #fbbf24; border-radius: 8px; font-size: 11.5px; color: #92400e; font-weight: 700; flex-wrap: wrap; }
+            .md-tl-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+            .md-tl-attach-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 10.5px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+            .md-tl-attach-btn:hover { background: #dbeafe; border-color: #3b82f6; transform: translateY(-1px); }
+
+            /* Kitufe cha Attachments kinachong'aa */
+            .btn-attachments-glow { padding: 8px 16px; background: #fffbeb; color: #b45309; border: 1.5px solid #fcd34d; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); animation: pulseGlow 2s infinite; }
+            .btn-attachments-glow:hover { background: #fef3c7; transform: translateY(-2px); }
+            @keyframes pulseGlow {
+                0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+                70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+            }
+
+            /* ============================================================
+            COMPOSE MAIL MODAL
+            ============================================================ */
+            .mc-overlay { display: none; position: fixed; inset: 0; background: rgba(2, 41, 8, 0.75); backdrop-filter: blur(8px); z-index: 9000; align-items: center; justify-content: center; padding: 20px; }
+            .mc-overlay.show { display: flex; }
+            .mc-modal { background: white; border-radius: 20px; width: 100%; max-width: 760px; max-height: 94vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5); animation: mcSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+            @keyframes mcSlideUp { from { transform: translateY(40px) scale(0.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+            .mc-header { background: linear-gradient(135deg, #022908, #034d13); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--gold); flex-shrink: 0; gap: 12px; }
+            .mc-header-left { display: flex; align-items: center; gap: 14px; }
+            .mc-header-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.2); border: 1.5px solid rgba(245, 158, 11, 0.5); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+            .mc-header-text h3 { color: white; font-size: 18px; font-weight: 900; margin: 0 0 2px; }
+            .mc-header-text p { color: rgba(255, 255, 255, 0.6); font-size: 11.5px; margin: 0; font-weight: 600; }
+            .mc-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); border: none; color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+            .mc-close:hover { background: var(--red); transform: rotate(90deg); }
+            .mc-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px; background: var(--gray-50); }
+            .mc-body::-webkit-scrollbar { width: 8px; }
+            .mc-body::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+            .mc-field { display: flex; flex-direction: column; gap: 7px; }
+            .mc-label { font-size: 11px; font-weight: 900; color: var(--gray-700); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+            .mc-label .req { color: #dc2626; }
+            .mc-input, .mc-textarea, .mc-select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 14px; font-family: inherit; background: white; color: var(--gray-800); outline: none; transition: all 0.2s; }
+            .mc-input:focus, .mc-textarea:focus, .mc-select:focus { border-color: var(--mail-primary); box-shadow: 0 0 0 4px rgba(2, 41, 8, 0.1); }
+            .mc-textarea { resize: vertical; min-height: 130px; line-height: 1.7; }
+
+            /* Multi Select */
+            .ms-wrap { position: relative; }
+            .ms-box { min-height: 48px; padding: 8px 12px; border: 1.5px solid var(--gray-300); border-radius: 10px; background: white; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; cursor: text; transition: all 0.2s; }
+            .ms-box:focus-within { border-color: var(--mail-primary); box-shadow: 0 0 0 4px rgba(2, 41, 8, 0.1); }
+            .ms-input { border: none; outline: none; flex: 1; min-width: 120px; padding: 5px; font-size: 14px; font-family: inherit; background: transparent; }
+            .ms-tag { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--mail-primary), var(--mail-primary-dark)); color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; box-shadow: 0 2px 8px rgba(2, 41, 8, 0.25); animation: tagPop 0.2s ease; }
+            @keyframes tagPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+            .ms-tag .rm { background: rgba(255, 255, 255, 0.25); border: none; color: white; width: 16px; height: 16px; border-radius: 50%; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+            .ms-tag .rm:hover { background: var(--red); }
+            .ms-dropdown { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18); max-height: 280px; overflow-y: auto; z-index: 100; display: none; }
+            .ms-dropdown.show { display: block; }
+            .ms-user { padding: 11px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid var(--gray-50); transition: background 0.15s; }
+            .ms-user:hover { background: #f0fdf4; }
+            .ms-user:last-child { border-bottom: none; }
+            .ms-avatar { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--mail-primary), var(--mail-primary-dark)); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0; }
+            .ms-user-info { flex: 1; min-width: 0; }
+            .ms-user-name { font-size: 13.5px; font-weight: 800; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .ms-user-role { font-size: 10.5px; font-weight: 700; color: var(--gray-500); background: var(--gray-100); display: inline-block; padding: 1px 7px; border-radius: 5px; margin-top: 2px; text-transform: uppercase; }
+            .ms-empty { padding: 22px; text-align: center; color: var(--gray-400); font-size: 13px; font-weight: 600; }
+            .mc-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            .mc-footer { padding: 18px 24px; background: white; border-top: 1.5px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+            .mc-footer-hint { font-size: 11.5px; color: var(--gray-400); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+            .mc-footer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+            .mc-btn { padding: 12px 24px; border-radius: 12px; font-size: 13.5px; font-weight: 900; font-family: inherit; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 7px; }
+            .mc-btn:hover { transform: translateY(-2px); }
+            .mc-btn-cancel { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+            .mc-btn-draft { background: #fffbeb; color: #b45309; border: 1.5px solid #fcd34d; }
+            .mc-btn-send { background: linear-gradient(135deg, var(--green), var(--mail-primary)); color: white; box-shadow: 0 6px 20px rgba(2, 41, 8, 0.4); }
+
+            /* Attach Zone */
+            .mc-attach-zone { border: 2px dashed var(--gray-300); border-radius: 14px; padding: 26px; text-align: center; background: white; cursor: pointer; transition: all 0.2s; }
+            .mc-attach-zone:hover { border-color: var(--mail-primary); background: #f0fdf4; }
+            .mc-attach-icon { font-size: 34px; margin-bottom: 8px; display: block; }
+            .mc-attach-title { font-size: 14px; font-weight: 800; color: var(--gray-800); margin-bottom: 3px; }
+            .mc-attach-hint { font-size: 11.5px; color: var(--gray-400); font-weight: 600; }
+            .mc-attach-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+            .mc-attach-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: white; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 12px; font-weight: 700; color: var(--gray-700); box-shadow: 0 2px 8px rgba(2, 41, 8, 0.04); }
+            .mc-attach-chip .rm { background: rgba(239, 68, 68, 0.1); color: var(--red); border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .mc-attach-chip .rm:hover { background: var(--red); color: white; }
+
+            /* Mail Attachment Item */
+            .mail-attachment-item { display: flex; align-items: center; gap: 8px; background: white; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; }
+            .mail-attachment-item .remove-attach { background: none; border: none; color: #dc2626; cursor: pointer; font-weight: 800; }
+
+            /* ===== RESPONSIVE & PRINT ===== */
+            @media (max-width: 1024px) {
+                .dashboard-stats { grid-template-columns: repeat(2,1fr); }
+                .task-grid { grid-template-columns: 1fr; }
+                .chart-grid { grid-template-columns: 1fr; }
+                .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+                .report-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+                .asset-stats-grid { grid-template-columns: repeat(2, 1fr); }
+            }
+            @media (max-width: 768px) {
+                .sidebar { position: fixed; top: 0; left: 0; z-index: 250; width: 280px; height: 100vh; box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5); }
+                .sidebar.collapsed { transform: translateX(-100%); width: 280px; }
+                .sidebar-backdrop.show { display: block; }
+                .dashboard-header { padding: 10px 16px; flex-wrap: wrap; gap: 6px; }
+                .dashboard-header .header-title { font-size: 13px; }
+                .dashboard-content { padding: 16px 14px 24px; }
+                .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+                .stat-card .stat-number { font-size: 20px; }
+                .tabs-header { flex-direction: column; gap: 4px; }
+                .tabs-header .tab-btn { padding: 10px; font-size: 13px; min-width: auto; }
+                .stock-grid { grid-template-columns: 1fr 1fr; }
+                .site-footer { padding: 14px 16px; }
+                .kpi-grid { grid-template-columns: 1fr; }
+                .user-dropdown-panel { width: 300px; right: -10px; }
+                .ud-info { display: none; }
+                .user-dropdown-trigger { padding: 4px; border-radius: 50%; }
+                .ud-arrow { display: none; }
+            }
+            @media (max-width: 640px) {
+                .report-kpi-grid { grid-template-columns: 1fr; }
+                .report-hero-content { flex-direction: column; align-items: flex-start; }
+                .md-msg-subject { font-size: 18px; }
+                .md-msg-date { font-size: 10px; padding: 6px 10px; }
+                .md-wf-header { padding: 16px; }
+                .md-msg-header, .md-msg-body { padding: 18px; }
+            }
+            @media (max-width: 480px) {
+                .dashboard-stats { grid-template-columns: 1fr; }
+                .stock-grid { grid-template-columns: 1fr; }
+                .dashboard-header .header-title { font-size: 11px; }
+                .asset-stats-grid { grid-template-columns: 1fr; }
+                .user-dropdown-panel { width: calc(100vw - 32px); right: -60px; }
+            }
+            @media print {
+                .sidebar, .dashboard-header, .tabs-header, .modal-close, .modal-footer, .action-btn, #toastContainer, .site-footer { display: none !important; }
+                .modal-overlay { position: static; background: white; }
+                .modal-box { box-shadow: none; border-radius: 0; max-width: 100%; padding: 0; max-height: none; }
+                body { background: white; }
+            }
+            button:disabled { opacity: 0.6; cursor: not-allowed !important; transform: none !important; }
     </style>
 </head>
 <body data-roles="Manager">
@@ -1906,13 +2220,16 @@
                 <div class="user-role">📋 Operations Manager</div>
             </div>
         </div>
-
+        
         <a class="sidebar-portal" href="#" onclick="handleLogoutClick(event); return false;">🔌 Logout</a>
-
+        <a href="index.html" class="nav-link-btn">
+         ← Back to Website
+        </a>
         <div class="sidebar-bottom">
             <span>MAKETE DISTRICT COUNCIL SPV</span>
             <small>Quality service is our priority.</small>
         </div>
+        
     </aside>
     <!-- ===== PAGE ===== -->
     <div class="page-content">
@@ -1924,6 +2241,10 @@
                 <div class="header-title">MAK DC Investment <span>Company LTD </span> | Company Manager</div>
             </div>
             <div class="header-right">
+                <button onclick="switchTab('tab-mail-center')" class="mail-header-btn" title="Mail Center">
+                    📩
+                    <span id="mailHeaderBadge" class="mail-header-badge">0</span>
+                </button>
                 <div class="user-dropdown-wrap" id="userDropdownWrap">
                     <button class="user-dropdown-trigger" onclick="toggleUserDropdown(event)" aria-label="Open user menu">
                         <div class="ud-avatar" id="udAvatar"><span id="udInitials">MG</span></div>
@@ -2806,6 +3127,90 @@
                         </div>
                     </div>
                 </div>
+                <!-- ============================================================
+                TAB: MAIL CENTER
+                ============================================================ -->
+                <div class="tab-content" id="tab-mail-center">
+                    <div class="mail-shell-horizontal">
+                        <!-- TOP TOOLBAR -->
+                        <div class="mail-top-toolbar">
+                            <div class="mail-brand-horizontal">
+                                <div class="mail-brand-logo">
+                                    <img src="assets/makdc-logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/30'">
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 16px; font-weight: 900; color: #022908; margin: 0;">MAK DC Mail</h3>
+                                    <p style="font-size: 11px; color: #64748b; margin: 0; font-weight: 600;">Secure Communication</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button class="mail-btn-secondary" onclick="openMinuteComposeModal()">📝 New Minute</button>
+                                <button class="mail-btn-primary" onclick="openComposeMailModal()">✏️ Compose</button>
+                            </div>
+                        </div>
+
+                        <!-- HORIZONTAL NAVIGATION -->
+                        <div class="mail-horizontal-nav">
+                            <button onclick="switchMailBox('inbox')" id="mail-nav-inbox" class="mhn-item active">
+                                📥 Inbox <span id="inboxBadge" class="mhn-badge red">0</span>
+                            </button>
+                            <button onclick="switchMailBox('starred')" id="mail-nav-starred" class="mhn-item">
+                                ⭐ Starred
+                            </button>
+                            <button onclick="switchMailBox('pending')" id="mail-nav-pending" class="mhn-item">
+                                ⏳ Pending <span id="pendingBadge" class="mhn-badge gold">0</span>
+                            </button>
+                            <button onclick="switchMailBox('minutes')" id="mail-nav-minutes" class="mhn-item">
+                                📝 Minutes <span id="minutesBadge" class="mhn-badge purple">0</span>
+                            </button>
+                            <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 10px;"></div>
+                            <button onclick="switchMailBox('sent')" id="mail-nav-sent" class="mhn-item">📤 Sent</button>
+                            <button onclick="switchMailBox('drafts')" id="mail-nav-drafts" class="mhn-item">📁 Drafts</button>
+                            <button onclick="switchMailBox('documents')" id="mail-nav-documents" class="mhn-item">📎 Attachments</button>
+                        </div>
+
+                        <!-- MAIN CONTENT AREA -->
+                        <div class="mail-main-content">
+                            <!-- LIST VIEW -->
+                            <div id="mailListView" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                                <div class="mail-list-header">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <h2 id="mailListTitle">Inbox</h2>
+                                        <span class="mail-topbar-count" id="mailListCount">0 messages</span>
+                                    </div>
+                                    <button onclick="refreshCurrentMailbox()" 
+                                            style="padding: 10px 16px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">
+                                        🔄 Refresh
+                                    </button>
+                                    <div class="mail-search-wrap" style="width: 300px;">
+                                        <span class="search-icon">🔍</span>
+                                        <input type="text" id="mailSearchInput" oninput="filterMailList()" placeholder="Search mail...">
+                                    </div>
+                                </div>
+                                
+                                <div id="mailListContainer" class="mail-list-scroll">
+                                    <!-- List items zitajaa hapa kupitia JS -->
+                                </div>
+                            </div>
+
+                            <!-- DETAIL VIEW -->
+                            <div id="mailDetailView" class="mail-detail-overlay">
+                                <div class="mail-detail-topbar">
+                                    <button class="mail-back-btn" onclick="closeMailDetailView()">
+                                        ← Back to <span id="mailBackLabel">Inbox</span>
+                                    </button>
+                                    <div class="mail-detail-actions">
+                                        <button id="btnStarMail" class="mail-icon-btn" onclick="toggleStarCurrentMail()" title="Star">⭐</button>
+                                        <button id="btnArchiveMail" class="mail-icon-btn" onclick="toggleArchiveCurrentMail()" title="Archive">📁</button>
+                                        <button id="btnDeleteMail" class="mail-icon-btn danger" onclick="deleteCurrentMail()" title="Delete">🗑️</button>
+                                    </div>
+                                </div>
+                                <div id="mailDetailBody" class="mail-detail-scroll"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -3074,7 +3479,269 @@
             </div>
         </div>
     </div>
+       <!-- ============================================================
+     COMPOSE MAIL MODAL
+     ============================================================ -->
+    <div class="mc-overlay" id="composeMailModal">
+        <div class="mc-modal" style="max-width: 760px; max-height: 92vh; display: flex; flex-direction: column;">
+            
+            <!-- Header -->
+            <div class="mc-header">
+                <div class="mc-header-left">
+                    <div class="mc-header-icon">✏️</div>
+                    <div class="mc-header-text">
+                        <h3>Compose Message</h3>
+                        <p>MAK DC Investment • Official Communication</p>
+                    </div>
+                </div>
+                <button class="mc-close" onclick="closeComposeModal()">✕</button>
+            </div>
 
+            <!-- Body -->
+            <div class="mc-body">
+                
+                <!-- SEND TO -->
+                <div class="mc-field" style="position: relative;">
+                    <label class="mc-label">
+                        Send To <span class="req">*</span> 
+                        <span style="font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: 0; margin-left: 4px; font-size: 10.5px;">(Select one or more recipients)</span>
+                    </label>
+                    
+                    <div class="ms-box" id="sendToBox" onclick="document.getElementById('sendToInput').focus()">
+                        <input type="text" class="ms-input" id="sendToInput" placeholder="Type name to search..." autocomplete="off">
+                    </div>
+                    <div class="ms-dropdown" id="sendToDropdown"></div>
+                </div>
+
+                <!-- CC -->
+                <div class="mc-field" style="position: relative;">
+                    <label class="mc-label">
+                        CC (Copy To) <span style="font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: 0; margin-left: 4px; font-size: 10.5px;">(Optional)</span>
+                    </label>
+                    
+                    <div class="ms-box" id="ccBox" onclick="document.getElementById('ccInput').focus()">
+                        <input type="text" class="ms-input" id="ccInput" placeholder="Type name to search..." autocomplete="off">
+                    </div>
+                    <div class="ms-dropdown" id="ccDropdown"></div>
+                </div>
+
+                <!-- TYPE & PRIORITY -->
+                <div class="mc-row2">
+                    <div class="mc-field">
+                        <label class="mc-label">Message Type</label>
+                        <select class="mc-select" id="mailType">
+                            <option value="information">ℹ️ Information</option>
+                            <option value="action">✅ Action Required</option>
+                            <option value="urgent">⚠️ Urgent</option>
+                        </select>
+                    </div>
+                    <div class="mc-field">
+                        <label class="mc-label">Priority Level</label>
+                        <select class="mc-select" id="mailPriority">
+                            <option value="normal">🟢 Normal</option>
+                            <option value="high">🟡 High</option>
+                            <option value="urgent">🔴 Urgent</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SUBJECT -->
+                <div class="mc-field">
+                    <label class="mc-label">Subject <span class="req">*</span></label>
+                    <input type="text" class="mc-input" id="mailSubject" placeholder="E.g., Budget Approval for Q4 2026">
+                </div>
+
+                <!-- BODY -->
+                <div class="mc-field">
+                    <label class="mc-label">Message Content <span class="req">*</span></label>
+                    <textarea class="mc-textarea" id="mailBody" placeholder="Write your official message here..."></textarea>
+                </div>
+
+                <!-- ATTACHMENTS -->
+                <div class="mc-field">
+                    <label class="mc-label">📎 Attach Documents</label>
+                    
+                    <div class="mc-attach-zone" onclick="document.getElementById('mailAttachInput').click()">
+                        <span class="mc-attach-icon">📄</span>
+                        <div class="mc-attach-title">Click to browse or drag files here</div>
+                        <div class="mc-attach-hint">PDF, DOCX, XLSX, JPG, PNG — Max 10MB each</div>
+                    </div>
+                    <input type="file" id="mailAttachInput" multiple style="display:none;" onchange="handleMailAttachments(event)">
+                    <div class="mc-attach-list" id="mailAttachList"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mc-footer">
+                <div class="mc-footer-hint">
+                    <span style="color: #dc2626;">*</span> Required fields
+                </div>
+                <div class="mc-footer-actions">
+                    <button onclick="closeComposeModal()" class="mc-btn mc-btn-cancel">Cancel</button>
+                    <button onclick="saveMailDraft()" class="mc-btn mc-btn-draft">💾 Save Draft</button>
+                    <button onclick="sendMail()" class="mc-btn mc-btn-send">📤 Send Message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================
+     MINUTE COMPOSE MODAL
+     ============================================================ -->
+    <div class="modal-overlay" id="minuteComposeModal">
+        <div class="modal-box" style="max-width: 680px; padding: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
+            <div style="background: linear-gradient(135deg, #022908, #034d13); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #f59e0b;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(245,158,11,0.15); border: 1.5px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(245,158,11,0.2);">📝</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 19px; font-weight: 800; letter-spacing: 0.3px;">Create New Minute</h3>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px;">Workflow circulation for approvals & tasks</div>
+                    </div>
+                </div>
+                <button onclick="closeModal('minuteComposeModal')" style="background: rgba(255,255,255,0.12); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>
+            </div>
+            <div style="padding: 24px 26px; background: #f8fafc; max-height: 65vh; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;">
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Subject / Title <span style="color: #dc2626;">*</span></label>
+                    <input type="text" id="minuteSubject" placeholder="E.g., Budget Approval for Q4 2026" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; background: white;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Assign To (First Person) <span style="color: #dc2626;">*</span></label>
+                    <select id="minuteAssignTo" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; outline: none; background: white; cursor: pointer;"></select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">Message / Instructions <span style="color: #dc2626;">*</span></label>
+                    <textarea id="minuteBody" rows="4" placeholder="Write clear instructions here..." style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px; outline: none; background: white; line-height: 1.6;"></textarea>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">📎 Attachments (Max 25MB)</label>
+                    <input type="file" id="minuteAttachments" multiple onchange="handleMinuteAttachments(event)" style="display: none;">
+                    <div style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 24px; text-align: center; background: white; cursor: pointer;" onclick="document.getElementById('minuteAttachments').click()">
+                        <span style="font-size: 32px; margin-bottom: 8px; display: block;">📄</span>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">Click to browse or drag files here</div>
+                        <div style="font-size: 11px; color: #94a3b8; font-weight: 500;">PDF, DOCX, XLSX, JPG, PNG</div>
+                    </div>
+                    <div id="minuteAttachList" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+            </div>
+            <div style="padding: 16px 26px; background: white; border-top: 1.5px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 11px; color: #94a3b8; font-weight: 600;"><span style="color: #dc2626;">*</span> Required fields</div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="closeModal('minuteComposeModal')" style="padding: 11px 24px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">Cancel</button>
+                    <button onclick="sendMinute()" style="padding: 11px 24px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.3); font-family: inherit;">🚀 Create & Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================
+     ATTEND & ASSIGN MODAL
+     ============================================================ -->
+    <div class="modal-overlay" id="attendMailModal" style="z-index: 12000;">
+        <div class="modal-box" style="max-width: 600px; padding: 0; overflow: hidden; border-radius: 16px; display: flex; flex-direction: column; max-height: 92vh;">
+            
+            <div style="background: linear-gradient(135deg, #022908, #034d13); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-bottom: 3px solid #22c55e;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; background: rgba(46,204,113,0.2); border: 1.5px solid #2ecc71; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;">✅</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 800;">Attend & Assign</h3>
+                        <div id="attendMailSubject" style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px;">Loading...</div>
+                    </div>
+                </div>
+                <button onclick="closeModal('attendMailModal')" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; flex-shrink: 0;">✕</button>
+            </div>
+            
+            <div style="padding: 22px 24px; background: #f8fafc; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
+                
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+                        💬 Your Comment / Action Taken <span style="color: #dc2626;">*</span>
+                    </label>
+                    <textarea id="attendComment" rows="4" placeholder="E.g., Malipo yamefanyika..." style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; line-height: 1.6;"></textarea>
+                </div>
+                
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+                        ➡️ Forward to Next Person (Optional)
+                    </label>
+                    <select id="attendAssignTo" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-family: inherit; outline: none; background: white; cursor: pointer;">
+                        <option value="">-- No assignment, just comment --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+                        📎 Attach Documents (Optional)
+                    </label>
+                    <div class="mc-attach-zone" onclick="document.getElementById('attendAttachInput').click()" style="padding: 16px;">
+                        <span class="mc-attach-icon" style="font-size: 24px;">📄</span>
+                        <div class="mc-attach-title" style="font-size: 12px;">Click to browse files</div>
+                    </div>
+                    <input type="file" id="attendAttachInput" multiple style="display:none;" onchange="handleAttendAttachments(event)">
+                    <div id="attendAttachList" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+                
+            </div>
+            
+            <div style="padding: 16px 24px; background: white; border-top: 1.5px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+                <button onclick="closeModal('attendMailModal')" style="padding: 10px 22px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit;">Cancel</button>
+                <button id="attendSubmitBtn" onclick="submitAttend(currentMailId)" style="padding: 10px 24px; background: linear-gradient(135deg, #2ecc71, #022908); color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(46,204,113,0.3); display: inline-flex; align-items: center; gap: 6px;">✅ Submit Action</button>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================
+     CLOSE WORKFLOW MODAL
+    ============================================================ -->
+    <div class="modal-overlay" id="closeWorkflowModal" style="z-index: 12000;">
+        <div class="modal-box" style="max-width: 600px; padding: 0; overflow: hidden; border-radius: 16px; display: flex; flex-direction: column; max-height: 92vh;">
+            
+            <div style="background: linear-gradient(135deg, #022908, #034d13); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-bottom: 3px solid #dc2626;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; background: rgba(239,68,68,0.2); border: 1.5px solid #ef4444; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🔒</div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 800;">Close Workflow</h3>
+                        <div id="closeMailSubject" style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px;">Loading...</div>
+                    </div>
+                </div>
+                <button onclick="closeModal('closeWorkflowModal')" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; flex-shrink: 0;">✕</button>
+            </div>
+            
+            <div style="padding: 22px 24px; background: #f8fafc; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
+                
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+                        📝 What was done? (Resolution) <span style="color: #dc2626;">*</span>
+                    </label>
+                    <textarea id="closeComment" rows="4" placeholder="E.g., Malipo yamekamilika na risiti imepakiwa..." style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; line-height: 1.6;"></textarea>
+                </div>
+                
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+                        👤 Tag Someone (Optional)
+                    </label>
+                    <select id="closeAssignTo" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-family: inherit; outline: none; background: white; cursor: pointer;">
+                        <option value="">-- No one to tag --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
+                        📎 Attach Evidence (Optional)
+                    </label>
+                    <div class="mc-attach-zone" onclick="document.getElementById('closeAttachInput').click()" style="padding: 16px;">
+                        <span class="mc-attach-icon" style="font-size: 24px;">📄</span>
+                        <div class="mc-attach-title" style="font-size: 12px;">Click to attach files</div>
+                    </div>
+                    <input type="file" id="closeAttachInput" multiple style="display:none;" onchange="handleCloseAttachments(event)">
+                    <div id="closeAttachList" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+                
+            </div>
+            
+            <div style="padding: 16px 24px; background: white; border-top: 1.5px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
+                <button onclick="closeModal('closeWorkflowModal')" style="padding: 10px 22px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit;">Cancel</button>
+                <button id="closeSubmitBtn" onclick="submitCloseWorkflow()" style="padding: 10px 24px; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(220,38,38,0.3); display: inline-flex; align-items: center; gap: 6px;">🔒 Close Workflow</button>
+            </div>
+        </div>
+    </div>
     <!-- ===== MODERN CONFIRM MODAL ===== -->
     <div class="modern-confirm-overlay" id="modernConfirmOverlay">
         <div class="modern-confirm-box">

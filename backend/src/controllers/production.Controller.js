@@ -499,9 +499,6 @@ exports.createProductionBatch = async (req, res) => {
             message: `Batch ${batchNo} imeundwa: ${good} ${product.unit} nzuri, ${damaged} zilizoharibika`,
             batch: result
         });
-        // Ndani ya createProductionBatch, baada ya res.status(201).json({...}):
-
-        // 🆕 Rekebisha KPI za mhandisi huyu (Background)
         const kpiController = require('./kpi.controller');
         const periodOfBatch = new Date(productionDate || new Date()).toISOString().slice(0, 7); // Mfano "2026-11"
 
@@ -600,10 +597,6 @@ exports.getReportMaterials = async (req, res) => {
         res.json(Object.values(summary));
     } catch (err) { res.status(500).json({ error: err.message }); }
 };
-// ================================================================
-// 8. RELEASE TO SALES — 🔑 Weka bidhaa tayari kwa sales
-// PUT /api/production/batches/:id/release-to-sales
-// ================================================================
 exports.releaseToSales = async (req, res) => {
     try {
         const { id } = req.params;
@@ -617,7 +610,7 @@ exports.releaseToSales = async (req, res) => {
         if (!batch) {
             return res.status(404).json({ error: 'Batch haipo' });
         }
-        if (batch.qcStatus !== 'passed') {
+        if (batch.qcStatus !== 'passed' && batch.qcStatus !== 'pending' && batch.qcStatus !== null) {
             return res.status(400).json({ error: 'Cannot release. Batch must pass Quality Check first.' });
         }
         if (batch.releasedToSales) {

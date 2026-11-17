@@ -4,14 +4,11 @@
 
 const { prisma } = require('../config/database');
 
-
 async function listProducts(req, res) {
     try {
         const products = await prisma.product.findMany({
             where: { 
                 isActive: true 
-                // TUMEONDOA availableForSale: true HAPA
-                // Ili bidhaa zote zilizo active zionekane kwenye website
             },
             orderBy: [
                 { order: 'asc' },
@@ -26,8 +23,6 @@ async function listProducts(req, res) {
         res.status(500).json({ error: 'Failed to fetch products.' });
     }
 }
-
-// ... (Functions nyingine zibaki vilevile: listProductsAdmin, getProduct, createProduct, updateProduct, deleteProduct)
 async function listProductsAdmin(req, res) {
     try {
         const products = await prisma.product.findMany({
@@ -98,8 +93,6 @@ async function createProduct(req, res) {
                 isActive: isActive !== undefined ? isActive : true
             }
         });
-
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -121,7 +114,6 @@ async function createProduct(req, res) {
         res.status(500).json({ error: 'Failed to create product.' });
     }
 }
-
 // ================================================================
 // UPDATE PRODUCT (Sales + SuperAdmin)
 // PUT /api/products/:id

@@ -58,37 +58,50 @@ async function createOrder(req, res) {
             notes, items, source, marketingPlanId
         } = req.body;
 
-        // Validation
+        // 1. Validation ya Msingi
         if (!customerName || !phone || !items || items.length === 0) {
             return res.status(400).json({ error: 'Name, phone, and items are required.' });
         }
 
-        // 🆕 ===== VALIDATION: ANGALIA STOCK YA KILA BIDHAA =====
+        // 2. 🆕 ANGALIA ROLE YA MTUMIAJI
+        // (req.user inakuwepo tu kama ame-login, mfano Sales au Superadmin)
+        const userRole = (req.user?.role || '').toLowerCase();
+        const isSuperAdminOrSales = userRole.includes('superadmin') || userRole.includes('sales');
+
+        // 3. Tafuta bidhaa zote zilizotajwa kwenye order
         const productNames = items.map(item => item.productName || item.product);
         
         const products = await prisma.product.findMany({
             where: { 
                 name: { in: productNames },
-                isActive: true,
-                availableForSale: true  // 🆕 Lazima bidhaa iwe imetolewa na Engineer
+                isActive: true
+                // ❌ Tumeondoa availableForSale: true hapa ili Waruhusu wote kuagiza
             }
         });
 
-        // Unda map ya product kwa jina
+        // 4. Unda map ya product kwa jina kwa ajili ya ukaguzi wa haraka
         const productMap = {};
         products.forEach(p => { productMap[p.name] = p; });
 
-        // Angalia kila item kama ipo na stock inatosha
+        // 5. Kagua kila item
         const stockErrors = [];
         for (const item of items) {
             const productName = item.productName || item.product;
             const product = productMap[productName];
             
+            // 5a. Kama bidhaa haipo kabisa kwenye database
             if (!product) {
-                stockErrors.push(`❌ "${productName}" haipo au haijatolewa na Production bado.`);
+                stockErrors.push(`❌ "${productName}" haipo kwenye mfumo.`);
                 continue;
             }
             
+            // 5b. Kama ni MTUMIAJI WA KAWAIDA (sio Sales/Superadmin), LAZIMA bidhaa iwe availableForSale
+            if (!isSuperAdminOrSales && !product.availableForSale) {
+                stockErrors.push(`❌ "${productName}" haipo kwenye Production bado. Tafadhali wasiliana na Sales.`);
+                continue;
+            }
+            
+            // 5c. Angalia kama stock inatosha
             if (product.stock < item.quantity) {
                 stockErrors.push(
                     `❌ "${productName}" haitoshi. Iliyopo: ${product.stock}, inahitajika: ${item.quantity}`
@@ -102,19 +115,18 @@ async function createOrder(req, res) {
                 stockErrors 
             });
         }
-        // 🆕 ===== MWISHO WA VALIDATION =====
 
-        // Calculate totals
+        // 6. Calculate totals
         const totalItems = items.length;
         const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
         const totalAmount = items.reduce((sum, item) => sum + ((item.unitPrice || 0) * (item.quantity || 0)), 0);
 
-        // Generate order ID
+        // 7. Generate order ID
         const orderId = generateOrderId();
 
-        // 🆕 ===== TRANSACTION: CREATE ORDER + DEDUCT STOCK =====
+        // 8. 🆕 TRANSACTION: CREATE ORDER + DEDUCT STOCK
         const order = await prisma.$transaction(async (tx) => {
-            // 1. Unda order
+            // 8a. Unda order
             const newOrder = await tx.order.create({
                 data: {
                     orderId,
@@ -149,7 +161,7 @@ async function createOrder(req, res) {
                 }
             });
 
-            // 🆕 2. Punguza stock ya kila bidhaa
+            // 8b. Punguza stock ya kila bidhaa
             for (const item of items) {
                 const productName = item.productName || item.product;
                 const product = productMap[productName];
@@ -165,10 +177,10 @@ async function createOrder(req, res) {
 
             return newOrder;
         }, {
-            timeout: 15000  // 🆕 Ongeza timeout
+            timeout: 15000
         });
 
-        // Audit log
+        // 9. Audit log
         if (req.user?.userId) {
             await prisma.auditLog.create({
                 data: {
@@ -182,6 +194,7 @@ async function createOrder(req, res) {
             });
         }
 
+        // 10. Recalculate Marketing KPI (Kama ipo)
         if (marketingPlanId) {
             try {
                 await marketingController.recalculateKpiFromOrders(marketingPlanId);

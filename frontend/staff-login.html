@@ -1077,11 +1077,7 @@
         position: relative;
         z-index: 2;
     }
-
-    /* ================================================================
-       RESPONSIVE
-       ================================================================ */
-    @media (max-width: 900px) {
+     @media (max-width: 900px) {
         .login-wrapper { max-width: 800px; }
         .brand-panel, .form-panel { padding: 40px 32px; }
     }
@@ -1151,6 +1147,36 @@
         .form-header h1 { font-size: 22px; }
         .btn-login { padding: 16px; font-size: 13px; }
         .welcome-box { padding: 28px 22px 24px; }
+    }
+        .nav-link-btn{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:10px 16px;
+        margin-top:15px;
+        margin-bottom:10px;
+        border-radius:12px;
+        text-decoration:none;
+        font-size:12px;
+        font-weight:700;
+        letter-spacing:0.8px;
+        color:var(--ink);
+        background:linear-gradient(
+            135deg,
+            var(--gold-light) 0%,
+            var(--gold) 100%
+        );
+        box-shadow:0 6px 18px rgba(212,160,23,0.25);
+        transition:all .3s ease;
+    }
+
+    .nav-link-btn:hover{
+        transform:translateY(-2px);
+        box-shadow:0 10px 24px rgba(212,160,23,0.45);
+    }
+
+    .nav-link-btn:active{
+        transform:translateY(0);
     }
     </style>
 </head>
@@ -1261,6 +1287,9 @@
                     <div class="form-header-tag">
                         <span class="form-header-tag-dot"></span>
                         <span>Secure Sign In</span>
+                        <a href="index.html" class="nav-link-btn">
+                            ← Back to Website
+                        </a>
                     </div>
                     <h1>Welcome Back</h1>
                     <p>Sign in to access your dashboard</p>

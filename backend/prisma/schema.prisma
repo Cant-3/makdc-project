@@ -738,7 +738,7 @@ model RawMaterialReceipt {
   receivedById Int  @map("received_by_id")
   receivedBy   User @relation("RawReceipts", fields: [receivedById], references: [id])
 
-  notes     String?
+  notes     String? 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([materialId])
@@ -1616,4 +1616,32 @@ model InternalMessageAttendance {
   @@index([messageId])
   @@index([userId])
   @@map("internal_message_attendance")
+}
+model DepartmentReport {
+  id            Int      @id @default(autoincrement())
+  reportNumber  String   @unique @map("report_number")
+  department    String
+  title         String
+  period        String
+  summary       String?  @db.Text
+  metrics       Json?
+  submittedBy   String   @map("submitted_by")
+  submittedById Int      @map("submitted_by_id")
+  submittedAt   DateTime @default(now()) @map("submitted_at")
+  status        String   @default("unread")
+  ceoNotes      String?  @db.Text @map("ceo_notes")
+
+  @@map("department_reports")
+}
+model AggregatedReport {
+  id                  Int      @id @default(autoincrement())
+  title               String
+  period              String
+  sourceReportIds     Int[]    // Array ya ID za ripoti zilizochaguliwa
+  ceoAnalysis         String?  @db.Text
+  ceoRecommendations  String?  @db.Text
+  status              String   @default("draft") // draft, published
+  createdAt           DateTime @default(now())
+  
+  @@map("aggregated_reports")
 }

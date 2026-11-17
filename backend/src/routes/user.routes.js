@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 
 const userController = require('../controllers/user.controller');
-const { authenticate, requireSuperAdmin } = require('../middleware/auth');
+const { authenticate, requireSuperAdmin, requireAnyRole } = require('../middleware/auth');
 const {
     createUserSchema,
     updateUserSchema,
@@ -28,14 +28,12 @@ router.use(authenticate);
 router.put('/me', 
     validate(updateOwnProfileSchema),
     userController.updateOwnProfile
-);
+); 
+router.get('/', requireAnyRole, userController.listUsers);
 
 // ================================================================
 // SUPER ADMIN ONLY ROUTES
 // ================================================================
-
-// GET /api/users — List all users
-router.get('/', requireSuperAdmin, userController.listUsers);
 
 // POST /api/users — Create user
 router.post('/', 

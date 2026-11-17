@@ -1,75 +1,24 @@
-// ================================================================
-// MAK DC INVESTMENT — CEO DASHBOARD (TAB-BASED)
-// ================================================================
+let currentUser = null;let currentProfilePic = null;let allCompanyPayments = [];let allCEOPayrolls = [];let allCEOFundTransfers = [];
+let allCEOStaff = [];let currentApprovalFilter = 'pending-ceo';let isSavingKpiDraft = false;let isReleasingKpi = false;
 
-let currentUser = null;
-let currentProfilePic = null;
-let allCompanyPayments = [];
-let allCEOPayrolls = [];
-let allCEOFundTransfers = [];
-let allCEOStaff = [];
-let currentApprovalFilter = 'pending-ceo';
-let isSavingKpiDraft = false;
-let isReleasingKpi = false;
-
-// ================================================================
-// INIT
-// ================================================================
-document.addEventListener('DOMContentLoaded', async function() {
-    if (!protectPage('CEO', 'SuperAdmin')) return;
-
-    currentUser = Auth.getUser();
-
-    renderCEOProfile();
-    initSidebar();
-    await loadCEODashboard();
-});
-
-// ================================================================
-// RENDER CEO PROFILE
-// ================================================================
+document.addEventListener('DOMContentLoaded', async function() {if (!protectPage('CEO', 'SuperAdmin')) return;currentUser = Auth.getUser();renderCEOProfile();initSidebar();await loadCEODashboard();});
 function renderCEOProfile() {
     if (!currentUser) return;
-
     const user = currentUser;
     const initials = user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
-    setText('sidebarUserName', user.fullName);
-    setAvatar('sidebarUserAvatar', user.profilePic, initials);
-    setText('udName', user.fullName);
-    setText('udRole', `👔 ${user.role}`);
-    setAvatar('udAvatar', user.profilePic, initials);
-    setText('udpName', user.fullName);
-    setText('udpRole', `👔 ${user.role}`);
-    setText('udpEmail', user.email || '—');
-    setText('udpPhone', user.phone || '—');
-    setText('udpDepartment', user.department || '—');
-    setText('udpEmployeeId', user.employeeId || '—');
-    setAvatar('udpPic', user.profilePic, initials);
-    setText('welcomeName', user.fullName);
+    setText('sidebarUserName', user.fullName);setAvatar('sidebarUserAvatar', user.profilePic, initials);setText('udName', user.fullName);
+    setText('udRole', `👔 ${user.role}`);setAvatar('udAvatar', user.profilePic, initials);setText('udpName', user.fullName);setText('udpRole', `👔 ${user.role}`);
+    setText('udpEmail', user.email || '—');setText('udpPhone', user.phone || '—');setText('udpDepartment', user.department || '—');setText('udpEmployeeId', user.employeeId || '—');
+    setAvatar('udpPic', user.profilePic, initials);setText('welcomeName', user.fullName);
 }
-
-// ================================================================
-// TAB SWITCHING — MUHIMU
-// ================================================================
 function switchTab(tabId, event) {
     if (event) event.preventDefault();
-
-    // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    
-    // Remove active from all sidebar links (zote kuu na ndogo)
     document.querySelectorAll('.sidebar-nav a, .sidebar-submenu a').forEach(a => a.classList.remove('active'));
-
-    // Show selected tab
     const target = document.getElementById(tabId);
     if (target) target.classList.add('active');
-
-    // Highlight sidebar link (Kama ilibonyezwa moja kwa moja)
     if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
-        
-        // Kama ni ya submenu, hakikisha dropdown ipo wazi
         if (event.currentTarget.closest('.sidebar-submenu')) {
             const parentGroup = event.currentTarget.closest('.sidebar-nav-group');
             if (parentGroup) {
@@ -79,7 +28,6 @@ function switchTab(tabId, event) {
             }
         }
     } else {
-        // Kama imeitwa na JS (mfano kupitia function nyingine)
         const link = document.querySelector(`.sidebar-nav a[onclick*="${tabId}"]`);
         if (link) link.classList.add('active');
     }
@@ -98,69 +46,83 @@ function switchTab(tabId, event) {
     if (tabId === 'tab-released-kpis') loadReleasedKpisTab();
     if (tabId === 'tab-draft-kpis') loadDraftKpisTab();
     if (tabId === 'tab-kpis') loadKPIs();
-    if (tabId === 'tab-mail-center') {switchMailBox('inbox'); // Fungua inbox kwa default
-}
-    if (tabId === 'tab-reports') {/* static */}
-
-    // Close sidebar on mobile
+    if (tabId === 'tab-mail-center') {if (!document.getElementById('tab-mail-center').classList.contains('active')) {switchMailBox('inbox');}}
+    if (tabId === 'tab-reports') {const activeSubTab = document.querySelector('.rep-subtab-content.active');if (activeSubTab) {
+        if (activeSubTab.id === 'rep-subtab-submitted') loadSubmittedReports();
+        if (activeSubTab.id === 'rep-subtab-live') loadLiveReport();
+    }}
     if (window.innerWidth <= 768) closeSidebar();
-
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (tabId === 'tab-track-orders') {
+    document.getElementById('ceoTrackId').value = '';
+    document.getElementById('ceoTrackPhone').value = '';
+    document.getElementById('ceoTrackResult').innerHTML = '';
 }
-// ================================================================
-// LOAD CEO DASHBOARD — inaita kila tab load
-// ================================================================
+}
+function refreshCurrentMailbox() {
+    if (!currentMailBoxType) return;
+    delete mailListCache[currentMailBoxType];
+    delete mailListCacheTime[currentMailBoxType];
+    loadMailboxMessages(currentMailBoxType);
+    modernToast('🔄 Refreshed', `${currentMailBoxType} reloaded.`, 'info');
+}
 async function loadCEODashboard() {
-    try {
-        // Load all data in parallel
-        await Promise.all([
-            loadOverviewTab(),
-            loadEmployeesTab(),
-            loadPaymentsTab(),
-            loadPayrollsTab(),
-            loadTransfersTab(),
-            loadAccountsTab()
-        ]);
-    } catch (err) {
-        console.error('CEO dashboard error:', err);
-        showToast('Failed to load dashboard: ' + err.message, 'error');
-    }
+    const results = await Promise.allSettled([
+        loadOverviewTab(),
+        loadEmployeesTab(),
+        loadPaymentsTab(),
+        loadPayrollsTab(),
+        loadTransfersTab(),
+        loadAccountsTab()
+    ]);
+    results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+            console.error(`Tab index ${index} imeshindwa kupakia:`, result.reason);
+        }
+    });
 }
-
 // ================================================================
-// TAB: OVERVIEW
+// RENDER RECENT ACTIVITY
 // ================================================================
-async function loadOverviewTab() {
-    try {
-        const [users, employees, payments] = await Promise.all([
-            API.getUsers().catch(() => []),
-            API.getEmployees().catch(() => []),
-            API.getPayments().catch(() => [])
-        ]);
+function renderRecentActivity(orders) {
+    const container = document.getElementById('ceoRecentActivity');
+    if (!container) return;
 
-        const totalStaff = (users || []).length + (employees || []).length;
-        const totalPayments = (payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
-        const pendingPayments = (payments || []).filter(p => p.status === 'pending').length;
-        const approvedToday = (payments || []).filter(p => {
-            if (p.status !== 'paid' && p.status !== 'completed') return false;
-            if (!p.verifiedAt) return false;
-            return new Date(p.verifiedAt).toDateString() === new Date().toDateString();
-        }).length;
+    const recent = [...orders]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
 
-        setText('statPendingApprovals', pendingPayments);
-        setText('statApprovedToday', approvedToday);
-        setText('statApprovedAmount', 'TSh ' + totalPayments.toLocaleString());
-        setText('statTotalEmployees', totalStaff);
-        setText('ceoSidebarEmpBadge', totalStaff);
-    } catch (err) {
-        console.error('loadOverviewTab error:', err);
+    if (recent.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8;">No recent activity found.</div>';
+        return;
     }
-}
 
-// ================================================================
-// TAB: EMPLOYEES
-// ================================================================
+    container.innerHTML = recent.map(o => {
+        let icon = '📦';
+        let color = '#3b82f6';
+        
+        if (o.status === 'paid') { icon = '💰'; color = '#16a34a'; }
+        else if (o.status === 'delivered') { icon = '🚚'; color = '#0f766e'; }
+        else if (o.status === 'rejected') { icon = '❌'; color = '#dc2626'; }
+        else if (o.status === 'completed') { icon = '✅'; color = '#15803d'; }
+
+        const dateStr = new Date(o.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+        return `
+            <div style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid #f1f5f9;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: ${color}15; color: ${color}; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">${icon}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${esc(o.customerName || 'Unknown Customer')}</div>
+                    <div style="font-size: 11px; color: #64748b;">Order: <strong style="font-family: monospace;">${esc(o.orderId)}</strong></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 13px; font-weight: 800; color: #0f172a;">TSh ${Number(o.totalAmount || 0).toLocaleString()}</div>
+                    <div style="font-size: 10px; color: #94a3b8;">${dateStr}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 async function loadEmployeesTab() {
     const container = document.getElementById('ceoEmployeesContainer');
     if (!container) return;
@@ -181,14 +143,8 @@ async function loadEmployeesTab() {
         const totalPayroll = (employees || []).reduce((sum, e) =>
             sum + (Number(e.basicSalary) || 0) + (Number(e.allowances) || 0), 0);
         const avgSalary = (employees || []).length > 0 ? totalPayroll / (employees || []).length : 0;
-
-        setText('ceoTotalEmployees', total);
-        setText('ceoActiveEmployees', allActive);
-        setText('ceoMonthlyPayroll', 'TSh ' + totalPayroll.toLocaleString());
-        setText('ceoAvgSalary', 'TSh ' + Math.round(avgSalary).toLocaleString());
-        setText('ceoEmpCountBadge', total + ' Total');
-        setText('ceoSidebarEmpBadge', total);
-
+        setText('ceoTotalEmployees', total); setText('ceoActiveEmployees', allActive); setText('ceoMonthlyPayroll', 'TSh ' + totalPayroll.toLocaleString());
+        setText('ceoAvgSalary', 'TSh ' + Math.round(avgSalary).toLocaleString());setText('ceoEmpCountBadge', total + ' Total');setText('ceoSidebarEmpBadge', total);
         allCEOStaff = [
             ...(users || []).map(u => ({
                 source: 'user', id: u.id, employeeId: u.employeeId || 'N/A',
@@ -205,23 +161,18 @@ async function loadEmployeesTab() {
                 type: e.employmentType || 'Employee'
             }))
         ];
-
         renderCEOEmployees();
-
     } catch (err) {
         console.error('loadEmployeesTab error:', err);
         container.innerHTML = `<div style="text-align:center;padding:50px;color:var(--red);">Error: ${esc(err.message)}</div>`;
     }
 }
-
 function renderCEOEmployees() {
     const container = document.getElementById('ceoEmployeesContainer');
     if (!container) return;
-
     const search = (document.getElementById('ceoEmpSearch')?.value || '').toLowerCase();
     const dept = document.getElementById('ceoEmpDeptFilter')?.value || '';
     const status = document.getElementById('ceoEmpStatusFilter')?.value || '';
-
     let filtered = allCEOStaff;
     if (search) {
         filtered = filtered.filter(s =>
@@ -241,7 +192,6 @@ function renderCEOEmployees() {
             </div>`;
         return;
     }
-
     container.innerHTML = `
         <div style="background:white;border-radius:12px;overflow:hidden;border:1px solid var(--gray-200);">
             <div class="ceo-emp-header" style="display:grid;grid-template-columns:50px 1.5fr 1.3fr 1fr 1.2fr 1fr 100px 60px;gap:12px;padding:12px 18px;background:var(--gray-50);border-bottom:2px solid var(--gray-200);font-size:10px;font-weight:800;color:var(--gray-500);text-transform:uppercase;letter-spacing:1px;">
@@ -270,7 +220,6 @@ function renderCEOEmployees() {
         </div>
     `;
 }
-
 function viewEmployeeDetail(employeeId) {
     const emp = allCEOStaff.find(e => e.employeeId === employeeId);
     if (!emp) { showToast('Employee not found', 'error'); return; }
@@ -298,7 +247,6 @@ function viewEmployeeDetail(employeeId) {
             <div class="detail-row"><span class="label">Total Monthly</span><span class="value" style="color:#22c55e;font-weight:800;">TSh ${(emp.basicSalary + emp.allowances).toLocaleString()}</span></div>
         ` : ''}
     `;
-
     document.getElementById('employeeDetailModal').classList.add('show');
 }
 
@@ -306,38 +254,23 @@ function refreshCEOEmployees() {
     loadEmployeesTab();
     showToast('🔄 Refreshed!', 'info');
 }
-
-// ================================================================
-// TAB: PAYMENT APPROVALS
-// ================================================================
 async function loadPaymentsTab() {
     const container = document.getElementById('approvalsContainer');
     if (!container) return;
-
     container.innerHTML = '<div style="text-align:center;padding:50px;color:var(--gray-400);">⏳ Loading payments...</div>';
-
     try {
         let payments = [];
         if (typeof API.getCompanyPayments === 'function') {
             payments = await API.getCompanyPayments().catch(() => []);
         }
-
         allCompanyPayments = Array.isArray(payments) ? payments : [];
         allCompanyPayments.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
         const pc = allCompanyPayments.filter(p => p.status === 'pending-ceo').length;
         const ap = allCompanyPayments.filter(p => p.status === 'approved').length;
         const pd = allCompanyPayments.filter(p => p.status === 'paid').length;
         const rj = allCompanyPayments.filter(p => p.status === 'rejected').length;
-
-        setText('filterPendingBadge', pc);
-        setText('filterApprovedBadge', ap);
-        setText('filterRejectedBadge', rj);
-        setText('filterCompletedBadge', pd);
-        setText('pendingApprovalsCount', pc + ' Pending');
-        setText('sidebarApprovalsBadge', pc);
-        setText('statPendingApprovals', pc);
-
+        setText('filterPendingBadge', pc);setText('filterApprovedBadge', ap);setText('filterRejectedBadge', rj);setText('filterCompletedBadge', pd);
+        setText('pendingApprovalsCount', pc + ' Pending');setText('sidebarApprovalsBadge', pc);setText('statPendingApprovals', pc);
         renderCEOApprovals();
     } catch (err) {
         console.error('loadPaymentsTab error:', err);
@@ -437,8 +370,6 @@ async function ceoApprovePayment(id) {
             ceoApprovedAt: new Date().toISOString(),
             ceoApprovedBy: currentUser?.fullName || 'CEO'
         });
-
-        // 🆕 Sasisha Procurement Request iwe tayari kulipwa
         if (p.procurementRequestId) {
             await API.updateProcurementStatus(p.procurementRequestId, { status: 'payment-approved' });
         }
@@ -449,11 +380,9 @@ async function ceoApprovePayment(id) {
         modernToast('Failed', err.message, 'error');
     }
 }
-
 async function ceoRejectPayment(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) return;
-
     const res = await modernConfirm({
         title: '❌ Reject Payment?',
         message: `Provide a reason for rejecting payment "${p.reference}".`,
@@ -464,9 +393,7 @@ async function ceoRejectPayment(id) {
         needsReason: true,
         reasonLabel: 'Rejection Reason'
     });
-
     if (!res.confirmed) return;
-
     try {
         await API.updateCompanyPayment(id, {
             status: 'rejected',
@@ -480,14 +407,11 @@ async function ceoRejectPayment(id) {
         modernToast('Failed', err.message, 'error');
     }
 }
-
 function viewCEOPaymentDetail(id) {
     const p = allCompanyPayments.find(x => String(x.id) === String(id));
     if (!p) { modernToast('Not Found', 'Payment not found', 'error'); return; }
-
     const typeInfo = getCPTypeInfo(p.type);
     const statusInfo = getCPStatusInfo(p.status);
-
     const body = document.getElementById('approvalDetailBody');
     body.innerHTML = `
         <div class="approval-detail-block">
@@ -507,7 +431,6 @@ function viewCEOPaymentDetail(id) {
         ${p.description ? `<div class="approval-detail-block" style="margin-top:12px;"><h4>📝 Description</h4><div style="font-size:13px;color:var(--gray-700);line-height:1.6;">${esc(p.description)}</div></div>` : ''}
         ${p.managerVerifiedAt ? `<div class="approval-detail-block" style="margin-top:12px;"><h4>✅ Manager Verification</h4><div class="detail-row"><span class="label">Verified By</span><span class="value">${esc(p.managerVerifiedBy || '—')}</span></div><div class="detail-row"><span class="label">Verified At</span><span class="value">${new Date(p.managerVerifiedAt).toLocaleString()}</span></div></div>` : ''}
     `;
-
     const footer = document.getElementById('approvalDetailFooter');
     if (p.status === 'pending-ceo') {
         footer.innerHTML = `
@@ -521,7 +444,6 @@ function viewCEOPaymentDetail(id) {
 
     document.getElementById('approvalDetailModal').classList.add('show');
 }
-
 function getCPTypeInfo(type) {
     const map = {
         procurement: { icon: '🛒', label: 'Procurement' },
@@ -535,7 +457,6 @@ function getCPTypeInfo(type) {
     };
     return map[type] || map.other;
 }
-
 function getCPStatusInfo(status) {
     const map = {
         'draft':           { icon: '📝', label: 'Draft',           color: '#64748b', bg: 'rgba(100,116,139,0.15)' },
@@ -547,32 +468,24 @@ function getCPStatusInfo(status) {
     };
     return map[status] || map['draft'];
 }
-
-// ================================================================
-// TAB: PAYROLL APPROVALS
-// ================================================================
 async function loadPayrollsTab() {
     const container = document.getElementById('ceoPayrollsContainer');
     if (!container) return;
 
     container.innerHTML = '<div style="text-align:center;padding:50px;color:var(--gray-400);">⏳ Loading payrolls...</div>';
-
     try {
         const payrolls = await API.getPayrolls();
         allCEOPayrolls = Array.isArray(payrolls) ? payrolls : [];
         allCEOPayrolls.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
         const pending = allCEOPayrolls.filter(p => p.status === 'pending-ceo');
         setText('sidebarPayrollBadge', pending.length);
         setText('ceoPayrollCountBadge', pending.length + ' Pending');
-
         renderCEOPayrolls(pending);
     } catch (err) {
         console.error('loadPayrollsTab error:', err);
         container.innerHTML = `<div style="text-align:center;padding:50px;color:#dc2626;">Error: ${esc(err.message)}</div>`;
     }
 }
-
 function renderCEOPayrolls(pending) {
     const container = document.getElementById('ceoPayrollsContainer');
     if (!container) return;
@@ -725,10 +638,6 @@ async function viewCEOPayroll(id) {
 
     modal.classList.add('show');
 }
-
-// ================================================================
-// TAB: FUND TRANSFERS
-// ================================================================
 async function loadTransfersTab() {
     const container = document.getElementById('ceoFundTransfersContainer');
     if (!container) return;
@@ -911,10 +820,6 @@ async function viewCEOFundTransfer(id) {
 
     modal.classList.add('show');
 }
-
-// ================================================================
-// TAB: COMPANY ACCOUNTS
-// ================================================================
 async function loadAccountsTab() {
     const container = document.getElementById('ceoAccountsContainer');
     if (!container) return;
@@ -5175,6 +5080,9 @@ async function releaseSingleDraftKpi(id, btn) {
 // 🆕 MAIL SYSTEM (FULLY INTEGRATED WITH API)
 // ================================================================
 let allMailUsers = [];
+let mailListCache = {};
+let mailListCacheTime = {};
+const MAIL_CACHE_TTL = 30000;
 let selectedSendTo = [];
 let selectedCC = [];
 let selectedAssignTo = [];
@@ -5237,11 +5145,21 @@ async function switchMailBox(type) {
 // ================= 3. LOAD MESSAGES =================
 async function loadMailboxMessages(type) {
     const container = document.getElementById('mailListContainer');
+    const now = Date.now();
+    if (mailListCache[type] && (now - (mailListCacheTime[type] || 0) < MAIL_CACHE_TTL)) {
+        cachedMailList = mailListCache[type];
+        renderMailList(cachedMailList);
+        return;
+    }
+
     container.innerHTML = `<div style="text-align: center; padding: 60px; color: #64748b;"><div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">⏳</div><div style="font-weight: 700;">Fetching messages...</div></div>`;
 
     try {
         const messages = await API.getMailboxMessages(type);
         cachedMailList = messages || [];
+
+        mailListCache[type] = cachedMailList;
+        mailListCacheTime[type] = now;
 
         if (cachedMailList.length === 0) {
             container.innerHTML = `<div style="text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px dashed #cbd5e1;"><div style="font-size: 50px; margin-bottom: 16px; opacity: 0.5;">📭</div><div style="font-size: 16px; font-weight: 800; color: #334155; margin-bottom: 6px;">No Messages Found</div><div style="font-size: 13px; color: #64748b;">Your ${type} is empty.</div></div>`;
@@ -5254,7 +5172,7 @@ async function loadMailboxMessages(type) {
     }
 }
 // ================================================================
-// 🆕 RENDER MAIL LIST — Inaonyesha status ya chain
+// 🆕 RENDER MAIL LIST — Premium Design
 // ================================================================
 function renderMailList(messages) {
     const container = document.getElementById('mailListContainer');
@@ -5278,49 +5196,75 @@ function renderMailList(messages) {
         const isClosed = msg.status === 'closed';
         const isPending = msg.status === 'pending' || (msg.assignedTo && msg.assignedTo.length > 0 && !isClosed);
         
-        // Display name (sender kwa inbox, receiver kwa sent)
+        // Jina la kuonyesha
         const displayName = currentMailBoxType === 'sent' 
             ? (msg.receiverName || 'Unknown')
             : (msg.senderName || 'Unknown');
         const prefix = currentMailBoxType === 'sent' ? 'To: ' : '';
         
+        // Tarehe
         const dateStr = msg.createdAt 
             ? new Date(msg.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
             : '';
+            
+        // Initials za Avatar
         const initials = (displayName || 'U').substring(0, 2).toUpperCase();
         
+        // Rangi ya Avatar (Kila mtu na rangi yake)
+        const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#14b8a6'];
+        const colorIndex = displayName.length % colors.length;
+        const avatarColor = colors[colorIndex];
+
         // Badges
         let badges = '';
         if (msg.isMinute) {
-            badges += `<span style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(139,92,246,0.12); color: var(--purple);">📝 MINUTE</span>`;
+            badges += `<span style="font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgba(139,92,246,0.15); color: #7c3aed; letter-spacing: 0.5px;">📝 MINUTE</span>`;
         }
         if (isClosed) {
-            badges += `<span style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(100,116,139,0.12); color: var(--gray-500);">🔒 CLOSED</span>`;
+            badges += `<span style="font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgba(100,116,139,0.15); color: #475569; letter-spacing: 0.5px;">🔒 CLOSED</span>`;
         } else if (isPending) {
-            badges += `<span style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(245,158,11,0.12); color: #d97706;">⏳ IN PROGRESS</span>`;
+            badges += `<span style="font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; background: rgba(245,158,11,0.15); color: #b45309; letter-spacing: 0.5px;">⏳ IN PROGRESS</span>`;
         }
         if (msg.isStarred) {
             badges += `<span style="font-size: 14px;">⭐</span>`;
         }
         
         return `
-            <div class="mail-item ${isUnread ? 'unread' : ''}" onclick="viewMailDetail('${msg.id}')">
-                <div class="mi-avatar">${initials}</div>
+            <div class="mail-item ${isUnread ? 'unread' : ''}" onclick="viewMailDetail('${msg.id}')" 
+                 style="display: flex; gap: 16px; padding: 16px 20px; background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; position: relative; align-items: flex-start;">
+                
+                <!-- Avatar -->
+                <div style="width: 46px; height: 46px; border-radius: 12px; background: ${avatarColor}15; color: ${avatarColor}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; flex-shrink: 0; border: 1.5px solid ${avatarColor}30;">
+                    ${initials}
+                </div>
+
                 <div style="flex: 1; min-width: 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; gap: 8px;">
-                        <div style="font-size: 14px; font-weight: ${isUnread ? '900' : '700'}; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <!-- Jina na Tarehe -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 10px;">
+                        <div style="font-size: 14.5px; font-weight: ${isUnread ? '900' : '700'}; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             ${prefix}${esc(displayName)}
                         </div>
-                        <div style="font-size: 11px; font-weight: 700; color: var(--gray-400); flex-shrink: 0;">${dateStr}</div>
+                        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; flex-shrink: 0; background: #f1f5f9; padding: 3px 8px; border-radius: 6px;">
+                            ${dateStr}
+                        </div>
                     </div>
-                    <div style="font-size: 13.5px; font-weight: ${isUnread ? '800' : '600'}; color: var(--gray-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">
+                    
+                    <!-- Kichwa cha Habari (Subject) -->
+                    <div style="font-size: 14px; font-weight: ${isUnread ? '800' : '600'}; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px;">
                         ${esc(msg.subject || '(No Subject)')}
                     </div>
-                    <div style="font-size: 12.5px; color: var(--gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        ${esc((msg.body || '').substring(0, 100))}
+                    
+                    <!-- Preview ya Ujumbe -->
+                    <div style="font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5;">
+                        ${esc((msg.body || '').substring(0, 120))}${(msg.body || '').length > 120 ? '...' : ''}
                     </div>
                 </div>
-                ${badges ? `<div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0; margin-left: 8px;">${badges}</div>` : ''}
+
+                <!-- Badges (Upande wa Kulia) -->
+                <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 6px; flex-shrink: 0; margin-left: 8px;">
+                    ${badges}
+                    ${isUnread ? '<div style="width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);"></div>' : ''}
+                </div>
             </div>
         `;
     }).join('');
@@ -5328,29 +5272,349 @@ function renderMailList(messages) {
 // ================================================================
 // 🆕 FILTER MAIL LIST — Search (inatumia renderMailList mpya)
 // ================================================================
+let mailFilterTimeout;
 function filterMailList() {
-    const query = (document.getElementById('mailSearchInput')?.value || '').toLowerCase().trim();
+    clearTimeout(mailFilterTimeout);
+    mailFilterTimeout = setTimeout(() => {
+        const query = (document.getElementById('mailSearchInput')?.value || '').toLowerCase().trim();
+
+        if (!query) {
+            renderMailList(cachedMailList);
+            return;
+        }
+
+        const filtered = cachedMailList.filter(msg =>
+            (msg.subject && msg.subject.toLowerCase().includes(query)) ||
+            (msg.senderName && msg.senderName.toLowerCase().includes(query)) ||
+            (msg.receiverName && msg.receiverName.toLowerCase().includes(query)) ||
+            (msg.body && msg.body.toLowerCase().includes(query))
+        );
+
+        renderMailList(filtered);
+    }, 300);
+}
+// ================= 6. VIEW DETAIL =================
+// ================================================================
+// 🆕 ATTEND MODAL LOGIC (Na Attachments)
+// ================================================================
+let currentAttendAttachments = []; // Hifadhi faili za kuattach
+
+async function openAttendModal(mailId) {
+    let modal = document.getElementById('attendMailModal');
+    if (modal) modal.classList.remove('show');
     
-    if (!query) {
-        renderMailList(cachedMailList);
+    let msg = window.mailCache && window.mailCache[mailId] ? window.mailCache[mailId] : null;
+    
+    // Set subject kwenye kichwa
+    const subjectEl = document.getElementById('attendMailSubject');
+    if (subjectEl) subjectEl.textContent = msg ? esc(msg.subject || '(No Subject)') : 'Message';
+
+    // Safisha fomu
+    document.getElementById('attendComment').value = '';
+    document.getElementById('attendAttachList').innerHTML = '';
+    currentAttendAttachments = [];
+
+    // Load users kwenye dropdown
+    const select = document.getElementById('attendAssignTo');
+    select.innerHTML = '<option value="">-- No assignment, just comment --</option>';
+    
+    try {
+        let users = allMailUsers;
+        if (!users || users.length === 0) {
+            users = await API.getUsers();
+            const curUser = Auth.getUser();
+            allMailUsers = (users || []).filter(u => u.id !== curUser.userId && u.role !== 'SuperAdmin');
+        }
+        
+        allMailUsers.forEach(u => {
+            select.insertAdjacentHTML('beforeend', `<option value="${u.id}">${esc(u.fullName)} • ${esc(u.role || u.department || 'User')}</option>`);
+        });
+    } catch (err) { console.warn(err); }
+
+    // Fungua Modal
+    document.getElementById('attendMailModal').classList.add('show');
+}
+
+// Handle file attachments
+function handleAttendAttachments(event) {
+    const files = Array.from(event.target.files);
+    const list = document.getElementById('attendAttachList');
+
+    files.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+            modernToast('Too Large', `${file.name} ni kubwa mno (Max 10MB)`, 'error');
+            return;
+        }
+        if (currentAttendAttachments.find(f => f.name === file.name && f.size === file.size)) return;
+        currentAttendAttachments.push(file);
+    });
+
+    list.innerHTML = currentAttendAttachments.map((file, index) => `
+        <div class="mail-attachment-item" style="display:flex; align-items:center; gap:8px; background:white; padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+            <span>📎</span>
+            <span style="font-weight:600; color:#334155;">${file.name}</span>
+            <button onclick="event.stopPropagation(); removeAttendAttachment(${index})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-weight:800;">✕</button>
+        </div>
+    `).join('');
+    
+    event.target.value = ''; // Reset input
+}
+
+function removeAttendAttachment(index) {
+    currentAttendAttachments.splice(index, 1);
+    document.getElementById('attendAttachList').innerHTML = currentAttendAttachments.map((file, idx) => `
+        <div class="mail-attachment-item" style="display:flex; align-items:center; gap:8px; background:white; padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+            <span>📎</span>
+            <span style="font-weight:600; color:#334155;">${file.name}</span>
+            <button onclick="event.stopPropagation(); removeAttendAttachment(${idx})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-weight:800;">✕</button>
+        </div>
+    `).join('');
+}
+
+// Submit Attend
+async function submitAttend(mailId) {
+    if (!mailId) mailId = currentMailId;
+
+    const commentInput = document.getElementById('attendComment');
+    const comment = (commentInput?.value || '').trim();
+    const assignToVal = document.getElementById('attendAssignTo')?.value;
+    const assignTo = assignToVal ? [parseInt(assignToVal)] : [];
+    const btn = document.getElementById('attendSubmitBtn');
+
+    // Validation
+    if (!comment && assignTo.length === 0) {
+        modernToast('Required', 'Tafadhali andika maoni au chagua mtu wa kumsuluhisha.', 'warning');
+        commentInput?.focus();
         return;
     }
 
-    const filtered = cachedMailList.filter(msg => 
-        (msg.subject && msg.subject.toLowerCase().includes(query)) ||
-        (msg.senderName && msg.senderName.toLowerCase().includes(query)) ||
-        (msg.receiverName && msg.receiverName.toLowerCase().includes(query)) ||
-        (msg.body && msg.body.toLowerCase().includes(query))
-    );
-    
-    renderMailList(filtered);
-}
-// ================= 6. VIEW DETAIL =================
-let mailCache = {}; 
+    // Disable button
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Processing...';
+    btn.style.opacity = '0.7';
 
+    try {
+        // 🆕 Convert attachments to Base64 kama zipo
+        let attachmentData = [];
+        if (currentAttendAttachments.length > 0) {
+            const promises = currentAttendAttachments.map(file => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+                reader.readAsDataURL(file);
+            }));
+            attachmentData = await Promise.all(promises);
+        }
+
+        // Tuma kwa API
+        await API.attendMail(mailId, { comment, assignTo, attachments: attachmentData });
+
+        modernToast('✅ Success', assignTo.length > 0 ? 'Maoni yamewekwa na ujumbe umeelekezwa.' : 'Maoni yamewekwa.', 'success');
+
+        // Funga modal
+        document.getElementById('attendMailModal')?.classList.remove('show');
+
+        // Futa cache zote ili tupate data mpya
+        if (window.mailCache && window.mailCache[mailId]) delete window.mailCache[mailId];
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        // Reload
+        await viewMailDetail(mailId);
+        loadMailBadges();
+        if (currentMailBoxType) loadMailboxMessages(currentMailBoxType);
+
+    } catch (err) {
+        console.error('Attend error:', err);
+        modernToast('Failed', err.message || 'Haikuweza kutuma.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        btn.style.opacity = '1';
+    }
+}
 // ================================================================
-// 🆕 VIEW MAIL DETAIL — Inatumia Timeline Mpya
+// 🆕 CLOSE WORKFLOW LOGIC (Na Attachments & Assign)
 // ================================================================
+let currentCloseAttachments = []; // Hifadhi faili za kufunga
+
+async function closeCurrentMail() {
+    if (!currentMailId) return;
+    
+    let modal = document.getElementById('closeWorkflowModal');
+    if (modal) modal.classList.remove('show');
+    
+    let msg = window.mailCache && window.mailCache[currentMailId] ? window.mailCache[currentMailId] : null;
+    
+    // Set subject kwenye kichwa
+    const subjectEl = document.getElementById('closeMailSubject');
+    if (subjectEl) subjectEl.textContent = msg ? esc(msg.subject || '(No Subject)') : 'Message';
+
+    // Safisha fomu
+    document.getElementById('closeComment').value = '';
+    document.getElementById('closeAttachList').innerHTML = '';
+    currentCloseAttachments = [];
+
+    // Load users kwenye dropdown
+    const select = document.getElementById('closeAssignTo');
+    select.innerHTML = '<option value="">-- No assignment, just close --</option>';
+    
+    try {
+        let users = allMailUsers;
+        if (!users || users.length === 0) {
+            users = await API.getUsers();
+            const curUser = Auth.getUser();
+            allMailUsers = (users || []).filter(u => u.id !== curUser.userId && u.role !== 'SuperAdmin');
+        }
+        
+        allMailUsers.forEach(u => {
+            select.insertAdjacentHTML('beforeend', `<option value="${u.id}">${esc(u.fullName)} • ${esc(u.role || u.department || 'User')}</option>`);
+        });
+    } catch (err) { console.warn(err); }
+
+    // Fungua Modal
+    document.getElementById('closeWorkflowModal').classList.add('show');
+}
+
+// Handle attachments za kufunga
+function handleCloseAttachments(event) {
+    const files = Array.from(event.target.files);
+    const list = document.getElementById('closeAttachList');
+
+    files.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+            modernToast('Too Large', `${file.name} ni kubwa mno (Max 10MB)`, 'error');
+            return;
+        }
+        if (currentCloseAttachments.find(f => f.name === file.name && f.size === file.size)) return;
+        currentCloseAttachments.push(file);
+    });
+
+    list.innerHTML = currentCloseAttachments.map((file, index) => `
+        <div class="mail-attachment-item" style="display:flex; align-items:center; gap:8px; background:white; padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+            <span>📎</span>
+            <span style="font-weight:600; color:#334155;">${file.name}</span>
+            <button onclick="event.stopPropagation(); removeCloseAttachment(${index})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-weight:800;">✕</button>
+        </div>
+    `).join('');
+    
+    event.target.value = ''; // Reset input
+}
+
+function removeCloseAttachment(index) {
+    currentCloseAttachments.splice(index, 1);
+    document.getElementById('closeAttachList').innerHTML = currentCloseAttachments.map((file, idx) => `
+        <div class="mail-attachment-item" style="display:flex; align-items:center; gap:8px; background:white; padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px;">
+            <span>📎</span>
+            <span style="font-weight:600; color:#334155;">${file.name}</span>
+            <button onclick="event.stopPropagation(); removeCloseAttachment(${idx})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-weight:800;">✕</button>
+        </div>
+    `).join('');
+}
+
+// Submit Close Action
+async function submitCloseWorkflow() {
+    const commentInput = document.getElementById('closeComment');
+    const comment = (commentInput?.value || '').trim();
+    const assignToVal = document.getElementById('closeAssignTo')?.value;
+    const assignTo = assignToVal ? [parseInt(assignToVal)] : [];
+    const btn = document.getElementById('closeSubmitBtn');
+
+    // Validation (Lazima kuwe na comment)
+    if (!comment) {
+        modernToast('Required', 'Tafadhali andika kile kilichofanyika kabla ya kufunga.', 'warning');
+        commentInput?.focus();
+        return;
+    }
+
+    // Disable button
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Closing...';
+    btn.style.opacity = '0.7';
+
+    try {
+        // Convert attachments to Base64 kama zipo
+        let attachmentData = [];
+        if (currentCloseAttachments.length > 0) {
+            const promises = currentCloseAttachments.map(file => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+                reader.readAsDataURL(file);
+            }));
+            attachmentData = await Promise.all(promises);
+        }
+
+        // Tuma kwa API
+        await API.closeMail(currentMailId, { comment, assignTo, attachments: attachmentData });
+
+        modernToast('✅ Success', 'Workflow imefungwa kikamilifu.', 'success');
+
+        // Funga modal
+        document.getElementById('closeWorkflowModal')?.classList.remove('show');
+
+        // Futa cache zote
+        if (window.mailCache && window.mailCache[currentMailId]) delete window.mailCache[currentMailId];
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        // Reload
+        await viewMailDetail(currentMailId);
+        loadMailBadges();
+        if (currentMailBoxType) loadMailboxMessages(currentMailBoxType);
+
+    } catch (err) {
+        console.error('Close error:', err);
+        modernToast('Failed', err.message || 'Haikuweza kufunga.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        btn.style.opacity = '1';
+    }
+}
+async function sendMail() {
+    const subject = document.getElementById('mailSubject').value.trim();
+    const body = document.getElementById('mailBody').value.trim();
+    const type = document.getElementById('mailType').value;
+    const priority = document.getElementById('mailPriority').value;
+    const statusDiv = document.getElementById('mailComposeStatus');
+    const btn = document.querySelector('#composeMailModal button[onclick="sendMail()"]');
+    
+    if (selectedSendTo.length === 0) return modernToast('Error', 'Please select at least one recipient', 'error');
+    if (!subject) return modernToast('Error', 'Please enter a subject', 'error');
+    if (!body) return modernToast('Error', 'Please write a message', 'error');
+
+    const originalBtn = btn.innerHTML;
+    btn.innerHTML = '⏳ Sending...'; btn.disabled = true;
+
+    try {
+        const attachmentPromises = currentMailAttachments.map(file => new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+            reader.readAsDataURL(file);
+        }));
+        const attachmentData = await Promise.all(attachmentPromises);
+
+        const payload = {
+            receivers: selectedSendTo.map(u => u.id),
+            cc: selectedCC.map(u => u.id),
+            subject, body, type, priority,
+            attachments: attachmentData,
+            isMinute: false
+        };
+
+        await API.sendInternalMail(payload);
+
+        // 🆕 Futa cache zote za list
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        modernToast('✅ Sent', 'Message sent successfully!', 'success');
+        closeModal('composeMailModal');
+        loadMailBadges();
+        if (currentMailBoxType === 'sent') loadMailboxMessages('sent');
+        
+    } catch (err) {
+        modernToast('Error', err.message, 'error');
+        btn.innerHTML = originalBtn; btn.disabled = false;
+    }
+}
+// ================= 6. VIEW MAIL DETAIL (CEO VERSION - 2 COLUMN) =================
 async function viewMailDetail(id) {
     currentMailId = id;
     document.getElementById('mailListView').style.display = 'none';
@@ -5360,6 +5624,8 @@ async function viewMailDetail(id) {
     if (backLabel) backLabel.textContent = document.getElementById('mailListTitle')?.textContent || 'Inbox';
     
     const body = document.getElementById('mailDetailBody');
+    
+    // Onyesha loading kwanza
     body.innerHTML = `
         <div style="text-align: center; padding: 60px; color: var(--gray-500);">
             <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">⏳</div>
@@ -5368,25 +5634,54 @@ async function viewMailDetail(id) {
     `;
 
     try {
-        let msg = window.mailCache && window.mailCache[id] ? window.mailCache[id] : await API.getInternalMailById(id);
-        if (!msg) return;
+        // Vuta data KABLA ya kutumia `msg`
+        let msg = await API.getInternalMailById(id); 
+        if (!msg) {
+            body.innerHTML = `<div style="color: var(--red); text-align: center; padding: 40px; font-weight: 800;">❌ Message not found.</div>`;
+            return;
+        }
+        
         if (!window.mailCache) window.mailCache = {};
         window.mailCache[id] = msg;
 
-        // Mark as read (kama ni inbox)
+        // Mark as read (background)
         if (currentMailBoxType === 'inbox' && msg.status === 'unread') {
-            try {
-                await API.markMailAsRead(id);
-                loadMailBadges();
-                msg.status = 'read';
-            } catch (e) { console.warn('Mark read error:', e); }
+            (async () => {
+                try {
+                    await API.markMailAsRead(id);
+                    loadMailBadges();
+                    msg.status = 'read';
+                } catch (e) { console.warn('Mark read error:', e); }
+            })();
+        }
+        
+        const isClosed = msg.status === 'closed' || msg.status === 'draft';
+        
+        // Hesabu attachments zote
+        let totalAtts = 0;
+        if (msg.attachments && Array.isArray(msg.attachments)) {
+            totalAtts += msg.attachments.length;
+        }
+        if (msg.attendance && Array.isArray(msg.attendance)) {
+            msg.attendance.forEach(att => {
+                if (att.attachments && Array.isArray(att.attachments)) {
+                    totalAtts += att.attachments.length;
+                }
+            });
         }
 
-        // ==========================================
-        // 1. TENGENEZA VIFUNGO (Actions) - Horizontal juu
-        // ==========================================
-        const isClosed = msg.status === 'closed' || msg.status === 'draft';
-        let actionButtons = `<button class="btn-act-reply" onclick="openReplyModal('${id}')">↩️ Reply</button>`;
+        // Kitufe cha Attachments
+        const attButton = `
+            <button class="btn-attachments-glow" onclick="openAttachmentsModal('${id}')">
+                📎 Attachments (${totalAtts})
+            </button>
+        `;
+
+        let actionButtons = `
+            ${attButton}
+            <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 8px;"></div>
+            <button class="btn-act-reply" onclick="openReplyModal('${id}')">↩️ Reply</button>
+        `;
         
         if (!isClosed) {
             actionButtons += `
@@ -5394,127 +5689,217 @@ async function viewMailDetail(id) {
                 <button class="btn-act-close" onclick="closeCurrentMail()">🔒 Close Workflow</button>
             `;
         } else {
-            actionButtons += `<div style="padding: 8px 14px; background: #f5f3ff; color: var(--purple); border: 1px solid #ede9fe; border-radius: 6px; font-weight: 800; font-size: 11px;">🔒 Workflow Closed</div>`;
+            actionButtons += `<div style="padding: 8px 14px; background: #f5f3ff; color: #6d28d9; border: 1px solid #ede9fe; border-radius: 8px; font-weight: 800; font-size: 12px; display: inline-flex; align-items: center;">🔒 Closed</div>`;
         }
 
-        // ==========================================
-        // 2. TENGENEZA METADATA NA FAILI (Upande wa Kulia)
-        // ==========================================
-        let fileListHtml = '';
-        let previewAreaHtml = '';
-        let firstFileUrl = '';
-
-        if (msg.attachments && msg.attachments.length > 0) {
-            msg.attachments.forEach((att, index) => {
-                const ext = (att.name || '').split('.').pop().toLowerCase();
-                const isPdf = ext === 'pdf';
-                const isImage = ['jpg','jpeg','png','gif','webp'].includes(ext);
-                
-                if (index === 0 && att.data) firstFileUrl = att.data;
-
-                fileListHtml += `
-                    <button class="doc-file-btn ${index === 0 ? 'active' : ''}" onclick="previewDocFile('${att.data}', '${isPdf}', this)">
-                        <span style="font-size: 16px;">${isPdf ? '📕' : isImage ? '🖼️' : '📄'}</span>
-                        <div style="flex: 1; min-width: 0;">
-                            <div style="font-weight: 800; color: var(--gray-800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(att.name)}</div>
-                        </div>
-                    </button>
-                `;
-            });
-        } else {
-            fileListHtml = `<div style="text-align:center; padding:20px; font-size:12px; color:var(--gray-400);">Hakuna viambatanisho</div>`;
-            previewAreaHtml = `<div style="color: #cbd5e1; text-align: center; margin-top: 80px;"><div style="font-size: 40px;">📄</div><div style="font-weight:700; margin-top:10px;">No Document</div></div>`;
+        const detailActions = document.querySelector('.mail-detail-actions');
+        if (detailActions) {
+            detailActions.innerHTML = `
+                ${actionButtons}
+                <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 8px;"></div>
+                <button id="btnStarMail" class="mail-icon-btn" onclick="toggleStarCurrentMail()" title="Star">⭐</button>
+                <button id="btnArchiveMail" class="mail-icon-btn" onclick="toggleArchiveCurrentMail()" title="Archive">📁</button>
+                <button id="btnDeleteMail" class="mail-icon-btn danger" onclick="deleteCurrentMail()" title="Delete">🗑️</button>
+            `;
         }
 
-        // ==========================================
-        // 3. RENDER 3-COLUMN LAYOUT
-        // ==========================================
+        // ✅ Render LAYOUT MPYA (2 Columns) — classes za CEO
         body.innerHTML = `
-            <div class="mail-detail-3col" style="padding: 10px;">
+            <div class="mail-detail-modern">
                 
-                <!-- COLUMN 1: TIMELINE (Kushoto) -->
-                <div class="col-timeline">
-                    <div class="premium-workflow-section" style="margin: 0; padding: 16px;">
-                        ${renderCurrentHandlerPill(msg)}
-                        <div class="premium-section-title">🔄 WORKFLOW HISTORY</div>
+                <!-- ================= LEFT: WORKFLOW PANEL ================= -->
+                <div class="md-workflow-panel">
+                    <div class="md-wf-header">
+                        <div class="md-wf-header-icon">🔄</div>
+                        <div class="md-wf-header-title">
+                            <h3>Workflow History</h3>
+                            <p>Actions & assignments</p>
+                        </div>
+                    </div>
+                    <div class="md-wf-body">
                         ${renderWorkflowChain(msg)}
                     </div>
                 </div>
 
-                <!-- COLUMN 2: UJUMBE (Katikati) -->
-                <div class="col-message">
-                    <!-- Vifungo Juu -->
-                    <div class="action-buttons-top">
-                        ${actionButtons}
-                    </div>
-
-                    <!-- Ujumbe -->
-                    <div class="premium-message-card" style="margin: 0;">
-                        <div class="premium-msg-header" style="padding: 20px;">
-                            <h2 class="premium-msg-subject" style="font-size: 18px;">${esc(msg.subject || '(No Subject)')}</h2>
-                            <div class="premium-msg-meta">
-                                <div class="premium-avatar">${(msg.senderName || 'U').substring(0, 2).toUpperCase()}</div>
-                                <div class="premium-meta-text">
-                                    <div class="premium-sender-name">${esc(msg.senderName || 'Unknown')}</div>
-                                    <div class="premium-receiver-info">To: <strong>${esc(msg.receiverName || '—')}</strong></div>
-                                </div>
-                                <div class="premium-date">
-                                    ${new Date(msg.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                <!-- ================= RIGHT: MESSAGE PANEL ================= -->
+                <div class="md-message-panel">
+                    <div class="md-msg-header">
+                        <h2 class="md-msg-subject">${esc(msg.subject || '(No Subject)')}</h2>
+                        
+                        <div class="md-msg-meta-row">
+                            <div class="md-msg-avatar">${(msg.senderName || 'U').substring(0, 2).toUpperCase()}</div>
+                            <div class="md-msg-sender-info">
+                                <div class="md-msg-sender-name">${esc(msg.senderName || 'Unknown')}</div>
+                                <div class="md-msg-receiver">
+                                    To: <strong>${esc(msg.receiverName || '—')}</strong>
+                                    <span class="md-msg-status ${msg.status}">${(msg.status || '').toUpperCase()}</span>
                                 </div>
                             </div>
+                            <div class="md-msg-date">
+                                📅 ${new Date(msg.createdAt).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
+                            </div>
                         </div>
-                        <div class="premium-msg-body" style="padding: 20px; font-size: 14px; min-height: 200px; background: white;">
-                            ${esc(msg.body || '')}
-                        </div>
+                    </div>
+                    
+                    <div class="md-msg-body">
+                        ${esc(msg.body || '')}
                     </div>
                 </div>
-
-                <!-- COLUMN 3: DOCUMENT VIEWER (Kulia) -->
-                <div class="col-actions">
-                    <!-- Metadata -->
-                    <div class="doc-meta-card">
-                        <div class="doc-meta-row">
-                            <span class="doc-meta-label">Reference</span>
-                            <span class="doc-meta-value">${esc(msg.reference || msg.id || 'N/A')}</span>
-                        </div>
-                        <div class="doc-meta-row">
-                            <span class="doc-meta-label">Date</span>
-                            <span class="doc-meta-value">${new Date(msg.createdAt).toLocaleDateString('en-GB')}</span>
-                        </div>
-                    </div>
-
-                    <!-- Orodha ya Faili -->
-                    <div class="premium-section-title" style="margin-bottom: 8px; margin-top: 16px;">📎 Documents</div>
-                    <div style="margin-bottom: 16px;">${fileListHtml}</div>
-
-                    <!-- Preview Area -->
-                    <div class="doc-viewer-container">
-                        <div class="doc-viewer-header">
-                            <div style="font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase;">Document Preview</div>
-                        </div>
-                        <div class="doc-viewer-body" id="docPreviewArea">
-                            ${firstFileUrl ? `<iframe id="docIframe" src="${firstFileUrl}#toolbar=0" style="width:100%; height:100%; border:none; background:white; border-radius:4px;"></iframe>` : previewAreaHtml}
-                        </div>
-                    </div>
-                </div>
-
             </div>
         `;
 
-        // Kama faili ya kwanza ni picha, ibadilishe iframe iwe img
-        if (firstFileUrl) {
-            const firstExt = (msg.attachments[0].name || '').split('.').pop().toLowerCase();
-            if (['jpg','jpeg','png','gif','webp'].includes(firstExt)) {
-                document.getElementById('docPreviewArea').innerHTML = `<img src="${firstFileUrl}" style="max-width:100%; max-height:100%; object-fit:contain; box-shadow:0 4px 12px rgba(0,0,0,0.2);">`;
-            }
-        }
-
     } catch (err) {
         console.error('View Mail Error:', err);
-        body.innerHTML = `<div style="color: var(--red); text-align: center; padding: 40px;">❌ Failed to load: ${esc(err.message)}</div>`;
+        body.innerHTML = `<div style="color: var(--red); text-align: center; padding: 40px; font-weight: 800;">❌ Failed to load: ${esc(err.message)}</div>`;
     }
 }
+function openAttachmentsModal(id) {
+    const msg = window.mailCache[id];
+    if (!msg) {
+        modernToast('Error', 'Message data not found.', 'error');
+        return;
+    }
 
+    let allFiles = [];
+
+    // 1. Chukua za mwanzo (Created)
+    if (msg.attachments && Array.isArray(msg.attachments) && msg.attachments.length > 0) {
+        msg.attachments.forEach(att => {
+            allFiles.push({ ...att, source: 'Original Message' });
+        });
+    }
+
+    // 2. Chukua za majibu (Attendance)
+    if (msg.attendance && Array.isArray(msg.attendance) && msg.attendance.length > 0) {
+        msg.attendance.forEach(att => {
+            if (att.attachments && Array.isArray(att.attachments) && att.attachments.length > 0) {
+                att.attachments.forEach(file => {
+                    allFiles.push({ ...file, source: `Reply by ${att.userName}` });
+                });
+            }
+        });
+    }
+
+    let modal = document.getElementById('viewAttachmentsModal');
+    if (modal) modal.remove();
+
+    let filesHtml = '';
+    
+    if (allFiles.length === 0) {
+        filesHtml = `
+            <div style="text-align:center; padding: 30px; color:#94a3b8;">
+                <div style="font-size: 50px; margin-bottom: 10px; opacity: 0.3;">📭</div>
+                <div style="font-weight:800; font-size: 15px; color:#475569;">No attachments found</div>
+                <div style="font-size:12px; margin-top:4px;">Files attached to this message will appear here.</div>
+            </div>
+        `;
+    } else {
+        filesHtml = allFiles.map(att => {
+            const ext = (att.name || '').split('.').pop().toLowerCase();
+            const icon = ext === 'pdf' ? '📕' : ['jpg','jpeg','png','gif'].includes(ext) ? '🖼️' : '📄';
+            const sizeStr = att.size ? (att.size / 1024).toFixed(1) + ' KB' : 'Unknown size';
+            
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:white; border:1.5px solid #e2e8f0; padding:14px 18px; border-radius:12px; margin-bottom:10px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width: 40px; height: 40px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                            ${icon}
+                        </div>
+                        <div>
+                            <div style="font-weight:800; color:#0f172a; font-size:14px;">${esc(att.name)}</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:2px;">${sizeStr} • <span style="color:#1a7f5a; font-weight:800;">${esc(att.source)}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="downloadMailAttachment('${att.data}', '${esc(att.name)}')" style="padding:8px 16px; background:#f0fdf4; color:#1a7f5a; border:1.5px solid #bbf7d0; border-radius:8px; font-weight:800; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:6px; transition: all 0.2s;">
+                        ⬇️ Download
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // CUSTOM DESIGN MODAL (Premium)
+    document.body.insertAdjacentHTML('beforeend', `
+        <div class="modal-overlay show" id="viewAttachmentsModal" style="z-index: 9000;">
+            <div class="modal-box" style="max-width: 550px; padding: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.3);">
+                
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, #0a1929, #0f2942); padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; color: white; border-bottom: 3px solid #f59e0b;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width: 42px; height: 42px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">📎</div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 900;">Attachments</h3>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px;">${allFiles.length} file(s) attached</div>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('viewAttachmentsModal').remove()" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕</button>
+                </div>
+
+                <!-- Body -->
+                <div style="padding: 24px 28px; max-height: 60vh; overflow-y: auto; background: #f8fafc;">
+                    ${filesHtml}
+                </div>
+
+                <!-- Footer -->
+                <div style="padding: 18px 28px; background: white; border-top: 1.5px solid #e2e8f0; display:flex; justify-content:flex-end;">
+                    <button onclick="document.getElementById('viewAttachmentsModal').remove()" style="padding: 12px 28px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit; transition: all 0.2s;">Close Window</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+// 🆕 Function mpya ya kuonyesha faili na kitufe cha Kupakua (Download)
+function renderAttachmentsUI(attachments) {
+    let fileListHtml = '';
+
+    attachments.forEach((att, index) => {
+        const ext = (att.name || '').split('.').pop().toLowerCase();
+        const isPdf = ext === 'pdf';
+        const isImage = ['jpg','jpeg','png','gif','webp'].includes(ext);
+        const icon = isPdf ? '📕' : isImage ? '🖼️' : '📄';
+
+        fileListHtml += `
+            <div class="doc-file-btn" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border: 1.5px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px; overflow: hidden;">
+                    <span style="font-size: 24px;">${icon}</span>
+                    <div style="min-width: 0;">
+                        <div style="font-weight: 800; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(att.name)}</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Click to download</div>
+                    </div>
+                </div>
+                <!-- Kitufe cha Kupakua -->
+                <button onclick="downloadMailAttachment('${att.data}', '${esc(att.name)}')" style="padding: 8px 16px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                    ⬇️ Download
+                </button>
+            </div>
+        `;
+    });
+
+    document.getElementById('docFileListContainer').innerHTML = fileListHtml;
+}
+
+// 🆕 Function ya Kupakua Faili
+function downloadMailAttachment(fileData, fileName) {
+    if (!fileData) return modernToast('Error', 'File data is missing', 'error');
+    
+    const a = document.createElement('a');
+    a.href = fileData;
+    a.download = fileName || 'attachment';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    
+    modernToast('⬇️ Downloading', fileName + ' is downloading...', 'info');
+}
+// Helper ya kuonyesha kuwa hakuna documents
+function showNoDocState() {
+    const listC = document.getElementById('docFileListContainer');
+    if (listC) listC.innerHTML = `
+        <div style="text-align:center; padding:40px; color:var(--gray-400); border:1.5px dashed #cbd5e1; border-radius:12px;">
+            <div style="font-size:40px; margin-bottom:10px; opacity:0.5;">📭</div>
+            <div style="font-weight:700;">No attachments</div>
+        </div>`;
+}
 // ================================================================
 // 🆕 FUNCTION YA KUBADILISHA FAILI KWENYE PREVIEW
 // ================================================================
@@ -5585,72 +5970,87 @@ function closeComposeModal() {
 function focusMultiInput(type) {
     document.getElementById(`${type}Input`).focus();
 }
-
 // ================================================================
 // 🔍 SETUP SEARCHABLE DROPDOWN
 // ================================================================
 function setupMailSearch(type) {
     const input = document.getElementById(`${type}Input`);
     const dropdown = document.getElementById(`${type}Dropdown`);
-    const box = document.getElementById(`${type}Box`);
 
     // Clone input kuondoa listeners za zamani
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
 
+    // Onyesha dropdown input inapoguswa
     newInput.addEventListener('focus', () => {
         dropdown.classList.add('show');
         renderDropdown(type, '');
     });
 
+    // Tafuta kila unapoandika
     newInput.addEventListener('input', function() {
+        dropdown.classList.add('show');
         renderDropdown(type, this.value.toLowerCase().trim());
     });
 
-    // Close dropdown on blur (with delay for click)
+    // Ficha dropdown ukitoka nje
     newInput.addEventListener('blur', function() {
         setTimeout(() => {
-            if (!dropdown.matches(':hover')) {
-                dropdown.classList.remove('show');
-            }
-        }, 200);
+            dropdown.classList.remove('show');
+        }, 200); // Subiri kidogo ili uweze kubonyeza mtu
     });
 }
 
+// ================================================================
+// 🆕 RENDER DROPDOWN (Orodha ya Majina)
+// ================================================================
 function renderDropdown(type, query) {
     const dropdown = document.getElementById(`${type}Dropdown`);
     const selected = type === 'sendTo' ? selectedSendTo : selectedCC;
 
+    // Chuja watu wasiochaguliwa tayari
     let filtered = allMailUsers.filter(u => !selected.find(s => s.id === u.id));
     
+    // Kama kuna maandishi ya kutafuta, chuja zaidi
     if (query) {
         filtered = filtered.filter(u =>
-            u.fullName.toLowerCase().includes(query) ||
+            (u.fullName && u.fullName.toLowerCase().includes(query)) ||
             (u.role && u.role.toLowerCase().includes(query)) ||
             (u.department && u.department.toLowerCase().includes(query))
         );
     }
 
     if (filtered.length === 0) {
-        dropdown.innerHTML = `<div class="dropdown-empty">No users found${query ? ` for "${esc(query)}"` : ''}</div>`;
+        dropdown.innerHTML = `<div class="ms-empty" style="padding: 20px; text-align: center; color: #64748b; font-size: 13px;">No users found${query ? ` for "${esc(query)}"` : ''}</div>`;
         return;
     }
 
+    // Tengeneza HTML ya kila mtu
     dropdown.innerHTML = filtered.map(user => {
         const initials = user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         const roleLabel = user.role || user.department || 'User';
+        
         return `
-            <div class="dropdown-user-item" onmousedown="event.preventDefault(); addTag('${user.id}', '${type}')">
-                <div class="dropdown-user-avatar">${initials}</div>
-                <div class="dropdown-user-info">
-                    <div class="dropdown-user-name">${esc(user.fullName)}</div>
-                    <div class="dropdown-user-role">${esc(roleLabel)}</div>
+            <div class="ms-user" onmousedown="event.preventDefault(); addTag('${user.id}', '${type}')"
+                 style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;"
+                 onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'">
+                
+                <div class="ms-avatar" style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #1a7f5a, #0f2942); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0;">
+                    ${initials}
+                </div>
+                
+                <div class="ms-user-info" style="flex: 1; min-width: 0;">
+                    <div class="ms-user-name" style="font-size: 13.5px; font-weight: 800; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${esc(user.fullName)}
+                    </div>
+                    <div class="ms-user-role" style="font-size: 10.5px; font-weight: 700; color: #64748b; background: #f1f5f9; display: inline-block; padding: 1px 7px; border-radius: 5px; margin-top: 2px; text-transform: uppercase;">
+                        ${esc(roleLabel)}
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
 }
-
 // ================================================================
 // ➕ ADD/REMOVE TAGS
 // ================================================================
@@ -5684,27 +6084,26 @@ function removeTag(userId, type) {
         renderTags('cc');
     }
 }
-
 function renderTags(type) {
     const box = document.getElementById(`${type}Box`);
     const input = document.getElementById(`${type}Input`);
     const selected = type === 'sendTo' ? selectedSendTo : selectedCC;
 
-    // Ondoa tags zote za zamani
-    box.querySelectorAll('.multi-select-tag').forEach(tag => tag.remove());
+    // 1. Ondoa tags zote za zamani
+    box.querySelectorAll('.ms-tag').forEach(tag => tag.remove());
 
-    // Ongeza tags mpya kabla ya input
+    // 2. Ongeza tags mpya KABLA ya input
     selected.forEach(user => {
         const tag = document.createElement('div');
-        tag.className = 'multi-select-tag';
+        tag.className = 'ms-tag';
         tag.innerHTML = `
             ${esc(user.fullName.split(' ')[0])}
-            <button class="tag-remove" onclick="event.stopPropagation(); removeTag('${user.id}', '${type}')">✕</button>
+            <button class="rm" onclick="event.stopPropagation(); removeTag('${user.id}', '${type}')">✕</button>
         `;
+        // Weka tag kabla ya input
         box.insertBefore(tag, input);
     });
 }
-
 function handleMailAttachments(event) {
     const files = Array.from(event.target.files);
     const list = document.getElementById('mailAttachList');
@@ -5730,50 +6129,6 @@ function removeMailAttachment(index) {
     document.getElementById('mailAttachList').innerHTML = currentMailAttachments.map((file, idx) => `
         <div class="mail-attachment-item"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeMailAttachment(${idx})" class="remove-attach">✕</button></div>
     `).join('');
-}
-
-async function sendMail() {
-    const subject = document.getElementById('mailSubject').value.trim();
-    const body = document.getElementById('mailBody').value.trim();
-    const type = document.getElementById('mailType').value;
-    const priority = document.getElementById('mailPriority').value;
-    const statusDiv = document.getElementById('mailComposeStatus');
-    const btn = document.querySelector('#composeMailModal button[onclick="sendMail()"]');
-    
-    if (selectedSendTo.length === 0) return modernToast('Error', 'Please select at least one recipient', 'error');
-    if (!subject) return modernToast('Error', 'Please enter a subject', 'error');
-    if (!body) return modernToast('Error', 'Please write a message', 'error');
-
-    const originalBtn = btn.innerHTML;
-    btn.innerHTML = '⏳ Sending...'; btn.disabled = true;
-
-    try {
-        const attachmentPromises = currentMailAttachments.map(file => new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
-            reader.readAsDataURL(file);
-        }));
-        const attachmentData = await Promise.all(attachmentPromises);
-
-        const payload = {
-            receivers: selectedSendTo.map(u => u.id),
-            cc: selectedCC.map(u => u.id),
-            subject, body, type, priority,
-            attachments: attachmentData,
-            isMinute: false
-        };
-
-        await API.sendInternalMail(payload);
-        
-        modernToast('✅ Sent', 'Message sent successfully!', 'success');
-        closeModal('composeMailModal');
-        loadMailBadges();
-        if (currentMailBoxType === 'sent') loadMailboxMessages('sent');
-        
-    } catch (err) {
-        modernToast('Error', err.message, 'error');
-        btn.innerHTML = originalBtn; btn.disabled = false;
-    }
 }
 
 // ================= 8. REPLY, ATTEND, CLOSE =================
@@ -5813,6 +6168,15 @@ async function submitReply(originalId) {
 
     try {
         await API.replyInternalMail(originalId, { body, attachments: [] });
+
+        // 🆕 Futa cache za list (ili list ijirefresh upya baada ya reply)
+        Object.keys(mailListCache).forEach(k => delete mailListCache[k]);
+
+        // 🆕 Futa cache ya detail (ili attendance mpya ionekane)
+        if (window.mailCache && window.mailCache[originalId]) {
+            delete window.mailCache[originalId];
+        }
+
         modernToast('✅ Sent', 'Reply sent successfully!', 'success');
         document.getElementById('replyMailModal').remove();
         loadMailBadges();
@@ -5823,162 +6187,10 @@ async function submitReply(originalId) {
         btn.innerHTML = originalBtn; btn.disabled = false;
     }
 }
-// ================================================================
-// 🆕 OPEN ATTEND MODAL — Kisasa Zenye Preview ya Chain
-// ================================================================
-async function openAttendModal(mailId) {
-    let modal = document.getElementById('attendMailModal');
-    if (modal) modal.remove();
-    
-    let msg = window.mailCache && window.mailCache[mailId] ? window.mailCache[mailId] : null;
-    
-    document.body.insertAdjacentHTML('beforeend', `
-        <div class="modal-overlay show" id="attendMailModal" style="z-index: 12000;">
-            <div class="modal-box" style="max-width: 600px; padding: 0; overflow: hidden; border-radius: 16px; display: flex; flex-direction: column; max-height: 92vh;">
-                
-                <div style="background: linear-gradient(135deg, #0a1929, #0f2942); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-bottom: 3px solid var(--green);">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 44px; height: 44px; background: rgba(46,204,113,0.2); border: 1.5px solid var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;">
-                            ✅
-                        </div>
-                        <div>
-                            <h3 style="margin: 0; font-size: 17px; font-weight: 800;">Attend & Assign</h3>
-                            <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px;">
-                                ${msg ? esc(msg.subject || '(No Subject)') : 'Message'}
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="document.getElementById('attendMailModal').remove()" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; flex-shrink: 0;">✕</button>
-                </div>
-                
-                <div style="padding: 22px 24px; background: var(--gray-50); overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px;">
-                    
-                    ${msg && msg.receiverName ? `
-                        <div style="padding: 10px 14px; background: white; border: 1.5px solid var(--gray-200); border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 12px;">
-                            <span style="font-weight: 800; color: var(--gray-500); text-transform: uppercase; font-size: 10px; letter-spacing: 0.8px;">Current:</span>
-                            <span style="font-weight: 700; color: var(--primary-dark);">${esc(msg.receiverName)}</span>
-                        </div>
-                    ` : ''}
-                    
-                    <div>
-                        <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
-                            💬 Your Comment / Action Taken <span style="color: var(--red);">*</span>
-                        </label>
-                        <textarea id="attendComment" rows="4" placeholder="E.g., Malipo yamefanyika..." style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 13.5px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; line-height: 1.6;"></textarea>
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; font-size: 11px; font-weight: 800; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">
-                            ➡️ Forward to Next Person (Optional)
-                        </label>
-                        <select id="attendAssignTo" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 13.5px; font-family: inherit; outline: none; background: white; cursor: pointer;">
-                            <option value="">-- No assignment, just comment --</option>
-                        </select>
-                    </div>
-                    
-                </div>
-                
-                <div style="padding: 16px 24px; background: white; border-top: 1.5px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;">
-                    <button onclick="document.getElementById('attendMailModal').remove()" style="padding: 10px 22px; background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit;">Cancel</button>
-                    <button id="attendSubmitBtn" onclick="submitAttend('${mailId}')" style="padding: 10px 24px; background: linear-gradient(135deg, var(--green), var(--primary)); color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(46,204,113,0.3); display: inline-flex; align-items: center; gap: 6px;">✅ Submit Action</button>
-                </div>
-            </div>
-        </div>
-    `);
 
-    // Load users kwa dropdown
-    const select = document.getElementById('attendAssignTo');
-    try {
-        let users = allMailUsers;
-        if (!users || users.length === 0) {
-            users = await API.getUsers();
-            const curUser = Auth.getUser();
-            allMailUsers = (users || []).filter(u => u.id !== curUser.userId && u.role !== 'SuperAdmin');
-        }
-        allMailUsers.forEach(u => {
-            select.insertAdjacentHTML('beforeend', `<option value="${u.id}">${esc(u.fullName)} • ${esc(u.role || u.department || 'User')}</option>`);
-        });
-    } catch (err) { console.warn(err); }
-}
 // ================================================================
 // 🆕 SUBMIT ATTEND — Inatuma comment + assign
 // ================================================================
-async function submitAttend(mailId) {
-    const commentInput = document.getElementById('attendComment');
-    const comment = (commentInput?.value || '').trim();
-    const assignToVal = document.getElementById('attendAssignTo')?.value;
-    const assignTo = assignToVal ? [parseInt(assignToVal)] : [];
-    const btn = document.getElementById('attendSubmitBtn');
-
-    // Validation
-    if (!comment && assignTo.length === 0) {
-        modernToast('Required', 'Please write a comment or assign to someone.', 'warning');
-        commentInput?.focus();
-        return;
-    }
-
-    if (!comment) {
-        modernToast('Required', 'Please write a comment describing your action.', 'warning');
-        commentInput?.focus();
-        return;
-    }
-
-    // Disable button
-    const originalHtml = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '⏳ Processing...';
-    btn.style.opacity = '0.7';
-    btn.style.cursor = 'not-allowed';
-
-    try {
-        // Tuma kwa API
-        await API.attendMail(mailId, { comment, assignTo });
-
-        // Success
-        modernToast('✅ Success', 
-            assignTo.length > 0 
-                ? 'Comment added and mail forwarded.' 
-                : 'Comment added to workflow.', 
-            'success'
-        );
-
-        // Funga modal
-        document.getElementById('attendMailModal')?.remove();
-
-        // Clear cache ili tupate data mpya
-        if (window.mailCache && window.mailCache[mailId]) {
-            delete window.mailCache[mailId];
-        }
-
-        // Reload detail view
-        await viewMailDetail(mailId);
-
-        // Reload badges na list
-        loadMailBadges();
-        if (currentMailBoxType) {
-            loadMailboxMessages(currentMailBoxType);
-        }
-
-    } catch (err) {
-        console.error('Attend error:', err);
-        modernToast('Failed', err.message || 'Could not submit action.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-        btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-    }
-}
-async function closeCurrentMail() {
-    if (!currentMailId) return;
-    const res = await modernConfirm({ title: '🔒 Close Workflow?', message: 'This will mark the workflow as complete.', type: 'warning', okText: '🔒 Close', cancelText: 'Cancel' });
-    if (!res.confirmed) return;
-    try {
-        await API.closeMail(currentMailId, { comment: 'Closed via dashboard' });
-        modernToast('✅ Closed', 'Mail workflow closed.', 'success');
-        viewMailDetail(currentMailId);
-        loadMailBadges();
-    } catch (err) { modernToast('Error', err.message, 'error'); }
-}
 
 // ================= 9. STAR, ARCHIVE, DELETE =================
 async function toggleStarCurrentMail() {
@@ -6145,91 +6357,93 @@ async function saveMailDraft() {
         modernToast('Error', err.message, 'error');
     }
 }
-// ================================================================
-// 🆕 RENDER WORKFLOW CHAIN — Timeline ya Wima Yenye Rangi
-// ================================================================
+// ================= 9. RENDER WORKFLOW CHAIN (CEO VERSION - NEW STYLE) =================
+
 function renderWorkflowChain(msg) {
-    // Kama hakuna attendance, onyesha empty state
     const attendance = msg.attendance || [];
     
     if (attendance.length === 0) {
         return `
-            <div class="premium-timeline-v2-empty">
-                <span class="icon">📭</span>
-                <div class="title">No Workflow History</div>
-                <div class="desc">Actions taken on this mail will appear here.</div>
-            </div>
-        `;
+            <div class="md-tl-empty">
+                <div class="md-tl-empty-icon">📭</div>
+                <div class="md-tl-empty-title">No Workflow Yet</div>
+                <div class="md-tl-empty-desc">Actions will appear here.</div>
+            </div>`;
     }
 
-    // Chuja na panga kwa tarehe (zamani → mpya)
     const sorted = [...attendance].sort((a, b) => 
         new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
     );
 
-    // Tengeneza kila item
-    const itemsHtml = sorted.map((att, index) => {
-        const action = (att.action || 'attended').toLowerCase();
-        const icon = getActionIcon(action);
-        const actionLabel = getActionLabel(action);
-        const userName = att.userName || 'System';
-        const userRole = att.userRole || att.role || '';
-        const initials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-        const timeStr = formatTimeAgo(att.createdAt);
-        
-        // Comment (kama ipo)
-        const commentHtml = att.comment 
-            ? `<div class="tl-comment">${esc(att.comment)}</div>` 
-            : '';
-        
-        // Assigned to (kama ipo)
-        let assignedHtml = '';
-        if (att.assignedTo && att.assignedTo.length > 0) {
-            const names = att.assignedNames && att.assignedNames.length > 0
-                ? att.assignedNames
-                : ['Unknown User'];
-            assignedHtml = `
-                <div class="tl-assigned-to">
-                    <span class="arrow">➡️</span>
-                    <span>Assigned to: <strong>${names.map(n => esc(n)).join(', ')}</strong></span>
-                </div>
-            `;
-        } else if (att.assignedToName) {
-            assignedHtml = `
-                <div class="tl-assigned-to">
-                    <span class="arrow">➡️</span>
-                    <span>Assigned to: <strong>${esc(att.assignedToName)}</strong></span>
-                </div>
-            `;
-        }
-        
-        return `
-            <div class="tl-item ${action}">
-                <div class="tl-icon">${icon}</div>
-                <div class="tl-card">
-                    <div class="tl-header">
-                        <div class="tl-user">
-                            <div class="tl-avatar">${initials}</div>
-                            <div>
-                                <div class="tl-username">${esc(userName)}</div>
-                                ${userRole ? `<div class="tl-role">${esc(userRole)}</div>` : ''}
+    return `
+        <div class="md-timeline">
+            ${sorted.map((att) => {
+                const action = (att.action || 'attended').toLowerCase();
+                const userName = att.userName || 'System';
+                const userRole = att.userRole || att.role || 'User';
+                const initials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const timeStr = formatTimeAgo(att.createdAt);
+                
+                // Determine action class
+                let actionClass = 'attended';
+                let actionLabel = 'Attended';
+                if (action.includes('created') || action === 'send') { 
+                    actionClass = 'created'; actionLabel = 'Created'; 
+                } else if (action.includes('assign')) { 
+                    actionClass = 'assigned'; actionLabel = 'Assigned'; 
+                } else if (action.includes('close')) { 
+                    actionClass = 'closed'; actionLabel = 'Closed'; 
+                }
+
+                // Assigned To
+                let assignHtml = '';
+                if (att.assignedTo && att.assignedTo.length > 0) {
+                    const names = att.assignedNames && att.assignedNames.length > 0 
+                        ? att.assignedNames : ['Unknown'];
+                    assignHtml = `
+                        <div class="md-tl-assign-pill">
+                            ➡️ Assigned to: <strong>${names.map(n => esc(n)).join(', ')}</strong>
+                        </div>`;
+                }
+
+                // Attachments
+                let attHtml = '';
+                if (att.attachments && att.attachments.length > 0) {
+                    attHtml = `<div class="md-tl-attachments">`;
+                    att.attachments.forEach(file => {
+                        attHtml += `
+                            <button onclick="downloadMailAttachment('${file.data}', '${esc(file.name)}')" class="md-tl-attach-btn">
+                                📎 ${esc(file.name)}
+                            </button>`;
+                    });
+                    attHtml += `</div>`;
+                }
+
+                return `
+                    <div class="md-tl-item ${actionClass}">
+                        <div class="md-tl-header">
+                            <div class="md-tl-user-block">
+                                <div class="md-tl-avatar">${initials}</div>
+                                <div class="md-tl-user-info">
+                                    <div class="md-tl-name">${esc(userName)}</div>
+                                    <div class="md-tl-role">${esc(userRole)}</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="md-tl-action-badge ${actionClass}">${actionLabel}</div>
+                                <div class="md-tl-time">${timeStr}</div>
                             </div>
                         </div>
-                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                            <span class="tl-action-badge">${icon} ${actionLabel}</span>
-                            <span class="tl-time">${timeStr}</span>
-                        </div>
+
+                        ${att.comment ? `<div class="md-tl-comment">${esc(att.comment)}</div>` : ''}
+                        ${assignHtml}
+                        ${attHtml}
                     </div>
-                    ${commentHtml}
-                    ${assignedHtml}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    return `<div class="premium-timeline-v2">${itemsHtml}</div>`;
+                `;
+            }).join('')}
+        </div>
+    `;
 }
-
 // ================================================================
 // 🆕 HELPERS: Icon, Label, Time
 // ================================================================
@@ -6258,7 +6472,6 @@ function getActionLabel(action) {
     };
     return map[action] || 'Action';
 }
-
 function formatTimeAgo(dateStr) {
     if (!dateStr) return '—';
     const date = new Date(dateStr);
@@ -6275,13 +6488,8 @@ function formatTimeAgo(dateStr) {
     if (diffHr < 24) return `${diffHr}h ago`;
     if (diffDay < 7) return `${diffDay}d ago`;
     
-    return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    });
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
-
 // ================================================================
 // 🆕 CURRENT HANDLER — Nani Anashikilia Mail Sasa
 // ================================================================
@@ -6314,4 +6522,1557 @@ function renderCurrentHandlerPill(msg) {
             <span>📌 Currently with: <strong>${esc(handler.name)}</strong></span>
         </div>
     `;
+}
+// ================================================================
+// CEO REPORTS — LIVE DATA LOGIC (ENGLISH)
+// ================================================================
+
+let liveTrendChart = null;
+let liveStatusChart = null;
+let liveStockChart = null;
+let liveFinanceChart = null;
+
+// 1. Sub-tab Switching
+function switchReportSubTab(subtab, btn) {
+    document.querySelectorAll('.rep-subtab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.rep-subtab-btn').forEach(b => b.classList.remove('active'));
+
+    document.getElementById(`rep-subtab-${subtab}`).classList.add('active');
+    if (btn) btn.classList.add('active');
+
+    // 🆕 Load data when switching sub-tabs
+    if (subtab === 'submitted') {
+        loadSubmittedReports();
+    }
+    if (subtab === 'live') {
+        // Optional: auto-generate live report if empty
+        const kpiGrid = document.getElementById('liveReportKPIGrid');
+        if (kpiGrid && kpiGrid.querySelector('div[style*="dashed"]')) {
+            loadLiveReport();
+        }
+    }
+     if (subtab === 'aggregated') {
+        loadAggregatedReports();
+    }
+}
+// 2. Toggle Custom Date Range
+function toggleLiveCustomDate() {
+    const val = document.getElementById('liveReportPeriod').value;
+    const div = document.getElementById('liveCustomDateRange');
+    if (val === 'custom') {
+        div.style.display = 'flex';
+    } else {
+        div.style.display = 'none';
+    }
+}
+
+// 3. Get Date Range based on Period
+function getLiveDateRange() {
+    const period = document.getElementById('liveReportPeriod').value;
+    const now = new Date();
+    let start = new Date();
+    let end = new Date();
+
+    end.setHours(23, 59, 59, 999);
+
+    if (period === 'today') {
+        start.setHours(0, 0, 0, 0);
+    } else if (period === 'this-week') {
+        const day = now.getDay() || 7; 
+        if (day !== 1) start.setHours(-24 * (day - 1));
+        start.setHours(0,0,0,0);
+    } else if (period === 'this-month') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (period === 'last-month') {
+        start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    } else if (period === 'this-quarter') {
+        const q = Math.floor(now.getMonth() / 3) * 3;
+        start = new Date(now.getFullYear(), q, 1);
+    } else if (period === 'this-year') {
+        start = new Date(now.getFullYear(), 0, 1);
+    } else if (period === 'custom') {
+        const fromVal = document.getElementById('liveDateFrom').value;
+        const toVal = document.getElementById('liveDateTo').value;
+        if (!fromVal || !toVal) {
+            showToast('Please select both start and end dates.', 'warning');
+            return null;
+        }
+        start = new Date(fromVal);
+        end = new Date(toVal);
+        end.setHours(23, 59, 59, 999);
+    }
+
+    return { start, end };
+}
+
+// 4. MAIN FUNCTION: Generate Live Report
+async function loadLiveReport() {
+    const dept = document.getElementById('liveReportDept').value;
+    const range = getLiveDateRange();
+    if (!range) return;
+
+    const { start, end } = range;
+
+    // Update Header UI
+    const startStr = start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const endStr = end.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    document.getElementById('liveReportPeriodLabel').textContent = `${startStr} - ${endStr}`;
+    document.getElementById('liveReportGeneratedAt').textContent = new Date().toLocaleString('en-GB');
+
+    // Show loading state
+    const kpiGrid = document.getElementById('liveReportKPIGrid');
+    kpiGrid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--primary); grid-column:1/-1; background:white; border-radius:12px;"><div style="font-size:30px; margin-bottom:10px;" class="spin">⏳</div><div style="font-weight:800;">Analyzing data...</div></div>';
+    
+    document.getElementById('liveReportNarrativeWrap').style.display = 'none';
+    document.getElementById('liveReportTableWrap').style.display = 'none';
+    document.getElementById('liveReportChartsWrap').style.display = 'none';
+
+    try {
+        // Fetch all data concurrently
+        const results = await Promise.allSettled([
+            (dept === 'all' || dept === 'Production') ? API.getProductionSummary({ startDate: start.toISOString(), endDate: end.toISOString() }).catch(() => null) : Promise.resolve(null),
+            (dept === 'all' || dept === 'Sales') ? API.getOrders().catch(() => []) : Promise.resolve([]),
+            (dept === 'all' || dept === 'Finance') ? API.getCompanyPayments().catch(() => []) : Promise.resolve([]),
+            (dept === 'all' || dept === 'Procurement') ? API.getProcurementRequests('/all').catch(() => []) : Promise.resolve([])
+        ]);
+
+        const productionData = results[0].status === 'fulfilled' ? results[0].value : null;
+        const ordersData = results[1].status === 'fulfilled' ? results[1].value : [];
+        const paymentsData = results[2].status === 'fulfilled' ? results[2].value : [];
+        const procRequestsData = results[3].status === 'fulfilled' ? results[3].value : [];
+
+        // Filter data by date
+        const filterByDate = (arr, dateField) => {
+            return (arr || []).filter(item => {
+                const d = item[dateField];
+                if (!d) return false;
+                const dt = new Date(d);
+                return dt >= start && dt <= end;
+            });
+        };
+
+        const myOrders = filterByDate(ordersData, 'createdAt');
+        const myPayments = filterByDate(paymentsData, 'createdAt');
+        const myProc = filterByDate(procRequestsData, 'created_at');
+
+        // === CALCULATE METRICS ===
+        let metrics = {
+            revenue: 0,
+            expenses: 0,
+            netProfit: 0,
+            staffCount: 0,
+            ordersCount: myOrders.length,
+            procCount: myProc.length,
+            prodCount: productionData?.totals?.totalProduced || 0
+        };
+
+        // Sales Revenue (Paid + Delivered)
+        myOrders.forEach(o => {
+            if (['paid', 'delivered', 'completed'].includes(o.status)) {
+                metrics.revenue += Number(o.totalAmount || 0);
+            }
+        });
+
+        // Finance Expenses (Paid)
+        myPayments.forEach(p => {
+            if (p.status === 'paid') {
+                metrics.expenses += Number(p.amount || 0);
+            }
+        });
+
+        metrics.netProfit = metrics.revenue - metrics.expenses;
+        
+        try {
+            const users = await API.getUsers().catch(()=>[]);
+            metrics.staffCount = users.length;
+        } catch(e) {}
+
+        // === 1. RENDER KPI CARDS ===
+        kpiGrid.innerHTML = `
+            <div class="stat-card" style="border-left:4px solid var(--primary);">
+                <div class="stat-icon">💰</div>
+                <div class="stat-number" style="color:var(--primary);">TSh ${metrics.revenue.toLocaleString()}</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card" style="border-left:4px solid var(--red);">
+                <div class="stat-icon">💸</div>
+                <div class="stat-number" style="color:var(--red);">TSh ${metrics.expenses.toLocaleString()}</div>
+                <div class="stat-label">Total Expenses</div>
+            </div>
+            <div class="stat-card" style="border-left:4px solid ${metrics.netProfit >= 0 ? 'var(--green)' : 'var(--red)'};">
+                <div class="stat-icon">📈</div>
+                <div class="stat-number" style="color:${metrics.netProfit >= 0 ? 'var(--green)' : 'var(--red)'};">TSh ${metrics.netProfit.toLocaleString()}</div>
+                <div class="stat-label">Net Profit</div>
+            </div>
+            <div class="stat-card" style="border-left:4px solid var(--gold);">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number" style="color:var(--primary-dark);">${metrics.staffCount}</div>
+                <div class="stat-label">Total Staff</div>
+            </div>
+        `;
+
+        // === 2. RENDER NARRATIVE ===
+        let narrative = `During the period from <strong>${startStr} to ${endStr}</strong>, the company performed well. `;
+        if (metrics.revenue > 0 || metrics.expenses > 0) {
+            narrative += `Total revenue collected was <strong>TSh ${metrics.revenue.toLocaleString()}</strong>, while expenses amounted to <strong>TSh ${metrics.expenses.toLocaleString()}</strong>. Thus, net profit is <strong>TSh ${metrics.netProfit.toLocaleString()}</strong>. `;
+        }
+        
+        if (dept === 'all' || dept === 'Sales') {
+            narrative += `The Sales department received ${metrics.ordersCount} orders, `;
+            const paidOrders = myOrders.filter(o => o.status === 'paid').length;
+            narrative += `of which ${paidOrders} were paid. `;
+        }
+
+        if ((dept === 'all' || dept === 'Production') && productionData) {
+            narrative += `The Production department produced ${metrics.prodCount.toLocaleString()} units, with a waste rate of ${productionData.totals.wastePercent}%. `;
+        }
+
+        if (dept === 'all' || dept === 'Procurement') {
+            narrative += `The Procurement department handled ${metrics.procCount} requests.`;
+        }
+
+        document.getElementById('liveReportNarrative').innerHTML = narrative;
+        document.getElementById('liveReportNarrativeWrap').style.display = 'block';
+
+        // === 3. RENDER SUMMARY TABLE ===
+        let tableHtml = '';
+        
+        if ((dept === 'all' || dept === 'Sales') && myOrders.length > 0) {
+            tableHtml += `
+                <tr style="border-bottom:1px solid var(--gray-100);">
+                    <td style="padding:14px 18px;"><strong>🛒 Sales Orders</strong></td>
+                    <td style="padding:14px 18px; text-align:center;">${myOrders.length}</td>
+                    <td style="padding:14px 18px; text-align:right; font-weight:800; color:var(--primary);">TSh ${metrics.revenue.toLocaleString()}</td>
+                    <td style="padding:14px 18px; font-size:11px; color:var(--gray-500);">${myOrders.filter(o=>o.status==='paid').length} Paid, ${myOrders.filter(o=>o.status==='pending').length} Pending</td>
+                </tr>`;
+        }
+
+        if ((dept === 'all' || dept === 'Production') && productionData) {
+            tableHtml += `
+                <tr style="border-bottom:1px solid var(--gray-100);">
+                    <td style="padding:14px 18px;"><strong>🏭 Production</strong></td>
+                    <td style="padding:14px 18px; text-align:center;">${productionData.totals.totalBatches}</td>
+                    <td style="padding:14px 18px; text-align:right; font-weight:800; color:var(--primary);">${metrics.prodCount.toLocaleString()} units</td>
+                    <td style="padding:14px 18px; font-size:11px; color:var(--gray-500);">${productionData.totals.wastePercent}% Waste, ${productionData.totals.totalReleased} Released</td>
+                </tr>`;
+        }
+
+        if ((dept === 'all' || dept === 'Finance') && myPayments.length > 0) {
+            tableHtml += `
+                <tr style="border-bottom:1px solid var(--gray-100);">
+                    <td style="padding:14px 18px;"><strong>💰 Finance</strong></td>
+                    <td style="padding:14px 18px; text-align:center;">${myPayments.length}</td>
+                    <td style="padding:14px 18px; text-align:right; font-weight:800; color:var(--red);">TSh ${metrics.expenses.toLocaleString()}</td>
+                    <td style="padding:14px 18px; font-size:11px; color:var(--gray-500);">${myPayments.filter(p=>p.status==='paid').length} Paid, ${myPayments.filter(p=>p.status==='pending-ceo').length} Pending CEO</td>
+                </tr>`;
+        }
+
+        if ((dept === 'all' || dept === 'Procurement') && myProc.length > 0) {
+            tableHtml += `
+                <tr style="border-bottom:1px solid var(--gray-100);">
+                    <td style="padding:14px 18px;"><strong>📋 Procurement</strong></td>
+                    <td style="padding:14px 18px; text-align:center;">${myProc.length}</td>
+                    <td style="padding:14px 18px; text-align:right; font-weight:800; color:var(--primary);">TSh ${myProc.reduce((s,p)=>s+Number(p.total_amount||0), 0).toLocaleString()}</td>
+                    <td style="padding:14px 18px; font-size:11px; color:var(--gray-500);">${myProc.filter(r=>r.status==='pending-ceo').length} Pending CEO</td>
+                </tr>`;
+        }
+
+        if (!tableHtml) {
+            tableHtml = '<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray-400);">No data found for this period.</td></tr>';
+        }
+
+        document.getElementById('liveReportSummaryTable').innerHTML = tableHtml;
+        document.getElementById('liveReportTableWrap').style.display = 'block';
+
+        // === 4. RENDER CHARTS ===
+        document.getElementById('liveReportChartsWrap').style.display = 'grid';
+        renderLiveCharts(metrics, myOrders, myPayments, productionData, myProc);
+
+    } catch (err) {
+        console.error('Live Report error:', err);
+        kpiGrid.innerHTML = `<div style="text-align:center; padding:40px; color:var(--red); grid-column:1/-1; background:white; border-radius:12px;">❌ Error: ${err.message}</div>`;
+    }
+}
+
+// 5. RENDER CHARTS FUNCTION
+function renderLiveCharts(metrics, orders, payments, prodData, procData) {
+    // A. Trend Chart
+    const ctxTrend = document.getElementById('liveReportTrendChart');
+    if (ctxTrend) {
+        if (liveTrendChart) liveTrendChart.destroy();
+        const last7Days = [...Array(7)].map((_, i) => {
+            const d = new Date(); d.setDate(d.getDate() - (6 - i));
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        });
+        const counts = last7Days.map(dateStr => {
+            return orders.filter(o => {
+                if (!o.createdAt) return false;
+                const oDate = new Date(o.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                return oDate === dateStr;
+            }).length;
+        });
+
+        liveTrendChart = new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: last7Days,
+                datasets: [{
+                    label: 'Orders',
+                    data: counts,
+                    borderColor: '#1a7f5a',
+                    backgroundColor: 'rgba(26,127,90,0.1)',
+                    tension: 0.4, fill: true, pointBackgroundColor: '#1a7f5a'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // B. Status Chart
+    const ctxStatus = document.getElementById('liveReportStatusChart');
+    if (ctxStatus) {
+        if (liveStatusChart) liveStatusChart.destroy();
+        const pending = orders.filter(o => o.status === 'pending').length;
+        const paid = orders.filter(o => o.status === 'paid').length;
+        const delivered = orders.filter(o => o.status === 'delivered' || o.status === 'completed').length;
+        const rejected = orders.filter(o => o.status === 'rejected').length;
+
+        liveStatusChart = new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Paid', 'Delivered', 'Rejected'],
+                datasets: [{
+                    data: [pending, paid, delivered, rejected],
+                    backgroundColor: ['#f59e0b', '#22c55e', '#3b82f6', '#ef4444'],
+                    borderWidth: 3, borderColor: '#fff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+        });
+    }
+
+    // C. Stock Chart
+    const ctxStock = document.getElementById('liveReportStockChart');
+    if (ctxStock) {
+        if (liveStockChart) liveStockChart.destroy();
+        let good = 0, damaged = 0;
+        if (prodData && prodData.totals) {
+            good = prodData.totals.totalProduced - prodData.totals.totalDamaged;
+            damaged = prodData.totals.totalDamaged;
+        }
+        liveStockChart = new Chart(ctxStock, {
+            type: 'bar',
+            data: {
+                labels: ['Good Units', 'Damaged'],
+                datasets: [{
+                    data: [good, damaged],
+                    backgroundColor: ['#22c55e', '#ef4444'],
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // D. Finance Chart
+    const ctxFin = document.getElementById('liveReportFinanceChart');
+    if (ctxFin) {
+        if (liveFinanceChart) liveFinanceChart.destroy();
+        const paid = payments.filter(p => p.status === 'paid').length;
+        const pending = payments.filter(p => p.status.includes('pending')).length;
+        
+        liveFinanceChart = new Chart(ctxFin, {
+            type: 'doughnut',
+            data: {
+                labels: ['Paid Expenses', 'Pending Payments'],
+                datasets: [{
+                    data: [paid, pending],
+                    backgroundColor: ['#16a34a', '#f59e0b'],
+                    borderWidth: 3, borderColor: '#fff'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+        });
+    }
+}
+
+// 6. PRINT LIVE REPORT
+function printLiveReport() {
+    const header = document.getElementById('liveReportPeriodLabel').textContent;
+    if (header === '—') {
+        showToast('Please generate a report first.', 'warning');
+        return;
+    }
+
+    const narrative = document.getElementById('liveReportNarrative').innerHTML;
+    const table = document.getElementById('liveReportTableWrap').innerHTML;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>CEO Live Report</title>
+            <style>
+                body { font-family: 'Inter', Arial, sans-serif; padding: 30px; color: #333; }
+                .header { text-align: center; border-bottom: 3px solid #0f2942; padding-bottom: 15px; margin-bottom: 25px; }
+                .header h1 { margin: 0; font-size: 22px; color: #1a7f5a; }
+                .narrative { background: #f0fdf4; border-left: 4px solid #1a7f5a; padding: 20px; margin-bottom: 25px; font-size: 14px; line-height: 1.8; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 12px; }
+                th { background: #f8fafc; color: #0f2942; }
+                .footer { text-align: center; font-size: 11px; color: #888; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>MAK DC INVESTMENT COMPANY LTD</h1>
+                <p>CEO Live Report — ${header}</p>
+                <p>Generated on ${new Date().toLocaleString()}</p>
+            </div>
+            <div class="narrative">${narrative}</div>
+            <h3>Department Summary</h3>
+            <table>
+                ${table.replace(/<div[^>]*>|<\/div>/g, '')}
+            </table>
+            <div class="footer">
+                This is a computer-generated document. No signature required.<br>
+                MAK DC Investment Company LTD &copy; ${new Date().getFullYear()}
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+}
+// ================================================================
+// CEO REPORTS — SUBMITTED REPORTS (USING DEPARTMENT-REPORTS)
+// ================================================================
+
+async function loadSubmittedReports() {
+    const container = document.getElementById('submittedReportsContainer');
+    const badge = document.getElementById('submittedCountBadge');
+    if (!container) return;
+
+    // Show loading
+    container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--primary); background:white; border-radius:12px;"><div style="font-size:30px; margin-bottom:10px;">⏳</div><div style="font-weight:800;">Fetching department reports...</div></div>';
+
+    try {
+        const dept = document.getElementById('submittedDeptFilter')?.value || '';
+        const status = document.getElementById('submittedStatusFilter')?.value || '';
+
+        // Build query params
+        let query = '';
+        const params = new URLSearchParams();
+        if (dept) params.append('department', dept);
+        if (status) params.append('status', status);
+        if (params.toString()) query = '?' + params.toString();
+
+        // 🆕 USE DEPARTMENT REPORTS API
+        let reports = await API.getDepartmentReports(query).catch(() => []);
+        
+        // Safety check: ensure it's an array
+        if (!Array.isArray(reports)) reports = [];
+
+        badge.textContent = reports.length + ' Reports';
+
+        if (reports.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:var(--gray-400); background:white; border-radius:12px; border:1.5px dashed var(--gray-300);">
+                    <span style="font-size:56px; display:block; margin-bottom:14px; opacity:0.6;">📭</span>
+                    <div style="font-size:16px; font-weight:800; color:var(--gray-600);">No Reports Found</div>
+                    <div style="font-size:13px; margin-top:6px;">Managers haven't submitted any reports yet.</div>
+                </div>`;
+            return;
+        }
+
+        // Render the list
+        container.innerHTML = reports.map(report => {
+            const isUnread = report.status === 'unread';
+            const borderColor = isUnread ? 'var(--gold)' : 'var(--primary)';
+            const statusBg = isUnread ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.15)';
+            const statusColor = isUnread ? '#b45309' : '#15803d';
+            const statusLabel = isUnread ? '🆕 New' : '✅ Reviewed';
+
+            // Use submitted_at or submittedAt depending on API response
+            const dateField = report.submitted_at || report.submittedAt || report.createdAt;
+            const dateStr = dateField ? new Date(dateField).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+
+            // Use report_number or reportNumber depending on API response
+            const reportNum = report.report_number || report.reportNumber || '';
+
+            return `
+                <div style="background:white; border:1.5px solid var(--gray-200); border-left:5px solid ${borderColor}; border-radius:12px; padding:20px 24px; display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; box-shadow: var(--shadow-sm); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    
+                    <div style="flex:1; min-width:250px;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;">
+                            ${reportNum ? `<span style="font-family:monospace; font-weight:900; color:var(--primary); font-size:12px;">${esc(reportNum)}</span>` : ''}
+                            <span style="font-size:10px; font-weight:800; padding:4px 10px; border-radius:10px; background:rgba(26,127,90,0.1); color:var(--primary); text-transform:uppercase;">${esc(report.department || 'General')}</span>
+                            <span style="font-size:10px; font-weight:800; padding:4px 10px; border-radius:10px; background:${statusBg}; color:${statusColor}; text-transform:uppercase;">${statusLabel}</span>
+                        </div>
+                        
+                        <div style="font-size:16px; font-weight:800; color:var(--gray-800); margin-bottom:6px;">${esc(report.title || 'Monthly Report')}</div>
+                        
+                        <div style="font-size:12px; color:var(--gray-500); display:flex; gap:16px; flex-wrap:wrap;">
+                            <span>👤 By: <strong style="color:var(--gray-700);">${esc(report.submitted_by || report.submittedBy || 'Manager')}</strong></span>
+                            <span>📅 Period: <strong style="color:var(--gray-700);">${esc(report.period || '—')}</strong></span>
+                            <span>⏰ Date: <strong style="color:var(--gray-700);">${dateStr}</strong></span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
+                        <button onclick="viewSubmittedReport(${report.id})" style="padding:9px 18px; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; border-radius:8px; font-weight:700; font-family:inherit; font-size:12px; cursor:pointer; box-shadow:0 4px 12px rgba(26,127,90,0.3);">
+                            👁 View Details
+                        </button>
+                        ${isUnread ? `
+                            <button onclick="markReportReviewed(${report.id})" style="padding:9px 18px; background:rgba(34,197,94,0.1); color:#15803d; border:1.5px solid rgba(34,197,94,0.3); border-radius:8px; font-weight:700; font-family:inherit; font-size:12px; cursor:pointer;">
+                                ✅ Mark Reviewed
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error('Load submitted reports error:', err);
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--red); background:white; border-radius:12px;">❌ Failed to load reports: ${esc(err.message)}</div>`;
+    }
+}
+
+async function viewSubmittedReport(id) {
+    // 1. Ficha Sub-tabs (Live Data, Submitted, Aggregated)
+    const subTabs = document.querySelector('.rep-subtab-btn').parentElement;
+    if (subTabs) subTabs.style.display = 'none';
+
+    // 2. Ficha List ya Inbox
+    const inboxContainer = document.getElementById('submittedReportsContainer');
+    if (inboxContainer) inboxContainer.style.display = 'none';
+    
+    // 3. Onyesha Full Page View
+    const page = document.getElementById('fullReportView');
+    if (page) {
+        page.style.display = 'block';
+        // Hakikisha tunabaki kwenye tab ya reports
+        document.getElementById('tab-reports').classList.add('active'); 
+    }
+    
+    // 4. Weka loading
+    document.getElementById('pageReportNarrative').innerHTML = '⏳ Loading report details...';
+
+    try {
+        const allReports = await API.getDepartmentReports().catch(() => []);
+        const report = Array.isArray(allReports) ? allReports.find(r => r.id === id) : null;
+
+        if (!report) throw new Error("Report not found.");
+
+        // Extract data
+        const reportNum = report.report_number || report.reportNumber || '—';
+        const submittedBy = report.submitted_by || report.submittedBy || 'Manager';
+        const deptName = report.department || 'General';
+        const metrics = report.metrics || {};
+        const summaryText = report.summary || 'No summary provided.';
+        const periodText = report.period || '—';
+        const dateField = report.submitted_at || report.submittedAt || report.createdAt;
+        const dateStr = dateField ? new Date(dateField).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+
+        // Jaza Header
+        document.getElementById('pageReportRef').textContent = reportNum;
+        document.getElementById('pageReportDate').textContent = dateStr;
+        document.getElementById('pageReportDept').textContent = deptName;
+        document.getElementById('pageReportBy').textContent = submittedBy;
+        document.getElementById('pageReportTitle').textContent = report.title;
+        document.getElementById('pageReportSignature').textContent = submittedBy;
+
+        // Jaza Narrative
+        document.getElementById('pageReportNarrative').innerHTML = `"${esc(summaryText)}"`;
+
+        // Jaza Metrics
+        let metricsHtml = '';
+        if (Object.keys(metrics).length > 0) {
+            metricsHtml = Object.entries(metrics).map(([key, val]) => `
+                <div style="background: white; padding: 24px; border-radius: 12px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; overflow: hidden;">
+                    <div style="position: absolute; right: -10px; top: -10px; font-size: 80px; opacity: 0.03;">📊</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 1;">${esc(key)}</div>
+                    <div style="font-size: 32px; font-weight: 900; color: #0f172a; margin-top: 8px; position: relative; z-index: 1;">${typeof val === 'number' ? val.toLocaleString() : esc(val)}</div>
+                </div>
+            `).join('');
+        } else {
+            metricsHtml = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 20px;">No metrics provided for this report.</div>`;
+        }
+        document.getElementById('pageReportMetrics').innerHTML = metricsHtml;
+
+    } catch (err) {
+        document.getElementById('pageReportNarrative').innerHTML = `<span style="color: #dc2626;">⚠ Failed to load report details: ${esc(err.message)}</span>`;
+    }
+}
+
+function closeFullReportView() {
+    // Ficha Page
+    const page = document.getElementById('fullReportView');
+    if (page) page.style.display = 'none';
+
+    // Rudisha Sub-tabs
+    const subTabs = document.querySelector('.rep-subtab-btn').parentElement;
+    if (subTabs) subTabs.style.display = 'flex';
+
+    // Rudisha Inbox
+    const inboxContainer = document.getElementById('submittedReportsContainer');
+    if (inboxContainer) inboxContainer.style.display = 'block';
+}
+// ================================================================
+// MARK REPORT AS REVIEWED
+// ================================================================
+async function markReportReviewed(id) {
+    try {
+        await API.reviewDepartmentReport(id, { ceo_notes: 'Reviewed by CEO' });
+        showToast('✅ Report marked as reviewed.', 'success');
+        loadSubmittedReports();
+    } catch (err) {
+        showToast('Failed to mark report: ' + err.message, 'error');
+    }
+}
+// ================================================================
+// 🆕 LOAD AGGREGATED REPORTS (FIXED)
+// ================================================================
+async function loadAggregatedReports() {
+    const container = document.getElementById('aggregatedReportsList');
+
+    // 1. Hakikisha container ipo
+    if (!container) {
+        console.error('❌ Kosa: Element yenye ID "aggregatedReportsList" haipo kwenye HTML!');
+        return;
+    }
+
+    // 2. Onyesha loading state
+    container.innerHTML = `
+        <div style="text-align:center; padding:40px; color:var(--gray-400); background:white; border-radius:12px;">
+            <div style="font-size:30px; margin-bottom:10px;">⏳</div>
+            <div style="font-weight:800;">Fetching reports...</div>
+        </div>`;
+
+    try {
+        // 3. Vuta data (BILA .catch() ya kuficha kosa)
+        console.log('🔄 Inajaribu kuvuta aggregated reports...');
+        const reports = await API.getAggregatedReports();
+        console.log('✅ Data imefika:', reports);
+
+        // 4. Kama hakuna data
+        if (!reports || !Array.isArray(reports) || reports.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; color:var(--gray-400); background:white; border-radius:12px; border:1.5px dashed var(--gray-300);">
+                    <span style="font-size:56px; display:block; margin-bottom:14px; opacity:0.6;">📭</span>
+                    <div style="font-size:16px; font-weight:800; color:var(--gray-600);">No Aggregated Reports Yet</div>
+                    <div style="font-size:13px; margin-top:6px;">Click "Create New Aggregation" to combine reports.</div>
+                </div>`;
+            return;
+        }
+
+        // 5. Render kila report
+        container.innerHTML = reports.map(r => {
+            const dateStr = new Date(r.createdAt || Date.now()).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+
+            // Hakikisha sourceReportIds ni array
+            const sourceCount = Array.isArray(r.sourceReportIds) ? r.sourceReportIds.length : 0;
+
+            // Rangi za status
+            const isPublished = r.status === 'published';
+            const statusBg = isPublished ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)';
+            const statusColor = isPublished ? '#15803d' : '#b45309';
+
+            return `
+                <div style="background:white; border:1.5px solid var(--gray-200); border-left:5px solid var(--primary); border-radius:12px; padding:20px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; box-shadow: var(--shadow-sm);">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
+                            <span style="font-size:10px; font-weight:800; padding:4px 10px; border-radius:10px; background:rgba(26,127,90,0.1); color:var(--primary); text-transform:uppercase;">
+                                ${esc(r.period || 'N/A')}
+                            </span>
+                            <span style="font-size:10px; font-weight:800; padding:4px 10px; border-radius:10px; background:${statusBg}; color:${statusColor}; text-transform:uppercase;">
+                                ${esc(r.status || 'draft')}
+                            </span>
+                        </div>
+                        <div style="font-size:16px; font-weight:800; color:var(--gray-800);">
+                            ${esc(r.title || 'Untitled Report')}
+                        </div>
+                        <div style="font-size:12px; color:var(--gray-500); margin-top:4px;">
+                            📅 Created: ${dateStr} • 📄 ${sourceCount} Source Reports
+                        </div>
+                    </div>
+                    <button onclick="viewAggregatedReport(${r.id})" style="padding:9px 18px; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; border-radius:8px; font-weight:700; font-family:inherit; font-size:12px; cursor:pointer;">
+                        👁 View Report
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error('❌ Load aggregated error:', err);
+        container.innerHTML = `
+            <div style="text-align:center; padding:40px 20px; color:#dc2626; background:#fef2f2; border:1.5px solid #fecaca; border-radius:12px;">
+                <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
+                <div style="font-size:15px; font-weight:800; margin-bottom:6px;">Imeshindwa kupata ripoti</div>
+                <div style="font-size:13px; color:#991b1b;">${esc(err.message || 'Hitilafu isiyojulikana')}</div>
+                <div style="font-size:11px; color:#b91c1c; margin-top:8px;">Angalia Console (F12) kwa maelezo zaidi.</div>
+            </div>`;
+    }
+}
+async function openCreateAggregationModal() {
+    let modal = document.getElementById('createAggregationModal');
+    if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="modal-overlay" id="createAggregationModal" style="z-index: 10000;">
+                <div class="modal-box" style="max-width: 700px; padding: 0; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column; border-radius: 16px;">
+                    
+                    <div style="background:linear-gradient(135deg, var(--primary-dark), var(--primary)); padding: 20px 24px; color:white; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                        <div>
+                            <h3 style="font-size:18px; font-weight:800; margin:0;">➕ Create Aggregated Report</h3>
+                            <p style="font-size:12px; color:rgba(255,255,255,0.8); margin:4px 0 0;">Combine reports and add CEO analysis.</p>
+                        </div>
+                        <button onclick="closeModal('createAggregationModal')" style="background:rgba(255,255,255,0.2); border:none; color:white; width:34px; height:34px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
+                    </div>
+
+                    <div style="padding: 24px; overflow-y: auto; flex: 1; background: #f8fafc;">
+                        <div id="aggStatus" class="status-msg" style="display:none;"></div>
+                        
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">Report Title *</label>
+                            <input type="text" id="aggTitle" placeholder="e.g., Q3 2026 Company Performance" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:8px; margin-top:6px; font-family:inherit; outline:none;">
+                        </div>
+
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">Period *</label>
+                            <input type="text" id="aggPeriod" placeholder="e.g., Q3 2026" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:8px; margin-top:6px; font-family:inherit; outline:none;">
+                        </div>
+
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block; margin-bottom:8px;">Select Reports to Include *</label>
+                            <div id="aggReportSelector" style="max-height:200px; overflow-y:auto; border:1.5px solid #e2e8f0; border-radius:8px; background:white; padding:8px;">
+                                <div style="text-align:center; padding:20px; color:#94a3b8;">Loading available reports...</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">CEO Analysis / Summary</label>
+                            <textarea id="aggAnalysis" placeholder="Write your analysis here..." style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:8px; margin-top:6px; font-family:inherit; min-height:100px; resize:vertical; outline:none;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom:24px;">
+                            <label style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase;">Recommendations</label>
+                            <textarea id="aggRecommendations" placeholder="Action points for management..." style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:8px; margin-top:6px; font-family:inherit; min-height:80px; resize:vertical; outline:none;"></textarea>
+                        </div>
+
+                        <button onclick="submitAggregatedReport()" id="aggSubmitBtn" style="width:100%; padding:14px; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; border-radius:8px; font-weight:800; font-family:inherit; font-size:14px; cursor:pointer;">
+                            ✅ Create Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+        modal = document.getElementById('createAggregationModal');
+    }
+
+    // Clear form
+    document.getElementById('aggTitle').value = '';
+    document.getElementById('aggPeriod').value = '';
+    document.getElementById('aggAnalysis').value = '';
+    document.getElementById('aggRecommendations').value = '';
+    
+    // Load available reports
+    const selector = document.getElementById('aggReportSelector');
+    const allReports = await API.getDepartmentReports().catch(() => []);
+    
+    if (allReports.length === 0) {
+        selector.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No reports available to aggregate.</div>';
+    } else {
+        selector.innerHTML = allReports.map(r => `
+            <label style="display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #f1f5f9; cursor:pointer;">
+                <input type="checkbox" value="${r.id}" class="agg-checkbox" style="width:18px; height:18px; accent-color:var(--primary);">
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:#0f172a;">${esc(r.title)}</div>
+                    <div style="font-size:11px; color:#64748b;">${esc(r.department)} • ${esc(r.period)}</div>
+                </div>
+            </label>
+        `).join('');
+    }
+
+    modal.classList.add('show');
+}
+async function submitAggregatedReport() {
+    const btn = document.getElementById('aggSubmitBtn');
+    const statusDiv = document.getElementById('aggStatus');
+    
+    const title = document.getElementById('aggTitle').value.trim();
+    const period = document.getElementById('aggPeriod').value.trim();
+    const analysis = document.getElementById('aggAnalysis').value.trim();
+    const recommendations = document.getElementById('aggRecommendations').value.trim();
+    
+    const selectedIds = Array.from(document.querySelectorAll('.agg-checkbox:checked')).map(cb => parseInt(cb.value));
+
+    // Validation
+    if (!title || !period) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ Please fill in Title and Period.';
+        return;
+    }
+    if (selectedIds.length === 0) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ Please select at least one report.';
+        return;
+    }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Creating...';
+    btn.disabled = true;
+
+    try {
+        await API.createAggregatedReport({
+            title,
+            period,
+            sourceReportIds: selectedIds,
+            ceoAnalysis: analysis,
+            ceoRecommendations: recommendations
+        });
+
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg success';
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.style.color = '#15803d';
+        statusDiv.textContent = '✓ Aggregated Report created successfully!';
+        
+        setTimeout(() => {
+            closeModal('createAggregationModal');
+            loadAggregatedReports(); // Refresh list
+        }, 1500);
+
+    } catch (err) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ ' + err.message;
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+async function viewAggregatedReport(id) {
+    try {
+        const allReports = await API.getAggregatedReports();
+        const report = allReports.find(r => r.id === id);
+
+        if (!report) {
+            modernToast('Not Found', 'Report not found.', 'error');
+            return;
+        }
+
+        // 1. Tengeneza HTML ya ripoti zilizojumuishwa (Source Reports)
+        let sourceReportsHtml = '<div style="color: #94a3b8; font-size: 13px;">No source reports available.</div>';
+        
+        if (report.sourceReportsData && report.sourceReportsData.length > 0) {
+            sourceReportsHtml = report.sourceReportsData.map(src => `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #1a7f5a; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-size: 11px; font-weight: 800; color: #1a7f5a; text-transform: uppercase;">${src.department} Department</div>
+                            <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;">${src.title}</div>
+                        </div>
+                        <span style="font-size: 10px; font-weight: 700; background: rgba(59, 130, 246, 0.1); color: #2563eb; padding: 4px 8px; border-radius: 6px;">${src.period}</span>
+                    </div>
+                    <div style="font-size: 13px; color: #475569; line-height: 1.6; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+                        <strong>Summary:</strong> ${src.summary || 'No summary provided.'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 2. Tengeneza HTML yote ya Modal (Data ikiwa tayari imeingizwa)
+        const modalHtml = `
+            <div class="modal-overlay" id="viewAggregatedModal" style="z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);">
+                <div class="modal-box" style="max-width: 900px; padding: 0; overflow: hidden; max-height: 92vh; display: flex; flex-direction: column; border-radius: 12px; background: white;">
+                    
+                    <!-- Toolbar (Haichapishwi) -->
+                    <div class="no-print" style="background: #0a1929; padding: 16px 24px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-bottom: 3px solid #1a7f5a;">
+                        <div style="font-size: 16px; font-weight: 700;">📄 Report Preview</div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="window.print()" style="background: #1a7f5a; border: none; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                🖨️ Download / Print PDF
+                            </button>
+                            <button onclick="closeModal('viewAggregatedModal')" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 36px; height: 36px; border-radius: 6px; font-size: 18px; cursor: pointer;">✕</button>
+                        </div>
+                    </div>
+                    
+                    <!-- SEHEMU INAYOPRINTWA (Official Document) -->
+                    <div id="vamPrintableArea" style="padding: 40px; overflow-y: auto; flex: 1; background: white;">
+                        
+                        <!-- HEADER YA KAMPUNI -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1a7f5a; padding-bottom: 20px; margin-bottom: 30px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <img src="assets/makdc-logo.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid #1a7f5a; padding: 2px;" alt="Logo">
+                                <div>
+                                    <h1 style="font-size: 24px; font-weight: 900; color: #0f172a; margin: 0;">MAK DC INVESTMENT CO. LTD</h1>
+                                    <p style="font-size: 12px; color: #64748b; margin: 4px 0 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Makete District Council SPV</p>
+                                    <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">P.O.Box 123, Makete | info@makdc.co.tz</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Ref Number</div>
+                                <div style="font-size: 14px; font-weight: 800; color: #1a7f5a; font-family: monospace;">AGG-${String(report.id).padStart(5, '0')}</div>
+                                <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Date</div>
+                                <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${new Date().toLocaleDateString('en-GB')}</div>
+                            </div>
+                        </div>
+
+                        <!-- KICHWA CHA RIPOTI -->
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase;">${report.title}</h2>
+                            <span style="font-size: 13px; font-weight: 700; color: #1a7f5a; background: rgba(26,127,90,0.1); padding: 4px 12px; border-radius: 20px;">Period: ${report.period}</span>
+                        </div>
+
+                        <!-- CEO ANALYSIS -->
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">1. EXECUTIVE SUMMARY & ANALYSIS</h3>
+                            <div style="font-size: 14px; line-height: 1.8; color: #334155; text-align: justify;">${report.ceoAnalysis || 'No analysis provided.'}</div>
+                        </div>
+
+                        <!-- RECOMMENDATIONS -->
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">2. RECOMMENDATIONS</h3>
+                            <div style="font-size: 14px; line-height: 1.8; color: #334155; text-align: justify;">${report.ceoRecommendations || 'No recommendations provided.'}</div>
+                        </div>
+
+                        <!-- SOURCE REPORTS -->
+                        <div style="margin-bottom: 40px;">
+                            <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 12px;">3. DEPARTMENT REPORTS INCLUDED</h3>
+                            <div>${sourceReportsHtml}</div>
+                        </div>
+
+                        <!-- SEHEMU YA SAHIHI -->
+                        <div style="display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px;">
+                            <div style="width: 45%;">
+                                <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 40px;">Prepared By:</div>
+                                <div style="border-bottom: 2px solid #0f172a; width: 100%; margin-bottom: 6px;"></div>
+                                <div style="font-size: 13px; font-weight: 800; color: #0f172a;">George Africanus Gujonjo</div>
+                                <div style="font-size: 11px; color: #64748b;">Chief Executive Officer</div>
+                            </div>
+                            <div style="width: 45%;">
+                                <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 40px;">Approved By:</div>
+                                <div style="border-bottom: 2px solid #0f172a; width: 100%; margin-bottom: 6px;"></div>
+                                <div style="font-size: 13px; font-weight: 800; color: #0f172a;">Board of Directors</div>
+                                <div style="font-size: 11px; color: #64748b;">MAK DC Investment</div>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER YA DOCUMENT -->
+                        <div style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center;">
+                            <p style="font-size: 10px; color: #94a3b8; margin: 0;">This is an official document generated by MAK DC System. Confidential & Proprietary.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 3. Ondoa modal ya zamani kama ipo, kisha ongeza hii mpya
+        const existingModal = document.getElementById('viewAggregatedModal');
+        if (existingModal) existingModal.remove();
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // 4. Fungua Modal
+        document.getElementById('viewAggregatedModal').classList.add('show');
+
+    } catch (err) {
+        console.error('View Aggregated Error:', err);
+        modernToast('Error', 'Failed to load report details.', 'error');
+    }
+}
+function showCreateAggregationPage() {
+    document.getElementById('aggregatedListView').style.display = 'none';
+    document.getElementById('createAggregationPage').style.display = 'block';
+    loadAvailableReportsForAggregation(); 
+}
+function hideCreateAggregationPage() {
+    document.getElementById('createAggregationPage').style.display = 'none';
+    document.getElementById('aggregatedListView').style.display = 'block';
+    document.getElementById('aggTitle').value = '';
+    document.getElementById('aggPeriod').value = '';
+    document.getElementById('aggAnalysisEditor').innerHTML = '';
+    document.getElementById('aggRecommendationsEditor').innerHTML = '';
+}
+function formatDoc(cmd) {
+    document.execCommand(cmd, false, null);
+}
+async function submitAggregatedReport() {
+    const btn = document.getElementById('aggSubmitBtn');
+    const statusDiv = document.getElementById('aggStatus');
+    
+    const title = document.getElementById('aggTitle').value.trim();
+    const period = document.getElementById('aggPeriod').value.trim();
+    // Tunachukua HTML ndani ya editor ili kuhifadhi mabadiliko (Bold, Lists n.k.)
+    const analysis = document.getElementById('aggAnalysisEditor').innerHTML;
+    const recommendations = document.getElementById('aggRecommendationsEditor').innerHTML;
+    
+    const selectedIds = Array.from(document.querySelectorAll('.agg-checkbox:checked')).map(cb => parseInt(cb.value));
+
+    if (!title || !period) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ Please fill in Title and Period.';
+        return;
+    }
+    if (selectedIds.length === 0) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ Please select at least one report.';
+        return;
+    }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Creating...';
+    btn.disabled = true;
+
+    try {
+        await API.createAggregatedReport({
+            title,
+            period,
+            sourceReportIds: selectedIds,
+            ceoAnalysis: analysis,
+            ceoRecommendations: recommendations
+        });
+
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg success';
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.style.color = '#15803d';
+        statusDiv.textContent = '✓ Aggregated Report created successfully!';
+        
+        setTimeout(() => {
+            hideCreateAggregationPage();
+            loadAggregatedReports(); // Refresh list
+        }, 1500);
+
+    } catch (err) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = '⚠ ' + err.message;
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+async function loadAvailableReportsForAggregation() {
+    const container = document.getElementById('aggReportSelector');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">⏳ Inatafuta ripoti...</div>';
+    try {
+        const allReports = await API.getDepartmentReports();
+        
+        if (!allReports || allReports.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">Hakuna ripoti zilizowasilishwa bado.</div>';
+            return;
+        }
+        container.innerHTML = allReports.map(r => `
+            <label style="display:flex; align-items:flex-start; gap:10px; padding:12px; border-bottom:1px solid #f1f5f9; cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" value="${r.id}" class="agg-checkbox" style="width:18px; height:18px; accent-color:var(--primary); margin-top:2px;">
+                <div>
+                    <div style="font-size:13px; font-weight:800; color:#0f172a;">${r.title || 'Untitled Report'}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:2px;">${r.department || 'General'} • ${r.period || 'N/A'}</div>
+                </div>
+            </label>
+        `).join('');
+
+    } catch (err) {
+        console.error('Load available reports error:', err);
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#dc2626;">❌ Imeshindwa kupata ripoti: ${err.message}</div>`;
+    }
+}
+// ================================================================
+// 🆕 TRACK ORDERS (CEO)
+// ================================================================
+async function ceoTrackOrder() {
+    const trackingId = document.getElementById('ceoTrackId').value.trim().toUpperCase();
+    const phone = document.getElementById('ceoTrackPhone').value.trim();
+
+    if (!trackingId) {
+        showToast('⚠ Please enter Tracking ID', 'warning');
+        return;
+    }
+
+    const resultDiv = document.getElementById('ceoTrackResult');
+    resultDiv.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; background:white; border-radius:12px; border:1px solid var(--gray-200);">
+            <div style="display: inline-block; width: 44px; height: 44px; border: 4px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+            <div style="margin-top: 14px; color: var(--gray-500); font-size: 14px; font-weight: 600;">⏳ Searching for order...</div>
+        </div>
+    `;
+
+    try {
+        // Tunatumia API ya track iliyopo kwenye mfumo wako
+        let url = `http://localhost:5000/api/orders/track/${encodeURIComponent(trackingId)}`;
+        if (phone) url += `?phone=${encodeURIComponent(phone)}`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || 'Order not found');
+        }
+
+        const order = await response.json();
+        renderCEOTrackResult(order);
+
+    } catch (err) {
+        resultDiv.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; color: #dc2626; background:white; border-radius:12px; border:1px solid var(--gray-200);">
+                <div style="font-size: 40px; margin-bottom: 12px;">❌</div>
+                <div style="font-weight: 800; margin-bottom: 6px;">Order Not Found</div>
+                <div style="font-size: 14px; color: var(--gray-500);">${err.message}. Please check the Tracking ID.</div>
+            </div>
+        `;
+    }
+}
+
+function renderCEOTrackResult(order) {
+    const resultDiv = document.getElementById('ceoTrackResult');
+    
+    const statusColors = {
+        'pending': '#f59e0b',
+        'ready-for-finance': '#14b8a6',
+        'awaiting-payment': '#f59e0b',
+        'postpaid-approved': '#4f46e5',
+        'paid': '#16a34a',
+        'delivered': '#16a34a',
+        'completed': '#0f172a',
+        'rejected': '#dc2626'
+    };
+    const statusText = (order.status || 'pending').charAt(0).toUpperCase() + (order.status || 'pending').slice(1).replace(/-/g, ' ');
+    const statusColor = statusColors[order.status] || '#f59e0b';
+
+    const itemsHtml = (order.items || []).map(item => `
+        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-200); font-size: 14px;">
+            <span>${item.productName} × ${item.quantity}</span>
+            <strong style="color: var(--primary);">TSh ${Number(item.subtotal || 0).toLocaleString()}</strong>
+        </div>
+    `).join('');
+
+    const statusSteps = ['pending', 'ready-for-finance', 'awaiting-payment', 'paid', 'delivered', 'completed'];
+    const currentIndex = statusSteps.indexOf(order.status);
+    const timelineSteps = [
+        { 
+            step: 'Order Received', 
+            dept: 'Sales Dept', 
+            person: order.creator?.fullName || 'System' 
+        },
+        { 
+            step: 'Processing', 
+            dept: 'Sales Review', 
+            person: order.salesReviewer?.fullName || 'Pending' 
+        },
+        { 
+            step: 'Awaiting Payment', 
+            dept: 'Finance Dept', 
+            person: order.paymentVerifier?.fullName || 'Pending' 
+        },
+        { 
+            step: 'Paid', 
+            dept: 'Finance', 
+            person: order.receiptIssuer?.fullName || 'Pending' 
+        },
+        { 
+            step: 'Delivered', 
+            dept: 'Logistics', 
+            person: order.deliverer?.fullName || 'Pending' 
+        },
+        { 
+            step: 'Completed', 
+            dept: 'Customer', 
+            person: 'Confirmed by ' + (order.customerName || 'Customer') 
+        }
+    ];
+
+    const timelineHtml = timelineSteps.map((s, index) => {
+        let className = 'timeline-step';
+        if (index < currentIndex) className += ' completed';
+        if (index === currentIndex) className += ' active';
+
+        return `
+            <div class="${className}">
+                <div class="step-circle">${index < currentIndex ? '✓' : (index + 1)}</div>
+                <div class="step-label">${s.step}</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">${s.dept}</div>
+                <div style="font-size: 9px; color: #94a3b8; margin-top: 2px; font-style: italic;">${s.person}</div>
+            </div>
+        `;
+    }).join('');
+
+    resultDiv.innerHTML = `
+        <div style="background:white; border-radius:12px; border:1px solid var(--gray-200); overflow:hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+            <div style="background: var(--primary-dark); color:white; padding: 20px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <h3 style="margin:0; font-size:18px;">📦 Order: ${order.orderId}</h3>
+                <span style="background: ${statusColor}; color:white; padding:6px 16px; border-radius:20px; font-size:12px; font-weight:800; text-transform:uppercase;">${statusText}</span>
+            </div>
+            <div style="padding: 24px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+                    <div style="background:var(--gray-50); padding:14px; border-radius:8px;">
+                        <div style="font-size:10px; font-weight:800; color:var(--gray-500); text-transform:uppercase; margin-bottom:4px;">Customer Name</div>
+                        <div style="font-size:14px; font-weight:700;">${order.customerName || '—'}</div>
+                    </div>
+                    <div style="background:var(--gray-50); padding:14px; border-radius:8px;">
+                        <div style="font-size:10px; font-weight:800; color:var(--gray-500); text-transform:uppercase; margin-bottom:4px;">Phone Number</div>
+                        <div style="font-size:14px; font-weight:700;">${order.phone || '—'}</div>
+                    </div>
+                    <div style="background:var(--gray-50); padding:14px; border-radius:8px;">
+                        <div style="font-size:10px; font-weight:800; color:var(--gray-500); text-transform:uppercase; margin-bottom:4px;">Delivery Type</div>
+                        <div style="font-size:14px; font-weight:700;">${order.deliveryType || '—'}</div>
+                    </div>
+                    <div style="background:var(--gray-50); padding:14px; border-radius:8px;">
+                        <div style="font-size:10px; font-weight:800; color:var(--gray-500); text-transform:uppercase; margin-bottom:4px;">Grand Total</div>
+                        <div style="font-size:16px; font-weight:800; color:var(--primary);">TSh ${Number(order.totalAmount || 0).toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size:14px; font-weight:800; color:var(--gray-800); margin-bottom:12px;">🛒 Ordered Products</h4>
+                <div style="background:var(--gray-50); border-radius:8px; padding:16px; margin-bottom:24px;">
+                    ${itemsHtml || '<div style="text-align:center; color:var(--gray-400);">No items</div>'}
+                    <div style="display:flex; justify-content:space-between; padding-top:16px; margin-top:8px; border-top:2px solid var(--gray-300); font-weight:800;">
+                        <span>GRAND TOTAL</span>
+                        <span>TSh ${Number(order.totalAmount || 0).toLocaleString()}</span>
+                    </div>
+                </div>
+
+                <h4 style="font-size:14px; font-weight:800; color:var(--gray-800); margin-bottom:12px;">📍 Order Progress</h4>
+                <div class="timeline-steps" style="margin-bottom:0;">
+                    ${timelineHtml}
+                </div>
+            </div>
+        </div>
+    `;
+}
+// ================================================================
+// 🆕 LOAD OVERVIEW TAB (FIXED)
+// ================================================================
+async function loadOverviewTab() {
+    try {
+        // Set Date
+        const now = new Date();
+        setText('ceoLiveDate', now.toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }));
+
+        // Vuta data kwa usalama (Tumeongeza getUsers)
+        let safeOrders = [];
+        let safeEmployees = [];
+        let safeUsers = []; // 🆕 Ongeza hii
+        let safeBatches = [];
+        let safeAccounts = [];
+        let safeProcurement = [];
+        let safePayments = [];
+
+        try { safeOrders = await API.getOrders().catch(() => []) || []; } catch(e) { console.warn(e); }
+        try { safeEmployees = await API.getEmployees().catch(() => []) || []; } catch(e) { console.warn(e); }
+        try { safeUsers = await API.getUsers().catch(() => []) || []; } catch(e) { console.warn(e); } // 🆕 Vuta users
+        try { safeBatches = await API.getProductionBatches({ limit: 100 }).catch(() => []) || []; } catch(e) { console.warn(e); }
+        try { safeAccounts = await API.getAccounts().catch(() => []) || []; } catch(e) { console.warn(e); }
+        try { safeProcurement = await API.getProcurementRequests('/all').catch(() => []) || []; } catch(e) { console.warn(e); }
+        try { safePayments = await API.getCompanyPayments().catch(() => []) || []; } catch(e) { console.warn(e); }
+
+        // ===== 1. CALCULATE KPIs =====
+        
+        const today = new Date().toDateString();
+        const todaySales = safeOrders
+            .filter(o => new Date(o.createdAt).toDateString() === today && o.status !== 'rejected')
+            .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+        
+        const totalOrders = safeOrders.length;
+
+        const thisMonth = new Date().getMonth();
+        const thisYear = new Date().getFullYear();
+        const monthUnits = safeBatches
+            .filter(b => {
+                const d = new Date(b.productionDate);
+                return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+            })
+            .reduce((sum, b) => sum + (b.quantityProduced || 0), 0);
+
+        // 🆕 HESABU YA EMPLOYEES: Chukua wote (Users + Employees) walio Active
+        const activeUsers = safeUsers.filter(u => u.status === 'Active').length;
+        const activeEmp = safeEmployees.filter(e => e.status === 'Active').length;
+        const totalStaff = activeUsers + activeEmp;
+
+        const pendingProc = safeProcurement.filter(p => p.status === 'pending-ceo').length;
+        const pendingPay = safePayments.filter(p => p.status === 'pending-ceo').length;
+        const totalApprovals = pendingProc + pendingPay;
+        const totalCash = safeAccounts
+            .filter(a => a.status === 'approved' && (a.purpose === 'collections' || a.purpose === 'operations'))
+            .reduce((sum, a) => sum + Number(a.balance || 0), 0);
+        const lowStockCount = 0;
+        const pendingPayments = safeOrders.filter(o => o.status === 'awaiting-payment' || o.status === 'ready-for-finance').length;
+
+        // ===== 2. UPDATE UI =====
+        setText('ovSalesToday', 'TSh ' + todaySales.toLocaleString());
+        setText('ovTotalOrders', totalOrders);
+        setText('ovProductionUnits', monthUnits.toLocaleString());
+        setText('ovTotalStaff', totalStaff); // 🆕 Sasa inaonyesha idadi sahihi
+        setText('ovPendingApprovals', totalApprovals);
+        setText('ovTotalCash', 'TSh ' + totalCash.toLocaleString());
+        setText('ovLowStock', lowStockCount);
+        setText('ovPendingPayments', pendingPayments);
+
+        // ===== 3. RENDER CHARTS =====
+        try { renderRevenueChart(safeOrders); } catch (e) { console.error('Rev Chart Error:', e.message); }
+        try { renderOrderStatusChart(safeOrders); } catch (e) { console.error('Status Chart Error:', e.message); }
+        try { renderProductionChart(safeBatches); } catch (e) { console.error('Prod Chart Error:', e.message); }
+        try { renderDeptChart(safeProcurement); } catch (e) { console.error('Dept Chart Error:', e.message); }
+
+        // ===== 4. RENDER RECENT ACTIVITY =====
+        renderRecentActivity(safeOrders);
+
+    } catch (err) {
+        console.error('Overview error:', err);
+        showToast('Failed to load overview data', 'error');
+    }
+}
+
+// ================================================================
+// CHART 1: Revenue Trend
+// ================================================================
+function renderRevenueChart(orders) {
+    const canvas = document.getElementById('ceoRevenueChart');
+    if (!canvas) return;
+
+    if (window.ceoRevChart instanceof Chart) {
+        window.ceoRevChart.destroy();
+    }
+
+    const safeOrders = Array.isArray(orders) ? orders : [];
+    const last7Days = [];
+    const labels = [];
+    
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toDateString();
+        labels.push(d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
+        
+        const dailyTotal = safeOrders
+            .filter(o => new Date(o.createdAt).toDateString() === dateStr && o.status !== 'rejected')
+            .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+        
+        last7Days.push(dailyTotal);
+    }
+
+    window.ceoRevChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Revenue (TSh)',
+                data: last7Days,
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.5)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+// ================================================================
+// CHART 2: Order Status
+// ================================================================
+function renderOrderStatusChart(orders) {
+    const canvas = document.getElementById('ceoStatusChart');
+    if (!canvas) return;
+
+    if (window.ceoStatusChart instanceof Chart) {
+        window.ceoStatusChart.destroy();
+    }
+
+    const safeOrders = Array.isArray(orders) ? orders : [];
+    const statusCounts = {
+        'Pending': safeOrders.filter(o => o.status === 'pending').length,
+        'Paid': safeOrders.filter(o => o.status === 'paid').length,
+        'Delivered': safeOrders.filter(o => o.status === 'delivered').length,
+        'Completed': safeOrders.filter(o => o.status === 'completed').length,
+        'Rejected': safeOrders.filter(o => o.status === 'rejected').length
+    };
+
+    window.ceoStatusChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(statusCounts),
+            datasets: [{
+                data: Object.values(statusCounts),
+                backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#0f766e', '#ef4444'],
+                borderWidth: 3,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 10, weight: '600' }, padding: 10 } }
+            }
+        }
+    });
+}
+
+// ================================================================
+// CHART 3: Production Breakdown
+// ================================================================
+function renderProductionChart(batches) {
+    const canvas = document.getElementById('ceoProductionChart');
+    if (!canvas) return;
+
+    if (window.ceoProdChart instanceof Chart) {
+        window.ceoProdChart.destroy();
+    }
+
+    const safeBatches = Array.isArray(batches) ? batches : [];
+    const productMap = {};
+    safeBatches.forEach(b => {
+        const name = b.product?.name || 'Unknown';
+        if (!productMap[name]) productMap[name] = 0;
+        productMap[name] += b.quantityProduced || 0;
+    });
+
+    const sorted = Object.entries(productMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const labels = sorted.map(s => s[0]);
+    const data = sorted.map(s => s[1]);
+
+    window.ceoProdChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels.length ? labels : ['No Data'],
+            datasets: [{
+                label: 'Units Produced',
+                data: data.length ? data : [0],
+                backgroundColor: ['#0f766e', '#14b8a6', '#2dd4bf', '#5eead4', '#99f6e4'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(226, 232, 240, 0.5)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+// ================================================================
+// CHART 4: Department Activity
+// ================================================================
+function renderDeptChart(procurement) {
+    const canvas = document.getElementById('ceoDeptChart');
+    if (!canvas) return;
+
+    if (window.ceoDeptChart instanceof Chart) {
+        window.ceoDeptChart.destroy();
+    }
+
+    const safeProcurement = Array.isArray(procurement) ? procurement : [];
+    const deptMap = {};
+    safeProcurement.forEach(p => {
+        const dept = p.department || 'General';
+        if (!deptMap[dept]) deptMap[dept] = 0;
+        deptMap[dept]++;
+    });
+
+    const labels = Object.keys(deptMap);
+    const data = Object.values(deptMap);
+
+    window.ceoDeptChart = new Chart(canvas, {
+        type: 'polarArea',
+        data: {
+            labels: labels.length ? labels : ['No Data'],
+            datasets: [{
+                data: data.length ? data : [0],
+                backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#0f766e'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 10, weight: '600' }, padding: 10 } }
+            }
+        }
+    });
+}
+
+// ================================================================
+// RENDER RECENT ACTIVITY
+// ================================================================
+function renderRecentActivity(orders) {
+    const container = document.getElementById('ceoRecentActivity');
+    if (!container) return;
+
+    const safeOrders = Array.isArray(orders) ? orders : [];
+    const recent = [...safeOrders]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+
+    if (recent.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8;">No recent activity found.</div>';
+        return;
+    }
+
+    container.innerHTML = recent.map(o => {
+        let icon = '📦';
+        let color = '#3b82f6';
+        
+        if (o.status === 'paid') { icon = '💰'; color = '#16a34a'; }
+        else if (o.status === 'delivered') { icon = '🚚'; color = '#0f766e'; }
+        else if (o.status === 'rejected') { icon = '❌'; color = '#dc2626'; }
+        else if (o.status === 'completed') { icon = '✅'; color = '#15803d'; }
+
+        const dateStr = new Date(o.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+        return `
+            <div style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid #f1f5f9;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: ${color}15; color: ${color}; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">${icon}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${esc(o.customerName || 'Unknown Customer')}</div>
+                    <div style="font-size: 11px; color: #64748b;">Order: <strong style="font-family: monospace;">${esc(o.orderId)}</strong></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 13px; font-weight: 800; color: #0f172a;">TSh ${Number(o.totalAmount || 0).toLocaleString()}</div>
+                    <div style="font-size: 10px; color: #94a3b8;">${dateStr}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }

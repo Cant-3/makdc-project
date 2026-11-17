@@ -88,10 +88,30 @@ function optionalAuth(req, res, next) {
 
     next();
 }
+// ================================================================
+// REQUIRE ANY ROLE — Ruhusu roles zote za msingi
+// ================================================================
+function requireAnyRole(req, res, next) {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Unahitaji kuingia kwanza.' });
+    }
+
+    const allowedRoles = [
+        'SuperAdmin', 'CEO', 'Manager', 
+        'Procurement', 'Finance', 'Engineer', 'Sales'
+    ];
+
+    if (!allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Huna ruhusa ya kufanya hivi' });
+    }
+
+    next();
+}
 
 module.exports = {
     authenticate,
     requireRole,
     requireSuperAdmin,
+    requireAnyRole, 
     optionalAuth
 };

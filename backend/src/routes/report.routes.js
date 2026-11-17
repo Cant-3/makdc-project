@@ -1,80 +1,31 @@
 // ================================================================
-// MAK DC INVESTMENT — REPORT ROUTES
+// MAK DC INVESTMENT — REPORT ROUTES (FULL VERSION)
 // ================================================================
-
 const express = require('express');
 const router = express.Router();
-
 const reportController = require('../controllers/report.controller');
 const { authenticate, requireRole } = require('../middleware/auth');
 
-// ================================================================
-// AUTHENTICATED ROUTES — Kila kitu kinahitaji token
-// ================================================================
 router.use(authenticate);
 
-// ================================================================
-// GET /api/reports/sales — Sales Summary (KPI cards)
-// ================================================================
-router.get('/sales',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'),
-    reportController.getSalesSummary
-);
+// --- ZILIZOPO ---
+router.get('/sales', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'), reportController.getSalesSummary);
+router.get('/sales/trend', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'), reportController.getSalesTrend);
+router.get('/sales/top-products', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'), reportController.getTopProducts);
+router.get('/sales/top-regions', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'), reportController.getTopRegions);
+router.get('/sales/top-customers', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'), reportController.getTopCustomers);
 
-// ================================================================
-// GET /api/reports/sales/trend — Daily trend (charts)
-// ================================================================
-router.get('/sales/trend',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'),
-    reportController.getSalesTrend
-);
+router.get('/procurement-summary', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'), reportController.getProcurementSummary);
+router.get('/store-summary', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'), reportController.getStoreSummary);
+router.get('/asset-summary', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'), reportController.getAssetSummary);
+router.get('/master-summary', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'), reportController.getMasterReport);
+router.get('/procurement-trend', requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'), reportController.getProcurementTrend);
 
-// ================================================================
-// GET /api/reports/sales/top-products — Top products
-// ================================================================
-router.get('/sales/top-products',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'),
-    reportController.getTopProducts
-);
-
-// ================================================================
-// GET /api/reports/sales/top-regions — Revenue by region
-// ================================================================
-router.get('/sales/top-regions',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'),
-    reportController.getTopRegions
-);
-
-// ================================================================
-// GET /api/reports/sales/top-customers — Top customers
-// ================================================================
-router.get('/sales/top-customers',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Sales'),
-    reportController.getTopCustomers
-);
-// ================================================================
-// 🆕 PROCUREMENT, STORE & ASSET REPORTS
-// ================================================================
-router.get('/procurement-summary', 
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
-    reportController.getProcurementSummary
-);
-
-router.get('/store-summary',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
-    reportController.getStoreSummary
-);
-
-router.get('/asset-summary',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
-    reportController.getAssetSummary
-);
-router.get('/master-summary',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
-    reportController.getMasterReport
-);
-router.get('/procurement-trend',
-    requireRole('SuperAdmin', 'CEO', 'Manager', 'Finance', 'Procurement'),
-    reportController.getProcurementTrend
-);
+// --- 🆕 MPYA: DEPARTMENT REPORTS ---
+router.post('/department-reports/submit', reportController.submitDepartmentReport);
+router.get('/department-reports/all', reportController.getDepartmentReports);
+router.get('/department-reports/:id', reportController.getDepartmentReportById);
+router.patch('/department-reports/:id/review', reportController.reviewDepartmentReport);
+router.post('/aggregated-reports', reportController.createAggregatedReport);
+router.get('/aggregated-reports', reportController.getAggregatedReports);
 module.exports = router;
