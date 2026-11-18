@@ -2,7 +2,7 @@
 // MAK DC INVESTMENT — FRONTEND CONFIG
 // ================================================================
 const CONFIG = {
-    API_URL: 'https://makdc-project.onrender.com/api',
+    API_URL: 'https://api.makdcinvestments.co.tz/api',
     TOKEN_KEY: 'makdc_token',
     USER_KEY: 'makdc_user',
     ROLES: {

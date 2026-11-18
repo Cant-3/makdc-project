@@ -7627,7 +7627,7 @@ async function ceoTrackOrder() {
 
     try {
         // Tunatumia API ya track iliyopo kwenye mfumo wako
-        let url = `http://localhost:5000/api/orders/track/${encodeURIComponent(trackingId)}`;
+        let url = `https://makdc-project.onrender.com/api/orders/track/${encodeURIComponent(trackingId)}`;
         if (phone) url += `?phone=${encodeURIComponent(phone)}`;
 
         const response = await fetch(url);
