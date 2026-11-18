@@ -126,7 +126,6 @@ app.use('/api/kpis', kpiRoutes);
 app.use('/api/messages', require('./routes/message.routes'));
 app.use('/api/reports', require('./routes/report.routes'));
 
-
 // ================================================================
 // 404 HANDLER (IWE MWISHO KABISA)
 // ================================================================
