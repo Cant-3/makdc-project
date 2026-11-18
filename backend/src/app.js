@@ -125,10 +125,6 @@ app.use('/api/manager-reports', managerReportRoutes);
 app.use('/api/kpis', kpiRoutes);
 app.use('/api/messages', require('./routes/message.routes'));
 app.use('/api/reports', require('./routes/report.routes'));
-
-// ================================================================
-// 404 HANDLER (IWE MWISHO KABISA)
-// ================================================================
 app.use((req, res) => {
     res.status(404).json({
         error: 'Route haipo',
@@ -136,10 +132,6 @@ app.use((req, res) => {
         method: req.method
     });
 });
-
-// ================================================================
-// GLOBAL ERROR HANDLER
-// ================================================================
 app.use((err, req, res, next) => {
     console.error('❌ Error:', err.message);
     console.error(err.stack);
