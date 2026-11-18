@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 // MIDDLEWARE YA MSINGI
 // ================================================================
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: process.env.FRONTEND_URL || 'https://makdccoltd.netlify.app',
     credentials: true
 }));
 
