@@ -1,24 +1,12 @@
-// ================================================================
-// MAK DC INVESTMENT — AUTHENTICATION MIDDLEWARE
-// ================================================================
-// Inathibitisha JWT token na kutambua mtumiaji
-// ================================================================
-
 const jwt = require('jsonwebtoken');
 const { JWT_CONFIG } = require('../config/constants');
 
-// ================================================================
-// AUTHENTICATE — Thibitisha JWT token
-// ================================================================
 function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Token haipo. Tafadhali ingia.' });
     }
-
     const token = authHeader.split(' ')[1];
-
     try {
         const decoded = jwt.verify(token, JWT_CONFIG.SECRET);
         req.user = decoded;
@@ -30,10 +18,6 @@ function authenticate(req, res, next) {
         return res.status(401).json({ error: 'Token si sahihi.' });
     }
 }
-
-// ================================================================
-// REQUIRE ROLE — Ruhusu roles maalum pekee
-// ================================================================
 function requireRole(...allowedRoles) {
     return (req, res, next) => {
         if (!req.user) {
@@ -52,9 +36,6 @@ function requireRole(...allowedRoles) {
     };
 }
 
-// ================================================================
-// REQUIRE SUPER ADMIN — Ruhusu SuperAdmin, CEO, na Manager
-// ================================================================
 function requireSuperAdmin(req, res, next) {
     if (!req.user) {
         return res.status(401).json({ error: 'Unahitaji kuingia kwanza.' });
@@ -67,9 +48,6 @@ function requireSuperAdmin(req, res, next) {
 
     next();
 }
-// ================================================================
-// OPTIONAL AUTH — Kama token ipo, ithibitishe. Kama haipo, endelea
-// ================================================================
 function optionalAuth(req, res, next) {
     const authHeader = req.headers.authorization;
 
@@ -88,9 +66,6 @@ function optionalAuth(req, res, next) {
 
     next();
 }
-// ================================================================
-// REQUIRE ANY ROLE — Ruhusu roles zote za msingi
-// ================================================================
 function requireAnyRole(req, res, next) {
     if (!req.user) {
         return res.status(401).json({ error: 'Unahitaji kuingia kwanza.' });
@@ -107,7 +82,6 @@ function requireAnyRole(req, res, next) {
 
     next();
 }
-
 module.exports = {
     authenticate,
     requireRole,

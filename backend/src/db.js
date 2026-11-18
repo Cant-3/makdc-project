@@ -1,6 +1,3 @@
-// ================================================================
-// DATABASE CONNECTION — Neon PostgreSQL (Cloud)
-// ================================================================
 const { Pool } = require('pg');
 require('dotenv').config();
 
@@ -13,8 +10,6 @@ const pool = new Pool({
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000
 });
-
-// Log connection
 pool.on('connect', () => {
     console.log('✅ PostgreSQL (Neon) connected');
 });
@@ -22,20 +17,14 @@ pool.on('connect', () => {
 pool.on('error', (err) => {
     console.error('❌ PostgreSQL pool error:', err.message);
 });
-
-// Helper: Fanya query kirahisi
 async function query(sql, params = []) {
     const result = await pool.query(sql, params);
     return result.rows;
 }
-
-// Helper: Fanya query na kurudisha result kamili
 async function execute(sql, params = []) {
     const result = await pool.query(sql, params);
     return result;
 }
-
-// Test connection on startup
 pool.query('SELECT NOW()')
     .then(() => console.log('✅ Database test: OK'))
     .catch(err => console.error('❌ Database test failed:', err.message));
