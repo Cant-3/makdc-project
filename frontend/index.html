@@ -1358,12 +1358,8 @@
     </style>
 </head>
 <body>
-
-    <!-- ===== CUSTOM CURSOR ===== -->
     <div class="cursor-dot" id="cursorDot"></div>
     <div class="cursor-ring" id="cursorRing"></div>
-
-    <!-- ===== FLOATING GLASS NAV ===== -->
     <div class="nav-wrapper" id="navbar">
         <nav class="nav-pill">
             <a href="#home" class="nav-brand">
@@ -1401,8 +1397,6 @@
             </div>
         </nav>
     </div>
-
-    <!-- ===== HERO (FULL BACKGROUND) ===== -->
     <section class="hero" id="home">
         <!-- Background Images Container -->
         <div class="hero-bg-layer" id="heroBgContainer">
@@ -1465,8 +1459,6 @@
             </div>
         </div>
     </section>
-
-   <!-- ===== ABOUT & TESTIMONIALS ===== -->
     <section class="section" id="about">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1531,8 +1523,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ===== PRODUCTS ===== -->
     <section class="section section-dark" id="products">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1569,8 +1559,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ===== NEWS ===== -->
     <section class="section" id="news">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1608,8 +1596,6 @@
             <div id="newsPagination" class="pagination-wrap"></div>
         </div>
     </section>
-
-    <!-- ===== PROJECTS ===== -->
     <section class="section section-dark" id="projects">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1635,8 +1621,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ===== LEADERSHIP ===== -->
     <section class="section" id="leadership">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1662,8 +1646,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ===== VISION & MISSION ===== -->
     <section class="section section-dark" id="vision">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1699,8 +1681,6 @@
             </div>
         </div>
     </section>
-
-    <!-- ===== FOOTER ===== -->
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-col">
@@ -1742,8 +1722,6 @@
             <p id="siteCopyright">© 2026 MAK DC Investment Company Limited. All rights reserved.</p>
         </div>
     </footer>
-
-    <!-- ===== LEADER BIO MODAL ===== -->
     <div class="leader-bio-overlay" id="leaderBioModal" onclick="if(event.target===this) closeLeaderBio()">
         <div class="leader-bio-box">
             <button class="leader-bio-close" onclick="closeLeaderBio()">✕</button>
@@ -1766,8 +1744,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ===== PROJECT DETAILS MODAL ===== -->
     <div class="project-modal-overlay" id="projectModal" onclick="if(event.target===this) closeProjectModal()">
         <div class="project-modal-box">
             <button class="project-modal-close" onclick="closeProjectModal()">✕</button>
@@ -1783,10 +1759,7 @@
             </div>
         </div>
     </div>
-
-    <!-- ===== SCRIPTS ===== -->
     <script>
-        // Custom Cursor Logic
         (function initCustomCursor() {
             const dot = document.getElementById('cursorDot');
             const ring = document.getElementById('cursorRing');
@@ -1808,7 +1781,6 @@
             });
         })();
 
-        // Navbar Scroll
         const navbar = document.getElementById('navbar');
         const navToggle = document.getElementById('navToggle');
         const navLinks = document.getElementById('navLinks');
@@ -1957,7 +1929,6 @@
         })();
         function orderProductNow(name) { window.location.href = `customer-portal.html?product=${encodeURIComponent(name)}`; }
 
-        // --- 4. TESTIMONIALS API ---
         let testimonialData = [], testimonialIndex = 0, testimonialTimer = null;
         (async function loadTestimonials() {
             const slidesContainer = document.getElementById('testimonialSlides');
@@ -2012,7 +1983,6 @@
             if (slider) { slider.addEventListener('mouseenter', stopAutoPlay); slider.addEventListener('mouseleave', startAutoPlay); }
         });
 
-        // --- 5. NEWS API ---
         let allNewsData = [], currentPage = 1; const NEWS_PER_PAGE = 6;
         (async function loadNews() {
             const grid = document.getElementById('newsGrid');
@@ -2061,7 +2031,6 @@
         }
         function goToNewsPage(page) { currentPage = page; renderNewsPage(); document.getElementById('news')?.scrollIntoView({ behavior: 'smooth' }); }
 
-        // --- 6. PROJECTS API (WITH MODAL) ---
         let allProjectsData = [];
         (async function loadProjects() {
             const grid = document.getElementById('projectsGrid');
@@ -2109,7 +2078,6 @@
             document.getElementById('projectModal').classList.remove('show');
         }
 
-        // --- 7. LEADERSHIP API ---
         let allLeaders = [];
         (async function loadLeadership() {
             const grid = document.getElementById('leadershipGrid');
