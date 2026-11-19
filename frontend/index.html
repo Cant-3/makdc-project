@@ -1131,235 +1131,15 @@
     ::-webkit-scrollbar-track { background: var(--paper); }
     ::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 5px; border: 2px solid var(--paper); }
     ::-webkit-scrollbar-thumb:hover { background: var(--gold-2); }
-    /* ===== ABOUT & TESTIMONIAL (NEW STRUCTURE) ===== */
-    .about-testimonial-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Nusu kwa nusu */
-        gap: 40px;
-        align-items: stretch; /* Hii inafanya vyote viwe na urefu sawa */
-        background: var(--cream);
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 20px 50px rgba(12, 15, 10, 0.08);
-        margin-top: 20px;
-    }
-
-    @media (max-width: 1024px) {
-        .about-testimonial-wrapper { grid-template-columns: 1fr; padding: 24px; }
-    }
-
-    /* Upande wa Kushoto (Picha & Features) */
-    .about-visual-side {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        height: 100%;
-    }
-
-    .about-image-wrapper {
-        position: relative;
-        flex: 1;
-        min-height: 300px;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-
-    .about-image-wrapper img {
-        width: 100%; height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .about-image-wrapper::after {
-        content: '';
-        position: absolute; inset: 0;
-        background: linear-gradient(180deg, transparent 50%, rgba(12,15,10,0.8) 100%);
-    }
-
-    .about-caption {
-        position: absolute;
-        bottom: 20px; left: 20px; right: 20px;
-        z-index: 2;
-        color: white;
-    }
-
-    .about-caption .cap-num {
-        font-family: 'Fraunces', serif;
-        font-size: 40px;
-        font-weight: 800;
-        color: var(--gold);
-        line-height: 1;
-        margin-bottom: 4px;
-    }
-
-    .about-caption .cap-label {
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .about-features-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .about-feature {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        background: var(--paper);
-        padding: 14px 18px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--gray-700);
-        transition: all 0.3s;
-        border: 1px solid var(--gray-200);
-    }
-
-    .about-feature:hover {
-        background: white;
-        border-color: var(--gold);
-        transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(212, 160, 23, 0.1);
-    }
-
-    .about-feature-mark {
-        width: 24px; height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(212, 160, 23, 0.15);
-        border-radius: 50%;
-        color: var(--gold-2);
-        font-size: 10px;
-        flex-shrink: 0;
-    }
-
-    /* Upande wa Kulia (Testimonial) */
-    .testimonial-side {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        padding-left: 40px;
-        border-left: 1px solid var(--gray-200);
-    }
-
-    @media (max-width: 1024px) {
-        .testimonial-side { border-left: none; padding-left: 0; border-top: 1px solid var(--gray-200); padding-top: 32px; }
-    }
-
-    .testimonial-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 24px;
-    }
-
-    .testimonial-header .icon { font-size: 20px; }
-    .testimonial-header .label {
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: var(--teal-deep);
-    }
-
-    .testimonial-slider-container {
-        flex: 1;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .testimonial-slides {
-        position: relative;
-        flex: 1;
-        min-height: 250px;
-    }
-
-    .testimonial-slide {
-        position: absolute; inset: 0;
-        opacity: 0; visibility: hidden;
-        transition: all 0.6s ease;
-        transform: translateY(10px);
-        display: flex; flex-direction: column;
-    }
-
-    .testimonial-slide.active {
-        opacity: 1; visibility: visible;
-        transform: translateY(0);
-        position: relative;
-    }
-
-    .testimonial-slide-header {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 16px;
-    }
-
-    .testimonial-avatar {
-        width: 56px; height: 56px;
-        border-radius: 50%;
-        background-size: cover;
-        background-position: center;
-        border: 3px solid var(--gold);
-        flex-shrink: 0;
-    }
-
-    .testimonial-avatar-placeholder {
-        width: 56px; height: 56px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--teal), var(--emerald));
-        color: white;
-        display: flex; align-items: center; justify-content: center;
-        font-family: 'Fraunces', serif;
-        font-weight: 800; font-size: 22px;
-        border: 3px solid var(--gold);
-    }
-
-    .testimonial-info { flex: 1; }
-    .testimonial-name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 2px; }
-    .testimonial-role { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; }
-    .testimonial-stars { color: var(--gold-2); font-size: 13px; letter-spacing: 2px; }
-
-    .testimonial-message {
-        font-family: 'Fraunces', serif;
-        font-size: 18px;
-        color: var(--gray-700);
-        line-height: 1.6;
-        font-style: italic;
-        flex: 1;
-    }
-
-    .testimonial-dots {
-        display: flex;
-        gap: 8px;
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .testimonial-dot {
-        width: 8px; height: 8px;
-        border-radius: 50%;
-        background: var(--gray-300);
-        border: none; cursor: pointer; transition: all 0.3s;
-    }
-    .testimonial-dot.active {
-        width: 28px; border-radius: 4px;
-        background: linear-gradient(90deg, var(--gold), var(--teal));
-    }
     </style>
 </head>
 <body>
+
+    <!-- ===== CUSTOM CURSOR ===== -->
     <div class="cursor-dot" id="cursorDot"></div>
     <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- ===== FLOATING GLASS NAV ===== -->
     <div class="nav-wrapper" id="navbar">
         <nav class="nav-pill">
             <a href="#home" class="nav-brand">
@@ -1397,6 +1177,8 @@
             </div>
         </nav>
     </div>
+
+    <!-- ===== HERO (FULL BACKGROUND) ===== -->
     <section class="hero" id="home">
         <!-- Background Images Container -->
         <div class="hero-bg-layer" id="heroBgContainer">
@@ -1430,8 +1212,7 @@
                     <span class="hero-badge-text">Welcome to MAK DC Investment Company Limited</span>
                 </div>
 
-                <h1 class=
-            "hero-title" id="siteHeroTitle">
+                <h1 class="hero-title" id="siteHeroTitle">
                     <span class="line"><span class="line-inner">Building a</span></span>
                     <span class="line"><span class="line-inner"><em>stronger</em></span></span>
                     <span class="line"><span class="line-inner outline">tomorrow.</span></span>
@@ -1459,6 +1240,8 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== ABOUT & TESTIMONIALS ===== -->
     <section class="section" id="about">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1475,10 +1258,7 @@
                 </div>
             </div>
 
-            <!-- Grid ya Column Mbili Zinazolingana Urefu -->
             <div class="about-testimonial-wrapper fade-in">
-                
-                <!-- Upande wa Kushoto: Picha & Features -->
                 <div class="about-visual-side">
                     <div class="about-image-wrapper">
                         <img id="siteAboutImage" src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=800&q=80" alt="Construction">
@@ -1504,7 +1284,6 @@
                     </div>
                 </div>
 
-                <!-- Upande wa Kulia: Testimonial -->
                 <div class="testimonial-side">
                     <div class="testimonial-header">
                         <span class="icon">💬</span>
@@ -1523,6 +1302,8 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== PRODUCTS ===== -->
     <section class="section section-dark" id="products">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1559,6 +1340,8 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== NEWS ===== -->
     <section class="section" id="news">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1596,6 +1379,8 @@
             <div id="newsPagination" class="pagination-wrap"></div>
         </div>
     </section>
+
+    <!-- ===== PROJECTS ===== -->
     <section class="section section-dark" id="projects">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1621,6 +1406,8 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== LEADERSHIP ===== -->
     <section class="section" id="leadership">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1646,6 +1433,8 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== VISION & MISSION ===== -->
     <section class="section section-dark" id="vision">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1681,6 +1470,8 @@
             </div>
         </div>
     </section>
+
+    <!-- ===== FOOTER ===== -->
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-col">
@@ -1722,6 +1513,8 @@
             <p id="siteCopyright">© 2026 MAK DC Investment Company Limited. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- ===== LEADER BIO MODAL ===== -->
     <div class="leader-bio-overlay" id="leaderBioModal" onclick="if(event.target===this) closeLeaderBio()">
         <div class="leader-bio-box">
             <button class="leader-bio-close" onclick="closeLeaderBio()">✕</button>
@@ -1744,6 +1537,8 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== PROJECT DETAILS MODAL ===== -->
     <div class="project-modal-overlay" id="projectModal" onclick="if(event.target===this) closeProjectModal()">
         <div class="project-modal-box">
             <button class="project-modal-close" onclick="closeProjectModal()">✕</button>
@@ -1759,7 +1554,13 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== CONFIG SCRIPT (We must load this FIRST) ===== -->
+    <script src="config.js"></script>
+
+    <!-- ===== MAIN SCRIPTS ===== -->
     <script>
+        // Custom Cursor Logic
         (function initCustomCursor() {
             const dot = document.getElementById('cursorDot');
             const ring = document.getElementById('cursorRing');
@@ -1781,6 +1582,7 @@
             });
         })();
 
+        // Navbar Scroll
         const navbar = document.getElementById('navbar');
         const navToggle = document.getElementById('navToggle');
         const navLinks = document.getElementById('navLinks');
@@ -1844,7 +1646,7 @@
             const container = document.getElementById('heroBgContainer');
             if (!container) return;
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/hero');
+                const response = await fetch(`${CONFIG.API_URL}/hero`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const slides = await response.json();
                 if (!slides || slides.length === 0) throw new Error('No slides');
@@ -1862,7 +1664,7 @@
         // --- 2. SITE CONTENT API ---
         (async function loadSiteContent() {
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/content');
+                const response = await fetch(`${CONFIG.API_URL}/content`);
                 if (!response.ok) return;
                 const content = await response.json();
                 const setTxt = (id, txt) => { const el = document.getElementById(id); if (el && txt) el.textContent = txt; };
@@ -1879,16 +1681,13 @@
                 setTxt('siteMissionText', content.mission_text);
                 setTxt('siteValuesText', content.values_text);
                 
-                // About Features - Inahitaji kuwekwa kwenye API yako ya content kama 'about_feature_1', n.k.
                 setTxt('siteAboutFeature1', content.about_feature_1);
                 setTxt('siteAboutFeature2', content.about_feature_2);
                 setTxt('siteAboutFeature3', content.about_feature_3);
                 
-                // About Image - Inahitaji kuwekwa kwenye API yako ya content kama 'about_image'
                 const aboutImg = document.getElementById('siteAboutImage');
                 if (aboutImg && content.about_image) aboutImg.src = content.about_image;
 
-                // Contacts
                 const setHTML = (id, html) => { const el = document.getElementById(id); if (el && html) el.innerHTML = html.replace(/\n/g, '<br>'); };
                 setHTML('siteContactAddress', content.contact_address);
                 setTxt('siteContactPhone', content.contact_phone);
@@ -1902,7 +1701,7 @@
             const grid = document.getElementById('productGrid');
             if (!grid) return;
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/products');
+                const response = await fetch(`${CONFIG.API_URL}/products`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const products = await response.json();
                 if (!products || products.length === 0) {
@@ -1929,13 +1728,14 @@
         })();
         function orderProductNow(name) { window.location.href = `customer-portal.html?product=${encodeURIComponent(name)}`; }
 
+        // --- 4. TESTIMONIALS API ---
         let testimonialData = [], testimonialIndex = 0, testimonialTimer = null;
         (async function loadTestimonials() {
             const slidesContainer = document.getElementById('testimonialSlides');
             const dotsContainer = document.getElementById('testimonialDots');
             if (!slidesContainer) return;
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/testimonials');
+                const response = await fetch(`${CONFIG.API_URL}/testimonials`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const testimonials = await response.json();
                 if (!testimonials || testimonials.length === 0) {
@@ -1983,12 +1783,13 @@
             if (slider) { slider.addEventListener('mouseenter', stopAutoPlay); slider.addEventListener('mouseleave', startAutoPlay); }
         });
 
+        // --- 5. NEWS API ---
         let allNewsData = [], currentPage = 1; const NEWS_PER_PAGE = 6;
         (async function loadNews() {
             const grid = document.getElementById('newsGrid');
             if (!grid) return;
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/news');
+                const response = await fetch(`${CONFIG.API_URL}/news`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const news = await response.json();
                 if (!news || news.length === 0) { grid.innerHTML = `<div class="empty-state">No News Yet</div>`; return; }
@@ -2031,12 +1832,13 @@
         }
         function goToNewsPage(page) { currentPage = page; renderNewsPage(); document.getElementById('news')?.scrollIntoView({ behavior: 'smooth' }); }
 
+        // --- 6. PROJECTS API (WITH MODAL) ---
         let allProjectsData = [];
         (async function loadProjects() {
             const grid = document.getElementById('projectsGrid');
             if (!grid) return;
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/projects');
+                const response = await fetch(`${CONFIG.API_URL}/projects`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const projects = await response.json();
                 if (!projects || projects.length === 0) { grid.innerHTML = `<div class="empty-state">Projects Coming Soon</div>`; return; }
@@ -2078,12 +1880,13 @@
             document.getElementById('projectModal').classList.remove('show');
         }
 
+        // --- 7. LEADERSHIP API ---
         let allLeaders = [];
         (async function loadLeadership() {
             const grid = document.getElementById('leadershipGrid');
             if (!grid) return;
             try {
-                const response = await fetch('${CONFIG.API_URL}/api/leadership');
+                const response = await fetch(`${CONFIG.API_URL}/leadership`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const leaders = await response.json();
                 if (!leaders || leaders.length === 0) { grid.innerHTML = `<div class="empty-state">Leadership Coming Soon</div>`; return; }
