@@ -1,6 +1,18 @@
 [build]
   publish = "."
 
+# Hii inahakikisha sitemap.xml na robots.txt hazipelekwi kwenye index.html
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+# Hii inafanya kurasa zako zifanye kazi bila .html
 [[redirects]]
   from = "/*"
   to = "/:splat.html"
