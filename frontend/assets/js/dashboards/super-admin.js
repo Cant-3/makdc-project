@@ -433,6 +433,7 @@ function loadTabData(tabName) {
         case 'orders': loadOrders(); break;
         case 'payments': loadPayments(); break;
         case 'audit': loadAuditLogs(); break;
+        case 'about-us-manager': loadAboutUsContent(); break;
     }
 }
 
@@ -4387,28 +4388,103 @@ function downloadMailAttachment(fileData, fileName) {
     
     showToast('⬇️ Downloading ' + fileName, 'info');
 }
-
-// ================================================================
-// 17. POLLING — CHECK FOR NEW MESSAGES
-// ================================================================
 setInterval(() => {
     if (document.getElementById('tab-mail-center')?.classList.contains('active')) {
         loadMailBadges();
     }
 }, 30000);
-
-// ================================================================
-// 18. INIT MAIL BADGES ON LOAD
-// ================================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadMailBadges().catch(() => {});
     }, 3000);
 });
-// ================================================================
-// 🆕 FUNGA MODALS ZOTE KABLA YA KUFUNGUA MPYA
-// ================================================================
 function closeAllMailModals() {
     document.querySelectorAll('.mc-overlay').forEach(m => m.classList.remove('show'));
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
 }
+async function loadAboutUsContent() {
+    try {
+        let content = await API.getSiteContent();
+        if (!Array.isArray(content)) content = [];
+        
+        const findVal = (key) => {
+            const item = content.find(c => c.key === key);
+            return item ? item.value : '';
+        };
+
+        // 🆕 Kinga: Hakikisha element ipo kabla ya kuweka value
+        const descEl = document.getElementById('aboutDescription');
+        if (descEl) descEl.value = findVal('about_description');
+
+        const visionEl = document.getElementById('aboutVision');
+        if (visionEl) visionEl.value = findVal('about_vision');
+
+        const missionEl = document.getElementById('aboutMission');
+        if (missionEl) missionEl.value = findVal('about_mission');
+
+        const valuesEl = document.getElementById('aboutValues');
+        if (valuesEl) valuesEl.value = findVal('about_values');
+
+    } catch (err) {
+        console.error('Load about us error:', err);
+        showToast('Failed to load about us content', 'error');
+    }
+}
+async function saveAboutUsContent() {
+    const statusDiv = document.getElementById('aboutUsStatus');
+    const btn = event.target;
+    
+    const data = [
+        { key: 'about_description', value: document.getElementById('aboutDescription').value.trim(), category: 'about' },
+        { key: 'about_vision', value: document.getElementById('aboutVision').value.trim(), category: 'about' },
+        { key: 'about_mission', value: document.getElementById('aboutMission').value.trim(), category: 'about' },
+        { key: 'about_values', value: document.getElementById('aboutValues').value.trim(), category: 'about' }
+    ];
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Saving...';
+    statusDiv.className = 'status-msg';
+    statusDiv.style.display = 'none';
+
+    try {
+        // Vuta content zote zilizopo kwanza
+        let existing = await API.getSiteContent();
+        
+        if (!Array.isArray(existing)) {
+            existing = []; 
+        }
+        
+        const existingKeys = existing.map(c => c.key);
+
+        for (const item of data) {
+            if (existingKeys.includes(item.key)) {
+                // Kama ipo, update
+                await API.updateSiteContent(item.key, item.value);
+            } else {
+                // Kama haipo, create
+                await API.createSiteContent(item);
+            }
+        }
+        
+        statusDiv.className = 'status-msg success';
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = '✓ About Us content saved successfully!';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 3000);
+
+    } catch (err) {
+        statusDiv.className = 'status-msg error';
+        statusDiv.style.display = 'block';
+        statusDiv.textContent = '⚠ ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '💾 Save All Changes';
+    }
+}
+
+// Ita function hii ukurasa unapofunguka
+document.addEventListener('DOMContentLoaded', () => {
+    loadAboutUsContent();
+});

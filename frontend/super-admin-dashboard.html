@@ -6,6 +6,17 @@
     <title>Super Admin Dashboard - MAK DC Investment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/super-admin.css">
+    <link rel="icon" type="image/png" href="makdc-logo.jpg">
+    <link rel="apple-touch-icon" href="makdc-logo.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://makdcinvestments.co.tz/">
+    <meta property="og:title" content="MAK DC Investment Company - Quality Service is Our Priority(Huduma bora ni Kipaombele chetu)">
+    <meta property="og:description" content="A trusted partner in quality concrete blocks, building materials, and services that support Tanzania's sustainable growth.">
+    <meta property="og:image" content="https://makdcinvestments.co.tz/assets/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MAK DC Investment Company">
+    <meta name="twitter:description" content="A trusted partner in quality concrete blocks, building materials, and services that support Tanzania's sustainable growth.">
+    <meta name="twitter:image" content="https://makdcinvestments.co.tz/assets/og-image.jpg">
 
     <!-- SUB-TABS CSS -->
     <style>
@@ -101,6 +112,9 @@
             
             <a href="#" onclick="switchTab('content'); return false;">
                 <span>🎨</span><span class="nav-text">Site Content</span>
+            </a>
+            <a href="#" onclick="switchTab('about-us-manager'); return false;">
+                <span>⚙️</span><span class="nav-text">About Us Manager</span>
             </a>
 
             <!-- GROUP 4: OPERATIONS -->
@@ -573,6 +587,45 @@
                             <div id="mailDetailBody" class="mail-detail-scroll"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- TAB: ABOUT US MANAGER -->
+            <div class="tab-content" id="tab-about-us-manager">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">⚙️ About Us Manager</h1>
+                        <p class="page-subtitle">Manage company information, vision, mission, and values</p>
+                    </div>
+                    <button class="btn-primary" onclick="saveAboutUsContent()">💾 Save All Changes</button>
+                </div>
+
+                <div class="data-card" style="padding: 24px;">
+                    <div class="form-grid-2">
+                        <!-- Company Description -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Company Description / About Us Text</label>
+                            <textarea id="aboutDescription" rows="5" placeholder="Write a detailed description about the company..."></textarea>
+                        </div>
+
+                        <!-- Vision -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>🎯 Our Vision</label>
+                            <textarea id="aboutVision" rows="3" placeholder="Enter company vision..."></textarea>
+                        </div>
+
+                        <!-- Mission -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>🚀 Our Mission</label>
+                            <textarea id="aboutMission" rows="3" placeholder="Enter company mission..."></textarea>
+                        </div>
+
+                        <!-- Values -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>💎 Our Values</label>
+                            <textarea id="aboutValues" rows="3" placeholder="Enter company values..."></textarea>
+                        </div>
+                    </div>
+                    <div id="aboutUsStatus" class="status-msg"></div>
                 </div>
             </div>
         </div>

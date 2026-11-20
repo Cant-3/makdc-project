@@ -1,22 +1,9 @@
-// ================================================================
-// MAK DC INVESTMENT — SITE CONTENT CONTROLLER
-// ================================================================
-// Handles: List, Get, Update site content
-// ================================================================
-
 const { prisma } = require('../config/database');
-
-// ================================================================
-// LIST ALL SITE CONTENT
-// GET /api/content
-// ================================================================
 async function listContent(req, res) {
     try {
         const content = await prisma.siteContent.findMany({
             orderBy: { key: 'asc' }
         });
-
-        // Return as key-value object for easy frontend use
         const contentMap = {};
         content.forEach(item => {
             contentMap[item.key] = item.value;
@@ -29,11 +16,6 @@ async function listContent(req, res) {
         res.status(500).json({ error: 'Failed to fetch content.' });
     }
 }
-
-// ================================================================
-// GET SINGLE CONTENT BY KEY
-// GET /api/content/:key
-// ================================================================
 async function getContent(req, res) {
     try {
         const { key } = req.params;
@@ -53,17 +35,10 @@ async function getContent(req, res) {
         res.status(500).json({ error: 'Failed to fetch content.' });
     }
 }
-
-// ================================================================
-// UPDATE CONTENT BY KEY
-// PUT /api/content/:key
-// ================================================================
 async function updateContent(req, res) {
     try {
         const { key } = req.params;
         const { value } = req.body;
-
-        // Upsert (update or create)
         const content = await prisma.siteContent.upsert({
             where: { key },
             update: {
@@ -78,8 +53,6 @@ async function updateContent(req, res) {
                 updatedBy: req.user.userId
             }
         });
-
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -101,9 +74,40 @@ async function updateContent(req, res) {
         res.status(500).json({ error: 'Failed to update content.' });
     }
 }
+async function createOrUpdateContent(req, res) {
+    try {
+        const { key, value, category } = req.body;
 
+        if (!key || !value) {
+            return res.status(400).json({ error: 'Key and value are required.' });
+        }
+
+        const content = await prisma.siteContent.upsert({
+            where: { key: key },
+            update: { 
+                value: value,
+                ...(category && { category })
+            },
+            create: { 
+                key: key, 
+                value: value,
+                category: category || 'general'
+            }
+        });
+
+        res.status(200).json({
+            message: 'Content saved successfully!',
+            content
+        });
+
+    } catch (err) {
+        console.error('❌ Save content error:', err);
+        res.status(500).json({ error: 'Failed to save content.' });
+    }
+}
 module.exports = {
     listContent,
     getContent,
+    createOrUpdateContent,
     updateContent
 };

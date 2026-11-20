@@ -33,11 +33,11 @@ const API = {
     updateUser(userId, userData) { return this.put(`/users/${userId}`, userData); },
     deleteUser(userId) { return this.delete(`/users/${userId}`); },
 
-    // SITE CONTENT
+   // SITE CONTENT
     getSiteContent() { return this.get('/content'); },
+    createSiteContent(data) { return this.post('/content', data); }, // 🆕 Tumia POST
     updateSiteContent(key, value) { return this.put(`/content/${key}`, { value }); },
-
-    // ORDERS
+        // ORDERS
     getOrders() { return this.get('/orders'); },
     getOrder(orderId) { return this.get(`/orders/${orderId}`); },
     createOrder(data) { return this.post('/orders', data); },
