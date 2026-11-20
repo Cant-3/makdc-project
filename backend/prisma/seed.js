@@ -145,7 +145,7 @@ async function main() {
     // 6. UNDA SITE CONTENT (kwa Super Admin kubadili)
     // ============================================================
     const siteContentDefaults = [
-        { key: 'hero_title', value: 'Building a stronger tomorrow.', category: 'hero' },
+        { key: 'hero_title', value: 'Quality Service is Our Priority', category: 'hero' },
         { key: 'hero_subtitle', value: 'A trusted partner in quality concrete blocks, building materials, and services that support Tanzania\'s sustainable growth.', category: 'hero' },
         { key: 'about_text', value: 'MAK DC Investment Company Limited is a construction materials company focused on quality concrete blocks, reliable building materials, and services that support Tanzania\'s growing communities.', category: 'about' },
         { key: 'hero_side_text', value: 'A trusted supplier of quality construction materials across Tanzania — helping builders and contractors operate efficiently since 2006.', category: 'hero' },
