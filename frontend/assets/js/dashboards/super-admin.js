@@ -4402,89 +4402,337 @@ function closeAllMailModals() {
     document.querySelectorAll('.mc-overlay').forEach(m => m.classList.remove('show'));
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
 }
-async function loadAboutUsContent() {
-    try {
-        let content = await API.getSiteContent();
-        if (!Array.isArray(content)) content = [];
-        
-        const findVal = (key) => {
-            const item = content.find(c => c.key === key);
-            return item ? item.value : '';
-        };
-
-        // 🆕 Kinga: Hakikisha element ipo kabla ya kuweka value
-        const descEl = document.getElementById('aboutDescription');
-        if (descEl) descEl.value = findVal('about_description');
-
-        const visionEl = document.getElementById('aboutVision');
-        if (visionEl) visionEl.value = findVal('about_vision');
-
-        const missionEl = document.getElementById('aboutMission');
-        if (missionEl) missionEl.value = findVal('about_mission');
-
-        const valuesEl = document.getElementById('aboutValues');
-        if (valuesEl) valuesEl.value = findVal('about_values');
-
-    } catch (err) {
-        console.error('Load about us error:', err);
-        showToast('Failed to load about us content', 'error');
-    }
-}
-async function saveAboutUsContent() {
-    const statusDiv = document.getElementById('aboutUsStatus');
-    const btn = event.target;
-    
-    const data = [
-        { key: 'about_description', value: document.getElementById('aboutDescription').value.trim(), category: 'about' },
-        { key: 'about_vision', value: document.getElementById('aboutVision').value.trim(), category: 'about' },
-        { key: 'about_mission', value: document.getElementById('aboutMission').value.trim(), category: 'about' },
-        { key: 'about_values', value: document.getElementById('aboutValues').value.trim(), category: 'about' }
-    ];
-
-    btn.disabled = true;
-    btn.innerHTML = '⏳ Saving...';
-    statusDiv.className = 'status-msg';
-    statusDiv.style.display = 'none';
-
-    try {
-        // Vuta content zote zilizopo kwanza
-        let existing = await API.getSiteContent();
-        
-        if (!Array.isArray(existing)) {
-            existing = []; 
-        }
-        
-        const existingKeys = existing.map(c => c.key);
-
-        for (const item of data) {
-            if (existingKeys.includes(item.key)) {
-                // Kama ipo, update
-                await API.updateSiteContent(item.key, item.value);
-            } else {
-                // Kama haipo, create
-                await API.createSiteContent(item);
-            }
-        }
-        
-        statusDiv.className = 'status-msg success';
-        statusDiv.style.display = 'block';
-        statusDiv.textContent = '✓ About Us content saved successfully!';
-        
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-        }, 3000);
-
-    } catch (err) {
-        statusDiv.className = 'status-msg error';
-        statusDiv.style.display = 'block';
-        statusDiv.textContent = '⚠ ' + err.message;
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '💾 Save All Changes';
-    }
-}
-
-// Ita function hii ukurasa unapofunguka
 document.addEventListener('DOMContentLoaded', () => {
     loadAboutUsContent();
 });
+
+let aboutQuill = null;
+function initAboutEditor() {
+    if (aboutQuill) return; 
+
+    aboutQuill = new Quill('#aboutDescriptionEditor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],        // Text formatting
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],    // Numbers & Bullets
+                [{ 'header': [1, 2, 3, false] }],                 // Headers
+                [{ 'align': [] }],                                // Alignment
+                ['link', 'clean']                                 // Link na Clear format
+            ]
+        },
+        placeholder: 'Andika maelezo hapa... Unaweza kuweka Bold, Underline, Numbers n.k.'
+    });
+
+    // Sasisha input ya siri kila unapoandika
+    aboutQuill.on('text-change', function() {
+        document.getElementById('aboutDescription').value = aboutQuill.root.innerHTML;
+    });
+}
+
+// 2. Handle Image Upload (Kutoka Local Storage)
+function handleAboutImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Angalia ukubwa (Max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        Toast.error('Picha ni kubwa mno (Max 2MB)');
+        event.target.value = '';
+        return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+        Toast.error('Tafadhali chagua faili la picha');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        
+        // Hifadhi kwenye input ya siri
+        document.getElementById('aboutImageBase64').value = base64;
+        
+        // Onyesha Preview
+        const preview = document.getElementById('aboutImagePreview');
+        preview.innerHTML = `<img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        preview.style.border = '2px solid #22c55e'; // Green border to show success
+    };
+    reader.readAsDataURL(file);
+}
+
+// 3. Ondoa Picha
+function removeAboutImage() {
+    document.getElementById('aboutImageBase64').value = '';
+    document.getElementById('aboutImageInput').value = '';
+    const preview = document.getElementById('aboutImagePreview');
+    preview.innerHTML = '<span>🖼️</span>';
+    preview.style.border = '2px dashed #cbd5e1';
+}
+// Function ya kubadilisha tabs ndani ya About Us
+function switchAboutSubTab(subtabName, btn) {
+    // Ficha zote
+    document.querySelectorAll('#tab-about-us-manager .content-subtab').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('#tab-about-us-manager .subtab-btn').forEach(el => el.classList.remove('active'));
+    
+    // Onyesha iliyochaguliwa
+    document.getElementById('about-subtab-' + subtabName).classList.add('active');
+    if (btn) btn.classList.add('active');
+}
+// ================================================================
+// LOAD ABOUT US CONTENT (ILIBORESHWA)
+// ================================================================
+async function loadAboutUsContent() {
+    try {
+        // 1. Hakikisha Quill Editor imeanzishwa kabla ya kupakia data
+        initAboutEditor();
+        
+        // 2. Vuta content zote kutoka API
+        const content = await API.getSiteContent();
+        
+        // 3. Badilisha Array kuwa Object kwa urahisi wa kusoma
+        const contentMap = {};
+        if (Array.isArray(content)) {
+            content.forEach(item => { contentMap[item.key] = item.value; });
+        } else if (content && typeof content === 'object') {
+            Object.assign(contentMap, content);
+        }
+        
+        // Helper function ya kuweka value kwenye input
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+        
+        // ===== 1. TAARIFA ZA JUMLA (General Info) =====
+        setVal('aboutCompanyName', contentMap.about_company_name || contentMap.company_name);
+        setVal('aboutCompanySubtitle', contentMap.about_company_subtitle || contentMap.company_subtitle);
+        
+        // ===== 2. PICHA YA HERO (Hero Image) =====
+        const imageUrl = contentMap.about_image_url || contentMap.about_image || '';
+        if (imageUrl) {
+            document.getElementById('aboutImageBase64').value = imageUrl;
+            const preview = document.getElementById('aboutImagePreview');
+            if (preview) {
+                preview.innerHTML = `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+                preview.style.border = '2px solid #22c55e';
+            }
+        } else {
+            removeAboutImage();
+        }
+        
+        // ===== 3. MAELEZO (Quill Editor) =====
+        const descHtml = contentMap.about_description || contentMap.about_text || '';
+        if (aboutQuill) {
+            aboutQuill.root.innerHTML = descHtml;
+        }
+        // Weka kwenye hidden input pia
+        document.getElementById('aboutDescription').value = descHtml;
+        
+        // ===== 4. MITANDAO YA KIJAMII (Social Media) =====
+        setVal('socialFacebook', contentMap.social_facebook);
+        setVal('socialInstagram', contentMap.social_instagram);
+        setVal('socialWhatsapp', contentMap.social_whatsapp);
+        setVal('socialLinkedin', contentMap.social_linkedin);
+        setVal('socialTwitter', contentMap.social_twitter);
+        setVal('socialYoutube', contentMap.social_youtube);
+        
+        // ===== 5. DIRA, MISHENI NA DHIMA (Vision, Mission, Values) =====
+        setVal('aboutVision', contentMap.about_vision || contentMap.vision_text);
+        setVal('aboutMission', contentMap.about_mission || contentMap.mission_text);
+        setVal('aboutValues', contentMap.about_values || contentMap.values_text);
+        
+        // ===== 6. SHUGHULI (Activities) =====
+        setVal('activity1Title', contentMap['about_activity_1_title']);
+        setVal('activity1Desc', contentMap['about_activity_1_desc']);
+        setVal('activity1Image', contentMap['about_activity_1_image']);
+        if (contentMap['about_activity_1_image']) {
+            document.getElementById('activity1ImageName').textContent = 'Picha imepakiwa';
+            document.getElementById('activity1ImageName').style.color = '#16a34a';
+        }
+
+        setVal('activity2Title', contentMap['about_activity_2_title']);
+        setVal('activity2Desc', contentMap['about_activity_2_desc']);
+        setVal('activity2Image', contentMap['about_activity_2_image']);
+        if (contentMap['about_activity_2_image']) {
+            document.getElementById('activity2ImageName').textContent = 'Picha imepakiwa';
+            document.getElementById('activity2ImageName').style.color = '#16a34a';
+        }
+        // Load Features
+        setVal('feature1', contentMap['home_feature_1']);
+        setVal('feature2', contentMap['home_feature_2']);
+        setVal('feature3', contentMap['home_feature_3']);
+
+        setVal('activity3Title', contentMap['about_activity_3_title']);
+        setVal('activity3Desc', contentMap['about_activity_3_desc']);
+        setVal('activity3Image', contentMap['about_activity_3_image']);
+        if (contentMap['about_activity_3_image']) {
+            document.getElementById('activity3ImageName').textContent = 'Picha imepakiwa';
+            document.getElementById('activity3ImageName').style.color = '#16a34a';
+        }
+        
+        console.log('✅ About Us content loaded successfully');
+        
+    } catch (err) {
+        console.error('Load About Us error:', err);
+        const statusDiv = document.getElementById('aboutUsStatus');
+        if (statusDiv) {
+            statusDiv.className = 'status-msg error';
+            statusDiv.textContent = '⚠ Imeshindikana kupakia taarifa: ' + err.message;
+            statusDiv.style.display = 'block';
+        }
+    }
+}
+function handleActivityImageUpload(event, activityNumber) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+        Toast.error('Picha ni kubwa mno (Max 2MB)');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        document.getElementById(`activity${activityNumber}Image`).value = base64;
+        document.getElementById(`activity${activityNumber}ImageName`).textContent = file.name;
+        document.getElementById(`activity${activityNumber}ImageName`).style.color = '#16a34a';
+    };
+    reader.readAsDataURL(file);
+}
+// ================================================================
+// SAVE ABOUT US CONTENT (FIXED)
+// ================================================================
+async function saveAboutUsContent() {
+    const statusDiv = document.getElementById('aboutUsStatus');
+    statusDiv.className = 'status-msg';
+    statusDiv.textContent = '⏳ Inahifadhi...';
+    statusDiv.style.display = 'block';
+    const descriptionHtml = aboutQuill ? aboutQuill.root.innerHTML : '';
+    const imageBase64 = document.getElementById('aboutImageBase64')?.value || '';
+    
+    // 2. Chukua data za Shughuli (Activities)
+    const activity1Title = document.getElementById('activity1Title')?.value.trim() || '';
+    const activity1Desc = document.getElementById('activity1Desc')?.value.trim() || '';
+    const activity1Image = document.getElementById('activity1Image')?.value || ''; // 🆕
+
+    const activity2Title = document.getElementById('activity2Title')?.value.trim() || '';
+    const activity2Desc = document.getElementById('activity2Desc')?.value.trim() || '';
+    const activity2Image = document.getElementById('activity2Image')?.value || ''; // 🆕
+
+    const activity3Title = document.getElementById('activity3Title')?.value.trim() || '';
+    const activity3Desc = document.getElementById('activity3Desc')?.value.trim() || '';
+    const activity3Image = document.getElementById('activity3Image')?.value || ''; // 🆕
+    // Chukua data za Takwimu
+    const stat1Number = document.getElementById('stat1Number')?.value.trim() || '';
+    const stat1Label = document.getElementById('stat1Label')?.value.trim() || '';
+    const stat1Desc = document.getElementById('stat1Desc')?.value.trim() || '';
+
+    const stat2Number = document.getElementById('stat2Number')?.value.trim() || '';
+    const stat2Label = document.getElementById('stat2Label')?.value.trim() || '';
+    const stat2Desc = document.getElementById('stat2Desc')?.value.trim() || '';
+
+    const stat3Number = document.getElementById('stat3Number')?.value.trim() || '';
+    const stat3Label = document.getElementById('stat3Label')?.value.trim() || '';
+    const stat3Desc = document.getElementById('stat3Desc')?.value.trim() || '';
+    // Chukua thamani za vipengele
+    const feature1 = document.getElementById('feature1')?.value.trim() || '';
+    const feature2 = document.getElementById('feature2')?.value.trim() || '';
+    const feature3 = document.getElementById('feature3')?.value.trim() || '';
+
+    // 3. Tengeneza Object ya data zote
+    const fieldsToUpdate = {
+        // General
+        'about_company_name': document.getElementById('aboutCompanyName')?.value.trim(),
+        'about_company_subtitle': document.getElementById('aboutCompanySubtitle')?.value.trim(),
+        'about_image_url': imageBase64,
+        'about_description': descriptionHtml,
+        
+        // Social Media (Tumia optional chaining ?. ili kuzuia kosa kama field haipo)
+        'social_facebook': document.getElementById('socialFacebook')?.value.trim(),
+        'social_instagram': document.getElementById('socialInstagram')?.value.trim(),
+        'social_whatsapp': document.getElementById('socialWhatsapp')?.value.trim(),
+        'social_linkedin': document.getElementById('socialLinkedin')?.value.trim(),
+        
+        // Vision / Mission / Values
+        'about_vision': document.getElementById('aboutVision')?.value.trim(),
+        'about_mission': document.getElementById('aboutMission')?.value.trim(),
+        'about_values': document.getElementById('aboutValues')?.value.trim(),
+        
+        // Activities (Shughuli)
+        'about_activity_1_title': activity1Title,
+        'about_activity_1_desc': activity1Desc,
+        'about_activity_1_image': activity1Image, // 🆕
+        'about_activity_2_title': activity2Title,
+        'about_activity_2_desc': activity2Desc,
+        'about_activity_2_image': activity2Image, // 🆕
+        'about_activity_3_title': activity3Title,
+        'about_activity_3_desc': activity3Desc,
+        'about_activity_3_image': activity3Image,  // 🆕
+         // Hifadhi Takwimu
+        'about_stat_1_number': stat1Number,
+        'about_stat_1_label': stat1Label,
+        'about_stat_1_desc': stat1Desc,
+        'about_stat_2_number': stat2Number,
+        'about_stat_2_label': stat2Label,
+        'about_stat_2_desc': stat2Desc,
+        'about_stat_3_number': stat3Number,
+        'about_stat_3_label': stat3Label,
+        'about_stat_3_desc': stat3Desc,
+
+        'home_feature_1': feature1,
+        'home_feature_2': feature2,
+        'home_feature_3': feature3
+    };
+    
+    try {
+        // 4. Vuta content zote zilizopo kwenye database
+        let existing = await API.getSiteContent();
+        if (!Array.isArray(existing)) existing = [];
+        const existingKeys = existing.map(c => c.key);
+        
+        // 5. Pitia kila key na u-save
+        for (const [key, value] of Object.entries(fieldsToUpdate)) {
+            // 🆕 KAMATA KOSA: Kama value ni tupu au undefined, RUKA (usi-save)
+            if (value === undefined || value === null || value === '') {
+                continue; 
+            }
+            
+            // Kama key ipo, update. Kama haipo, create.
+            if (existingKeys.includes(key)) {
+                await API.updateSiteContent(key, value);
+            } else {
+                await API.createSiteContent({ key, value, category: 'about' });
+            }
+        }
+        
+        // 6. Onyesha ujumbe wa mafanikio
+        statusDiv.className = 'status-msg success';
+        statusDiv.textContent = '✓ About Us content updated successfully!';
+        Toast.success('✅ About Us imehifadhiwa!');
+        
+        setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+        // Load Stats
+        setVal('stat1Number', contentMap['about_stat_1_number'] || '2025');
+        setVal('stat1Label', contentMap['about_stat_1_label'] || 'Mwaka wa Kuanzishwa');
+        setVal('stat1Desc', contentMap['about_stat_1_desc'] || 'Kampuni ilianzishwa kufuatia mwongozo wa Serikali wa SPV.');
+
+        setVal('stat2Number', contentMap['about_stat_2_number'] || '9+');
+        setVal('stat2Label', contentMap['about_stat_2_label'] || 'Miradi ya Kimkakati');
+        setVal('stat2Desc', contentMap['about_stat_2_desc'] || 'Miradi inayolenga kuongeza mapato na huduma kwa wananchi.');
+
+        setVal('stat3Number', contentMap['about_stat_3_number'] || '100%');
+        setVal('stat3Label', contentMap['about_stat_3_label'] || 'Uadilifu na Ubora');
+        setVal('stat3Desc', contentMap['about_stat_3_desc'] || 'Tunajitolea kutoa huduma bora kwa viwango vya kimataifa.');
+        
+    } catch (err) {
+        console.error('Save About Us error:', err);
+        statusDiv.className = 'status-msg error';
+        statusDiv.textContent = '⚠ ' + err.message;
+        Toast.error('Imeshindikana kuhifadhi: ' + err.message);
+    }
+}

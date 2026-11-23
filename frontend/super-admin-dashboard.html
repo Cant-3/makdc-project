@@ -8,17 +8,16 @@
     <link rel="stylesheet" href="assets/css/super-admin.css">
     <link rel="icon" type="image/png" href="makdc-logo.jpg">
     <link rel="apple-touch-icon" href="makdc-logo.jpg">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <!-- Meta tags ... (Zinaendelea kama zilivyokuwa) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://makdcinvestments.co.tz/">
-    <meta property="og:title" content="MAK DC Investment Company - Quality Service is Our Priority(Huduma bora ni Kipaombele chetu)">
-    <meta property="og:description" content="A trusted partner in quality concrete blocks, building materials, and services that support Tanzania's sustainable growth.">
+    <meta property="og:title" content="MAK DC Investment Company">
+    <meta property="og:description" content="A trusted partner in quality concrete blocks, building materials, and services.">
     <meta property="og:image" content="https://makdcinvestments.co.tz/assets/og-image.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="MAK DC Investment Company">
-    <meta name="twitter:description" content="A trusted partner in quality concrete blocks, building materials, and services that support Tanzania's sustainable growth.">
-    <meta name="twitter:image" content="https://makdcinvestments.co.tz/assets/og-image.jpg">
 
-    <!-- SUB-TABS CSS -->
     <style>
         .subtabs-header {
             display: flex;
@@ -84,16 +83,12 @@
         <p class="sidebar-label">🦸 Super Admin Menu</p>
 
         <nav class="sidebar-nav">
-            <!-- GROUP 1: OVERVIEW -->
             <p class="sidebar-section-label">📊 DASHBOARD</p>
-            
             <a class="active" href="#" onclick="switchTab('overview'); return false;">
                 <span>📊</span><span class="nav-text">Overview</span>
             </a>
 
-            <!-- GROUP 2: MANAGEMENT -->
             <p class="sidebar-section-label">👥 MANAGEMENT</p>
-            
             <a href="#" onclick="switchTab('users'); return false;">
                 <span>👥</span><span class="nav-text">Users</span>
                 <span class="nav-badge" id="navUsersBadge">0</span>
@@ -107,9 +102,7 @@
                 <span class="nav-badge" id="navProductsBadge">0</span>
             </a>
 
-            <!-- GROUP 3: WEBSITE -->
             <p class="sidebar-section-label">🌐 WEBSITE</p>
-            
             <a href="#" onclick="switchTab('content'); return false;">
                 <span>🎨</span><span class="nav-text">Site Content</span>
             </a>
@@ -117,9 +110,7 @@
                 <span>⚙️</span><span class="nav-text">About Us Manager</span>
             </a>
 
-            <!-- GROUP 4: OPERATIONS -->
             <p class="sidebar-section-label">⚙️ OPERATIONS</p>
-            
             <a href="#" onclick="switchTab('orders'); return false;">
                 <span>📦</span><span class="nav-text">Orders</span>
             </a>
@@ -164,7 +155,6 @@
                         📩
                         <span id="mailHeaderBadge" class="mail-header-badge">0</span>
                     </button>
-                <!-- USER DROPDOWN -->
                 <div class="user-dropdown-wrap" id="userDropdownWrap">
                     <button class="user-dropdown-trigger" onclick="toggleUserDropdown(event)">
                         <div class="ud-avatar" id="udAvatar"><span id="udInitials">SA</span></div>
@@ -197,13 +187,6 @@
                                     <div class="udp-info-value" id="udpPhone">—</div>
                                 </div>
                             </div>
-                            <div class="udp-info-item">
-                                <span class="udp-ic">🆔</span>
-                                <div class="udp-info-text">
-                                    <div class="udp-info-label">Title</div>
-                                    <div class="udp-info-value" id="udpTitle">System Owner</div>
-                                </div>
-                            </div>
                         </div>
                         <div class="udp-actions">
                             <button class="udp-btn edit" onclick="openEditProfileModal(); closeUserDropdown();">🖋️ Edit Profile</button>
@@ -217,14 +200,11 @@
 
         <div class="dashboard-content">
 
-        <!-- TAB 1: OVERVIEW (EXECUTIVE MASTER CONTROL) -->
-        <div class="tab-content active" id="tab-overview" style="background-color: #f8fafc; padding: 24px; border-radius: 24px; min-height: 100vh; font-family: 'Inter', sans-serif;">
-
-            <!-- HERO SECTION -->
-            <div style="position: relative; background: linear-gradient(135deg, rgba(26, 36, 33, 0.95) 0%, rgba(15, 22, 20, 0.98) 100%); border-radius: 24px; padding: 40px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); margin-bottom: 30px;">
-                <div style="position: absolute; top: -100px; right: -50px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
-                
-                <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+        <!-- TAB 1: OVERVIEW -->
+        <div class="tab-content active" id="tab-overview" style="background-color: #f8fafc; padding: 24px; border-radius: 24px; min-height: 100vh;">
+            <!-- (Maudhui ya Overview yapo kama yalivyokuwa) -->
+            <div style="position: relative; background: linear-gradient(135deg, rgba(26, 36, 33, 0.95) 0%, rgba(15, 22, 20, 0.98) 100%); border-radius: 24px; padding: 40px; overflow: hidden; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
                     <div>
                         <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 6px 16px; border-radius: 30px; font-size: 12px; font-weight: 800; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
                             <span>👑</span> Executive Command Center
@@ -234,48 +214,33 @@
                         </h1>
                         <p style="color: #94a3b8; font-size: 15px; font-weight: 500;">Full system oversight. All nodes operational.</p>
                     </div>
-                    
                     <div style="text-align: right; background: rgba(0,0,0,0.3); padding: 16px 24px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.2);">
                         <div style="font-size: 32px; font-weight: 900; color: #f59e0b; font-family: monospace; letter-spacing: 2px;" id="liveClock">00:00:00</div>
                         <div style="font-size: 12px; color: #94a3b8; font-weight: 700; letter-spacing: 1px; margin-top: 4px;" id="liveDate">LOADING DATE...</div>
                     </div>
                 </div>
             </div>
-
-            <!-- MAIN GRID -->
             <div style="display: grid; grid-template-columns: 2.2fr 1fr; gap: 24px;">
-                
-                <!-- LEFT COLUMN -->
                 <div>
-                    <!-- 1. System Usage Trend -->
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 24px;">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 24px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">📈 System Usage Trend</h3>
-                            <select id="trendRange" onchange="loadOverview()" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer;">
+                            <h3 style="font-size: 18px; font-weight: 800; color: #1e293b;">📈 System Usage Trend</h3>
+                            <select id="trendRange" onchange="loadOverview()" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;">
                                 <option value="7">Last 7 Days</option>
                                 <option value="30">Last 30 Days</option>
                             </select>
-                        </div> <!-- 🆕 HAPA NDIPO DIV ILIKUWA HAIJAFUNGWA -->
-                        <div style="height: 320px; width: 100%;">
-                            <canvas id="systemUsageChart"></canvas>
                         </div>
+                        <div style="height: 320px; width: 100%;"><canvas id="systemUsageChart"></canvas></div>
                     </div>
-
-                    <!-- 2. Module Activity (Line Graph) -->
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px;">
                         <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px;">📊 Module Activity Trends</h3>
-                        <div style="height: 300px; width: 100%;">
-                            <canvas id="moduleActivityChart"></canvas>
-                        </div>
+                        <div style="height: 300px; width: 100%;"><canvas id="moduleActivityChart"></canvas></div>
                     </div>
                 </div>
-
-                <!-- RIGHT COLUMN -->
                 <div>
-                    <!-- 1. LIVE TRAFFIC -->
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 24px;">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; margin-bottom: 24px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">🌍 Live Traffic</h3>
+                            <h3 style="font-size: 18px; font-weight: 800; color: #1e293b;">🌍 Live Traffic</h3>
                             <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(34, 197, 94, 0.1); color: #16a34a; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;">
                                 <span style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></span> LIVE
                             </span>
@@ -283,868 +248,637 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
                             <div style="background: #f8fafc; padding: 16px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">
                                 <div style="font-size: 28px; font-weight: 900; color: #f59e0b;" id="onlineNowCount">0</div>
-                                <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">Online Now</div>
+                                <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Online Now</div>
                             </div>
                             <div style="background: #f8fafc; padding: 16px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">
                                 <div style="font-size: 28px; font-weight: 900; color: #3b82f6;" id="todayVisitorsCount">0</div>
-                                <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">Today's Visitors</div>
+                                <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Today's Visitors</div>
                             </div>
                         </div>
                         <div style="margin-bottom: 20px;">
                             <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; justify-content: space-between;">
-                                <span>Top Locations</span>
-                                <span>Visitors</span>
+                                <span>Top Locations</span><span>Visitors</span>
                             </div>
-                            <div id="locationTrafficContainer">
-                                <div style="text-align: center; color: #64748b; font-size: 12px;">⏳ Loading locations...</div>
-                            </div>
+                            <div id="locationTrafficContainer"><div style="text-align: center; color: #64748b; font-size: 12px;">⏳ Loading...</div></div>
                         </div>
                         <div>
                             <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Device Breakdown</div>
-                            <div style="display: flex; gap: 8px; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 10px;" id="deviceBreakdownBar">
-                                <!-- JS itajaza hapa -->
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #64748b;" id="deviceLabels">
-                                <!-- JS itajaza hapa -->
-                            </div>
+                            <div style="display: flex; gap: 8px; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 10px;" id="deviceBreakdownBar"></div>
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #64748b;" id="deviceLabels"></div>
                         </div>
                     </div>
-
-                    <!-- 2. RECENT ACTIVITY -->
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); flex: 1;">
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px;">
                         <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px;">🕒 Live Activity Feed</h3>
                         <div id="liveActivityFeed" style="position: relative; padding-left: 20px; border-left: 2px solid #e2e8f0;">
-                            <div style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">⏳ Connecting to server...</div>
+                            <div style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">⏳ Connecting...</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-            <!-- TAB 2: USERS -->
-            <div class="tab-content" id="tab-users">
-                <div class="page-header">
+
+        <!-- TAB 2: USERS -->
+        <div class="tab-content" id="tab-users">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">👥 User Management</h1>
+                    <p class="page-subtitle">Manage all system users</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary" onclick="exportUsersToCSV()" style="background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; font-weight: 700;">
+                        📥 Export CSV
+                    </button>
+                    <button class="btn-primary" onclick="openAddUserModal()">➕ Add User</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <div id="usersContainer" class="data-container">
+                    <div class="loading-state">⏳ Loading users...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SITE CONTENT -->
+        <div class="tab-content" id="tab-content">
+            <h1 class="page-title">🎨 Site Content Manager</h1>
+            <p class="page-subtitle">Edit content displayed on the website</p>
+
+            <div class="subtabs-header">
+                <button class="subtab-btn active" onclick="switchContentSubTab('general', this)">📝 General</button>
+                <button class="subtab-btn" onclick="switchContentSubTab('testimonials', this)">⭐ Testimonials</button>
+                <button class="subtab-btn" onclick="switchContentSubTab('news', this)">📰 News</button>
+                <button class="subtab-btn" onclick="switchContentSubTab('projects', this)">🏗️ Projects</button>
+                <button class="subtab-btn" onclick="switchContentSubTab('hero', this)">🖼️ Hero Slides</button>
+            </div>
+
+            <div class="content-subtab active" id="content-subtab-general">
+                <div class="page-header" style="margin-bottom:16px;">
                     <div>
-                        <h1 class="page-title">👥 User Management</h1>
-                        <p class="page-subtitle">Manage all system users</p>
+                        <h2 class="page-title" style="font-size:20px;">🎨 Site Content</h2>
+                        <p class="page-subtitle">Manage text and content displayed on the website</p>
+                    </div>
+                    <button class="btn-primary" onclick="openAddContentModal()">➕ Add Content</button>
+                </div>
+                <div class="data-card">
+                    <div id="contentContainer" class="data-container"><div class="loading-state">⏳ Loading content...</div></div>
+                </div>
+            </div>
+
+            <div class="content-subtab" id="content-subtab-testimonials">
+                <div class="page-header" style="margin-bottom:16px;">
+                    <div><h2 class="page-title" style="font-size:20px;">⭐ Testimonials</h2><p class="page-subtitle">Manage customer reviews</p></div>
+                    <button class="btn-primary" onclick="openAddTestimonialModal()">➕ Add Testimonial</button>
+                </div>
+                <div class="data-card"><div id="testimonialsContainer" class="data-container"><div class="loading-state">⏳ Loading testimonials...</div></div></div>
+            </div>
+
+            <div class="content-subtab" id="content-subtab-news">
+                <div class="page-header" style="margin-bottom:16px;">
+                    <div><h2 class="page-title" style="font-size:20px;">📰 News</h2><p class="page-subtitle">Manage news articles</p></div>
+                    <button class="btn-primary" onclick="openAddNewsModal()">➕ Add News</button>
+                </div>
+                <div class="data-card"><div id="newsContainer" class="data-container"><div class="loading-state">⏳ Loading news...</div></div></div>
+            </div>
+
+            <div class="content-subtab" id="content-subtab-projects">
+                <div class="page-header" style="margin-bottom:16px;">
+                    <div><h2 class="page-title" style="font-size:20px;">🏗️ Projects</h2><p class="page-subtitle">Manage projects</p></div>
+                    <button class="btn-primary" onclick="openAddProjectModal()">➕ Add Project</button>
+                </div>
+                <div class="data-card"><div id="projectsContainer" class="data-container"><div class="loading-state">⏳ Loading projects...</div></div></div>
+            </div>
+
+            <div class="content-subtab" id="content-subtab-hero">
+                <div class="page-header" style="margin-bottom:16px;">
+                    <div><h2 class="page-title" style="font-size:20px;">🖼️ Hero Slides</h2><p class="page-subtitle">Manage hero images</p></div>
+                    <button class="btn-primary" onclick="openAddHeroModal()">➕ Add Slide</button>
+                </div>
+                <div class="data-card"><div id="heroContainer" class="data-container"><div class="loading-state">⏳ Loading hero slides...</div></div></div>
+            </div>
+        </div>
+
+        <!-- TAB 3.5: LEADERSHIP -->
+        <div class="tab-content" id="tab-leadership">
+            <div class="page-header">
+                <div><h1 class="page-title">👔 Leadership Management</h1><p class="page-subtitle">Manage company leadership</p></div>
+                <button class="btn-primary" onclick="openAddLeaderModal()">➕ Add Leader</button>
+            </div>
+            <div class="data-card"><div id="leadershipContainer" class="data-container"><div class="loading-state">⏳ Loading leadership...</div></div></div>
+        </div>
+
+        <!-- TAB 3.6: PRODUCTS -->
+        <div class="tab-content" id="tab-products">
+            <div class="page-header">
+                <div><h1 class="page-title">📦 Products Management</h1><p class="page-subtitle">Manage products</p></div>
+                <button class="btn-primary" onclick="openAddProductModal()">➕ Add Product</button>
+            </div>
+            <div class="data-card"><div id="productsContainer" class="data-container"><div class="loading-state">⏳ Loading products...</div></div></div>
+        </div>
+
+        <!-- TAB 4: ORDERS -->
+        <div class="tab-content" id="tab-orders">
+            <h1 class="page-title">📦 All Orders</h1><p class="page-subtitle">All customer orders</p>
+            <div class="data-card"><div id="ordersContainer" class="data-container"><div class="loading-state">⏳ Loading orders...</div></div></div>
+        </div>
+
+        <!-- TAB 5: PAYMENTS -->
+        <div class="tab-content" id="tab-payments">
+            <h1 class="page-title">💰 All Payments</h1><p class="page-subtitle">All system payments</p>
+            <div class="data-card"><div id="paymentsContainer" class="data-container"><div class="loading-state">⏳ Loading payments...</div></div></div>
+        </div>
+
+        <!-- TAB 6: AUDIT LOGS -->
+        <div class="tab-content" id="tab-audit">
+            <h1 class="page-title">📋 System Actions</h1><p class="page-subtitle">Complete audit trail</p>
+            <div class="data-card"><div id="auditContainer" class="data-container"><div class="loading-state">⏳ Loading audit logs...</div></div></div>
+        </div>
+
+        <!-- MAIL CENTER TAB -->
+        <div class="tab-content" id="tab-mail-center">
+            <div class="mail-shell-horizontal">
+                <div class="mail-top-toolbar">
+                    <div class="mail-brand-horizontal">
+                        <div class="mail-brand-logo"><img src="assets/makdc-logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/30'"></div>
+                        <div><h3 style="font-size: 16px; font-weight: 900; color: #1A2421; margin: 0;">MAK DC Mail</h3><p style="font-size: 11px; color: #64748b; margin: 0; font-weight: 600;">Super Admin Panel</p></div>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <!-- 🆕 Kitufe cha Export -->
-                        <button class="btn-secondary" onclick="exportUsersToCSV()" style="background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; font-weight: 700;">
-                            📥 Export CSV
-                        </button>
-                        <button class="btn-primary" onclick="openAddUserModal()">➕ Add User</button>
+                        <button class="mail-btn-secondary" onclick="openMinuteComposeModal()">📝 New Minute</button>
+                        <button class="mail-btn-primary" onclick="openComposeMailModal()">✏️ Compose</button>
                     </div>
                 </div>
-                <div class="data-card">
-                    <div id="usersContainer" class="data-container">
-                        <div class="loading-state">⏳ Loading users...</div>
-                    </div>
+                <div class="mail-horizontal-nav">
+                    <button onclick="switchMailBox('inbox')" id="mail-nav-inbox" class="mhn-item active">📥 Inbox <span id="inboxBadge" class="mhn-badge red">0</span></button>
+                    <button onclick="switchMailBox('starred')" id="mail-nav-starred" class="mhn-item">⭐ Starred</button>
+                    <button onclick="switchMailBox('pending')" id="mail-nav-pending" class="mhn-item">⏳ Pending <span id="pendingBadge" class="mhn-badge gold">0</span></button>
+                    <button onclick="switchMailBox('minutes')" id="mail-nav-minutes" class="mhn-item">📝 Minutes <span id="minutesBadge" class="mhn-badge purple">0</span></button>
+                    <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 10px;"></div>
+                    <button onclick="switchMailBox('sent')" id="mail-nav-sent" class="mhn-item">📤 Sent</button>
+                    <button onclick="switchMailBox('drafts')" id="mail-nav-drafts" class="mhn-item">📁 Drafts</button>
                 </div>
-            </div>
-
-            <!-- TAB 3: SITE CONTENT (WITH SUB-TABS) -->
-            <div class="tab-content" id="tab-content">
-                <h1 class="page-title">🎨 Site Content Manager</h1>
-                <p class="page-subtitle">Edit content displayed on the website</p>
-
-                <!-- SUB-TABS -->
-                <div class="subtabs-header">
-                    <button class="subtab-btn active" onclick="switchContentSubTab('general', this)">📝 General</button>
-                    <button class="subtab-btn" onclick="switchContentSubTab('testimonials', this)">⭐ Testimonials</button>
-                    <button class="subtab-btn" onclick="switchContentSubTab('news', this)">📰 News</button>
-                    <button class="subtab-btn" onclick="switchContentSubTab('projects', this)">🏗️ Projects</button>
-                    <button class="subtab-btn" onclick="switchContentSubTab('hero', this)">🖼️ Hero Slides</button>
-                </div>
-
-                <!-- SUB-TAB: General (Site Content) -->
-                <div class="content-subtab active" id="content-subtab-general">
-                    <div class="page-header" style="margin-bottom:16px;">
-                        <div>
-                            <h2 class="page-title" style="font-size:20px;">🎨 Site Content</h2>
-                            <p class="page-subtitle">Manage text and content displayed on the website</p>
-                        </div>
-                        <button class="btn-primary" onclick="openAddContentModal()">➕ Add Content</button>
-                    </div>
-                    <div class="data-card">
-                        <div id="contentContainer" class="data-container">
-                            <div class="loading-state">⏳ Loading content...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SUB-TAB: Testimonials -->
-                <div class="content-subtab" id="content-subtab-testimonials">
-                    <div class="page-header" style="margin-bottom:16px;">
-                        <div>
-                            <h2 class="page-title" style="font-size:20px;">⭐ Testimonials</h2>
-                            <p class="page-subtitle">Manage customer reviews displayed on website</p>
-                        </div>
-                        <button class="btn-primary" onclick="openAddTestimonialModal()">➕ Add Testimonial</button>
-                    </div>
-                    <div class="data-card">
-                        <div id="testimonialsContainer" class="data-container">
-                            <div class="loading-state">⏳ Loading testimonials...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SUB-TAB: News (Coming soon) -->
-                <div class="content-subtab" id="content-subtab-news">
-                    <div class="page-header" style="margin-bottom:16px;">
-                        <div>
-                            <h2 class="page-title" style="font-size:20px;">📰 News &amp; Updates</h2>
-                            <p class="page-subtitle">Manage news articles displayed on website</p>
-                        </div>
-                        <button class="btn-primary" onclick="openAddNewsModal()">➕ Add News</button>
-                    </div>
-                    <div class="data-card">
-                        <div id="newsContainer" class="data-container">
-                            <div class="loading-state">⏳ Coming soon...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SUB-TAB: Projects (Coming soon) -->
-                <div class="content-subtab" id="content-subtab-projects">
-                    <div class="page-header" style="margin-bottom:16px;">
-                        <div>
-                            <h2 class="page-title" style="font-size:20px;">🏗️ Projects</h2>
-                            <p class="page-subtitle">Manage projects displayed on website</p>
-                        </div>
-                        <button class="btn-primary" onclick="openAddProjectModal()">➕ Add Project</button>
-                    </div>
-                    <div class="data-card">
-                        <div id="projectsContainer" class="data-container">
-                            <div class="loading-state">⏳ Coming soon...</div>
-                        </div>
-                    </div>
-                </div>
-
-               <!-- SUB-TAB: Hero Slides -->
-                <div class="content-subtab" id="content-subtab-hero">
-                    <div class="page-header" style="margin-bottom:16px;">
-                        <div>
-                            <h2 class="page-title" style="font-size:20px;">🖼️ Hero Slides</h2>
-                            <p class="page-subtitle">Manage hero background images</p>
-                        </div>
-                        <button class="btn-primary" onclick="openAddHeroModal()">➕ Add Slide</button>
-                    </div>
-                    <div class="data-card">
-                        <div id="heroContainer" class="data-container">
-                            <div class="loading-state">⏳ Loading hero slides...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3.5: LEADERSHIP -->
-            <div class="tab-content" id="tab-leadership">
-                <div class="page-header">
-                    <div>
-                        <h1 class="page-title">👔 Leadership Management</h1>
-                        <p class="page-subtitle">Manage company leadership displayed on website</p>
-                    </div>
-                    <button class="btn-primary" onclick="openAddLeaderModal()">➕ Add Leader</button>
-                </div>
-
-                <div class="data-card">
-                    <div id="leadershipContainer" class="data-container">
-                        <div class="loading-state">⏳ Loading leadership...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3.6: PRODUCTS -->
-            <div class="tab-content" id="tab-products">
-                <div class="page-header">
-                    <div>
-                        <h1 class="page-title">📦 Products Management</h1>
-                        <p class="page-subtitle">Manage products displayed on the website &amp; customer portal</p>
-                    </div>
-                    <button class="btn-primary" onclick="openAddProductModal()">➕ Add Product</button>
-                </div>
-
-                <div class="data-card">
-                    <div id="productsContainer" class="data-container">
-                        <div class="loading-state">⏳ Loading products...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: ORDERS -->
-            <div class="tab-content" id="tab-orders">
-                <h1 class="page-title">📦 All Orders</h1>
-                <p class="page-subtitle">All customer orders</p>
-
-                <div class="data-card">
-                    <div id="ordersContainer" class="data-container">
-                        <div class="loading-state">⏳ Loading orders...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 5: PAYMENTS -->
-            <div class="tab-content" id="tab-payments">
-                <h1 class="page-title">💰 All Payments</h1>
-                <p class="page-subtitle">All system payments</p>
-
-                <div class="data-card">
-                    <div id="paymentsContainer" class="data-container">
-                        <div class="loading-state">⏳ Loading payments...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 6: AUDIT LOGS -->
-            <div class="tab-content" id="tab-audit">
-                <h1 class="page-title">📋 System Actions</h1>
-                <p class="page-subtitle">Complete audit trail of all system actions</p>
-
-                <div class="data-card">
-                    <div id="auditContainer" class="data-container">
-                        <div class="loading-state">⏳ Loading audit logs...</div>
-                    </div>
-                </div>
-            </div>
-            <!-- ============================================================
-            TAB: MAIL CENTER (SUPER ADMIN)
-            ============================================================ -->
-            <div class="tab-content" id="tab-mail-center">
-                <div class="mail-shell-horizontal">
-                    <!-- TOP TOOLBAR -->
-                    <div class="mail-top-toolbar">
-                        <div class="mail-brand-horizontal">
-                            <div class="mail-brand-logo">
-                                <img src="assets/makdc-logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/30'">
+                <div class="mail-main-content">
+                    <div id="mailListView" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                        <div class="mail-list-header">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h2 id="mailListTitle">Inbox</h2>
+                                <span class="mail-topbar-count" id="mailListCount">0 messages</span>
                             </div>
-                            <div>
-                                <h3 style="font-size: 16px; font-weight: 900; color: #1A2421; margin: 0;">MAK DC Mail</h3>
-                                <p style="font-size: 11px; color: #64748b; margin: 0; font-weight: 600;">Super Admin Panel</p>
+                            <button onclick="refreshCurrentMailbox()" style="padding: 10px 16px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">🔄 Refresh</button>
+                            <div class="mail-search-wrap" style="width: 300px;">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="mailSearchInput" oninput="filterMailList()" placeholder="Search mail...">
                             </div>
                         </div>
-                        
-                        <div style="display: flex; gap: 10px;">
-                            <button class="mail-btn-secondary" onclick="openMinuteComposeModal()">📝 New Minute</button>
-                            <button class="mail-btn-primary" onclick="openComposeMailModal()">✏️ Compose</button>
-                        </div>
+                        <div id="mailListContainer" class="mail-list-scroll"></div>
                     </div>
-
-                    <!-- HORIZONTAL NAVIGATION -->
-                    <div class="mail-horizontal-nav">
-                        <button onclick="switchMailBox('inbox')" id="mail-nav-inbox" class="mhn-item active">
-                            📥 Inbox <span id="inboxBadge" class="mhn-badge red">0</span>
-                        </button>
-                        <button onclick="switchMailBox('starred')" id="mail-nav-starred" class="mhn-item">
-                            ⭐ Starred
-                        </button>
-                        <button onclick="switchMailBox('pending')" id="mail-nav-pending" class="mhn-item">
-                            ⏳ Pending <span id="pendingBadge" class="mhn-badge gold">0</span>
-                        </button>
-                        <button onclick="switchMailBox('minutes')" id="mail-nav-minutes" class="mhn-item">
-                            📝 Minutes <span id="minutesBadge" class="mhn-badge purple">0</span>
-                        </button>
-                        <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 10px;"></div>
-                        <button onclick="switchMailBox('sent')" id="mail-nav-sent" class="mhn-item">📤 Sent</button>
-                        <button onclick="switchMailBox('drafts')" id="mail-nav-drafts" class="mhn-item">📁 Drafts</button>
-                    </div>
-
-                    <!-- MAIN CONTENT AREA -->
-                    <div class="mail-main-content">
-                        <!-- LIST VIEW -->
-                        <div id="mailListView" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-                            <div class="mail-list-header">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <h2 id="mailListTitle">Inbox</h2>
-                                    <span class="mail-topbar-count" id="mailListCount">0 messages</span>
-                                </div>
-                                <button onclick="refreshCurrentMailbox()" 
-                                        style="padding: 10px 16px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">
-                                    🔄 Refresh
-                                </button>
-                                <div class="mail-search-wrap" style="width: 300px;">
-                                    <span class="search-icon">🔍</span>
-                                    <input type="text" id="mailSearchInput" oninput="filterMailList()" placeholder="Search mail...">
-                                </div>
-                            </div>
-                            
-                            <div id="mailListContainer" class="mail-list-scroll">
-                                <!-- List items zitajaa hapa kupitia JS -->
+                    <div id="mailDetailView" class="mail-detail-overlay">
+                        <div class="mail-detail-topbar">
+                            <button class="mail-back-btn" onclick="closeMailDetailView()">← Back to <span id="mailBackLabel">Inbox</span></button>
+                            <div class="mail-detail-actions">
+                                <button id="btnStarMail" class="mail-icon-btn" onclick="toggleStarCurrentMail()" title="Star">⭐</button>
+                                <button id="btnArchiveMail" class="mail-icon-btn" onclick="toggleArchiveCurrentMail()" title="Archive">📁</button>
+                                <button id="btnDeleteMail" class="mail-icon-btn danger" onclick="deleteCurrentMail()" title="Delete">🗑️</button>
                             </div>
                         </div>
-
-                        <!-- DETAIL VIEW -->
-                        <div id="mailDetailView" class="mail-detail-overlay">
-                            <div class="mail-detail-topbar">
-                                <button class="mail-back-btn" onclick="closeMailDetailView()">
-                                    ← Back to <span id="mailBackLabel">Inbox</span>
-                                </button>
-                                <div class="mail-detail-actions">
-                                    <button id="btnStarMail" class="mail-icon-btn" onclick="toggleStarCurrentMail()" title="Star">⭐</button>
-                                    <button id="btnArchiveMail" class="mail-icon-btn" onclick="toggleArchiveCurrentMail()" title="Archive">📁</button>
-                                    <button id="btnDeleteMail" class="mail-icon-btn danger" onclick="deleteCurrentMail()" title="Delete">🗑️</button>
-                                </div>
-                            </div>
-                            <div id="mailDetailBody" class="mail-detail-scroll"></div>
-                        </div>
+                        <div id="mailDetailBody" class="mail-detail-scroll"></div>
                     </div>
-                </div>
-            </div>
-            <!-- TAB: ABOUT US MANAGER -->
-            <div class="tab-content" id="tab-about-us-manager">
-                <div class="page-header">
-                    <div>
-                        <h1 class="page-title">⚙️ About Us Manager</h1>
-                        <p class="page-subtitle">Manage company information, vision, mission, and values</p>
-                    </div>
-                    <button class="btn-primary" onclick="saveAboutUsContent()">💾 Save All Changes</button>
-                </div>
-
-                <div class="data-card" style="padding: 24px;">
-                    <div class="form-grid-2">
-                        <!-- Company Description -->
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>Company Description / About Us Text</label>
-                            <textarea id="aboutDescription" rows="5" placeholder="Write a detailed description about the company..."></textarea>
-                        </div>
-
-                        <!-- Vision -->
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>🎯 Our Vision</label>
-                            <textarea id="aboutVision" rows="3" placeholder="Enter company vision..."></textarea>
-                        </div>
-
-                        <!-- Mission -->
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>🚀 Our Mission</label>
-                            <textarea id="aboutMission" rows="3" placeholder="Enter company mission..."></textarea>
-                        </div>
-
-                        <!-- Values -->
-                        <div class="form-group" style="grid-column: 1 / -1;">
-                            <label>💎 Our Values</label>
-                            <textarea id="aboutValues" rows="3" placeholder="Enter company values..."></textarea>
-                        </div>
-                    </div>
-                    <div id="aboutUsStatus" class="status-msg"></div>
                 </div>
             </div>
         </div>
+
+        <!-- TAB: ABOUT US MANAGER (ILIBORESHWA) -->
+        <div class="tab-content" id="tab-about-us-manager">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">⚙️ About Us Manager</h1>
+                    <p class="page-subtitle">Manage company information, hero image, projects, and activities</p>
+                </div>
+                <button class="btn-primary" onclick="saveAboutUsContent()">💾 Save All Changes</button>
+            </div>
+
+            <!-- ABOUT SUB-TABS -->
+            <div class="subtabs-header" style="margin-bottom: 20px;">
+                <button class="subtab-btn active" onclick="switchAboutSubTab('general', this)">🏢 Taarifa za Jumla</button>
+                <button class="subtab-btn" onclick="switchAboutSubTab('activities', this)">📋 Shughuli (Activities)</button>
+                <button class="subtab-btn" onclick="switchAboutSubTab('stats', this)">📊 Takwimu (Stats)</button>
+            </div>
+
+            <div class="data-card" style="padding: 24px;">
+                
+                <!-- SUB-TAB 1: GENERAL INFO -->
+                <div class="content-subtab active" id="about-subtab-general">
+                    <div class="form-grid-2">
+                        
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Company Name / Hero Title <span class="required">*</span></label>
+                            <input type="text" id="aboutCompanyName" placeholder="MAK DC Investment Company Limited">
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Hero Subtitle</label>
+                            <input type="text" id="aboutCompanySubtitle" placeholder="Kampuni inayosimamia Miradi ya Uwekezaji...">
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 10px;">
+                            <label>🖼️ Hero Background Image</label>
+                            <div class="leader-photo-upload-area" style="display: flex; align-items: center; gap: 20px;">
+                                <div class="leader-photo-preview" id="aboutImagePreview" style="width: 150px; height: 80px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; border: 2px dashed #cbd5e1;">
+                                    <span>🖼️</span>
+                                </div>
+                                <div class="leader-photo-controls">
+                                    <button type="button" class="btn-secondary" onclick="document.getElementById('aboutImageInput').click()">📷 Chagua Picha</button>
+                                    <button type="button" class="btn-secondary" onclick="removeAboutImage()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Ondoa</button>
+                                    <input type="file" id="aboutImageInput" accept="image/*" onchange="handleAboutImageUpload(event)" style="display:none;">
+                                    <input type="hidden" id="aboutImageBase64" value="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Company Description / About Us Text</label>
+                            <div id="aboutDescriptionEditor" style="height: 250px; background: white; border-radius: 8px;"></div>
+                            <input type="hidden" id="aboutDescription" value="">
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1; border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 10px;">
+                            <label style="font-size: 14px; color: #1e293b;">🌐 Social Media Links</label>
+                        </div>
+                        <div class="form-group"><label>Facebook URL</label><input type="text" id="socialFacebook" placeholder="https://facebook.com/..."></div>
+                        <div class="form-group"><label>Instagram URL</label><input type="text" id="socialInstagram" placeholder="https://instagram.com/..."></div>
+                        <div class="form-group"><label>WhatsApp URL</label><input type="text" id="socialWhatsapp" placeholder="https://wa.me/255..."></div>
+                        <div class="form-group"><label>LinkedIn URL</label><input type="text" id="socialLinkedin" placeholder="https://linkedin.com/..."></div>
+                        
+                        <div class="form-group" style="grid-column: 1 / -1; border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 10px;">
+                            <label style="font-size: 14px; color: #1e293b;">🎯 Dira, Misheni na Dhima</label>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>🎯 Dira (Vision)</label><textarea id="aboutVision" rows="3" placeholder="Kuwa Kampuni kiongozi..."></textarea></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>🚀 Misheni (Mission)</label><textarea id="aboutMission" rows="3" placeholder="Kukuza maendeleo..."></textarea></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>💎 Dhima (Values)</label><textarea id="aboutValues" rows="3" placeholder="Huduma bora ndio kipaumbele..."></textarea></div>
+                    </div>
+                </div>
+
+                <!-- SUB-TAB 2: ACTIVITIES (SHUGHULI) -->
+                <div class="content-subtab" id="about-subtab-activities">
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0288D1;">
+                        <p style="margin: 0; font-size: 13px; color: #475569;">
+                            <strong>Kumbuka:</strong> Miradi (Projects) inasimamiwa kupitia <strong>"Site Content > Projects"</strong>. Hapa unaweza kuweka Shughuli mbalimbali (Activities) zinazoonekana kwenye ukurasa wa About.
+                        </p>
+                    </div>
+                    <!-- SUB-TAB 3: TAKWIMU (STATS) -->
+                    <div class="content-subtab" id="about-subtab-stats">
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0288D1;">
+                            <p style="margin: 0; font-size: 13px; color: #475569;">
+                                Hizi ni takwimu zinazoonekana upande wa kulia wa ukurasa wa About (Mwaka, Miradi, Uadilifu).
+                            </p>
+                        </div>
+                        
+                        <div id="statsContainer" style="display: grid; gap: 20px;">
+                            <!-- Stat 1 -->
+                            <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                                <h4 style="margin-bottom: 12px; color: #0288D1;">Takwimu 1 (Mwaka)</h4>
+                                <div class="form-group">
+                                    <label>Namba (Value)</label>
+                                    <input type="text" id="stat1Number" placeholder="Mfano: 2025">
+                                </div>
+                                <div class="form-group">
+                                    <label>Kichwa (Label)</label>
+                                    <input type="text" id="stat1Label" placeholder="Mfano: Mwaka wa Kuanzishwa">
+                                </div>
+                                <div class="form-group">
+                                    <label>Maelezo (Description)</label>
+                                    <textarea id="stat1Desc" rows="2" placeholder="Maelezo..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Stat 2 -->
+                            <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                                <h4 style="margin-bottom: 12px; color: #0288D1;">Takwimu 2 (Miradi)</h4>
+                                <div class="form-group">
+                                    <label>Namba (Value)</label>
+                                    <input type="text" id="stat2Number" placeholder="Mfano: 9+">
+                                </div>
+                                <div class="form-group">
+                                    <label>Kichwa (Label)</label>
+                                    <input type="text" id="stat2Label" placeholder="Mfano: Miradi ya Kimkakati">
+                                </div>
+                                <div class="form-group">
+                                    <label>Maelezo (Description)</label>
+                                    <textarea id="stat2Desc" rows="2" placeholder="Maelezo..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Stat 3 -->
+                            <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                                <h4 style="margin-bottom: 12px; color: #0288D1;">Takwimu 3 (Uadilifu)</h4>
+                                <div class="form-group">
+                                    <label>Namba (Value)</label>
+                                    <input type="text" id="stat3Number" placeholder="Mfano: 100%">
+                                </div>
+                                <div class="form-group">
+                                    <label>Kichwa (Label)</label>
+                                    <input type="text" id="stat3Label" placeholder="Mfano: Uadilifu na Ubora">
+                                </div>
+                                <div class="form-group">
+                                    <label>Maelezo (Description)</label>
+                                    <textarea id="stat3Desc" rows="2" placeholder="Maelezo..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="activitiesContainer" style="display: grid; gap: 20px;">
+                        <!-- Activity 1 -->
+                        <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                            <h4 style="margin-bottom: 12px; color: #0288D1;">Mradi Unaosimamiwa na Mak Dc Inv Co Ltd 1</h4>
+                            <div class="form-group">
+                                <label>Kichwa cha Habari</label>
+                                <input type="text" id="activity1Title" placeholder="Mfano: Ujenzi wa Ofisi Mpya">
+                            </div>
+                            <div class="form-group">
+                                <label>Maelezo</label>
+                                <textarea id="activity1Desc" rows="2" placeholder="Maelezo..."></textarea>
+                            </div>
+                            <!-- 🆕 ONGEZA PICHA HAPA -->
+                            <div class="form-group">
+                                <label>Picha (Optional)</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button type="button" class="btn-secondary" onclick="document.getElementById('activity1ImageInput').click()" style="padding: 6px 12px; font-size: 12px;">📷 Chagua Picha</button>
+                                    <input type="file" id="activity1ImageInput" accept="image/*" onchange="handleActivityImageUpload(event, 1)" style="display: none;">
+                                    <input type="hidden" id="activity1Image" value="">
+                                    <span id="activity1ImageName" style="font-size: 11px; color: #64748b;">Hakuna picha</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Activity 2 -->
+                        <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                            <h4 style="margin-bottom: 12px; color: #0288D1;">Mradi Unaosimamiwa na Mak Dc Inv Co Ltd 2</h4>
+                            <div class="form-group">
+                                <label>Kichwa cha Habari</label>
+                                <input type="text" id="activity1Title" placeholder="Mfano: Ujenzi wa Ofisi Mpya">
+                            </div>
+                            <div class="form-group">
+                                <label>Maelezo</label>
+                                <textarea id="activity1Desc" rows="2" placeholder="Maelezo..."></textarea>
+                            </div>
+                            <!-- 🆕 ONGEZA PICHA HAPA -->
+                            <div class="form-group">
+                                <label>Picha (Optional)</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button type="button" class="btn-secondary" onclick="document.getElementById('activity1ImageInput').click()" style="padding: 6px 12px; font-size: 12px;">📷 Chagua Picha</button>
+                                    <input type="file" id="activity1ImageInput" accept="image/*" onchange="handleActivityImageUpload(event, 1)" style="display: none;">
+                                    <input type="hidden" id="activity1Image" value="">
+                                    <span id="activity1ImageName" style="font-size: 11px; color: #64748b;">Hakuna picha</span>
+                                </div>
+                            </div>
+                        </div>
+                       <!-- Activity 3 -->
+                        <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                            <h4 style="margin-bottom: 12px; color: #0288D1;">Mradi Unaosimamiwa na Mak Dc Inv Co Ltd 3</h4>
+                            <div class="form-group">
+                                <label>Kichwa cha Habari</label>
+                                <input type="text" id="activity1Title" placeholder="Mfano: Ujenzi wa Ofisi Mpya">
+                            </div>
+                            <div class="form-group">
+                                <label>Maelezo</label>
+                                <textarea id="activity1Desc" rows="2" placeholder="Maelezo..."></textarea>
+                            </div>
+                            <!-- 🆕 ONGEZA PICHA HAPA -->
+                            <div class="form-group">
+                                <label>Picha (Optional)</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button type="button" class="btn-secondary" onclick="document.getElementById('activity1ImageInput').click()" style="padding: 6px 12px; font-size: 12px;">📷 Chagua Picha</button>
+                                    <input type="file" id="activity1ImageInput" accept="image/*" onchange="handleActivityImageUpload(event, 1)" style="display: none;">
+                                    <input type="hidden" id="activity1Image" value="">
+                                    <span id="activity1ImageName" style="font-size: 11px; color: #64748b;">Hakuna picha</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Activity 4 -->
+                        <div style="border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; background: #fff;">
+                            <h4 style="margin-bottom: 12px; color: #0288D1;">Mradi Unaosimamiwa na Mak Dc Inv Co Ltd 4</h4>
+                            <div class="form-group">
+                                <label>Kichwa cha Habari</label>
+                                <input type="text" id="activity1Title" placeholder="Mfano: Ujenzi wa Ofisi Mpya">
+                            </div>
+                            <div class="form-group">
+                                <label>Maelezo</label>
+                                <textarea id="activity1Desc" rows="2" placeholder="Maelezo..."></textarea>
+                            </div>
+                            <!-- 🆕 ONGEZA PICHA HAPA -->
+                            <div class="form-group">
+                                <label>Picha (Optional)</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button type="button" class="btn-secondary" onclick="document.getElementById('activity1ImageInput').click()" style="padding: 6px 12px; font-size: 12px;">📷 Chagua Picha</button>
+                                    <input type="file" id="activity1ImageInput" accept="image/*" onchange="handleActivityImageUpload(event, 1)" style="display: none;">
+                                    <input type="hidden" id="activity1Image" value="">
+                                    <span id="activity1ImageName" style="font-size: 11px; color: #64748b;">Hakuna picha</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 🆕 SEHEMU YA VIPENGELE VITATU (Features) -->
+                <div class="form-group" style="grid-column: 1 / -1; border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 20px;">
+                    <label style="font-size: 14px; color: #1e293b;">✅ Vipengele Vitatu (Zinaonekana kwenye Homepage)</label>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Kipengele 1</label>
+                    <input type="text" id="feature1" placeholder="Mfano: Quality concrete blocks & building materials">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Kipengele 2</label>
+                    <input type="text" id="feature2" placeholder="Mfano: Trusted by builders & contractors">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Kipengele 3</label>
+                    <input type="text" id="feature3" placeholder="Mfano: Reliable delivery & customer-focused">
+                </div>
+                <div id="aboutUsStatus" class="status-msg"></div>
+            </div>
+        </div>
+        
+        </div> <!-- End Dashboard Content -->
 
         <footer class="site-footer">
             <p>MAK DC Investment Company — Super Admin Dashboard</p>
             <small>© 2026 All rights reserved.</small>
         </footer>
-
-    </div>
-
-    <!-- ===== ADD USER MODAL ===== -->
+    </div>    
+    <!-- ADD USER MODAL -->
     <div class="modal-overlay" id="addUserModal">
         <div class="modal-box">
-            <div class="modal-header">
-                <h3>➕ Add New User</h3>
-                <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3>➕ Add New User</h3><button class="modal-close" onclick="closeModal('addUserModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
-                        <input type="text" id="newUserName" placeholder="Full name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email <span class="required">*</span></label>
-                        <input type="email" id="newUserEmail" placeholder="user@makdc.co.tz">
-                    </div>
-                    <div class="form-group">
-                        <label>Password <span class="required">*</span></label>
-                        <input type="password" id="newUserPassword" placeholder="At least 6 characters">
-                    </div>
-                    <div class="form-group">
-                        <label>Role <span class="required">*</span></label>
-                        <select id="newUserRole">
-                            <option value="SuperAdmin">🦸 Super Admin</option>
-                            <option value="">-- Select Role --</option>
-                            <option value="CEO">👔 CEO</option>
-                            <option value="Manager">📋 Manager</option>
-                            <option value="Finance">💰 Finance</option>
-                            <option value="Sales">📈 Sales</option>
-                            <option value="Procurement">🛒 Procurement</option>
-                            <option value="Lawyer">⚖️ Lawyer</option>
-                            <option value="Engineer">🔧 Engineer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Department</label>
-                        <select id="newUserDepartment">
-                            <option value="">-- Select Department --</option>
-                            <option value="Administration Department">🏢 Administration Department</option>
-                            <option value="Sales and Marketing Department">📈 Sales and Marketing Department</option>
-                            <option value="Engineering and Production Department">⚙️ Engineering and Production Department</option>
-                            <option value="Lawyer Department">⚖️ Lawyer Department</option>
-                            <option value="Finance Department">💰 Finance Department</option>
-                            <option value="Procurements Management Unit">🛒 Procurements Management Unit</option>
-                            <option value="Information and Technology Department">💻 Information and Technology Department</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="newUserPhone" placeholder="+255 XXX XXX XXX">
-                    </div>
-                    <div class="form-group">
-                        <label>Employee ID</label>
-                        <input type="text" id="newUserEmployeeId" placeholder="e.g., EMP-006">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="newUserStatus">
-                            <option value="Active">✅ Active</option>
-                            <option value="Inactive">⏸ Inactive</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newUserName" placeholder="Full name"></div>
+                    <div class="form-group"><label>Email <span class="required">*</span></label><input type="email" id="newUserEmail" placeholder="user@makdc.co.tz"></div>
+                    <div class="form-group"><label>Password <span class="required">*</span></label><input type="password" id="newUserPassword" placeholder="At least 6 characters"></div>
+                    <div class="form-group"><label>Role <span class="required">*</span></label><select id="newUserRole"><option value="SuperAdmin">🦸 Super Admin</option><option value="">-- Select Role --</option><option value="CEO">👔 CEO</option><option value="Manager">📋 Manager</option><option value="Finance">💰 Finance</option><option value="Sales">📈 Sales</option><option value="Procurement">🛒 Procurement</option><option value="Lawyer">⚖️ Lawyer</option><option value="Engineer">🔧 Engineer</option></select></div>
+                    <div class="form-group"><label>Department</label><select id="newUserDepartment"><option value="">-- Select Department --</option><option value="Administration Department">🏢 Administration Department</option><option value="Sales and Marketing Department">📈 Sales and Marketing Department</option><option value="Engineering and Production Department">⚙️ Engineering and Production Department</option><option value="Lawyer Department">⚖️ Lawyer Department</option><option value="Finance Department">💰 Finance Department</option><option value="Procurements Management Unit">🛒 Procurements Management Unit</option><option value="Information and Technology Department">💻 Information and Technology Department</option></select></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="newUserPhone" placeholder="+255 XXX XXX XXX"></div>
+                    <div class="form-group"><label>Employee ID</label><input type="text" id="newUserEmployeeId" placeholder="e.g., EMP-006"></div>
+                    <div class="form-group"><label>Status</label><select id="newUserStatus"><option value="Active">✅ Active</option><option value="Inactive">⏸ Inactive</option></select></div>
                 </div>
                 <div id="addUserStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('addUserModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveNewUser()">💾 Save User</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('addUserModal')">Cancel</button><button class="btn-submit" onclick="saveNewUser()">💾 Save User</button></div>
         </div>
     </div>
 
-    <!-- ===== EDIT USER MODAL ===== -->
+    <!-- EDIT USER MODAL -->
     <div class="modal-overlay" id="editUserModal">
         <div class="modal-box">
-            <div class="modal-header">
-                <h3>🖋️ Edit User</h3>
-                <button class="modal-close" onclick="closeModal('editUserModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3>🖋️ Edit User</h3><button class="modal-close" onclick="closeModal('editUserModal')">✕</button></div>
             <div class="modal-body">
                 <input type="hidden" id="editUserId">
                 <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
-                        <input type="text" id="editUserName" placeholder="Full name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email <span class="required">*</span></label>
-                        <input type="email" id="editUserEmail" placeholder="user@makdc.co.tz">
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="editUserPassword" placeholder="••••••">
-                    </div>
-                    <div class="form-group">
-                        <label>Role <span class="required">*</span></label>
-                        <select id="editUserRole">
-                            <option value="SuperAdmin">🦸 Super Admin</option>
-                            <option value="CEO">👔 CEO</option>
-                            <option value="Manager">📋 Manager</option>
-                            <option value="Finance">💰 Finance</option>
-                            <option value="Sales">📈 Sales</option>
-                            <option value="Procurement">🛒 Procurement</option>
-                            <option value="Lawyer">⚖️ Lawyer</option>
-                            <option value="Engineer">🔧 Engineer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Department</label>
-                        <select id="editUserDepartment">
-                            <option value="">-- Select Department --</option>
-                            <option value="Administration Department">🏢 Administration Department</option>
-                            <option value="Sales and Marketing Department">📈 Sales and Marketing Department</option>
-                            <option value="Engineering and Production Department">⚙️ Engineering and Production Department</option>
-                            <option value="Lawyer Department">⚖️ Lawyer Department</option>
-                            <option value="Finance Department">💰 Finance Department</option>
-                            <option value="Procurements Management Unit">🛒 Procurements Management Unit</option>
-                            <option value="Information and Technology Department">💻 Information and Technology Department</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="editUserPhone" placeholder="+255 XXX XXX XXX">
-                    </div>
-                    <div class="form-group">
-                        <label>Employee ID</label>
-                        <input type="text" id="editUserEmployeeId" placeholder="e.g., EMP-006">
-                    </div>
-                    <div class="form-group">
-                        <label>Status <span class="required">*</span></label>
-                        <select id="editUserStatus">
-                            <option value="Active">✅ Active</option>
-                            <option value="Inactive">⏸ Inactive</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="editUserName" placeholder="Full name"></div>
+                    <div class="form-group"><label>Email <span class="required">*</span></label><input type="email" id="editUserEmail" placeholder="user@makdc.co.tz"></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="editUserPassword" placeholder="••••••"></div>
+                    <div class="form-group"><label>Role <span class="required">*</span></label><select id="editUserRole"><option value="SuperAdmin">🦸 Super Admin</option><option value="CEO">👔 CEO</option><option value="Manager">📋 Manager</option><option value="Finance">💰 Finance</option><option value="Sales">📈 Sales</option><option value="Procurement">🛒 Procurement</option><option value="Lawyer">⚖️ Lawyer</option><option value="Engineer">🔧 Engineer</option></select></div>
+                    <div class="form-group"><label>Department</label><select id="editUserDepartment"><option value="">-- Select Department --</option><option value="Administration Department">🏢 Administration Department</option><option value="Sales and Marketing Department">📈 Sales and Marketing Department</option><option value="Engineering and Production Department">⚙️ Engineering and Production Department</option><option value="Lawyer Department">⚖️ Lawyer Department</option><option value="Finance Department">💰 Finance Department</option><option value="Procurements Management Unit">🛒 Procurements Management Unit</option><option value="Information and Technology Department">💻 Information and Technology Department</option></select></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="editUserPhone" placeholder="+255 XXX XXX XXX"></div>
+                    <div class="form-group"><label>Employee ID</label><input type="text" id="editUserEmployeeId" placeholder="e.g., EMP-006"></div>
+                    <div class="form-group"><label>Status <span class="required">*</span></label><select id="editUserStatus"><option value="Active">✅ Active</option><option value="Inactive">⏸ Inactive</option></select></div>
                 </div>
                 <div id="editUserStatusMsg" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('editUserModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveEditUser()">💾 Update User</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('editUserModal')">Cancel</button><button class="btn-submit" onclick="saveEditUser()">💾 Update User</button></div>
         </div>
     </div>
 
-    <!-- ===== EDIT CONTENT MODAL ===== -->
+    <!-- EDIT CONTENT MODAL -->
     <div class="modal-overlay" id="editContentModal">
         <div class="modal-box">
-            <div class="modal-header">
-                <h3>🖋️ Edit Content</h3>
-                <button class="modal-close" onclick="closeModal('editContentModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3>🖋️ Edit Content</h3><button class="modal-close" onclick="closeModal('editContentModal')">✕</button></div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Key</label>
-                    <input type="text" id="editContentKey" readonly style="background:#f1f5f9;">
-                </div>
-                <div class="form-group">
-                    <label>Value <span class="required">*</span></label>
-                    <textarea id="editContentValue" rows="5"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <input type="text" id="editContentCategory" readonly style="background:#f1f5f9;">
-                </div>
+                <div class="form-group"><label>Key</label><input type="text" id="editContentKey" readonly style="background:#f1f5f9;"></div>
+                <div class="form-group"><label>Value <span class="required">*</span></label><textarea id="editContentValue" rows="5"></textarea></div>
+                <div class="form-group"><label>Category</label><input type="text" id="editContentCategory" readonly style="background:#f1f5f9;"></div>
                 <div id="editContentStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('editContentModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveContentChanges()">💾 Save Changes</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('editContentModal')">Cancel</button><button class="btn-submit" onclick="saveContentChanges()">💾 Save Changes</button></div>
         </div>
     </div>
 
-    <!-- ===== ADD CONTENT MODAL (MPYA) ===== -->
+    <!-- ADD CONTENT MODAL -->
     <div class="modal-overlay" id="addContentModal">
         <div class="modal-box">
-            <div class="modal-header">
-                <h3>➕ Add New Content</h3>
-                <button class="modal-close" onclick="closeModal('addContentModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3>➕ Add New Content</h3><button class="modal-close" onclick="closeModal('addContentModal')">✕</button></div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Key <span class="required">*</span></label>
-                    <input type="text" id="newContentKey" placeholder="e.g., about_image">
-                    <small style="display:block;margin-top:6px;font-size:11px;color:#64748b;">
-                        Use lowercase letters, numbers, and underscores only. No spaces or special characters.
-                    </small>
-                </div>
-                
-                <div class="form-group">
-                    <label>Value (Text) <span class="required">*</span></label>
-                    <textarea id="newContentValue" rows="3" placeholder="Andika maudhui hapa (kama ni maandishi)..."></textarea>
-                </div>
-
-                <!-- 🆕 KIPENGELE KIPYA CHA KUPACHIKA PICHA -->
+                <div class="form-group"><label>Key <span class="required">*</span></label><input type="text" id="newContentKey" placeholder="e.g., about_image"><small style="display:block;margin-top:6px;font-size:11px;color:#64748b;">Use lowercase letters, numbers, and underscores only.</small></div>
+                <div class="form-group"><label>Value (Text) <span class="required">*</span></label><textarea id="newContentValue" rows="3" placeholder="Andika maudhui hapa..."></textarea></div>
                 <div class="form-group" style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 16px;">
                     <label>Au Pakia Picha (Kama ni Image)</label>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <button type="button" class="btn-secondary" onclick="document.getElementById('newContentImageInput').click()" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 8px; cursor: pointer;">
-                            📷 Chagua Picha
-                        </button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('newContentImageInput').click()" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 8px; cursor: pointer;">📷 Chagua Picha</button>
                         <input type="file" id="newContentImageInput" accept="image/*" onchange="handleNewContentImageUpload(event)" style="display: none;">
                         <span id="newContentImageName" style="font-size: 12px; color: #64748b;">Hakuna picha iliyochaguliwa</span>
                     </div>
                     <input type="hidden" id="newContentImageBase64" value="">
-                    <small style="display:block;margin-top:6px;font-size:11px;color:#64748b;">
-                        Ukichagua picha, itatumika badala ya maandishi (Value) hapo juu.
-                    </small>
                 </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <input type="text" id="newContentCategory" placeholder="e.g., about, hero, footer">
-                </div>
+                <div class="form-group"><label>Category</label><input type="text" id="newContentCategory" placeholder="e.g., about, hero, footer"></div>
                 <div id="addContentStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('addContentModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveNewContent()">💾 Save Content</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('addContentModal')">Cancel</button><button class="btn-submit" onclick="saveNewContent()">💾 Save Content</button></div>
         </div>
     </div>
 
-    <!-- ===== ADD/EDIT LEADER MODAL ===== -->
+    <!-- LEADER MODAL -->
     <div class="modal-overlay" id="leaderModal">
         <div class="modal-box">
-            <div class="modal-header">
-                <h3 id="leaderModalTitle">➕ Add Leader</h3>
-                <button class="modal-close" onclick="closeModal('leaderModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="leaderModalTitle">➕ Add Leader</h3><button class="modal-close" onclick="closeModal('leaderModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
-                        <input type="text" id="leaderFullName" placeholder="e.g., John Mwakasege">
-                    </div>
-                    <div class="form-group">
-                        <label>Role / Position <span class="required">*</span></label>
-                        <input type="text" id="leaderRole" placeholder="e.g., CEO">
-                    </div>
-                    <div class="form-group">
-                        <label>Order</label>
-                        <input type="number" id="leaderOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="leaderIsActive">
-                            <option value="true">✅ Active</option>
-                            <option value="false">⏸ Inactive</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Email</label>
-                        <input type="email" id="leaderEmail" placeholder="email@makdc.co.tz">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="tel" id="leaderPhone" placeholder="+255 XXX XXX XXX">
-                    </div>
-                    <div class="form-group">
-                        <label>LinkedIn URL</label>
-                        <input type="text" id="leaderLinkedin" placeholder="https://linkedin.com/in/...">
-                    </div>
+                    <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="leaderFullName" placeholder="e.g., John Mwakasege"></div>
+                    <div class="form-group"><label>Role / Position <span class="required">*</span></label><input type="text" id="leaderRole" placeholder="e.g., CEO"></div>
+                    <div class="form-group"><label>Order</label><input type="number" id="leaderOrder" placeholder="0" value="0"></div>
+                    <div class="form-group"><label>Status</label><select id="leaderIsActive"><option value="true">✅ Active</option><option value="false">⏸ Inactive</option></select></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Email</label><input type="email" id="leaderEmail" placeholder="email@makdc.co.tz"></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="leaderPhone" placeholder="+255 XXX XXX XXX"></div>
+                    <div class="form-group"><label>LinkedIn URL</label><input type="text" id="leaderLinkedin" placeholder="https://linkedin.com/in/..."></div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Photo</label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="leaderPhotoPreview">
-                                <span id="leaderPhotoInitials">📷</span>
-                            </div>
+                            <div class="leader-photo-preview" id="leaderPhotoPreview"><span id="leaderPhotoInitials">📷</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('leaderPhotoInput').click()">
-                                    📷 Choose Photo
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeLeaderPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('leaderPhotoInput').click()">📷 Choose Photo</button>
+                                <button type="button" class="btn-secondary" onclick="removeLeaderPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="leaderPhotoInput" accept="image/*" onchange="handleLeaderPhotoUpload(event)" style="display:none;">
                                 <input type="hidden" id="leaderPhoto" value="">
                                 <p class="leader-photo-hint">JPG, PNG, GIF — max 2MB</p>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Bio / Description</label>
-                        <textarea id="leaderBio" rows="4" placeholder="Brief description..."></textarea>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Bio / Description</label><textarea id="leaderBio" rows="4" placeholder="Brief description..."></textarea></div>
                 </div>
                 <div id="leaderStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('leaderModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveLeader()">💾 Save Leader</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('leaderModal')">Cancel</button><button class="btn-submit" onclick="saveLeader()">💾 Save Leader</button></div>
         </div>
     </div>
-    
-    <!-- ===== MODAL: CHANGE PASSWORD ===== -->
+
+    <!-- CHANGE PASSWORD MODAL -->
     <div class="modal-overlay" id="changePasswordModal">
         <div class="modal-box" style="max-width: 450px; padding: 0; overflow: hidden; border-radius: 16px;">
             <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 16px; font-weight: 800; display:flex; align-items:center; gap:8px;">
-                    <span style="font-size: 20px;">🔐</span> Change Password
-                </div>
+                <div style="font-size: 16px; font-weight: 800; display:flex; align-items:center; gap:8px;"><span style="font-size: 20px;">🔐</span> Change Password</div>
                 <button class="modal-close" style="color:white; background: rgba(255,255,255,0.1); border-radius: 50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; opacity:1; cursor:pointer;" onclick="closeModal('changePasswordModal')">✕</button>
             </div>
-            
             <div style="padding: 24px;">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">Current Password <span style="color:var(--red);">*</span></label>
-                    <input type="password" id="cpCurrentPassword" placeholder="Enter current password" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;">
-                </div>
-                
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">New Password <span style="color:var(--red);">*</span></label>
-                    <input type="password" id="cpNewPassword" placeholder="At least 6 characters" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;">
-                </div>
-                
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">Confirm New Password <span style="color:var(--red);">*</span></label>
-                    <input type="password" id="cpConfirmPassword" placeholder="Confirm new password" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;">
-                </div>
-                
+                <div class="form-group" style="margin-bottom: 16px;"><label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">Current Password <span style="color:var(--red);">*</span></label><input type="password" id="cpCurrentPassword" placeholder="Enter current password" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;"></div>
+                <div class="form-group" style="margin-bottom: 16px;"><label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">New Password <span style="color:var(--red);">*</span></label><input type="password" id="cpNewPassword" placeholder="At least 6 characters" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;"></div>
+                <div class="form-group" style="margin-bottom: 16px;"><label style="font-size:12px; font-weight:700; color:var(--gray-800); text-transform:uppercase; letter-spacing:0.5px;">Confirm New Password <span style="color:var(--red);">*</span></label><input type="password" id="cpConfirmPassword" placeholder="Confirm new password" style="width:100%; padding:12px; border:1px solid var(--gray-300); border-radius:8px; font-size:13px; font-family:inherit; background:var(--gray-50); margin-top:6px;"></div>
                 <div id="cpStatusMsg" class="status-msg"></div>
             </div>
-            
             <div style="padding: 16px 24px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display:flex; justify-content:flex-end; gap:12px;">
                 <button class="btn-action" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700);" onclick="closeModal('changePasswordModal')">Cancel</button>
                 <button class="btn-action red" id="cpSaveBtn" onclick="submitChangePassword()" style="padding: 10px 24px; font-size:14px;">Update Password</button>
             </div>
         </div>
     </div>
-    <!-- ============================================================
-     MODAL: COMPOSE MAIL (SUPER ADMIN)
-     ============================================================ -->
+
+    <!-- COMPOSE MAIL MODAL -->
     <div class="mc-overlay" id="composeMailModal">
         <div class="mc-modal">
-            <div class="mc-header">
-                <div class="mc-header-left">
-                    <div class="mc-header-icon">✏️</div>
-                    <div class="mc-header-text">
-                        <h3>Compose Message</h3>
-                        <p>Send internal message</p>
-                    </div>
-                </div>
-                <button class="mc-close" onclick="closeComposeModal()">✕</button>
-            </div>
+            <div class="mc-header"><div class="mc-header-left"><div class="mc-header-icon">✏️</div><div class="mc-header-text"><h3>Compose Message</h3><p>Send internal message</p></div></div><button class="mc-close" onclick="closeComposeModal()">✕</button></div>
             <div class="mc-body">
-                <div class="mc-field">
-                    <label class="mc-label">To <span class="req">*</span></label>
-                    <div class="ms-wrap">
-                        <div class="ms-box" id="sendToBox" onclick="document.getElementById('sendToInput').focus()">
-                            <input type="text" class="ms-input" id="sendToInput" placeholder="Type name...">
-                        </div>
-                        <div class="ms-dropdown" id="sendToDropdown"></div>
-                    </div>
-                </div>
-
-                <div class="mc-field">
-                    <label class="mc-label">CC (Optional)</label>
-                    <div class="ms-wrap">
-                        <div class="ms-box" id="ccBox" onclick="document.getElementById('ccInput').focus()">
-                            <input type="text" class="ms-input" id="ccInput" placeholder="Type name...">
-                        </div>
-                        <div class="ms-dropdown" id="ccDropdown"></div>
-                    </div>
-                </div>
-
-                <div class="mc-row2">
-                    <div class="mc-field">
-                        <label class="mc-label">Type</label>
-                        <select class="mc-select" id="mailType">
-                            <option value="information">📄 Information</option>
-                            <option value="request">📋 Request</option>
-                            <option value="action">⚡ Action Required</option>
-                            <option value="urgent">🚨 Urgent</option>
-                        </select>
-                    </div>
-                    <div class="mc-field">
-                        <label class="mc-label">Priority</label>
-                        <select class="mc-select" id="mailPriority">
-                            <option value="normal">🟢 Normal</option>
-                            <option value="high">🟡 High</option>
-                            <option value="urgent">🔴 Urgent</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mc-field">
-                    <label class="mc-label">Subject <span class="req">*</span></label>
-                    <input type="text" class="mc-input" id="mailSubject" placeholder="Enter subject...">
-                </div>
-
-                <div class="mc-field">
-                    <label class="mc-label">Message <span class="req">*</span></label>
-                    <textarea class="mc-textarea" id="mailBody" placeholder="Write your message here..."></textarea>
-                </div>
-
-                <div class="mc-field">
-                    <label class="mc-label">Attachments</label>
-                    <div class="mc-attach-zone" onclick="document.getElementById('mailFileInput').click()">
-                        <span class="mc-attach-icon">📎</span>
-                        <div class="mc-attach-title">Click to attach files</div>
-                        <div class="mc-attach-hint">Max 10MB per file</div>
-                    </div>
-                    <input type="file" id="mailFileInput" multiple style="display:none;" onchange="handleMailAttachments(event)">
-                    <div class="mc-attach-list" id="mailAttachList"></div>
-                </div>
+                <div class="mc-field"><label class="mc-label">To <span class="req">*</span></label><div class="ms-wrap"><div class="ms-box" id="sendToBox" onclick="document.getElementById('sendToInput').focus()"><input type="text" class="ms-input" id="sendToInput" placeholder="Type name..."></div><div class="ms-dropdown" id="sendToDropdown"></div></div></div>
+                <div class="mc-field"><label class="mc-label">CC (Optional)</label><div class="ms-wrap"><div class="ms-box" id="ccBox" onclick="document.getElementById('ccInput').focus()"><input type="text" class="ms-input" id="ccInput" placeholder="Type name..."></div><div class="ms-dropdown" id="ccDropdown"></div></div></div>
+                <div class="mc-row2"><div class="mc-field"><label class="mc-label">Type</label><select class="mc-select" id="mailType"><option value="information">📄 Information</option><option value="request">📋 Request</option><option value="action">⚡ Action Required</option><option value="urgent">🚨 Urgent</option></select></div><div class="mc-field"><label class="mc-label">Priority</label><select class="mc-select" id="mailPriority"><option value="normal">🟢 Normal</option><option value="high">🟡 High</option><option value="urgent">🔴 Urgent</option></select></div></div>
+                <div class="mc-field"><label class="mc-label">Subject <span class="req">*</span></label><input type="text" class="mc-input" id="mailSubject" placeholder="Enter subject..."></div>
+                <div class="mc-field"><label class="mc-label">Message <span class="req">*</span></label><textarea class="mc-textarea" id="mailBody" placeholder="Write your message here..."></textarea></div>
+                <div class="mc-field"><label class="mc-label">Attachments</label><div class="mc-attach-zone" onclick="document.getElementById('mailFileInput').click()"><span class="mc-attach-icon">📎</span><div class="mc-attach-title">Click to attach files</div><div class="mc-attach-hint">Max 10MB per file</div></div><input type="file" id="mailFileInput" multiple style="display:none;" onchange="handleMailAttachments(event)"><div class="mc-attach-list" id="mailAttachList"></div></div>
             </div>
-            <div class="mc-footer">
-                <div class="mc-footer-hint">🔒 Secure internal messaging</div>
-                <div class="mc-footer-actions">
-                    <button class="mc-btn mc-btn-cancel" onclick="closeComposeModal()">Cancel</button>
-                    <button class="mc-btn mc-btn-draft" onclick="saveMailDraft()">💾 Save Draft</button>
-                    <button class="mc-btn mc-btn-send" onclick="sendMail()">📤 Send Message</button>
-                </div>
-            </div>
+            <div class="mc-footer"><div class="mc-footer-hint">🔒 Secure internal messaging</div><div class="mc-footer-actions"><button class="mc-btn mc-btn-cancel" onclick="closeComposeModal()">Cancel</button><button class="mc-btn mc-btn-draft" onclick="saveMailDraft()">💾 Save Draft</button><button class="mc-btn mc-btn-send" onclick="sendMail()">📤 Send Message</button></div></div>
         </div>
     </div>
 
-    <!-- ============================================================
-        MODAL: MINUTE COMPOSE (SUPER ADMIN)
-        ============================================================ -->
+    <!-- MINUTE COMPOSE MODAL -->
     <div class="mc-overlay" id="minuteComposeModal">
         <div class="mc-modal">
-            <div class="mc-header">
-                <div class="mc-header-left">
-                    <div class="mc-header-icon">📝</div>
-                    <div class="mc-header-text">
-                        <h3>Create Minute</h3>
-                        <p>Assign task to someone</p>
-                    </div>
-                </div>
-                <button class="mc-close" onclick="closeModal('minuteComposeModal')">✕</button>
-            </div>
+            <div class="mc-header"><div class="mc-header-left"><div class="mc-header-icon">📝</div><div class="mc-header-text"><h3>Create Minute</h3><p>Assign task to someone</p></div></div><button class="mc-close" onclick="closeModal('minuteComposeModal')">✕</button></div>
             <div class="mc-body">
-                <div class="mc-field">
-                    <label class="mc-label">Subject <span class="req">*</span></label>
-                    <input type="text" class="mc-input" id="minuteSubject" placeholder="Minute subject...">
-                </div>
-                <div class="mc-field">
-                    <label class="mc-label">Assign To <span class="req">*</span></label>
-                    <select class="mc-select" id="minuteAssignTo">
-                        <option value="">-- Select Person --</option>
-                    </select>
-                </div>
-                <div class="mc-field">
-                    <label class="mc-label">Instructions <span class="req">*</span></label>
-                    <textarea class="mc-textarea" id="minuteBody" placeholder="What should they do?"></textarea>
-                </div>
-                <div class="mc-field">
-                    <label class="mc-label">Attachments</label>
-                    <div class="mc-attach-zone" onclick="document.getElementById('minuteFileInput').click()">
-                        <span class="mc-attach-icon">📎</span>
-                        <div class="mc-attach-title">Click to attach files</div>
-                        <div class="mc-attach-hint">Max 25MB per file</div>
-                    </div>
-                    <input type="file" id="minuteFileInput" multiple style="display:none;" onchange="handleMinuteAttachments(event)">
-                    <div class="mc-attach-list" id="minuteAttachList"></div>
-                </div>
+                <div class="mc-field"><label class="mc-label">Subject <span class="req">*</span></label><input type="text" class="mc-input" id="minuteSubject" placeholder="Minute subject..."></div>
+                <div class="mc-field"><label class="mc-label">Assign To <span class="req">*</span></label><select class="mc-select" id="minuteAssignTo"><option value="">-- Select Person --</option></select></div>
+                <div class="mc-field"><label class="mc-label">Instructions <span class="req">*</span></label><textarea class="mc-textarea" id="minuteBody" placeholder="What should they do?"></textarea></div>
+                <div class="mc-field"><label class="mc-label">Attachments</label><div class="mc-attach-zone" onclick="document.getElementById('minuteFileInput').click()"><span class="mc-attach-icon">📎</span><div class="mc-attach-title">Click to attach files</div><div class="mc-attach-hint">Max 25MB per file</div></div><input type="file" id="minuteFileInput" multiple style="display:none;" onchange="handleMinuteAttachments(event)"><div class="mc-attach-list" id="minuteAttachList"></div></div>
             </div>
-            <div class="mc-footer">
-                <div class="mc-footer-hint">📝 Creates a task for the assignee</div>
-                <div class="mc-footer-actions">
-                    <button class="mc-btn mc-btn-cancel" onclick="closeModal('minuteComposeModal')">Cancel</button>
-                    <button class="mc-btn mc-btn-send" onclick="sendMinute()">📤 Create Minute</button>
-                </div>
-            </div>
+            <div class="mc-footer"><div class="mc-footer-hint">📝 Creates a task for the assignee</div><div class="mc-footer-actions"><button class="mc-btn mc-btn-cancel" onclick="closeModal('minuteComposeModal')">Cancel</button><button class="mc-btn mc-btn-send" onclick="sendMinute()">📤 Create Minute</button></div></div>
         </div>
     </div>
 
-    <!-- ============================================================
-        MODAL: ATTEND & ASSIGN
-        ============================================================ -->
+    <!-- ATTEND & ASSIGN MODAL -->
     <div class="modal-overlay" id="attendMailModal">
         <div class="modal-box" style="max-width: 620px; padding: 0; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #1A2421, #0f1a16); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:42px; height:42px; border-radius:10px; background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.4); display:flex; align-items:center; justify-content:center; font-size:20px;">✅</div>
-                    <div>
-                        <div style="font-size:16px; font-weight:800;">Attend & Assign</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.7);" id="attendMailSubject">—</div>
-                    </div>
-                </div>
+                <div style="display:flex; align-items:center; gap:12px;"><div style="width:42px; height:42px; border-radius:10px; background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.4); display:flex; align-items:center; justify-content:center; font-size:20px;">✅</div><div><div style="font-size:16px; font-weight:800;">Attend & Assign</div><div style="font-size:11px; color:rgba(255,255,255,0.7);" id="attendMailSubject">—</div></div></div>
                 <button onclick="closeModal('attendMailModal')" style="background:rgba(255,255,255,0.2); border:none; color:white; width:32px; height:32px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
             </div>
             <div style="padding: 22px 26px; max-height: 60vh; overflow-y: auto;">
-                <div class="mc-field">
-                    <label class="mc-label">Comment / Notes</label>
-                    <textarea class="mc-textarea" id="attendComment" placeholder="Write what you've done or your response..." style="min-height: 100px;"></textarea>
-                </div>
-                <div class="mc-field" style="margin-top: 16px;">
-                    <label class="mc-label">Assign To (Optional)</label>
-                    <select class="mc-select" id="attendAssignTo">
-                        <option value="">-- No assignment, just comment --</option>
-                    </select>
-                </div>
-                <div class="mc-field" style="margin-top: 16px;">
-                    <label class="mc-label">Attachments (Optional)</label>
-                    <div class="mc-attach-zone" onclick="document.getElementById('attendFileInput').click()">
-                        <span class="mc-attach-icon">📎</span>
-                        <div class="mc-attach-title">Click to attach files</div>
-                        <div class="mc-attach-hint">Max 10MB per file</div>
-                    </div>
-                    <input type="file" id="attendFileInput" multiple style="display:none;" onchange="handleAttendAttachments(event)">
-                    <div class="mc-attach-list" id="attendAttachList"></div>
-                </div>
+                <div class="mc-field"><label class="mc-label">Comment / Notes</label><textarea class="mc-textarea" id="attendComment" placeholder="Write what you've done or your response..." style="min-height: 100px;"></textarea></div>
+                <div class="mc-field" style="margin-top: 16px;"><label class="mc-label">Assign To (Optional)</label><select class="mc-select" id="attendAssignTo"><option value="">-- No assignment, just comment --</option></select></div>
+                <div class="mc-field" style="margin-top: 16px;"><label class="mc-label">Attachments (Optional)</label><div class="mc-attach-zone" onclick="document.getElementById('attendFileInput').click()"><span class="mc-attach-icon">📎</span><div class="mc-attach-title">Click to attach files</div><div class="mc-attach-hint">Max 10MB per file</div></div><input type="file" id="attendFileInput" multiple style="display:none;" onchange="handleAttendAttachments(event)"><div class="mc-attach-list" id="attendAttachList"></div></div>
             </div>
             <div style="padding: 14px 26px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; justify-content: flex-end;">
                 <button onclick="closeModal('attendMailModal')" style="padding:10px 20px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit;">Cancel</button>
@@ -1153,45 +887,18 @@
         </div>
     </div>
 
-    <!-- ============================================================
-        MODAL: CLOSE WORKFLOW
-        ============================================================ -->
+    <!-- CLOSE WORKFLOW MODAL -->
     <div class="modal-overlay" id="closeWorkflowModal">
         <div class="modal-box" style="max-width: 620px; padding: 0; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #7f1d1d, #dc2626); padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:42px; height:42px; border-radius:10px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; font-size:20px;">🔒</div>
-                    <div>
-                        <div style="font-size:16px; font-weight:800;">Close Workflow</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.7);" id="closeMailSubject">—</div>
-                    </div>
-                </div>
+                <div style="display:flex; align-items:center; gap:12px;"><div style="width:42px; height:42px; border-radius:10px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; font-size:20px;">🔒</div><div><div style="font-size:16px; font-weight:800;">Close Workflow</div><div style="font-size:11px; color:rgba(255,255,255,0.7);" id="closeMailSubject">—</div></div></div>
                 <button onclick="closeModal('closeWorkflowModal')" style="background:rgba(255,255,255,0.2); border:none; color:white; width:32px; height:32px; border-radius:50%; font-size:18px; cursor:pointer;">✕</button>
             </div>
             <div style="padding: 22px 26px; max-height: 60vh; overflow-y: auto;">
-                <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #78350f; margin-bottom: 16px;">
-                    ⚠️ Closing this message means the workflow is complete. No further actions can be taken.
-                </div>
-                <div class="mc-field">
-                    <label class="mc-label">What was done? <span class="req">*</span></label>
-                    <textarea class="mc-textarea" id="closeComment" placeholder="Explain what was accomplished..." style="min-height: 100px;"></textarea>
-                </div>
-                <div class="mc-field" style="margin-top: 16px;">
-                    <label class="mc-label">Assign To (Optional)</label>
-                    <select class="mc-select" id="closeAssignTo">
-                        <option value="">-- No assignment, just close --</option>
-                    </select>
-                </div>
-                <div class="mc-field" style="margin-top: 16px;">
-                    <label class="mc-label">Attachments (Optional)</label>
-                    <div class="mc-attach-zone" onclick="document.getElementById('closeFileInput').click()">
-                        <span class="mc-attach-icon">📎</span>
-                        <div class="mc-attach-title">Click to attach files</div>
-                        <div class="mc-attach-hint">Max 10MB per file</div>
-                    </div>
-                    <input type="file" id="closeFileInput" multiple style="display:none;" onchange="handleCloseAttachments(event)">
-                    <div class="mc-attach-list" id="closeAttachList"></div>
-                </div>
+                <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #78350f; margin-bottom: 16px;">⚠️ Closing this message means the workflow is complete.</div>
+                <div class="mc-field"><label class="mc-label">What was done? <span class="req">*</span></label><textarea class="mc-textarea" id="closeComment" placeholder="Explain what was accomplished..." style="min-height: 100px;"></textarea></div>
+                <div class="mc-field" style="margin-top: 16px;"><label class="mc-label">Assign To (Optional)</label><select class="mc-select" id="closeAssignTo"><option value="">-- No assignment, just close --</option></select></div>
+                <div class="mc-field" style="margin-top: 16px;"><label class="mc-label">Attachments (Optional)</label><div class="mc-attach-zone" onclick="document.getElementById('closeFileInput').click()"><span class="mc-attach-icon">📎</span><div class="mc-attach-title">Click to attach files</div><div class="mc-attach-hint">Max 10MB per file</div></div><input type="file" id="closeFileInput" multiple style="display:none;" onchange="handleCloseAttachments(event)"><div class="mc-attach-list" id="closeAttachList"></div></div>
             </div>
             <div style="padding: 14px 26px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; justify-content: flex-end;">
                 <button onclick="closeModal('closeWorkflowModal')" style="padding:10px 20px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit;">Cancel</button>
@@ -1200,116 +907,40 @@
         </div>
     </div>
 
-    <!-- ============================================================
-        MODAL: VIEW ATTACHMENTS
-        ============================================================ -->
+    <!-- VIEW ATTACHMENTS MODAL -->
     <div class="modal-overlay" id="viewAttachmentsModal">
         <div class="modal-box" style="max-width: 550px; padding: 0; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #1A2421, #0f1a16); padding: 22px 26px; display: flex; justify-content: space-between; align-items: center; color: white;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:42px; height:42px; border-radius:10px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); display:flex; align-items:center; justify-content:center; font-size:20px;">📎</div>
-                    <div>
-                        <h3 style="margin: 0; font-size: 18px; font-weight: 900;">Attachments</h3>
-                        <div style="font-size: 12px; color: rgba(255,255,255,0.7);" id="attachmentsCount">0 file(s) attached</div>
-                    </div>
-                </div>
+                <div style="display:flex; align-items:center; gap:12px;"><div style="width:42px; height:42px; border-radius:10px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); display:flex; align-items:center; justify-content:center; font-size:20px;">📎</div><div><h3 style="margin: 0; font-size: 18px; font-weight: 900;">Attachments</h3><div style="font-size: 12px; color: rgba(255,255,255,0.7);" id="attachmentsCount">0 file(s) attached</div></div></div>
                 <button onclick="closeModal('viewAttachmentsModal')" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer;">✕</button>
             </div>
             <div id="attachmentsListBody" style="padding: 24px 28px; max-height: 60vh; overflow-y: auto; background: #f8fafc;"></div>
-            <div style="padding: 18px 28px; background: white; border-top: 1.5px solid #e2e8f0; display:flex; justify-content:flex-end;">
-                <button onclick="closeModal('viewAttachmentsModal')" style="padding: 12px 28px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit;">Close</button>
-            </div>
+            <div style="padding: 18px 28px; background: white; border-top: 1.5px solid #e2e8f0; display:flex; justify-content:flex-end;"><button onclick="closeModal('viewAttachmentsModal')" style="padding: 12px 28px; background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit;">Close</button></div>
         </div>
     </div>
-    <!-- ===== ADD/EDIT PRODUCT MODAL ===== -->
+
+    <!-- PRODUCT MODAL -->
     <div class="modal-overlay" id="productModal">
         <div class="modal-box" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3 id="productModalTitle">➕ Add Product</h3>
-                <button class="modal-close" onclick="closeModal('productModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="productModalTitle">➕ Add Product</h3><button class="modal-close" onclick="closeModal('productModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Product Name <span class="required">*</span></label>
-                        <input type="text" id="productName" placeholder="e.g., Concrete Blocks (6 inch)">
-                    </div>
-                    <div class="form-group">
-                        <label>Price (TSh) <span class="required">*</span></label>
-                        <input type="number" id="productPrice" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Unit</label>
-                        <select id="productUnit">
-                            <option value="per block">per block</option>
-                            <option value="per piece">per piece</option>
-                            <option value="per bag">per bag</option>
-                            <option value="per ton">per ton</option>
-                            <option value="per kg">per kg</option>
-                            <option value="per sheet">per sheet</option>
-                            <option value="per 5L">per 5L</option>
-                            <option value="per 10L">per 10L</option>
-                            <option value="per metre">per metre</option>
-                            <option value="per trip">per trip</option>
-                            <option value="per cubic meter">per meter</option>
-                            <option value="per roll">per roll</option>
-                            <option value="per box">per box</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="productCategory">
-                            <option value="">-- Select --</option>
-                            <option value="Blocks">Blocks</option>
-                            <option value="Paving">Paving</option>
-                            <option value="Cement">Cement</option>
-                            <option value="Aggregates">Aggregates</option>
-                            <option value="Roofing">Roofing</option>
-                            <option value="Paint">Paint</option>
-                            <option value="Steel">Steel</option>
-                            <option value="Hardware">Hardware</option>
-                            <option value="Agricultural Implements">Agricultural Implements</option>
-                            <option value="Timber">Timber</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tag (Badge)</label>
-                        <input type="text" id="productTag" placeholder="e.g., Best Seller, New, Popular">
-                    </div>
-                    <div class="form-group">
-                        <label>Stock (Quantity Available)</label>
-                        <input type="number" id="productStock" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Order (Display Order)</label>
-                        <input type="number" id="productOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="productIsActive">
-                            <option value="true">✅ Active</option>
-                            <option value="false">⏸ Inactive</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Description</label>
-                        <textarea id="productDescription" rows="3" placeholder="Brief description of the product..."></textarea>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Product Name <span class="required">*</span></label><input type="text" id="productName" placeholder="e.g., Concrete Blocks (6 inch)"></div>
+                    <div class="form-group"><label>Price (TSh) <span class="required">*</span></label><input type="number" id="productPrice" placeholder="0"></div>
+                    <div class="form-group"><label>Unit</label><select id="productUnit"><option value="per block">per block</option><option value="per piece">per piece</option><option value="per bag">per bag</option><option value="per ton">per ton</option><option value="per kg">per kg</option><option value="per sheet">per sheet</option><option value="per 5L">per 5L</option><option value="per 10L">per 10L</option><option value="per metre">per metre</option><option value="per trip">per trip</option><option value="per cubic meter">per meter</option><option value="per roll">per roll</option><option value="per box">per box</option><option value="Other">Other</option></select></div>
+                    <div class="form-group"><label>Category</label><select id="productCategory"><option value="">-- Select --</option><option value="Blocks">Blocks</option><option value="Paving">Paving</option><option value="Cement">Cement</option><option value="Aggregates">Aggregates</option><option value="Roofing">Roofing</option><option value="Paint">Paint</option><option value="Steel">Steel</option><option value="Hardware">Hardware</option><option value="Agricultural Implements">Agricultural Implements</option><option value="Timber">Timber</option><option value="Other">Other</option></select></div>
+                    <div class="form-group"><label>Tag (Badge)</label><input type="text" id="productTag" placeholder="e.g., Best Seller, New, Popular"></div>
+                    <div class="form-group"><label>Stock (Quantity Available)</label><input type="number" id="productStock" placeholder="0" value="0"></div>
+                    <div class="form-group"><label>Order (Display Order)</label><input type="number" id="productOrder" placeholder="0" value="0"></div>
+                    <div class="form-group"><label>Status</label><select id="productIsActive"><option value="true">✅ Active</option><option value="false">⏸ Inactive</option></select></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Description</label><textarea id="productDescription" rows="3" placeholder="Brief description of the product..."></textarea></div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Product Image</label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="productPhotoPreview">
-                                <span id="productPhotoInitials">📦</span>
-                            </div>
+                            <div class="leader-photo-preview" id="productPhotoPreview"><span id="productPhotoInitials">📦</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('productPhotoInput').click()">
-                                    📷 Choose Image
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeProductPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('productPhotoInput').click()">📷 Choose Image</button>
+                                <button type="button" class="btn-secondary" onclick="removeProductPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="productPhotoInput" accept="image/*" onchange="handleProductPhotoUpload(event)" style="display:none;">
                                 <input type="hidden" id="productImage" value="">
                                 <p class="leader-photo-hint">JPG, PNG, GIF — max 2MB</p>
@@ -1319,116 +950,53 @@
                 </div>
                 <div id="productStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('productModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveProduct()">💾 Save Product</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('productModal')">Cancel</button><button class="btn-submit" onclick="saveProduct()">💾 Save Product</button></div>
         </div>
     </div>
-    <!-- ===== VIEW USER PROFILE MODAL ===== -->
+
+    <!-- VIEW USER MODAL -->
     <div class="modal-overlay" id="viewUserModal">
         <div class="modal-box" style="max-width: 550px; padding: 0; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
-            
-            <!-- Header -->
             <div style="background: linear-gradient(135deg, #1A2421 0%, #0f1614 100%); padding: 30px 24px; color: white; position: relative; overflow: hidden; text-align: center;">
                 <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%); border-radius: 50%;"></div>
-                
                 <button class="modal-close" style="position: absolute; top: 16px; right: 20px; color:white; background: rgba(255,255,255,0.1); border-radius: 50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; z-index: 2;" onclick="closeModal('viewUserModal')">✕</button>
-
-                <!-- Avatar -->
-                <div id="viewUserAvatar" style="width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #fbbf24); border: 4px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: #1A2421; margin: 0 auto 16px; position: relative; z-index: 1; overflow: hidden;">
-                    GK
-                </div>
-                
+                <div id="viewUserAvatar" style="width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #fbbf24); border: 4px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: #1A2421; margin: 0 auto 16px; position: relative; z-index: 1; overflow: hidden;">GK</div>
                 <h2 id="viewUserName" style="font-size: 24px; font-weight: 800; color: white; margin-bottom: 4px; position: relative; z-index: 1;">Godfrey Kanti Mwanga</h2>
                 <div id="viewUserRoleBadge" style="display: inline-block; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 1;">SuperAdmin</div>
             </div>
-            
-            <!-- Body -->
             <div style="padding: 24px 30px; background: white;">
-                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    
-                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #3b82f6;">
-                        <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Email</div>
-                        <div id="viewUserEmail" style="font-size: 13px; font-weight: 700; color: #1e293b; word-break: break-all;">superadmin@makdc.co.tz</div>
-                    </div>
-
-                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #22c55e;">
-                        <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Phone</div>
-                        <div id="viewUserPhone" style="font-size: 13px; font-weight: 700; color: #1e293b;">+255 754 123 456</div>
-                    </div>
-
-                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #f59e0b;">
-                        <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Department</div>
-                        <div id="viewUserDept" style="font-size: 13px; font-weight: 700; color: #1e293b;">Information and Technology Department</div>
-                    </div>
-
-                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                        <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Employee ID</div>
-                        <div id="viewUserEmpId" style="font-size: 13px; font-weight: 700; color: #1e293b;">EMP-000</div>
-                    </div>
+                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #3b82f6;"><div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Email</div><div id="viewUserEmail" style="font-size: 13px; font-weight: 700; color: #1e293b; word-break: break-all;">superadmin@makdc.co.tz</div></div>
+                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #22c55e;"><div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Phone</div><div id="viewUserPhone" style="font-size: 13px; font-weight: 700; color: #1e293b;">+255 754 123 456</div></div>
+                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #f59e0b;"><div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Department</div><div id="viewUserDept" style="font-size: 13px; font-weight: 700; color: #1e293b;">IT Department</div></div>
+                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border-left: 4px solid #8b5cf6;"><div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Employee ID</div><div id="viewUserEmpId" style="font-size: 13px; font-weight: 700; color: #1e293b;">EMP-000</div></div>
                 </div>
-
-                <!-- Status Section -->
                 <div style="margin-top: 20px; padding: 16px 20px; background: linear-gradient(135deg, rgba(15,118,110,0.05), rgba(15,118,110,0.01)); border: 1.5px solid rgba(15,118,110,0.15); border-radius: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Account Status</div>
-                        <div id="viewUserStatus" style="font-size: 15px; font-weight: 900; color: #16a34a;">✅ ACTIVE</div>
-                    </div>
+                    <div><div style="font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Account Status</div><div id="viewUserStatus" style="font-size: 15px; font-weight: 900; color: #16a34a;">✅ ACTIVE</div></div>
                     <div style="font-size: 28px;">🛡️</div>
                 </div>
-
             </div>
-            
-            <!-- Footer -->
-            <div style="padding: 16px 30px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px;">
-                <button class="btn-cancel" style="padding: 10px 24px;" onclick="closeModal('viewUserModal')">Close Profile</button>
-            </div>
+            <div style="padding: 16px 30px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px;"><button class="btn-cancel" style="padding: 10px 24px;" onclick="closeModal('viewUserModal')">Close Profile</button></div>
         </div>
     </div>
         
-    <!-- ===== ADD/EDIT HERO SLIDE MODAL ===== -->
+    <!-- HERO SLIDE MODAL -->
     <div class="modal-overlay" id="heroModal">
         <div class="modal-box" style="max-width: 620px;">
-            <div class="modal-header">
-                <h3 id="heroModalTitle">➕ Add Hero Slide</h3>
-                <button class="modal-close" onclick="closeModal('heroModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="heroModalTitle">➕ Add Hero Slide</h3><button class="modal-close" onclick="closeModal('heroModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Title (Optional)</label>
-                        <input type="text" id="heroTitle" placeholder="e.g., Quality Service is Our Priority">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Subtitle (Optional)</label>
-                        <textarea id="heroSubtitle" rows="2" placeholder="Short description..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="heroOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="heroIsActive">
-                            <option value="true">✅ Active</option>
-                            <option value="false">⏸ Inactive</option>
-                        </select>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Title (Optional)</label><input type="text" id="heroTitle" placeholder="e.g., Quality Service is Our Priority"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Subtitle (Optional)</label><textarea id="heroSubtitle" rows="2" placeholder="Short description..."></textarea></div>
+                    <div class="form-group"><label>Display Order</label><input type="number" id="heroOrder" placeholder="0" value="0"></div>
+                    <div class="form-group"><label>Status</label><select id="heroIsActive"><option value="true">✅ Active</option><option value="false">⏸ Inactive</option></select></div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Background Image <span class="required">*</span></label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="heroPhotoPreview" style="width: 200px; height: 100px; border-radius: 10px;">
-                                <span>🖼️</span>
-                            </div>
+                            <div class="leader-photo-preview" id="heroPhotoPreview" style="width: 200px; height: 100px; border-radius: 10px;"><span>🖼️</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('heroPhotoInput').click()">
-                                    📷 Choose Image
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeHeroPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('heroPhotoInput').click()">📷 Choose Image</button>
+                                <button type="button" class="btn-secondary" onclick="removeHeroPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="heroPhotoInput" accept="image/*" onchange="handleHeroPhotoUpload(event)" style="display:none;">
                                 <input type="hidden" id="heroImage" value="">
                                 <p class="leader-photo-hint">JPG, PNG — max 2MB • Recommended: 1920x1080</p>
@@ -1438,122 +1006,50 @@
                 </div>
                 <div id="heroStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('heroModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveHeroSlide()">💾 Save Slide</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('heroModal')">Cancel</button><button class="btn-submit" onclick="saveHeroSlide()">💾 Save Slide</button></div>
         </div>
     </div>
 
-    <!-- ===== ADD/EDIT STAT MODAL ===== -->
+    <!-- STAT MODAL -->
     <div class="modal-overlay" id="statModal">
         <div class="modal-box" style="max-width: 520px;">
-            <div class="modal-header">
-                <h3 id="statModalTitle">➕ Add Stat</h3>
-                <button class="modal-close" onclick="closeModal('statModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="statModalTitle">➕ Add Stat</h3><button class="modal-close" onclick="closeModal('statModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Label <span class="required">*</span></label>
-                        <input type="text" id="statLabel" placeholder="e.g., Projects Completed">
-                    </div>
-                    <div class="form-group">
-                        <label>Value (Number) <span class="required">*</span></label>
-                        <input type="number" id="statValue" placeholder="e.g., 50">
-                    </div>
-                    <div class="form-group">
-                        <label>Icon (Emoji)</label>
-                        <input type="text" id="statIcon" placeholder="e.g., 🏗️">
-                    </div>
-                    <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="statOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="statIsActive">
-                            <option value="true">✅ Active</option>
-                            <option value="false">⏸ Inactive</option>
-                        </select>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Label <span class="required">*</span></label><input type="text" id="statLabel" placeholder="e.g., Projects Completed"></div>
+                    <div class="form-group"><label>Value (Number) <span class="required">*</span></label><input type="number" id="statValue" placeholder="e.g., 50"></div>
+                    <div class="form-group"><label>Icon (Emoji)</label><input type="text" id="statIcon" placeholder="e.g., 🏗️"></div>
+                    <div class="form-group"><label>Display Order</label><input type="number" id="statOrder" placeholder="0" value="0"></div>
+                    <div class="form-group"><label>Status</label><select id="statIsActive"><option value="true">✅ Active</option><option value="false">⏸ Inactive</option></select></div>
                 </div>
                 <div id="statStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('statModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveStat()">💾 Save Stat</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('statModal')">Cancel</button><button class="btn-submit" onclick="saveStat()">💾 Save Stat</button></div>
         </div>
     </div>
 
-    <!-- ===== ADD/EDIT PROJECT MODAL ===== -->
+    <!-- PROJECT MODAL -->
     <div class="modal-overlay" id="projectModal">
         <div class="modal-box" style="max-width: 680px;">
-            <div class="modal-header">
-                <h3 id="projectModalTitle">➕ Add Project</h3>
-                <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="projectModalTitle">➕ Add Project</h3><button class="modal-close" onclick="closeModal('projectModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Project Title <span class="required">*</span></label>
-                        <input type="text" id="projectTitle" placeholder="e.g., Mbeya Business Complex">
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="projectCategory">
-                            <option value="Commercial">🏢 Commercial</option>
-                            <option value="Residential">🏠 Residential</option>
-                            <option value="Infrastructure">🛣️ Infrastructure</option>
-                            <option value="Industrial">🏭 Industrial</option>
-                            <option value="Other">📦 Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Year</label>
-                        <input type="text" id="projectYear" placeholder="e.g., 2024">
-                    </div>
-                    <div class="form-group">
-                        <label>Location</label>
-                        <input type="text" id="projectLocation" placeholder="e.g., Mbeya, Tanzania">
-                    </div>
-                    <div class="form-group">
-                        <label>Client</label>
-                        <input type="text" id="projectClient" placeholder="e.g., Mbeya City Council">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Short Description</label>
-                        <textarea id="projectDescription" rows="2" placeholder="Brief summary shown on card..."></textarea>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Full Content (Optional)</label>
-                        <textarea id="projectContent" rows="4" placeholder="Full project details..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="projectOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="projectIsActive">
-                            <option value="true">✅ Active (Visible on website)</option>
-                            <option value="false">⏸ Inactive (Hidden)</option>
-                        </select>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Project Title <span class="required">*</span></label><input type="text" id="projectTitle" placeholder="e.g., Mbeya Business Complex"></div>
+                    <div class="form-group"><label>Category</label><select id="projectCategory"><option value="Commercial">🏢 Commercial</option><option value="Residential">🏠 Residential</option><option value="Infrastructure">🛣️ Infrastructure</option><option value="Industrial">🏭 Industrial</option><option value="Other">📦 Other</option></select></div>
+                    <div class="form-group"><label>Year</label><input type="text" id="projectYear" placeholder="e.g., 2024"></div>
+                    <div class="form-group"><label>Location</label><input type="text" id="projectLocation" placeholder="e.g., Mbeya, Tanzania"></div>
+                    <div class="form-group"><label>Client</label><input type="text" id="projectClient" placeholder="e.g., Mbeya City Council"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Short Description</label><textarea id="projectDescription" rows="2" placeholder="Brief summary shown on card..."></textarea></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Full Content (Optional)</label><textarea id="projectContent" rows="4" placeholder="Full project details..."></textarea></div>
+                    <div class="form-group"><label>Display Order</label><input type="number" id="projectOrder" placeholder="0" value="0"></div>
+                    <div class="form-group"><label>Status</label><select id="projectIsActive"><option value="true">✅ Active (Visible on website)</option><option value="false">⏸ Inactive (Hidden)</option></select></div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Project Image</label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="projectPhotoPreview">
-                                <span>🏗️</span>
-                            </div>
+                            <div class="leader-photo-preview" id="projectPhotoPreview"><span>🏗️</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('projectPhotoInput').click()">
-                                    📷 Choose Image
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeProjectPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('projectPhotoInput').click()">📷 Choose Image</button>
+                                <button type="button" class="btn-secondary" onclick="removeProjectPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="projectPhotoInput" accept="image/*" onchange="handleProjectPhotoUpload(event)" style="display:none;">
                                 <input type="hidden" id="projectImage" value="">
                                 <p class="leader-photo-hint">JPG, PNG, GIF — max 2MB</p>
@@ -1563,75 +1059,31 @@
                 </div>
                 <div id="projectStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('projectModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveProject()">💾 Save Project</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('projectModal')">Cancel</button><button class="btn-submit" onclick="saveProject()">💾 Save Project</button></div>
         </div>
     </div>
 
-    <!-- ===== ADD/EDIT NEWS MODAL ===== -->
+    <!-- NEWS MODAL -->
     <div class="modal-overlay" id="newsModal">
         <div class="modal-box" style="max-width: 680px;">
-            <div class="modal-header">
-                <h3 id="newsModalTitle">➕ Add News</h3>
-                <button class="modal-close" onclick="closeModal('newsModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="newsModalTitle">➕ Add News</h3><button class="modal-close" onclick="closeModal('newsModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Title <span class="required">*</span></label>
-                        <input type="text" id="newsTitle" placeholder="e.g., New Concrete Block Plant Launched">
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="newsCategory">
-                            <option value="News">📰 News</option>
-                            <option value="Offer">🎁 Offer</option>
-                            <option value="Update">🔄 Update</option>
-                            <option value="Announcement">📢 Announcement</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Author</label>
-                        <input type="text" id="newsAuthor" placeholder="e.g., Admin">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Excerpt (Short Description)</label>
-                        <textarea id="newsExcerpt" rows="2" placeholder="Brief summary shown on card..."></textarea>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Content <span class="required">*</span></label>
-                        <textarea id="newsContent" rows="5" placeholder="Full news content..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Published Date</label>
-                        <input type="date" id="newsPublishedAt">
-                    </div>
-                    <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="newsOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Status</label>
-                        <select id="newsIsActive">
-                            <option value="true">✅ Active (Visible on website)</option>
-                            <option value="false">⏸ Inactive (Hidden)</option>
-                        </select>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Title <span class="required">*</span></label><input type="text" id="newsTitle" placeholder="e.g., New Concrete Block Plant Launched"></div>
+                    <div class="form-group"><label>Category</label><select id="newsCategory"><option value="News">📰 News</option><option value="Offer">🎁 Offer</option><option value="Update">🔄 Update</option><option value="Announcement">📢 Announcement</option></select></div>
+                    <div class="form-group"><label>Author</label><input type="text" id="newsAuthor" placeholder="e.g., Admin"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Excerpt (Short Description)</label><textarea id="newsExcerpt" rows="2" placeholder="Brief summary shown on card..."></textarea></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Content <span class="required">*</span></label><textarea id="newsContent" rows="5" placeholder="Full news content..."></textarea></div>
+                    <div class="form-group"><label>Published Date</label><input type="date" id="newsPublishedAt"></div>
+                    <div class="form-group"><label>Display Order</label><input type="number" id="newsOrder" placeholder="0" value="0"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Status</label><select id="newsIsActive"><option value="true">✅ Active (Visible on website)</option><option value="false">⏸ Inactive (Hidden)</option></select></div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Image (Optional)</label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="newsPhotoPreview">
-                                <span id="newsPhotoInitials">📰</span>
-                            </div>
+                            <div class="leader-photo-preview" id="newsPhotoPreview"><span id="newsPhotoInitials">📰</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('newsPhotoInput').click()">
-                                    📷 Choose Image
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeNewsPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('newsPhotoInput').click()">📷 Choose Image</button>
+                                <button type="button" class="btn-secondary" onclick="removeNewsPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="newsPhotoInput" accept="image/*" onchange="handleNewsPhotoUpload(event)" style="display:none;">
                                 <input type="hidden" id="newsImage" value="">
                                 <p class="leader-photo-hint">JPG, PNG, GIF — max 2MB</p>
@@ -1641,16 +1093,10 @@
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Attachment (PDF/Document)</label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="newsAttachmentPreview">
-                                <span>📎</span>
-                            </div>
+                            <div class="leader-photo-preview" id="newsAttachmentPreview"><span>📎</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('newsAttachmentInput').click()">
-                                    📎 Choose File
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeNewsAttachment()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('newsAttachmentInput').click()">📎 Choose File</button>
+                                <button type="button" class="btn-secondary" onclick="removeNewsAttachment()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="newsAttachmentInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" onchange="handleNewsAttachmentUpload(event)" style="display:none;">
                                 <input type="hidden" id="newsAttachment" value="">
                                 <input type="hidden" id="newsAttachmentName" value="">
@@ -1661,68 +1107,29 @@
                 </div>
                 <div id="newsStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('newsModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveNews()">💾 Save News</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('newsModal')">Cancel</button><button class="btn-submit" onclick="saveNews()">💾 Save News</button></div>
         </div>
     </div>
 
-    <!-- ===== ADD/EDIT TESTIMONIAL MODAL ===== -->
+    <!-- TESTIMONIAL MODAL -->
     <div class="modal-overlay" id="testimonialModal">
         <div class="modal-box" style="max-width: 620px;">
-            <div class="modal-header">
-                <h3 id="testimonialModalTitle">➕ Add Testimonial</h3>
-                <button class="modal-close" onclick="closeModal('testimonialModal')">✕</button>
-            </div>
+            <div class="modal-header"><h3 id="testimonialModalTitle">➕ Add Testimonial</h3><button class="modal-close" onclick="closeModal('testimonialModal')">✕</button></div>
             <div class="modal-body">
                 <div class="form-grid-2">
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Customer Name <span class="required">*</span></label>
-                        <input type="text" id="testimonialName" placeholder="e.g., John Mwangi">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Role / Location</label>
-                        <input type="text" id="testimonialRole" placeholder="e.g., Contractor, Dar es Salaam">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Message / Review <span class="required">*</span></label>
-                        <textarea id="testimonialMessage" rows="4" placeholder="Customer's review..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Rating (1-5)</label>
-                        <select id="testimonialRating">
-                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
-                            <option value="4">⭐⭐⭐⭐ (4)</option>
-                            <option value="3">⭐⭐⭐ (3)</option>
-                            <option value="2">⭐⭐ (2)</option>
-                            <option value="1">⭐ (1)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="testimonialOrder" placeholder="0" value="0">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Status</label>
-                        <select id="testimonialIsActive">
-                            <option value="true">✅ Active (Visible on website)</option>
-                            <option value="false">⏸ Inactive (Hidden)</option>
-                        </select>
-                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Customer Name <span class="required">*</span></label><input type="text" id="testimonialName" placeholder="e.g., John Mwangi"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Role / Location</label><input type="text" id="testimonialRole" placeholder="e.g., Contractor, Dar es Salaam"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Message / Review <span class="required">*</span></label><textarea id="testimonialMessage" rows="4" placeholder="Customer's review..."></textarea></div>
+                    <div class="form-group"><label>Rating (1-5)</label><select id="testimonialRating"><option value="5">⭐⭐⭐⭐⭐ (5)</option><option value="4">⭐⭐⭐⭐ (4)</option><option value="3">⭐⭐⭐ (3)</option><option value="2">⭐⭐ (2)</option><option value="1">⭐ (1)</option></select></div>
+                    <div class="form-group"><label>Display Order</label><input type="number" id="testimonialOrder" placeholder="0" value="0"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Status</label><select id="testimonialIsActive"><option value="true">✅ Active (Visible on website)</option><option value="false">⏸ Inactive (Hidden)</option></select></div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Photo (Optional)</label>
                         <div class="leader-photo-upload-area">
-                            <div class="leader-photo-preview" id="testimonialPhotoPreview">
-                                <span id="testimonialPhotoInitials">👤</span>
-                            </div>
+                            <div class="leader-photo-preview" id="testimonialPhotoPreview"><span id="testimonialPhotoInitials">👤</span></div>
                             <div class="leader-photo-controls">
-                                <button type="button" class="btn-secondary" onclick="document.getElementById('testimonialPhotoInput').click()">
-                                    📷 Choose Photo
-                                </button>
-                                <button type="button" class="btn-secondary" onclick="removeTestimonialPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">
-                                    🗑️ Remove
-                                </button>
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('testimonialPhotoInput').click()">📷 Choose Photo</button>
+                                <button type="button" class="btn-secondary" onclick="removeTestimonialPhoto()" style="background:rgba(239,68,68,0.1);color:#dc2626;border-color:rgba(239,68,68,0.2);">🗑️ Remove</button>
                                 <input type="file" id="testimonialPhotoInput" accept="image/*" onchange="handleTestimonialPhotoUpload(event)" style="display:none;">
                                 <input type="hidden" id="testimonialPhoto" value="">
                                 <p class="leader-photo-hint">JPG, PNG, GIF — max 2MB</p>
@@ -1732,79 +1139,40 @@
                 </div>
                 <div id="testimonialStatus" class="status-msg"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('testimonialModal')">Cancel</button>
-                <button class="btn-submit" onclick="saveTestimonial()">💾 Save Testimonial</button>
-            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('testimonialModal')">Cancel</button><button class="btn-submit" onclick="saveTestimonial()">💾 Save Testimonial</button></div>
         </div>
     </div>
 
-    <!-- ===== EDIT PROFILE MODAL (Premium) ===== -->
+    <!-- EDIT PROFILE MODAL -->
     <div class="modal-overlay" id="editProfileModal">
         <div class="modal-box" style="max-width: 650px; padding: 0; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
-            
-            <!-- Header -->
             <div style="background: linear-gradient(135deg, #0a1929 0%, #0f2942 100%); padding: 24px 32px; color: white; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden;">
                 <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(46, 204, 113, 0.2) 0%, transparent 70%); border-radius: 50%;"></div>
                 <div style="display:flex; align-items:center; gap:16px; z-index: 1;">
-                    <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:26px;">
-                        👤
-                    </div>
-                    <div>
-                        <h3 style="font-size: 20px; font-weight: 800; color: white; margin: 0 0 4px 0;">Profile Settings</h3>
-                        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin: 0;">Manage your account information and security</p>
-                    </div>
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:26px;">👤</div>
+                    <div><h3 style="font-size: 20px; font-weight: 800; color: white; margin: 0 0 4px 0;">Profile Settings</h3><p style="font-size: 13px; color: rgba(255,255,255,0.7); margin: 0;">Manage your account information and security</p></div>
                 </div>
                 <button class="modal-close" style="color:white; background: rgba(255,255,255,0.15); border-radius: 50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; opacity:1; cursor:pointer; border:none; font-size:18px; z-index: 1;" onclick="closeModal('editProfileModal')" onmouseover="this.style.background='rgba(239,68,68,0.8)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
             </div>
-            
-            <!-- Body -->
             <div style="padding: 32px; max-height: 70vh; overflow-y: auto;">
-                
-                <!-- Avatar Section -->
                 <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 28px;">
                     <div style="position: relative;">
-                        <div class="edit-pic-preview" id="editPicPreview" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #1a7f5a; background: linear-gradient(135deg, #2ecc71 0%, #1a7f5a 100%); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: white; overflow: hidden; box-shadow: 0 8px 24px rgba(26, 127, 90, 0.3);">
-                            <span id="editPicInitials">EN</span>
-                        </div>
+                        <div class="edit-pic-preview" id="editPicPreview" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid #1a7f5a; background: linear-gradient(135deg, #2ecc71 0%, #1a7f5a 100%); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: white; overflow: hidden; box-shadow: 0 8px 24px rgba(26, 127, 90, 0.3);"><span id="editPicInitials">EN</span></div>
                         <button class="edit-pic-upload-btn" onclick="document.getElementById('profilePicInput').click()" style="position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; border-radius: 50%; background: #1a7f5a; border: 3px solid white; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" title="Upload Photo">📷</button>
                         <input type="file" id="profilePicInput" accept="image/*" onchange="handleProfilePicUpload(event)" style="display: none;">
                     </div>
                     <div style="font-size: 11px; color: var(--gray-500); margin-top: 10px;">Click the camera icon to update your photo</div>
                 </div>
-
-                <!-- Info Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-                    <div>
-                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Full Name</label>
-                        <input type="text" id="editProfileName" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
-                    </div>
-                    <div>
-                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Title / Position</label>
-                        <input type="text" id="editProfileTitle" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
-                    </div>
-                    <div>
-                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Email Address</label>
-                        <input type="email" id="editProfileEmail" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
-                    </div>
-                    <div>
-                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Phone Number <span style="color:var(--red);">*</span></label>
-                        <input type="tel" id="editProfilePhone" placeholder="+255 XXX XXX XXX" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 14px; background: white; color: var(--gray-800);">
-                    </div>
-                    <div>
-                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Department</label>
-                        <input type="text" id="editProfileDepartment" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
-                    </div>
-                    <div>
-                        <label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Employee ID</label>
-                        <input type="text" id="editProfileEmployeeId" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;">
-                    </div>
+                    <div><label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Full Name</label><input type="text" id="editProfileName" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;"></div>
+                    <div><label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Title / Position</label><input type="text" id="editProfileTitle" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;"></div>
+                    <div><label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Email Address</label><input type="email" id="editProfileEmail" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;"></div>
+                    <div><label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Phone Number <span style="color:var(--red);">*</span></label><input type="tel" id="editProfilePhone" placeholder="+255 XXX XXX XXX" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-300); border-radius: 10px; font-size: 14px; background: white; color: var(--gray-800);"></div>
+                    <div><label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Department</label><input type="text" id="editProfileDepartment" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;"></div>
+                    <div><label style="font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Employee ID</label><input type="text" id="editProfileEmployeeId" class="readonly-field" readonly style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: var(--gray-50); color: var(--gray-500); cursor: not-allowed;"></div>
                 </div>
-
                 <div id="editProfileStatus" class="status-msg"></div>
             </div>
-            
-            <!-- Footer -->
             <div style="padding: 20px 32px; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px;">
                 <button class="btn-action" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700); padding: 10px 24px; font-weight: 700;" onclick="closeModal('editProfileModal')">Cancel</button>
                 <button class="btn-action primary" style="padding: 10px 28px; font-weight: 700; background: linear-gradient(135deg, #1a7f5a, #0f2942);" onclick="saveUserProfile()">💾 Save Changes</button>
@@ -1812,23 +1180,17 @@
         </div>
     </div>
 
-    <!-- ===== CONFIRM LOGOUT DIALOG ===== -->
+    <!-- CONFIRM LOGOUT DIALOG -->
     <div class="confirm-overlay" id="logoutConfirmModal">
         <div class="confirm-box">
             <div class="confirm-icon red">🔌</div>
             <h3 class="confirm-title">Logout?</h3>
-            <p class="confirm-message">
-                Are you sure you want to logout?<br>
-                <small style="color:var(--gray-400);">You will need to sign in again to access the Super Admin Dashboard.</small>
-            </p>
-            <div class="confirm-actions">
-                <button class="btn-cancel" onclick="closeLogoutDialog()">Stay Logged In</button>
-                <button class="btn-confirm danger" onclick="confirmLogout()">Yes, Logout</button>
-            </div>
+            <p class="confirm-message">Are you sure you want to logout?<br><small style="color:var(--gray-400);">You will need to sign in again to access the Super Admin Dashboard.</small></p>
+            <div class="confirm-actions"><button class="btn-cancel" onclick="closeLogoutDialog()">Stay Logged In</button><button class="btn-confirm danger" onclick="confirmLogout()">Yes, Logout</button></div>
         </div>
     </div>
 
-    <!-- ===== TOAST ===== -->
+    <!-- TOAST -->
     <div id="toastContainer"></div>
 
     <!-- ===== SCRIPTS ===== -->

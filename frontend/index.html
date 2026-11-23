@@ -21,29 +21,37 @@
     <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* ==========================================
+       RANGI MPYA (Zile zile za customer.html):
+       Bluu Angavu (#0288D1), Kijani (Teal), Dhahabu
+       ========================================== */
     :root {
-        --ink: #0B1A2B;
-        --ink-2: #102A42;
-        --paper: #F4F7FB;
-        --paper-2: #E8EEF7;
-        --paper-3: #D6E0F0;
-        --pale-blue: #A8C8E8;
-        --pale-blue-2: #7FB0D9;
-        --pale-blue-3: #5A96C9;
-        --blue-deep: #1E4E7A;
-        --blue-deep-2: #153A5C;
-        --blue-light: #D6E7F5;
-        --gold: #C9A227;
-        --gold-light: #E0BE4E;
-        --gold-soft: #F5EBC8;
+        --ink: #0c0f0a; /* Giza la Maandishi */
+        --ink-2: #111c3a;
+        --paper: #f4f9fd; /* Background ya Ukurasa (Nyeupe yenye bluu) */
+        --paper-2: #e1f5fe;
+        --paper-3: #d0e4f7;
+        --pale-blue: #7FB0D9;
+        --pale-blue-2: #5A96C9;
+        --pale-blue-3: #0288D1; /* Bluu Angavu */
+        --blue-deep: #0288D1; /* Bluu Angavu */
+        --blue-deep-2: #01579B;
+        --blue-light: #e1f5fe;
+        --blue-bright: #0288D1; /* Nimeongeza hii kwa ajili ya sehemu za giza */
+        --blue-dark: #01579B; /* Nimeongeza hii kwa ajili ya footer na hero */
+        --gold: #d4af37; /* Dhahabu */
+        --gold-light: #f3d15e;
+        --gold-soft: #f5ebc8;
+        --gold-dark: #b8962e; /* Nimeongeza hii kwa ajili ya span kwenye nav */
         --cream: #FFFFFF;
-        --gray-100: #E6ECF3;
-        --gray-200: #D0DAE6;
-        --gray-300: #B0C0D2;
-        --gray-400: #8FA3B8;
-        --gray-500: #6B8098;
-        --gray-600: #4A5F76;
-        --gray-700: #2E4156;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --teal: #00695C; /* Kijani (Teal) */
     }
 
     html { scroll-behavior: smooth; }
@@ -72,23 +80,23 @@
     .nav-wrapper.scrolled { top: 12px; }
 
     .nav-pill {
-        background: rgba(11, 26, 43, 0.92);
+        background: rgba(255, 255, 255, 0.95); /* Nyeupe */
         backdrop-filter: blur(24px) saturate(1.6);
         -webkit-backdrop-filter: blur(24px) saturate(1.6);
-        border: 1px solid rgba(201, 162, 39, 0.35);
+        border: 1px solid rgba(2, 136, 209, 0.2); /* Bluu Angavu */
         border-radius: 20px;
         padding: 10px 10px 10px 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 20px;
-        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+        box-shadow: 0 8px 40px rgba(2, 136, 209, 0.15);
         transition: all 0.4s;
     }
 
     .nav-wrapper.scrolled .nav-pill {
-        background: rgba(11, 26, 43, 0.98);
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 12px 48px rgba(2, 136, 209, 0.2);
     }
 
     .nav-brand {
@@ -118,22 +126,23 @@
         font-weight: 800;
         font-size: 13px;
         color: var(--ink);
-        box-shadow: 0 0 20px rgba(201, 162, 39, 0.4);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
     }
 
+    /* Maandishi ya Header sasa ni Bluu ili yaonekane */
     .nav-brand-name {
         font-size: 13px;
         font-weight: 800;
-        color: #FFFFFF;
+        color: var(--blue-deep);
         letter-spacing: 0.3px;
         line-height: 1.15;
     }
 
-    .nav-brand-name span { color: var(--gold-light); }
+    .nav-brand-name span { color: var(--gold-dark); }
 
     .nav-brand-motto {
         font-size: 9px;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--gray-500);
         font-style: italic;
     }
 
@@ -146,9 +155,10 @@
         justify-content: center;
     }
 
+    /* Maandishi ya Navbar Links sasa ni Bluu/Nyeusi ili yaonekane */
     .nav-links a {
         padding: 8px 14px;
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--gray-700);
         text-decoration: none;
         font-size: 12px;
         font-weight: 600;
@@ -159,14 +169,14 @@
     }
 
     .nav-links a:hover {
-        color: #FFFFFF;
-        background: rgba(168, 200, 232, 0.12);
+        color: var(--blue-bright);
+        background: var(--blue-light);
     }
 
     .nav-links a.active {
-        color: var(--ink);
-        background: linear-gradient(135deg, var(--gold-light), var(--gold));
-        box-shadow: 0 4px 16px rgba(201, 162, 39, 0.4);
+        color: white;
+        background: var(--blue-bright);
+        box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
     }
 
     .nav-actions {
@@ -191,37 +201,36 @@
     }
 
     .nav-pill-btn.ghost {
-        color: var(--pale-blue);
-        border: 1.5px solid rgba(168, 200, 232, 0.5);
-        background: rgba(168, 200, 232, 0.05);
+        color: var(--blue-bright);
+        border: 1.5px solid var(--blue-bright);
+        background: rgba(2, 136, 209, 0.05);
     }
 
     .nav-pill-btn.ghost:hover {
-        background: rgba(168, 200, 232, 0.15);
-        border-color: var(--pale-blue);
-        color: #fff;
+        background: var(--blue-bright);
+        color: white;
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(168, 200, 232, 0.2);
+        box-shadow: 0 6px 20px rgba(2, 136, 209, 0.3);
     }
 
     .nav-pill-btn.solid {
-        background: linear-gradient(135deg, var(--gold-light), var(--gold));
+        background: var(--gold);
         color: var(--ink);
-        box-shadow: 0 4px 20px rgba(201, 162, 39, 0.4);
+        box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
         border: 1.5px solid transparent;
     }
 
     .nav-pill-btn.solid:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 28px rgba(201, 162, 39, 0.6);
-        background: linear-gradient(135deg, var(--gold), var(--gold-light));
+        box-shadow: 0 8px 28px rgba(212, 175, 55, 0.5);
+        background: var(--gold-light);
     }
 
     .nav-toggle {
         display: none;
         width: 40px; height: 40px;
-        background: rgba(168, 200, 232, 0.1);
-        border: 1px solid rgba(168, 200, 232, 0.3);
+        background: var(--blue-light);
+        border: 1px solid var(--blue-bright);
         border-radius: 12px;
         cursor: pointer;
         flex-direction: column;
@@ -234,7 +243,7 @@
     .nav-toggle span {
         display: block;
         width: 18px; height: 2px;
-        background: var(--gold);
+        background: var(--blue-bright);
         border-radius: 2px;
         transition: all 0.3s;
     }
@@ -250,7 +259,7 @@
         display: flex;
         align-items: center;
         overflow: hidden;
-        background: var(--ink);
+        background: var(--blue-dark);
         padding: 120px 8vw 60px;
     }
 
@@ -280,7 +289,12 @@
     .hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(110deg, rgba(11,26,43,0.96) 0%, rgba(11,26,43,0.85) 50%, rgba(30,78,122,0.45) 100%);
+        background: linear-gradient(
+            110deg, 
+            rgba(10, 17, 40, 0.98) 0%,   /* Giza zaidi kushoto */
+            rgba(1, 87, 155, 0.85) 40%,  /* Bluu katikati */
+            rgba(2, 136, 209, 0.3) 100%  /* Uwazi kulia */
+        );
         z-index: 2;
     }
 
@@ -291,11 +305,11 @@
         max-width: 1240px;
         margin: 0 auto;
         display: flex;
-        align-items: flex-end;
+        align-items: flex-end; /* 🆕 Inasogeza kadi na maandishi chini pamoja */
         justify-content: space-between;
         gap: 60px;
+        padding-bottom: 40px; /* Nafasi kidogo chini */
     }
-
     .hero-left-panel {
         flex: 1;
         max-width: 750px;
@@ -375,22 +389,24 @@
     .hero-title em { font-style: italic; color: var(--gold-light); font-weight: 600; }
 
     .hero-title .outline {
-        -webkit-text-stroke: 1.5px rgba(201, 162, 39, 0.9);
+        -webkit-text-stroke: 1.5px rgba(212, 175, 55, 0.9);
         -webkit-text-fill-color: transparent;
         font-style: italic;
         font-weight: 600;
     }
 
     .hero-text {
-        font-size: 16px;
-        color: rgba(255, 255, 255, 0.85);
-        max-width: 500px;
-        line-height: 1.8;
-        margin-bottom: 40px;
+        font-size: 16.5px; /* Herufi kubwa kidogo */
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 550px;
+        line-height: 1.9;
+        margin-bottom: 48px; /* Nafasi kubwa kidogo kabla ya vitufe */
         position: relative;
         z-index: 3;
-        border-left: 2px solid rgba(201, 162, 39, 0.6);
-        padding-left: 20px;
+        border-left: 3px solid var(--gold); /* Mstari wa dhahabu kushoto */
+        padding-left: 24px;
+        font-weight: 400;
+        letter-spacing: 0.3px;
     }
 
     .hero-actions {
@@ -405,7 +421,7 @@
         display: inline-flex;
         align-items: center;
         gap: 12px;
-        background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+        background: var(--gold);
         color: var(--ink);
         padding: 16px 32px;
         border-radius: 8px;
@@ -415,14 +431,18 @@
         letter-spacing: 0.8px;
         text-transform: uppercase;
         transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
-        box-shadow: 0 12px 32px rgba(201, 162, 39, 0.35);
+        box-shadow: 0 12px 32px rgba(212, 175, 55, 0.35);
         border: none;
         cursor: pointer;
         font-family: inherit;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
     }
-
+    .btn-hero-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+    }
     .btn-hero-primary::after {
         content: '';
         position: absolute; inset: 0;
@@ -437,7 +457,7 @@
 
     .btn-hero-primary:hover {
         transform: translateY(-3px);
-        box-shadow: 0 20px 44px rgba(30, 78, 122, 0.4);
+        box-shadow: 0 20px 44px rgba(2, 136, 209, 0.4);
         color: white;
     }
 
@@ -448,7 +468,7 @@
         display: inline-flex;
         align-items: center;
         gap: 12px;
-        background: rgba(11, 26, 43, 0.4);
+        background: rgba(10, 17, 40, 0.4);
         backdrop-filter: blur(10px);
         color: #FFFFFF;
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -466,22 +486,28 @@
         border-color: var(--pale-blue);
         color: var(--pale-blue);
         transform: translateY(-3px);
-        background: rgba(168, 200, 232, 0.1);
+        background: rgba(2, 136, 209, 0.1);
     }
 
     .hero-float-card {
-        position: relative;
-        z-index: 5;
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(20px);
-        border-radius: 18px;
-        padding: 24px 26px;
-        max-width: 320px;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(201, 162, 39, 0.25);
-        animation: floatCard 0.9s cubic-bezier(0.16,1,0.3,1) 0.6s backwards;
-        flex-shrink: 0;
-        display: none;
+    position: relative;
+    z-index: 5;
+    /* Glassmorphism Background */
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    border-radius: 24px;
+    padding: 35px 30px;
+    max-width: 340px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25), 
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset; /* Kivuli kikubwa + mstari mwembamba ndani */
+    
+    animation: floatCard 0.9s cubic-bezier(0.16,1,0.3,1) 0.6s backwards;
+    flex-shrink: 0;
+    display: none; /* Inaonekana tu kwenye desktop kubwa */
+    margin-bottom: 10px;
+    overflow: hidden;
     }
 
     @media (min-width: 1024px) {
@@ -494,41 +520,84 @@
     }
 
     .hero-float-card::before {
-        content: '';
-        position: absolute; top: 0; left: 0;
-        width: 100%; height: 3px;
-        background: linear-gradient(90deg, var(--gold), var(--pale-blue-3));
-        border-radius: 18px 18px 0 0;
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--gold), var(--blue-bright), var(--gold));
+    background-size: 200% 100%;
+    animation: gradientMove 3s linear infinite;
+    border-radius: 24px 24px 0 0;
     }
-
+    @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+    }
     .hero-float-icon {
-        width: 44px; height: 44px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--gold), var(--gold-light));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        margin-bottom: 14px;
-        box-shadow: 0 8px 20px rgba(201, 162, 39, 0.35);
+    width: 56px; /* 🆕 Imepunguzwa kutoka 64px */
+    height: 56px;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px; /* Nafasi kidogo kutoka kwa maandishi ya juu */
+    margin-bottom: 20px; /* Nafasi kati ya nembo na maelezo yaliyo chini */
+    
+    box-shadow: 0 10px 25px rgba(2, 136, 209, 0.3), 
+                0 0 0 4px rgba(255, 255, 255, 0.5),
+                0 0 20px rgba(212, 175, 55, 0.4); 
+                
+    position: relative;
+    z-index: 2;
+    transform: rotate(-3deg);
+    transition: transform 0.4s ease;
+    overflow: hidden;
+    border: 2px solid var(--gold);
+    }
+    /* 🆕 Hii inahakikisha picha inatoshea ndani ya duara */
+    .hero-float-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Inajaza duara vizuri bila kubana picha */
+        border-radius: 50%;
     }
 
+    .hero-float-card:hover .hero-float-icon {
+        transform: rotate(0deg) scale(1.08); /* Inanyooka na kukua kidogo ikiguswa */
+    }
+
+    /* Maelezo */
     .hero-float-card p {
-        font-size: 13px;
-        color: var(--gray-700);
-        line-height: 1.65;
+        font-size: 14px;
+        color: #334155; /* Rangi ya kijivu iliyokolea */
+        line-height: 1.8;
         margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
     }
 
+    /* Jina la Kampuni Chini */
     .hero-float-tag {
-        font-size: 9px;
-        color: var(--blue-deep);
+        font-size: 10px;
+        color: var(--blue-dark);
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid var(--gray-200);
+        letter-spacing: 2.5px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(2, 136, 209, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .hero-float-tag::before {
+    content: '';
+    display: block;
+    width: 20px; height: 2px;
+    background: var(--gold);
+    border-radius: 2px;
     }
 
     /* ===== SECTION BASE ===== */
@@ -541,10 +610,12 @@
 
     .section-inner { max-width: 1240px; margin: 0 auto; position: relative; z-index: 2; }
 
+    /* Sehemu za Giza sasa ni Bluu Angavu */
     .section-dark {
-        background: var(--ink);
+        background: var(--blue-bright);
         color: #FFFFFF;
     }
+
 
     /* ===== SECTION HEADER ===== */
     .sec-header {
@@ -606,13 +677,13 @@
         content: '';
         position: absolute; bottom: 4px; left: 0; right: 0;
         height: 8px;
-        background: rgba(201, 162, 39, 0.25);
+        background: rgba(212, 175, 55, 0.25);
         z-index: -1;
         border-radius: 2px;
     }
 
     .section-dark .sec-title em { color: var(--gold-light); }
-    .section-dark .sec-title em::after { background: rgba(201, 162, 39, 0.2); }
+    .section-dark .sec-title em::after { background: rgba(212, 175, 55, 0.2); }
 
     .sec-subtitle {
         color: var(--gray-600);
@@ -622,7 +693,7 @@
         margin: 18px auto 0;
     }
 
-    .section-dark .sec-subtitle { color: rgba(255, 255, 255, 0.6); }
+    .section-dark .sec-subtitle { color: rgba(255, 255, 255, 0.8); }
 
     .sec-divider {
         display: flex;
@@ -637,7 +708,7 @@
         background: var(--gray-300);
     }
 
-    .section-dark .sec-divider-line { background: rgba(201, 162, 39, 0.3); }
+    .section-dark .sec-divider-line { background: rgba(212, 175, 55, 0.5); }
 
     .sec-divider-diamond {
         font-size: 8px;
@@ -654,7 +725,7 @@
         background: var(--cream);
         border-radius: 24px;
         padding: 40px;
-        box-shadow: 0 20px 50px rgba(11, 26, 43, 0.08);
+        box-shadow: 0 20px 50px rgba(2, 136, 209, 0.08);
         margin-top: 20px;
         border: 1px solid var(--gray-100);
     }
@@ -688,7 +759,7 @@
     .about-image-wrapper::after {
         content: '';
         position: absolute; inset: 0;
-        background: linear-gradient(180deg, transparent 50%, rgba(11,26,43,0.85) 100%);
+        background: linear-gradient(180deg, transparent 50%, rgba(10,17,40,0.85) 100%);
     }
 
     .about-caption {
@@ -739,7 +810,7 @@
         background: white;
         border-color: var(--gold);
         transform: translateX(4px);
-        box-shadow: 0 4px 12px rgba(201, 162, 39, 0.12);
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.12);
     }
 
     .about-feature-mark {
@@ -747,7 +818,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(201, 162, 39, 0.15);
+        background: rgba(212, 175, 55, 0.15);
         border-radius: 50%;
         color: var(--blue-deep);
         font-size: 10px;
@@ -926,11 +997,11 @@
         transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
     }
     .slider-btn:hover { background: var(--ink); color: var(--gold-light); border-color: var(--ink); transform: translateY(-3px); }
-    .section-dark .slider-btn { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; }
+    .section-dark .slider-btn { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: #FFFFFF; }
     .section-dark .slider-btn:hover { background: var(--gold); color: var(--ink); border-color: var(--gold); }
     .slider-btn.hidden { opacity: 0.3; pointer-events: none; }
     .slider-progress { flex: 1; height: 2px; background: var(--gray-200); border-radius: 2px; overflow: hidden; max-width: 240px; }
-    .section-dark .slider-progress { background: rgba(255, 255, 255, 0.1); }
+    .section-dark .slider-progress { background: rgba(255, 255, 255, 0.2); }
     .slider-progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold), var(--blue-deep)); border-radius: 2px; transition: width 0.3s; width: 20%; }
 
     /* ===== CARD ===== */
@@ -946,10 +1017,10 @@
         transform: scaleX(0); transform-origin: left; transition: transform 0.5s; z-index: 3;
     }
     .card:hover::before { transform: scaleX(1); }
-    .card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 32px 60px rgba(11, 26, 43, 0.15); border-color: transparent; }
+    .card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 32px 60px rgba(2, 136, 209, 0.15); border-color: transparent; }
     .card-image { width: 100%; height: 220px; background-size: cover; background-position: center; position: relative; flex-shrink: 0; transition: transform 0.6s; }
     .card:hover .card-image { transform: scale(1.05); }
-    .card-image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(11, 26, 43, 0.6) 100%); }
+    .card-image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(10, 17, 40, 0.6) 100%); }
     .card-tag { position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: var(--ink); font-size: 9px; font-weight: 800; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; z-index: 2; }
 
     .card-body { padding: 24px; display: flex; flex-direction: column; flex: 1; }
@@ -960,12 +1031,12 @@
 
     .card-btn {
         display: flex; align-items: center; justify-content: center; gap: 8px;
-        width: 100%; padding: 14px; background: var(--ink); color: #FFFFFF;
+        width: 100%; padding: 14px; background: var(--blue-deep); color: #FFFFFF;
         border: none; border-radius: 10px; font-size: 12px; font-weight: 700;
         cursor: pointer; font-family: inherit; transition: all 0.3s;
         margin-top: 16px; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .card-btn:hover { background: var(--blue-deep); transform: translateY(-2px); }
+    .card-btn:hover { background: var(--blue-deep-2); transform: translateY(-2px); }
 
     /* ===== LOADING & EMPTY ===== */
     .loading-state { width: 100%; text-align: center; padding: 60px 20px; color: var(--gray-500); }
@@ -990,8 +1061,8 @@
         background-size: cover; background-position: center; cursor: pointer;
         transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .project-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 20%, rgba(11, 26, 43, 0.96) 100%); transition: all 0.5s; }
-    .project-card:hover::after { background: linear-gradient(180deg, rgba(30, 78, 122, 0.5) 0%, rgba(11, 26, 43, 0.98) 100%); }
+    .project-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 20%, rgba(10, 17, 40, 0.96) 100%); transition: all 0.5s; }
+    .project-card:hover::after { background: linear-gradient(180deg, rgba(2, 136, 209, 0.5) 0%, rgba(10, 17, 40, 0.98) 100%); }
     .project-card:hover { transform: scale(1.02) translateY(-4px); }
     .project-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 30px; z-index: 2; color: #FFFFFF; }
     .project-category { font-size: 10px; text-transform: uppercase; letter-spacing: 2.5px; color: var(--gold-light); font-weight: 800; margin-bottom: 10px; }
@@ -1001,7 +1072,7 @@
 
     /* ===== PROJECT MODAL ===== */
     .project-modal-overlay {
-        position: fixed; inset: 0; background: rgba(11, 26, 43, 0.88); backdrop-filter: blur(10px);
+        position: fixed; inset: 0; background: rgba(10, 17, 40, 0.88); backdrop-filter: blur(10px);
         z-index: 10000; display: flex; align-items: center; justify-content: center;
         padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s ease;
     }
@@ -1013,7 +1084,7 @@
     }
     .project-modal-overlay.show .project-modal-box { transform: scale(1); }
     .project-modal-close {
-        position: absolute; top: 16px; right: 16px; background: rgba(11,26,43,0.6);
+        position: absolute; top: 16px; right: 16px; background: rgba(10,17,40,0.6);
         color: white; border: none; width: 36px; height: 36px; border-radius: 50%;
         font-size: 18px; cursor: pointer; z-index: 10; transition: all 0.2s;
     }
@@ -1035,7 +1106,7 @@
     }
     .leader-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--gold), var(--blue-deep)); transform: scaleX(0); transition: transform 0.4s; }
     .leader-card:hover::before { transform: scaleX(1); }
-    .leader-card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 32px 60px rgba(11, 26, 43, 0.14); border-color: transparent; }
+    .leader-card:hover { transform: translateY(-8px) scale(1.01); box-shadow: 0 32px 60px rgba(2, 136, 209, 0.14); border-color: transparent; }
     .leader-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 0 20px; background: linear-gradient(135deg, var(--blue-deep), var(--pale-blue-3)); display: flex; align-items: center; justify-content: center; color: white; font-family: 'Playfair Display', serif; font-weight: 800; font-size: 28px; border: 3px solid var(--gold); overflow: hidden; transition: transform 0.4s; }
     .leader-card:hover .leader-avatar { transform: scale(1.05) rotate(-2deg); }
     .leader-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -1044,30 +1115,40 @@
     .leader-card p { font-size: 13px; color: var(--gray-600); line-height: 1.6; margin: 0; }
 
     /* ===== VISION MISSION ===== */
+    /* Nimebadilisha rangi hapa ili maandishi yaonekane (background nyeupe, maandishi giza) */
     .vm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 20px; align-items: start; }
-    .vm-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border-radius: 18px; padding: 36px 28px; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.4s; position: relative; }
+    .vm-card { 
+        background: #FFFFFF; 
+        border-radius: 18px; 
+        padding: 36px 28px; 
+        border: 1px solid var(--gray-200); 
+        transition: all 0.4s; 
+        position: relative;
+        box-shadow: 0 8px 30px rgba(2, 136, 209, 0.08);
+    }
     .vm-card:nth-child(2) { margin-top: 40px; }
     .vm-card:nth-child(3) { margin-top: 80px; }
     .vm-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--gold), var(--pale-blue-2)); }
-    .vm-card:hover { transform: translateY(-8px); box-shadow: 0 32px 60px rgba(0,0,0,0.4); border-color: rgba(201, 162, 39, 0.3); background: rgba(255, 255, 255, 0.06); }
-    .vm-icon { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, rgba(201, 162, 39, 0.15), rgba(30, 78, 122, 0.1)); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px; border: 1px solid rgba(201, 162, 39, 0.25); }
-    .vm-card h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--gold-light); margin-bottom: 12px; }
-    .vm-card p { font-size: 14px; color: rgba(255, 255, 255, 0.72); line-height: 1.8; margin: 0; }
+    .vm-card:hover { transform: translateY(-8px); box-shadow: 0 32px 60px rgba(2, 136, 209, 0.15); border-color: var(--gold); }
+    .vm-icon { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(2, 136, 209, 0.1)); display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px; border: 1px solid rgba(212, 175, 55, 0.3); }
+    .vm-card h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--blue-deep); margin-bottom: 12px; }
+    .vm-card p { font-size: 14px; color: var(--gray-600); line-height: 1.8; margin: 0; }
 
     /* ===== FOOTER ===== */
-    .site-footer { background: var(--ink); color: #FFFFFF; margin-top: auto; position: relative; overflow: hidden; border-top: 3px solid var(--gold); }
+    /* Footer sasa ni Bluu Iliyokolea (Deep Blue) na maandishi ni meupe */
+    .site-footer { background: var(--blue-deep-2); color: #FFFFFF; margin-top: auto; position: relative; overflow: hidden; border-top: 3px solid var(--gold); }
     .footer-content { display: grid; grid-template-columns: 2fr 1fr 1.5fr 1.5fr; gap: 48px; padding: 80px 8vw 48px; max-width: 1240px; margin: 0 auto; }
     .footer-col h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 800; color: var(--gold-light); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 22px; }
-    .footer-brand { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 800; color: var(--gold-light); text-decoration: none; display: block; margin-bottom: 16px; line-height: 1.1; }
-    .footer-motto { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--gold); font-style: italic; margin-bottom: 18px; }
-    .footer-desc { font-size: 13.5px; color: rgba(255, 255, 255, 0.55); line-height: 1.75; }
+    .footer-brand { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 800; color: var(--gold); text-decoration: none; display: block; margin-bottom: 16px; line-height: 1.1; }
+    .footer-motto { font-family: 'Playfair Display', serif; font-size: 14px; color: rgba(255, 255, 255, 0.8); font-style: italic; margin-bottom: 18px; }
+    .footer-desc { font-size: 13.5px; color: rgba(255, 255, 255, 0.7); line-height: 1.75; }
     .footer-links { list-style: none; padding: 0; margin: 0; }
     .footer-links li { margin-bottom: 12px; }
-    .footer-links a { color: rgba(255, 255, 255, 0.65); text-decoration: none; font-size: 13.5px; transition: all 0.25s; display: inline-block; }
+    .footer-links a { color: rgba(255, 255, 255, 0.8); text-decoration: none; font-size: 13.5px; transition: all 0.25s; display: inline-block; }
     .footer-links a:hover { color: var(--gold-light); padding-left: 6px; }
     .footer-contact { list-style: none; padding: 0; margin: 0; }
-    .footer-contact li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 13.5px; color: rgba(255, 255, 255, 0.65); line-height: 1.55; }
-    .footer-contact a { color: rgba(255, 255, 255, 0.65); text-decoration: none; }
+    .footer-contact li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 13.5px; color: rgba(255, 255, 255, 0.8); line-height: 1.55; }
+    .footer-contact a { color: rgba(255, 255, 255, 0.8); text-decoration: none; }
     .footer-contact a:hover { color: var(--gold-light); }
 
     /* ===== SOCIAL ICONS (SVG) ===== */
@@ -1076,9 +1157,9 @@
         width: 46px; height: 46px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
         text-decoration: none; transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.9);
     }
     .social-btn svg { width: 20px; height: 20px; fill: currentColor; transition: transform 0.35s; }
     .social-btn:hover { transform: translateY(-5px) scale(1.08); color: white; }
@@ -1091,17 +1172,17 @@
     .social-btn.twitter:hover { background: #000000; border-color: #000000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
     .social-btn.youtube:hover { background: #FF0000; border-color: #FF0000; box-shadow: 0 8px 24px rgba(255, 0, 0, 0.4); }
 
-    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 28px 8vw; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; max-width: 1240px; margin: 0 auto; }
-    .footer-bottom p { font-size: 12.5px; color: rgba(255, 255, 255, 0.35); margin: 0; }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 28px 8vw; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; max-width: 1240px; margin: 0 auto; }
+    .footer-bottom p { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin: 0; }
 
     /* ===== LEADER BIO MODAL ===== */
-    .leader-bio-overlay { position: fixed; inset: 0; background: rgba(11, 26, 43, 0.88); backdrop-filter: blur(12px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .leader-bio-overlay { position: fixed; inset: 0; background: rgba(10, 17, 40, 0.88); backdrop-filter: blur(12px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
     .leader-bio-overlay.show { opacity: 1; visibility: visible; }
     .leader-bio-box { background: var(--cream); border-radius: 18px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5); transform: scale(0.9) translateY(20px); transition: all 0.4s; position: relative; }
     .leader-bio-overlay.show .leader-bio-box { transform: scale(1) translateY(0); }
     .leader-bio-close { position: absolute; top: 18px; right: 18px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); border: none; color: white; font-size: 16px; cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; }
     .leader-bio-close:hover { background: #ef4444; transform: rotate(90deg); }
-    .leader-bio-header { background: var(--ink); padding: 44px 40px 40px; display: flex; align-items: center; gap: 24px; color: #FFFFFF; position: relative; }
+    .leader-bio-header { background: var(--blue-deep-2); padding: 44px 40px 40px; display: flex; align-items: center; gap: 24px; color: #FFFFFF; position: relative; }
     .leader-bio-avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border: 3px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 800; color: var(--ink); font-family: 'Playfair Display', serif; flex-shrink: 0; overflow: hidden; }
     .leader-bio-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .leader-bio-title h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: #FFFFFF; margin-bottom: 8px; }
@@ -1124,7 +1205,7 @@
         .hero-float-card { display: none; }
         .nav-links { display: none; }
         .nav-toggle { display: flex; }
-        .nav-links.open { display: flex; position: absolute; top: calc(100% + 8px); left: 0; right: 0; flex-direction: column; background: rgba(11, 26, 43, 0.98); backdrop-filter: blur(24px); padding: 16px; gap: 4px; border-radius: 16px; border: 1px solid rgba(201, 162, 39, 0.2); }
+        .nav-links.open { display: flex; position: absolute; top: calc(100% + 8px); left: 0; right: 0; flex-direction: column; background: rgba(255, 255, 255, 0.98); padding: 16px; gap: 4px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .nav-links.open a { width: 100%; padding: 13px 16px; }
         .vm-grid { grid-template-columns: 1fr; }
         .vm-card:nth-child(2), .vm-card:nth-child(3) { margin-top: 0; }
@@ -1157,6 +1238,376 @@
     ::-webkit-scrollbar-track { background: var(--paper); }
     ::-webkit-scrollbar-thumb { background: var(--blue-deep); border-radius: 5px; border: 2px solid var(--paper); }
     ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+    /* ==========================================
+    ABOUT & TESTIMONIAL SPLIT LAYOUT
+    ========================================== */
+    .about-split-wrapper {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 40px;
+        background: var(--white);
+        border-radius: 32px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(2, 136, 209, 0.08);
+        border: 1px solid var(--gray-200);
+        align-items: stretch;
+    }
+
+    @media (max-width: 1024px) {
+        .about-split-wrapper {
+            grid-template-columns: 1fr;
+            padding: 30px;
+        }
+    }
+
+    /* ===== TESTIMONIALS SIDE (LEFT) ===== */
+    .testimonial-side-new {
+        display: flex;
+        flex-direction: column;
+        padding-right: 40px;
+        border-right: 1px solid var(--gray-200);
+    }
+
+    @media (max-width: 1024px) {
+        .testimonial-side-new {
+            padding-right: 0;
+            border-right: none;
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: 40px;
+        }
+    }
+
+    .testimonial-header-new {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 30px;
+        color: var(--blue-dark);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    /* Slider Container */
+    .testimonial-slider-viewport {
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+        min-height: 320px;
+    }
+
+    .testimonial-slide-item {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.5s ease-in-out;
+        transform: translateX(20px);
+    }
+
+    .testimonial-slide-item.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        position: relative;
+    }
+
+    .testimonial-card-premium {
+        background: var(--bg-main);
+        border-radius: 24px;
+        padding: 35px 30px;
+        position: relative;
+        border: 1px solid var(--gray-200);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .testimonial-card-premium::before {
+        content: '"';
+        position: absolute;
+        top: 15px;
+        right: 30px;
+        font-size: 90px;
+        font-family: 'Playfair Display', serif;
+        color: var(--blue-light);
+        opacity: 0.7;
+        line-height: 1;
+    }
+
+    .tc-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .tc-avatar {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--blue-bright), var(--blue-dark));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 800;
+        border: 3px solid var(--gold);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .tc-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .tc-info h4 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+
+    .tc-info p {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .tc-stars {
+        color: var(--gold);
+        font-size: 16px;
+        margin-bottom: 16px;
+        letter-spacing: 2px;
+    }
+
+    .tc-message {
+        font-family: 'Playfair Display', serif;
+        font-size: 17px;
+        color: var(--text-dark);
+        line-height: 1.7;
+        font-style: italic;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+
+    /* Slider Dots */
+    .testimonial-dots-new {
+        display: flex;
+        gap: 8px;
+        margin-top: 20px;
+        justify-content: center;
+    }
+    .tc-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: var(--gray-300);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .tc-dot.active {
+        width: 30px;
+        border-radius: 5px;
+        background: var(--blue-bright);
+    }
+
+    /* ===== ABOUT US SIDE (RIGHT) ===== */
+    .about-side-new {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 20px;
+    }
+
+    @media (max-width: 1024px) {
+        .about-side-new {
+            padding-left: 0;
+            margin-top: 20px;
+        }
+    }
+
+    .about-side-new h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 38px;
+        font-weight: 800;
+        color: var(--blue-dark);
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    .about-side-new h2 em {
+        font-style: italic;
+        color: var(--gold-dark);
+    }
+
+    /* Sehemu ya HTML kutoka Quill */
+    /* Weka kikomo cha mistari mitatu kwenye homepage */
+    #siteAboutDescription {
+    font-size: 15.5px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+    display: -webkit-box;
+    -webkit-line-clamp: 5; /* 🆕 Inaonyesha mistari 5 tu */
+    line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    }
+    #siteAboutDescription p {
+        margin-bottom: 12px;
+    }
+    #siteAboutDescription p:last-child {
+        margin-bottom: 0;
+    }
+
+    .about-features-mini {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 30px;
+        margin-top: 10px;
+    }
+    /* Mpangilio mzima wa kipengele */
+    .about-feature-mini-item {
+        display: flex;
+        align-items: center; /* 🆕 Rudi kwenye center */
+        gap: 14px; /* Nafasi kati ya alama na maandishi */
+        font-size: 14.5px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 16px; /* Nafasi kati ya vipengele */
+    }
+
+    /* Alama ya ✓ */
+    .about-feature-mini-item > span:first-child {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background: var(--blue-bright); /* Rangi ya bluu iliyokolea */
+        color: white; /* Alama ya ✓ iwe nyeupe */
+        border-radius: 50%;
+        font-size: 14px;
+        font-weight: bold;
+        flex-shrink: 0; /* Isikandamizwe */
+    }
+
+    /* Maandishi yaliyoingizwa kupitia JS */
+    .about-feature-mini-item > span:last-child {
+        display: inline-block;
+        flex: 1; /* Inachukua nafasi yote iliyobaki */
+        line-height: 1.6;
+        color: #334155; /* Rangi nzuri ya kijivu iliyokolea */
+    }
+
+    .btn-read-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--blue-bright);
+        color: white;
+        padding: 16px 32px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: all 0.3s;
+        width: fit-content;
+        box-shadow: 0 10px 25px rgba(2, 136, 209, 0.3);
+    }
+
+    .btn-read-more:hover {
+        background: var(--blue-dark);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(2, 136, 209, 0.4);
+        color: white;
+    }
+    .typing-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px; /* 🆕 Ongeza ukubwa kidogo */
+    font-weight: 800;
+    color: var(--blue-dark); 
+    margin-bottom: 4px; /* 🆕 Nafasi ndogo sana kati ya jina na nembo */
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    }
+    .cursor {
+        display: inline-block;
+        width: 2px;
+        height: 22px;
+        background-color: var(--gold); /* Rangi ya dhahabu kwa cursor */
+        animation: blink 0.8s infinite;
+        border-radius: 2px;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+    /* ===== MPANGILIO WA JINA NA NEMBO KANDO KWA KANDO ===== */
+    .hero-card-header {
+        display: flex;
+        align-items: center; /* Vilingane katikati kwa wima */
+        justify-content: space-between; /* Jina kushoto, Nembo kulia */
+        gap: 15px; /* Nafasi kati yao */
+        margin-bottom: 20px; /* Nafasi kabla ya maelezo */
+        width: 100%;
+    }
+
+    /* Rekebisha Jina */
+    .typing-title {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 18px; /* Ukubwa wa herufi */
+        font-weight: 800;
+        color: var(--blue-dark);
+        margin: 0; /* Ondoa margin zote za juu/chini */
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        flex: 1; /* Inachukua nafasi iliyobaki */
+    }
+
+    /* Rekebisha Nembo */
+    .hero-float-icon {
+        width: 50px; /* Ukubwa mdogo ili kutoshea kando ya maandishi */
+        height: 50px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0; /* Zuia isikandamizwe na maandishi */
+        
+        box-shadow: 0 8px 20px rgba(2, 136, 209, 0.3), 
+                    0 0 0 3px rgba(255, 255, 255, 0.5),
+                    0 0 15px rgba(212, 175, 55, 0.4); 
+                    
+        position: relative;
+        z-index: 2;
+        transform: rotate(-3deg);
+        transition: transform 0.4s ease;
+        overflow: hidden;
+        border: 2px solid var(--gold);
+    }
     </style>
 </head>
 <body>
@@ -1249,22 +1700,34 @@
                     </a>
                 </div>
             </div>
+           <div class="hero-float-card">
+                <div class="hero-card-header">
+                    <h3 class="typing-title">
+                        <span id="typingText"></span><span class="cursor">|</span>
+                    </h3>
+                    <div class="hero-float-icon">
+                        <img src="assets/makdc-logo.jpg" alt="MAK DC Logo" onerror="this.src='https://via.placeholder.com/50x50/01579B/ffffff?text=MAK'">
+                    </div>
+                </div>
 
-            <div class="hero-float-card">
-                <div class="hero-float-icon">🏗️</div>
-                <p id="siteHeroSideText">A trusted supplier of quality construction materials across Tanzania — helping builders and contractors operate efficiently since 2006.</p>
-                <div class="hero-float-tag">MAK DC Investment Co.</div>
+                <!-- 🆕 Aya hii inapaswa kuwa na ID hii -->
+                <p id="siteHeroSideText">
+                    Together, we are building a stronger future and creating infrastructure that will serve generations to come...
+                </p>
+                
+                <div class="hero-float-tag">
+                    MAK DC Investment Co. Ltd
+                </div>
             </div>
-        </div>
     </section>
-
-    <!-- ===== ABOUT & TESTIMONIALS ===== -->
-    <section class="section" id="about">
+   <!-- ===== ABOUT & TESTIMONIALS (SPLIT LAYOUT) ===== -->
+    <section class="section" id="about" style="background: var(--paper); padding: 100px 8vw;">
         <div class="section-inner">
+            
             <div class="sec-header fade-in">
                 <div class="sec-kicker-wrap">
                     <span class="sec-kicker-line"></span>
-                    <span class="sec-kicker"><span class="diamond">◆</span> About Us <span class="diamond">◆</span></span>
+                    <span class="sec-kicker"><span class="diamond">◆</span> Who We Are <span class="diamond">◆</span></span>
                     <span class="sec-kicker-line"></span>
                 </div>
                 <h2 class="sec-title">Building trust <em>through purpose.</em></h2>
@@ -1275,56 +1738,53 @@
                 </div>
             </div>
 
-            <div class="about-testimonial-wrapper fade-in">
-                <div class="about-visual-side">
-                    <div class="about-image-wrapper">
-                        <img id="siteAboutImage" src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=800&q=80" alt="Construction">
-                        <div class="about-caption">
-                            <div class="cap-num" id="siteAboutYears">18+</div>
-                            <div class="cap-label">Years of Excellence</div>
+            <div class="about-split-wrapper fade-in">
+                
+                <div class="testimonial-side-new">
+                    <div class="testimonial-header-new">
+                        <span>💬</span> What Our Customers Say
+                    </div>
+                    
+                    <div class="testimonial-slider-viewport" id="testimonialSliderContainer">
+                        <!-- JS itaweka slides hapa -->
+                        <div class="loading-state" style="padding: 20px;">
+                            <div class="spinner" style="width: 30px; height: 30px;"></div>
+                            <div style="margin-top: 10px; font-size: 13px;">Inapakia maoni...</div>
                         </div>
                     </div>
-
-                    <p id="siteAboutDescription" style="font-size: 15px; line-height: 1.8; color: var(--gray-600); margin-bottom: 24px; padding: 0 8px;">
-                        Loading company description...
-                    </p>
-
-                    <div class="about-features-list">
-                        <div class="about-feature">
-                            <span class="about-feature-mark">✦</span>
-                            <span id="siteAboutFeature1">High-quality concrete blocks &amp; building materials</span>
-                        </div>
-                        <div class="about-feature">
-                            <span class="about-feature-mark">✦</span>
-                            <span id="siteAboutFeature2">Trusted by builders &amp; contractors across Tanzania</span>
-                        </div>
-                        <div class="about-feature">
-                            <span class="about-feature-mark">✦</span>
-                            <span id="siteAboutFeature3">Reliable delivery &amp; customer-focused service</span>
-                        </div>
+                    
+                    <!-- Dots za kubadilisha (zitaonekana tu kama zipo > 1) -->
+                    <div class="testimonial-dots-new" id="testimonialDotsContainer" style="display: none;"></div>
+                </div>
+                <div class="about-side-new">
+                    <h2 id="siteAboutTitle">MAK DC Investment <br><em>Company Limited</em></h2>
+                    
+                    <div id="siteAboutDescription">
+                        <p>Inapakia maelezo ya kampuni...</p>
+                    </div>
+                    
+                    <div class="about-features-mini">
+                    <div class="about-feature-mini-item">
+                        <span>✓</span> 
+                        <span id="siteFeature1">Quality concrete blocks & building materials</span>
+                    </div>
+                    <div class="about-feature-mini-item">
+                        <span>✓</span> 
+                        <span id="siteFeature2">Trusted by builders & contractors</span>
+                    </div>
+                    <div class="about-feature-mini-item">
+                        <span>✓</span> 
+                        <span id="siteFeature3">Reliable delivery & customer-focused</span>
                     </div>
                 </div>
-
-                <div class="testimonial-side">
-                    <div class="testimonial-header">
-                        <span class="icon">💬</span>
-                        <span class="label">What Our Customers Say</span>
-                    </div>
-
-                    <div class="testimonial-slider-container">
-                        <div class="testimonial-slides" id="testimonialSlides">
-                            <div class="loading-state" style="padding: 20px;">
-                                <div class="spinner"></div>
-                            </div>
-                        </div>
-                        <div class="testimonial-dots" id="testimonialDots"></div>
-                    </div>
+                    <a href="about.html" class="btn-read-more">
+                        Read More <span>→</span>
+                    </a>
                 </div>
+
             </div>
         </div>
     </section>
-
-    <!-- ===== PRODUCTS (MARQUEE AUTO-SCROLL) ===== -->
     <section class="section section-dark" id="products">
         <div class="section-inner">
             <div class="sec-header fade-in">
@@ -1514,22 +1974,22 @@
             <div class="footer-col">
                 <h4>Follow Us</h4>
                 <div class="footer-socials">
-                    <a href="#" class="social-btn facebook" title="Facebook" aria-label="Facebook">
+                    <a href="#" id="socialFacebook" class="social-btn facebook" title="Facebook" aria-label="Facebook" target="_blank">
                         <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                     </a>
-                    <a href="#" class="social-btn instagram" title="Instagram" aria-label="Instagram">
+                    <a href="#" id="socialInstagram" class="social-btn instagram" title="Instagram" aria-label="Instagram" target="_blank">
                         <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                     </a>
-                    <a href="#" class="social-btn whatsapp" title="WhatsApp" aria-label="WhatsApp">
+                    <a href="#" id="socialWhatsapp" class="social-btn whatsapp" title="WhatsApp" aria-label="WhatsApp" target="_blank">
                         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                     </a>
-                    <a href="#" class="social-btn linkedin" title="LinkedIn" aria-label="LinkedIn">
+                    <a href="#" id="socialLinkedin" class="social-btn linkedin" title="LinkedIn" aria-label="LinkedIn" target="_blank">
                         <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                     </a>
-                    <a href="#" class="social-btn twitter" title="X (Twitter)" aria-label="X">
+                    <a href="#" id="socialTwitter" class="social-btn twitter" title="X (Twitter)" aria-label="X" target="_blank">
                         <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     </a>
-                    <a href="#" class="social-btn youtube" title="YouTube" aria-label="YouTube">
+                    <a href="#" id="socialYoutube" class="social-btn youtube" title="YouTube" aria-label="YouTube" target="_blank">
                         <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                     </a>
                 </div>
@@ -1583,8 +2043,7 @@
 
     <!-- ===== CONFIG SCRIPT ===== -->
     <script src="assets/js/core/config.js"></script>
-
-    <!-- ===== MAIN SCRIPTS ===== -->
+        <!-- ===== MAIN SCRIPTS ===== -->
     <script>
         // Navbar Scroll
         const navbar = document.getElementById('navbar');
@@ -1665,41 +2124,79 @@
             }
         })();
 
-        // --- 2. SITE CONTENT API ---
+        // --- 2. SITE CONTENT API (DYNAMIC ABOUT US) ---
         (async function loadSiteContent() {
             try {
                 const response = await fetch(`${CONFIG.API_URL}/content`);
                 if (!response.ok) return;
                 const content = await response.json();
-                const setTxt = (id, txt) => { const el = document.getElementById(id); if (el && txt) el.textContent = txt; };
-
+                
+                const contentMap = {};
+                if (Array.isArray(content)) {
+                    content.forEach(item => { contentMap[item.key] = item.value; });
+                } else {
+                    Object.assign(contentMap, content);
+                }
+                
+                const setTxt = (id, txt) => { 
+                    const el = document.getElementById(id); 
+                    if (el && txt) el.textContent = txt; 
+                };
+                const setHTML = (id, html) => { 
+                    const el = document.getElementById(id); 
+                    if (el && html) el.innerHTML = html; 
+                };
+                setTxt('siteAboutTitle', contentMap.about_company_name || contentMap.company_name);
+                
+                let aboutDesc = contentMap.about_description || contentMap.about_text;
+                if (aboutDesc) {
+                    let plainText = aboutDesc.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                    if (plainText.length > 250) {
+                        plainText = plainText.substring(0, 250) + '...';
+                    }
+                    setHTML('siteAboutDescription', `<p>${plainText}</p>`); 
+                }
                 const heroTitle = document.getElementById('siteHeroTitle');
-                if (heroTitle && content.hero_title) {
-                    const words = content.hero_title.split(' '); const last = words.pop();
+                if (heroTitle && (contentMap.company_name || contentMap.hero_title)) {
+                    const titleText = contentMap.about_company_name || contentMap.company_name || contentMap.hero_title;
+                    const words = titleText.split(' '); const last = words.pop();
                     heroTitle.innerHTML = `<span class="line"><span class="line-inner">${words.join(' ')}</span></span><span class="line"><span class="line-inner outline">${last}</span></span>`;
                 }
-                setTxt('siteHeroSubtitle', content.hero_subtitle);
-                setTxt('siteHeroSideText', content.hero_side_text);
-                setTxt('siteAboutText', content.about_text);
-                setTxt('siteVisionText', content.vision_text);
-                setTxt('siteMissionText', content.mission_text);
-                setTxt('siteValuesText', content.values_text);
+                setTxt('siteHeroSubtitle', contentMap.about_company_subtitle || contentMap.company_subtitle || contentMap.hero_subtitle);
+                setTxt('siteHeroSideText', contentMap.hero_side_text || contentMap.about_side_text);
+                
+                // ===== VISION / MISSION / VALUES =====
+                setTxt('siteVisionText', contentMap.about_vision || contentMap.vision_text);
+                setTxt('siteMissionText', contentMap.about_mission || contentMap.mission_text);
+                setTxt('siteValuesText', contentMap.about_values || contentMap.values_text);
 
-                setTxt('siteAboutFeature1', content.about_feature_1);
-                setTxt('siteAboutFeature2', content.about_feature_2);
-                setTxt('siteAboutFeature3', content.about_feature_3);
+                // ===== CONTACT / FOOTER =====
+                setHTML('siteContactAddress', contentMap.contact_address);
+                setTxt('siteContactPhone', contentMap.contact_phone);
+                setTxt('siteContactEmail', contentMap.contact_email);
+                setTxt('siteContactHours', contentMap.contact_hours);
+                setTxt('siteFeature1', contentMap.home_feature_1);
+                setTxt('siteFeature2', contentMap.home_feature_2);
+                setTxt('siteFeature3', contentMap.home_feature_3);
 
-                const aboutImg = document.getElementById('siteAboutImage');
-                if (aboutImg && content.about_image) aboutImg.src = content.about_image;
+                // ===== SOCIAL MEDIA =====
+                const socialMap = {
+                    socialFacebook: 'social_facebook',
+                    socialInstagram: 'social_instagram',
+                    socialWhatsapp: 'social_whatsapp',
+                    socialLinkedin: 'social_linkedin',
+                    socialTwitter: 'social_twitter',
+                    socialYoutube: 'social_youtube'
+                };
+                Object.entries(socialMap).forEach(([id, key]) => {
+                    const el = document.getElementById(id);
+                    if (el && contentMap[key]) el.href = contentMap[key];
+                });
 
-                const setHTML = (id, html) => { const el = document.getElementById(id); if (el && html) el.innerHTML = html.replace(/\n/g, '<br>'); };
-                setHTML('siteContactAddress', content.contact_address);
-                setTxt('siteContactPhone', content.contact_phone);
-                setTxt('siteContactEmail', content.contact_email);
-                setTxt('siteContactHours', content.contact_hours);
-            } catch (err) { console.log('Content load error:', err); }
+            } catch (err) { 
+                console.error('Content load error:', err); 
+            }
         })();
-
         // --- 3. PRODUCTS API (MARQUEE AUTO-SCROLL) ---
         (async function loadProducts() {
             const grid = document.getElementById('productGrid');
@@ -1725,10 +2222,9 @@
                         </div>
                     </div>
                 `).join('');
-                // Duplicate for seamless infinite loop
                 grid.innerHTML = cardsHtml + cardsHtml;
                 const totalWidth = products.length * (340 + 24);
-                const speed = 60; // pixels per second
+                const speed = 60; 
                 const duration = Math.max(20, totalWidth / speed);
                 grid.style.animationDuration = duration + 's';
             } catch (err) {
@@ -1736,61 +2232,100 @@
             }
         })();
         function orderProductNow(name) { window.location.href = `customer-portal.html?product=${encodeURIComponent(name)}`; }
+        // --- 4. TESTIMONIALS API (SLIDER) ---
+        let testimonialData = [];
+        let testimonialCurrentIndex = 0;
+        let testimonialInterval = null;
 
-        // --- 4. TESTIMONIALS API ---
-        let testimonialData = [], testimonialIndex = 0, testimonialTimer = null;
         (async function loadTestimonials() {
-            const slidesContainer = document.getElementById('testimonialSlides');
-            const dotsContainer = document.getElementById('testimonialDots');
-            if (!slidesContainer) return;
+            const container = document.getElementById('testimonialSliderContainer');
+            const dotsContainer = document.getElementById('testimonialDotsContainer');
+            if (!container) return;
+
             try {
                 const response = await fetch(`${CONFIG.API_URL}/testimonials`);
                 if (!response.ok) throw new Error('Fetch failed');
                 const testimonials = await response.json();
+
                 if (!testimonials || testimonials.length === 0) {
-                    slidesContainer.innerHTML = `<div class="empty-state">No Testimonials Yet</div>`;
+                    container.innerHTML = `<p style="color: var(--text-muted); font-style: italic; padding: 20px 0;">Maoni ya wateja yataonekana hapa hivi karibuni.</p>`;
                     return;
                 }
                 testimonialData = testimonials;
-                slidesContainer.innerHTML = testimonials.map((t, i) => `
-                    <div class="testimonial-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
-                        <div class="testimonial-slide-header">
-                            ${t.photo ? `<div class="testimonial-avatar" style="background-image:url('${t.photo}');"></div>` : `<div class="testimonial-avatar-placeholder">${escapeHtml((t.customerName || '?').charAt(0).toUpperCase())}</div>`}
-                            <div class="testimonial-info">
-                                <div class="testimonial-name">${escapeHtml(t.customerName)}</div>
-                                <div class="testimonial-role">${escapeHtml(t.role || '')}</div>
-                                <div class="testimonial-stars">${'⭐'.repeat(t.rating || 5)}</div>
+                // Tengeneza Slides
+                container.innerHTML = testimonials.map((t, index) => {
+                    const name = t.customerName || t.name || 'Mteja';
+                    const role = t.role || 'Mteja';
+                    const message = t.message || '';
+                    const rating = t.rating || 5;
+                    const photo = t.photo || '';
+                    
+                    const initials = name.charAt(0).toUpperCase();
+                    const avatarHtml = photo ? `<img src="${photo}" alt="${escapeHtml(name)}">` : initials;
+                    return `
+                        <div class="testimonial-slide-item ${index === 0 ? 'active' : ''}" data-index="${index}">
+                            <div class="testimonial-card-premium">
+                                <div class="tc-header">
+                                    <div class="tc-avatar">${avatarHtml}</div>
+                                    <div class="tc-info">
+                                        <h4>${escapeHtml(name)}</h4>
+                                        <p>${escapeHtml(role)}</p>
+                                    </div>
+                                </div>
+                                <div class="tc-stars">${'⭐'.repeat(rating)}</div>
+                                <div class="tc-message">"${escapeHtml(message)}"</div>
                             </div>
                         </div>
-                        <div class="testimonial-message">${escapeHtml(t.message)}</div>
-                    </div>
-                `).join('');
-                if (dotsContainer) {
-                    dotsContainer.innerHTML = testimonials.map((_, i) => `<button class="testimonial-dot ${i === 0 ? 'active' : ''}" data-index="${i}"></button>`).join('');
-                    dotsContainer.querySelectorAll('.testimonial-dot').forEach(dot => {
-                        dot.addEventListener('click', () => { goToTestimonial(parseInt(dot.dataset.index)); resetAutoPlay(); });
-                    });
+                    `;
+                }).join('');
+                // Tengeneza Dots (Kama zipo zaidi ya 1)
+                if (testimonials.length > 1) {
+                    dotsContainer.style.display = 'flex';
+                    dotsContainer.innerHTML = testimonials.map((_, index) => `
+                        <button class="tc-dot ${index === 0 ? 'active' : ''}" onclick="goToTestimonial(${index})" aria-label="Nenda kwenye maoni ${index + 1}"></button>
+                    `).join('');
+            
+                    startTestimonialSlider();
                 }
-                startAutoPlay();
+
             } catch (err) {
-                slidesContainer.innerHTML = `<div class="empty-state">Failed to Load Testimonials</div>`;
+                console.error('Testimonials load error:', err);
+                container.innerHTML = `<p style="color: var(--red); padding: 20px 0;">Imeshindikana kupakia maoni.</p>`;
             }
         })();
-        function goToTestimonial(idx) {
-            const slides = document.querySelectorAll('.testimonial-slide');
-            const dots = document.querySelectorAll('.testimonial-dot');
-            if (!slides.length) return;
-            testimonialIndex = (idx + slides.length) % slides.length;
-            slides.forEach((s, i) => s.classList.toggle('active', i === testimonialIndex));
-            dots.forEach((d, i) => d.classList.toggle('active', i === testimonialIndex));
+
+        function goToTestimonial(index) {
+            if (index === testimonialCurrentIndex) return;
+            
+            const slides = document.querySelectorAll('.testimonial-slide-item');
+            const dots = document.querySelectorAll('.tc-dot');
+            
+            // Ficha zote
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            
+            // Onyesha iliyochaguliwa
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            
+            testimonialCurrentIndex = index;
+            
+            // Reset timer
+            resetTestimonialTimer();
         }
-        function startAutoPlay() { stopAutoPlay(); testimonialTimer = setInterval(() => goToTestimonial(testimonialIndex + 1), 5000); }
-        function stopAutoPlay() { if (testimonialTimer) clearInterval(testimonialTimer); }
-        function resetAutoPlay() { stopAutoPlay(); startAutoPlay(); }
-        document.addEventListener('DOMContentLoaded', () => {
-            const slider = document.querySelector('.testimonial-side');
-            if (slider) { slider.addEventListener('mouseenter', stopAutoPlay); slider.addEventListener('mouseleave', startAutoPlay); }
-        });
+
+        function startTestimonialSlider() {
+            testimonialInterval = setInterval(() => {
+                let nextIndex = testimonialCurrentIndex + 1;
+                if (nextIndex >= testimonialData.length) nextIndex = 0; // Rudi mwanzo
+                goToTestimonial(nextIndex);
+            }, 6000); // Inabadilika kila sekunde 6
+        }
+
+        function resetTestimonialTimer() {
+            clearInterval(testimonialInterval);
+            startTestimonialSlider();
+        }
 
         // --- 5. NEWS API ---
         let allNewsData = [], currentPage = 1; const NEWS_PER_PAGE = 6;
@@ -1823,7 +2358,7 @@
                             <div style="font-size: 10px; color: var(--gray-500); margin-bottom: 8px;">${dateStr}</div>
                             <h3>${escapeHtml(n.title)}</h3>
                             <p>${escapeHtml(n.excerpt || (n.content || '').slice(0, 100))}...</p>
-                            <div style="margin-top: 16px; font-size: 12px; font-weight: 800; color: var(--teal-deep);">Read more →</div>
+                            <div style="margin-top: 16px; font-size: 12px; font-weight: 800; color: var(--blue-deep);">Read more →</div>
                         </div>
                     </a>
                 `;
@@ -1887,7 +2422,6 @@
         function closeProjectModal() {
             document.getElementById('projectModal').classList.remove('show');
         }
-
         // --- 7. LEADERSHIP API ---
         let allLeaders = [];
         (async function loadLeadership() {
@@ -1932,41 +2466,7 @@
             document.getElementById('leaderBioModal').classList.add('show');
             document.body.style.overflow = 'hidden';
         }
-        // ================================================================
-        // 🆕 LOAD ABOUT US CONTENT FROM API
-        // ================================================================
-        async function loadAboutUsContent() {
-            try {
-                const content = await API.getSiteContent();
-                const safeContent = Array.isArray(content) ? content : [];
-                
-                const findVal = (key, fallback = 'Information not available yet.') => {
-                    const item = safeContent.find(c => c.key === key);
-                    return item ? item.value : fallback;
-                };
 
-                // Weka maandishi kwenye sehemu husika
-                const aboutDescEl = document.getElementById('siteAboutDescription');
-                if (aboutDescEl) aboutDescEl.textContent = findVal('about_description');
-
-                const aboutVisionEl = document.getElementById('dynamicVision');
-                if (aboutVisionEl) aboutVisionEl.textContent = findVal('about_vision');
-
-                const aboutMissionEl = document.getElementById('dynamicMission');
-                if (aboutMissionEl) aboutMissionEl.textContent = findVal('about_mission');
-
-                const aboutValuesEl = document.getElementById('dynamicValues');
-                if (aboutValuesEl) aboutValuesEl.textContent = findVal('about_values');
-
-            } catch (err) {
-                console.error('Load about us error:', err);
-            }
-        }
-
-        // Ita function hii ukurasa unapofunguka
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAboutUsContent();
-        });
         function closeLeaderBio() {
             document.getElementById('leaderBioModal').classList.remove('show');
             document.body.style.overflow = '';
@@ -1974,6 +2474,62 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') { closeLeaderBio(); closeProjectModal(); }
         });
+        // ==============================================
+        // 🆕 TYPEWRITER EFFECT LOGIC
+        // ==============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const textElement = document.getElementById('typingText');
+            if (!textElement) return;
+
+            // Maneno unayotaka yajiandike
+            const phrases = [
+                "MAK DC Investment Co. LTD",
+                "Quality Service is Our Priority",
+                "Building the Future"
+            ];
+
+            let phraseIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            let typingSpeed = 100; // Kasi ya kuandika (ms)
+            let deletingSpeed = 50; // Kasi ya kufuta (ms)
+            let delayBetweenPhrases = 2000; // Muda wa kusubiri kabla ya kufuta (ms)
+
+            function type() {
+                const currentPhrase = phrases[phraseIndex];
+                
+                if (isDeleting) {
+                    // Kama inafuta
+                    textElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                    charIndex--;
+                    typingSpeed = deletingSpeed;
+                } else {
+                    // Kama inaandika
+                    textElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                    charIndex++;
+                    typingSpeed = 100; // Rudi kwenye kasi ya kawaida ya kuandika
+                }
+
+                // Kama imemaliza kuandika neno
+                if (!isDeleting && charIndex === currentPhrase.length) {
+                    isDeleting = true;
+                    typingSpeed = delayBetweenPhrases; // Subiri kidogo kabla ya kufuta
+                } 
+                // Kama imemaliza kufuta neno
+                else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length; // Nenda kwenye neno lingine
+                    typingSpeed = 500; // Subiri kidogo kabla ya kuandika neno jipya
+                }
+
+                setTimeout(type, typingSpeed);
+            }
+
+            // Anza kujiandika baada ya sekunde 1
+            setTimeout(type, 1000);
+        });
     </script>
+</body>
+</html>    
 </body>
 </html>
