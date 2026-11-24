@@ -1,12 +1,21 @@
 // ================================================================
-// MAK DC INVESTMENT — ORDER CONTROLLER (CLEAN & FIXED)
+// MAK DC INVESTMENT — ORDER CONTROLLER (WITH WORKFLOW EMAILS)
 // ================================================================
-// Handles: Full Order Flow (Customer → Sales → Finance → Delivery)
+// Handles: Full Order Flow (Customer → Sales → Finance → Manager → CEO → Delivery)
 // ================================================================
 
 const { prisma } = require('../config/database');
 const marketingController = require('./marketing.controller');
-const { sendAdminOrderAlert, sendCustomerReceipt } = require('../services/email.service');
+
+// Ingiza functions zote za email kutoka email.service.js
+const { 
+    sendSalesNewOrder, 
+    sendFinanceNewOrder, 
+    sendManagerApproval, 
+    sendCEOApproval, 
+    sendOrderApprovedForDelivery,
+    sendCustomerReceipt 
+} = require('../services/email.service');
 
 // ================================================================
 // HELPER: Generate Order ID
@@ -191,11 +200,11 @@ async function createOrder(req, res) {
             }
         }
 
-        // 10. TUMA EMAIL (Admin & Customer)
+        // 10. TUMA EMAIL (Sales & Customer)
         if (order.email) {
             sendCustomerReceipt(order).catch(err => console.error('Email Error (Customer):', err));
         }
-        sendAdminOrderAlert(order).catch(err => console.error('Email Error (Admin):', err));
+        sendSalesNewOrder(order).catch(err => console.error('Email Error (Sales):', err));
 
         // 11. Response
         res.status(201).json({
@@ -339,8 +348,12 @@ async function sendToFinance(req, res) {
                 reviewedBySales: req.user.userId,
                 reviewedAtSales: new Date(),
                 salesReviewNotes: salesReviewNotes || null
-            }
+            },
+            include: { items: true } // Muhimu kwa ajili ya Email
         });
+
+        // Tuma Email kwa Finance
+        sendFinanceNewOrder(order).catch(err => console.error('Email Error (Finance):', err));
 
         await prisma.auditLog.create({
             data: {
@@ -390,7 +403,8 @@ async function setupPayment(req, res) {
                 paymentInstructions: paymentInstructions || null,
                 paymentDeadline: paymentDeadline ? new Date(paymentDeadline) : null,
                 status: paymentType === 'prepaid' ? 'awaiting-payment' : 'postpaid-approved'
-            }
+            },
+            include: { items: true }
         });
 
         await prisma.auditLog.create({
@@ -417,7 +431,7 @@ async function setupPayment(req, res) {
 }
 
 // ================================================================
-// FINANCE VERIFY PAYMENT
+// FINANCE VERIFY PAYMENT — Send to Manager
 // PUT /api/orders/:orderId/verify-payment
 // ================================================================
 async function verifyPayment(req, res) {
@@ -479,8 +493,12 @@ async function verifyPayment(req, res) {
                 receiptNumber,
                 receiptIssuedBy: req.user.userId,
                 receiptIssuedAt: new Date()
-            }
+            },
+            include: { items: true } // Muhimu kwa ajili ya Email
         });
+
+        // Tuma Email kwa MANAGER kuwa malipo yamekamilika, anahitaji idhini
+        sendManagerApproval(order).catch(err => console.error('Email Error (Manager):', err));
 
         await prisma.payment.create({
             data: {
@@ -534,7 +552,7 @@ async function verifyPayment(req, res) {
         }
 
         res.json({
-            message: 'Payment verified successfully! Receipt issued.',
+            message: 'Payment verified successfully! Sent to Manager for approval.',
             receiptNumber,
             order
         });
@@ -543,6 +561,76 @@ async function verifyPayment(req, res) {
         console.error('❌ Verify payment error:', err);
         if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to verify payment.' });
+    }
+}
+
+// ================================================================
+// MANAGER APPROVAL — Send to CEO (MPYA)
+// PUT /api/orders/:orderId/manager-approve
+// ================================================================
+async function managerApprove(req, res) {
+    try {
+        const { orderId } = req.params;
+
+        const order = await prisma.order.update({
+            where: { orderId },
+            data: { status: 'manager-approved' },
+            include: { items: true }
+        });
+
+        // Tuma Email kwa CEO kuwa inahitaji idhini ya mwisho
+        sendCEOApproval(order).catch(err => console.error('Email Error (CEO):', err));
+
+        await prisma.auditLog.create({
+            data: {
+                userId: req.user.userId,
+                action: 'manager_approve_order',
+                entityType: 'order',
+                entityId: orderId,
+                ipAddress: req.ip || 'unknown'
+            }
+        });
+
+        res.json({ message: 'Order approved by Manager! Sent to CEO.', order });
+    } catch (err) {
+        console.error('❌ Manager approval error:', err);
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
+        res.status(500).json({ error: 'Failed to approve order.' });
+    }
+}
+
+// ================================================================
+// CEO APPROVAL — Send to Delivery/Sales (MPYA)
+// PUT /api/orders/:orderId/ceo-approve
+// ================================================================
+async function ceoApprove(req, res) {
+    try {
+        const { orderId } = req.params;
+
+        const order = await prisma.order.update({
+            where: { orderId },
+            data: { status: 'ceo-approved' },
+            include: { items: true }
+        });
+
+        // Tuma Email kwa SALES/DELIVERY kuwa oda iko tayari kusafirishwa
+        sendOrderApprovedForDelivery(order).catch(err => console.error('Email Error (Delivery):', err));
+
+        await prisma.auditLog.create({
+            data: {
+                userId: req.user.userId,
+                action: 'ceo_approve_order',
+                entityType: 'order',
+                entityId: orderId,
+                ipAddress: req.ip || 'unknown'
+            }
+        });
+
+        res.json({ message: 'Order fully approved by CEO! Ready for delivery.', order });
+    } catch (err) {
+        console.error('❌ CEO approval error:', err);
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
+        res.status(500).json({ error: 'Failed to approve order.' });
     }
 }
 
@@ -857,6 +945,8 @@ module.exports = {
     sendToFinance,
     setupPayment,
     verifyPayment,
+    managerApprove,  // Mpya
+    ceoApprove,      // Mpya
     setDelivery,
     markDelivered,
     completeOrder,

@@ -95,6 +95,8 @@ router.put('/:orderId/reject',
     requireRole('Sales', 'Finance', 'CEO', 'Manager', 'SuperAdmin'),
     orderController.rejectOrder
 );
+router.put('/:orderId/manager-approve', auth, managerApprove);
+router.put('/:orderId/ceo-approve', auth, ceoApprove);
 
 // ================================================================
 // EXPORT — MWISHO WA FAILI
