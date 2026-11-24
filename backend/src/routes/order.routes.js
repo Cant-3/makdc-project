@@ -8,7 +8,7 @@ const router = express.Router();
 const orderController = require('../controllers/order.controller');
 
 // 1. Vuta functions zote muhimu za Auth hapa
-const { authenticate, requireRole, optionalAuth } = require('../middleware/auth.middleware');
+const { authenticate, requireRole, optionalAuth } = require('../middleware/auth');
 
 // ================================================================
 // PUBLIC ROUTES (Customer Portal) — BILA AUTH
