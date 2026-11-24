@@ -6,13 +6,16 @@ const express = require('express');
 const router = express.Router();
 
 const orderController = require('../controllers/order.controller');
-const { authenticate, requireRole, optionalAuth } = require('../middleware/auth');
+
+// 1. Vuta functions zote muhimu za Auth hapa
+const { authenticate, requireRole, optionalAuth } = require('../middleware/auth.middleware');
 
 // ================================================================
 // PUBLIC ROUTES (Customer Portal) — BILA AUTH
 // ================================================================
 
 // POST /api/orders — Create order (Customer anaunda)
+// optionalAuth inaruhusu mteja kuweka oda bila kuwa na account, lakini kama ana account, inatambua.
 router.post('/', optionalAuth, orderController.createOrder);
 
 // GET /api/orders/track/:orderId — Track order (Customer ana-track)
@@ -88,6 +91,20 @@ router.put('/:orderId/complete',
 );
 
 // ================================================================
+// MANAGER & CEO ROUTES (Zilizorekebishwa)
+// ================================================================
+
+router.put('/:orderId/manager-approve',
+    requireRole('Manager', 'SuperAdmin'),
+    orderController.managerApprove
+);
+
+router.put('/:orderId/ceo-approve',
+    requireRole('CEO', 'SuperAdmin'),
+    orderController.ceoApprove
+);
+
+// ================================================================
 // COMMON ROUTES
 // ================================================================
 
@@ -95,8 +112,6 @@ router.put('/:orderId/reject',
     requireRole('Sales', 'Finance', 'CEO', 'Manager', 'SuperAdmin'),
     orderController.rejectOrder
 );
-router.put('/:orderId/manager-approve', auth, managerApprove);
-router.put('/:orderId/ceo-approve', auth, ceoApprove);
 
 // ================================================================
 // EXPORT — MWISHO WA FAILI
