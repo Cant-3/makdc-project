@@ -3,6 +3,43 @@ const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ================================================================
+// HEADER YA KAMPUNI (Letterhead Style)
+// ================================================================
+const companyHeader = `
+    <div style="background-color: #ffffff; padding: 20px; border-bottom: 4px solid #01579B; text-align: center;">
+        <!-- Badilisha link ya picha hapa kama ipo sehemu nyingine -->
+        <img src="https://makdcinvestments.co.tz/logo.png" alt="MAK DC Investment" style="max-height: 80px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+        
+        <h1 style="color: #01579B; margin: 0 0 5px 0; font-size: 20px; letter-spacing: 1px;">MAK DC INVESTMENT COMPANY LIMITED</h1>
+        
+        <p style="color: #333; margin: 0 0 3px 0; font-size: 13px;">
+            <strong>Simu Na:</strong> +255 796 220 796 / +255 796 220 795
+        </p>
+        <p style="color: #333; margin: 0 0 3px 0; font-size: 13px;">
+            <strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #01579B; text-decoration: none;">ceo@makdcic.co.tz</a>
+        </p>
+        <p style="color: #333; margin: 0 0 10px 0; font-size: 13px;">
+            <strong>Tovuti:</strong> <a href="http://www.makdcic.co.tz" style="color: #01579B; text-decoration: none;">http://www.makdcic.co.tz</a>
+        </p>
+
+        <p style="color: #555; margin: 0; font-size: 12px; line-height: 1.4;">
+            Ofisi ya Mtendaji Mkuu, Mak DC Investment Co. LTD,<br>
+            2 Barabara ya Mahakama 3-Ngiu, 59501 IWAWA, MAKETE, S.L. P 88, <strong>MAKETE</strong>.
+        </p>
+    </div>
+`;
+
+// ================================================================
+// FOOTER YA KAMPUNI (Kwa ajili ya maelezo ya ziada)
+// ================================================================
+const companyFooter = `
+    <div style="background-color: #f1f1f1; padding: 15px 20px; text-align: center; border-top: 2px solid #01579B; font-size: 12px; color: #777;">
+        <p style="margin: 0;">Ujumbe huu umetumwa kiotomatiki na Mfumo wa MAK DC Investment.</p>
+        <p style="margin: 5px 0 0 0;">Quality Service is Our Priority</p>
+    </div>
+`;
+
+// ================================================================
 // 1. EMAIL KWA AJILI YA ADMIN (Wewe)
 // ================================================================
 async function sendAdminOrderAlert(order) {
@@ -22,17 +59,10 @@ async function sendAdminOrderAlert(order) {
             subject: `🚨 ODA MPYA: ${order.orderId} - ${order.customerName}`,
             html: `
                 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    ${companyHeader}
                     
-                    <!-- Header na Logo -->
-                    <div style="background-color: #01579B; padding: 25px 20px; text-align: center;">
-                        <img src="https://makdcinvestments.co.tz/makdc-logo.jpg" alt="MAK DC Logo" style="max-height: 60px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
-                        <h1 style="color: white; margin: 0; font-size: 22px; letter-spacing: 1px;">MAK DC INVESTMENT</h1>
-                        <p style="color: #e1f5fe; margin: 5px 0 0 0; font-size: 14px;">Mfumo wa Usimamizi wa Oda</p>
-                    </div>
-                    
-                    <!-- Body -->
                     <div style="padding: 30px 20px; background-color: #ffffff;">
-                        <h2 style="color: #333; margin-top: 0; font-size: 20px;">Habari Admin,</h2>
+                        <h2 style="color: #01579B; margin-top: 0; font-size: 20px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Habari Admin,</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">Mteja ameweka oda mpya kupitia mfumo. Tafadhali pitia taarifa zifuatazo ili kuendelea na mchakato wa ukaguzi:</p>
                         
                         <table style="width: 100%; margin-bottom: 25px; border-collapse: collapse; background-color: #f9f9f9; border-radius: 8px;">
@@ -68,7 +98,6 @@ async function sendAdminOrderAlert(order) {
                             </tbody>
                         </table>
 
-                        <!-- Jumla -->
                         <div style="background-color: #fff8e1; border-left: 5px solid #FFC107; padding: 15px; border-radius: 4px; margin-bottom: 30px;">
                             <table style="width: 100%;">
                                 <tr>
@@ -78,16 +107,12 @@ async function sendAdminOrderAlert(order) {
                             </table>
                         </div>
 
-                        <!-- Kitufe -->
                         <div style="text-align: center;">
                             <a href="https://makdcinvestments.co.tz/super-admin-dashboard.html" style="background-color: #01579B; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 15px; display: inline-block;">Ingia Kwenye Dashboard</a>
                         </div>
                     </div>
                     
-                    <!-- Footer -->
-                    <div style="background-color: #f1f1f1; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
-                        <p style="margin: 0; font-size: 12px; color: #777;">Ujumbe huu umetumwa kiotomatiki na Mfumo wa MAK DC Investment.<br>Tafadhali usijibu barua pepe hii moja kwa moja.</p>
-                    </div>
+                    ${companyFooter}
                 </div>
             `
         });
@@ -112,19 +137,12 @@ async function sendCustomerReceipt(order) {
             subject: `Asante kwa Oda Yako - MAK DC Investment (${order.orderId})`,
             html: `
                 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    ${companyHeader}
                     
-                    <!-- Header na Logo -->
-                    <div style="background-color: #01579B; padding: 25px 20px; text-align: center;">
-                        <img src="https://makdcinvestments.co.tz/makdc-logo.jpg" alt="MAK DC Logo" style="max-height: 60px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
-                        <h1 style="color: white; margin: 0; font-size: 22px; letter-spacing: 1px;">MAK DC INVESTMENT</h1>
-                    </div>
-                    
-                    <!-- Body -->
                     <div style="padding: 30px 20px; background-color: #ffffff;">
-                        <h2 style="color: #333; margin-top: 0; font-size: 20px;">Ndugu ${order.customerName},</h2>
+                        <h2 style="color: #01579B; margin-top: 0; font-size: 20px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Ndugu ${order.customerName},</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">Kwanza kabisa, tunakushukuru kwa kutuamini na kuchagua MAK DC Investment kwa mahitaji yako. Tunafurahi kukutaarifu kuwa <strong>tumepokea oda yako kwa mafanikio</strong> na timu yetu inaifanyia kazi kwa sasa.</p>
                         
-                        <!-- Tracking ID Box -->
                         <div style="background-color: #e1f5fe; padding: 25px 20px; text-align: center; border-radius: 8px; margin: 25px 0; border: 1px dashed #0288D1;">
                             <p style="margin: 0 0 10px 0; color: #01579B; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Namba Yako ya Kufuatilia (Tracking ID)</p>
                             <h1 style="color: #D32F2F; letter-spacing: 3px; margin: 0; font-size: 32px;">${order.orderId}</h1>
@@ -132,7 +150,6 @@ async function sendCustomerReceipt(order) {
                         
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">Tafadhali hifadhi namba hii mahali salama. Unaweza kuitumia kufuatilia hatua mbalimbali za oda yako (kama vile ukaguzi, malipo, na usafirishaji) kupitia tovuti yetu au kwa kuwasiliana na timu yetu ya huduma kwa wateja.</p>
                         
-                        <!-- Order Summary -->
                         <h3 style="color: #01579B; border-bottom: 2px solid #01579B; padding-bottom: 8px; margin-top: 30px; margin-bottom: 15px;">Muhtasari wa Oda</h3>
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
@@ -145,18 +162,12 @@ async function sendCustomerReceipt(order) {
                             </tr>
                         </table>
 
-                        <!-- Kitufe -->
                         <div style="text-align: center; margin-top: 35px;">
                             <a href="https://makdcinvestments.co.tz/customer-portal.html" style="background-color: #01579B; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 15px; display: inline-block;">Fuatilia Oda Yako Hapa</a>
                         </div>
                     </div>
                     
-                    <!-- Footer -->
-                    <div style="background-color: #f1f1f1; padding: 25px; text-align: center; border-top: 1px solid #e0e0e0;">
-                        <p style="margin: 0 0 8px 0; font-size: 14px; color: #333; font-weight: bold;">MAK DC Investment Company LTD</p>
-                        <p style="margin: 0 0 10px 0; font-size: 13px; color: #555;">Huduma Bora ni Kipaumbele Chetu.</p>
-                        <p style="margin: 0; font-size: 12px; color: #888;">Kama una swali lolote, tafadhali wasiliana nasi kupitia barua pepe: <a href="mailto:support@makdcinvestments.co.tz" style="color: #01579B; text-decoration: none;">support@makdcinvestments.co.tz</a></p>
-                    </div>
+                    ${companyFooter}
                 </div>
             `
         });
@@ -169,10 +180,15 @@ async function sendCustomerReceipt(order) {
 }
 
 // ================================================================
-// FUNCTIONS ZA HATUA MBALIMBALI ZA WORKFLOW (Sales, Finance, Manager, CEO)
+// 3. WORKFLOW EMAILS (Sales, Finance, Manager, CEO)
 // ================================================================
 async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl, actionText, badgeColor }) {
     try {
+        if (!to) {
+            console.warn(`⚠️ Barua pepe ya mpokeaji haipo kwa ajili ya: ${title}. Haijatumwa.`);
+            return;
+        }
+
         const items = order.items || [];
         const itemsList = items.map(item => 
             `<tr>
@@ -187,15 +203,12 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
             to: [to],
             subject: subject,
             html: `
-                <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff;">
-                    <div style="background-color: #01579B; padding: 20px; text-align: center;">
-                        <h1 style="color: white; margin: 0; font-size: 22px;">MAK DC INVESTMENT</h1>
-                        <p style="color: #e1f5fe; margin: 5px 0 0 0;">Mfumo wa Usimamizi wa Oda</p>
-                    </div>
+                <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    ${companyHeader}
                     
                     <div style="padding: 30px 20px;">
                         <span style="background-color: ${badgeColor}; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">${title}</span>
-                        <h2 style="color: #333; margin-top: 15px;">Habari,</h2>
+                        <h2 style="color: #01579B; margin-top: 15px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Habari,</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">${message}</p>
                         
                         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -220,9 +233,7 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
                         </div>
                     </div>
                     
-                    <div style="background-color: #f1f1f1; padding: 15px; text-align: center; border-top: 1px solid #e0e0e0;">
-                        <p style="margin: 0; font-size: 12px; color: #777;">Ujumbe huu umetumwa kiotomatiki na Mfumo wa MAK DC.</p>
-                    </div>
+                    ${companyFooter}
                 </div>
             `
         });
@@ -230,7 +241,7 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
         if (error) console.error(`❌ Email Error (${to}):`, error);
         else console.log(`✅ Email imetumwa kwa ${to}`, data.id);
     } catch (error) {
-        console.error('❌ Kosa la mfumo:', error.message);
+        console.error('❌ Kosa la mfumo (Workflow Email):', error.message);
     }
 }
 

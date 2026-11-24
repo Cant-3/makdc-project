@@ -331,7 +331,7 @@ function switchSidebarTab(targetId, event) {
         const link = event.target.closest('.sidebar-submenu a');
         if (link) link.classList.add('active');
     }
-    if (tabId === 'tab-my-submitted-reports') loadMySubmittedReports();
+    if (targetId === 'tab-my-submitted-reports') loadMySubmittedReports();
     if (targetId === 'sub-create-order') {
         loadProductsForSales().then(() => {
             const tbody = document.getElementById('itemsTableBody');
@@ -5732,7 +5732,6 @@ function removeAttendAttachment(index) {
         <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeAttendAttachment(${idx})" class="rm">✕</button></div>
     `).join('');
 }
-
 async function submitAttend() {
     const mailId = currentMailId;
     if (!mailId) return;
@@ -5780,10 +5779,6 @@ async function submitAttend() {
         btn.innerHTML = originalHtml;
     }
 }
-
-// ================================================================
-// 13. CLOSE WORKFLOW
-// ================================================================
 async function closeCurrentMail() {
     if (!currentMailId) return;
     
@@ -5814,7 +5809,6 @@ async function closeCurrentMail() {
 
     document.getElementById('closeWorkflowModal').classList.add('show');
 }
-
 function handleCloseAttachments(event) {
     const files = Array.from(event.target.files);
     const list = document.getElementById('closeAttachList');
@@ -5834,14 +5828,12 @@ function handleCloseAttachments(event) {
     
     event.target.value = '';
 }
-
 function removeCloseAttachment(index) {
     currentCloseAttachments.splice(index, 1);
     document.getElementById('closeAttachList').innerHTML = currentCloseAttachments.map((file, idx) => `
         <div class="mc-attach-chip"><span>📎</span><span>${file.name}</span><button onclick="event.stopPropagation(); removeCloseAttachment(${idx})" class="rm">✕</button></div>
     `).join('');
 }
-
 async function submitCloseWorkflow() {
     const comment = (document.getElementById('closeComment')?.value || '').trim();
     const assignToVal = document.getElementById('closeAssignTo')?.value;
@@ -5886,10 +5878,6 @@ async function submitCloseWorkflow() {
         btn.innerHTML = originalHtml;
     }
 }
-
-// ================================================================
-// 14. REPLY
-// ================================================================
 async function openReplyModal(originalId) {
     const msg = await API.getInternalMailById(originalId);
     if (!msg) return;
@@ -5915,7 +5903,6 @@ async function openReplyModal(originalId) {
         </div>
     `);
 }
-
 async function submitReply(originalId) {
     const body = document.getElementById('replyBody').value.trim();
     if (!body) return showToast('Reply body is required', 'error');
@@ -5942,10 +5929,6 @@ async function submitReply(originalId) {
         btn.innerHTML = originalBtn; btn.disabled = false;
     }
 }
-
-// ================================================================
-// 15. STAR / ARCHIVE / DELETE
-// ================================================================
 async function toggleStarCurrentMail() {
     if (!currentMailId) return;
     try {
@@ -5955,7 +5938,6 @@ async function toggleStarCurrentMail() {
         loadMailboxMessages(currentMailBoxType);
     } catch (err) { showToast('❌ ' + err.message, 'error'); }
 }
-
 async function toggleArchiveCurrentMail() {
     if (!currentMailId) return;
     try {
@@ -5965,7 +5947,6 @@ async function toggleArchiveCurrentMail() {
         loadMailboxMessages(currentMailBoxType);
     } catch (err) { showToast('❌ ' + err.message, 'error'); }
 }
-
 async function deleteCurrentMail() {
     if (!currentMailId) return;
     if (!confirm('Delete this message? It will move to trash.')) return;
@@ -5977,10 +5958,6 @@ async function deleteCurrentMail() {
         loadMailBadges();
     } catch (err) { showToast('❌ ' + err.message, 'error'); }
 }
-
-// ================================================================
-// 16. ATTACHMENTS VIEWER
-// ================================================================
 function openAttachmentsModal(id) {
     const msg = window.mailCache[id];
     if (!msg) {
@@ -6045,7 +6022,6 @@ function openAttachmentsModal(id) {
     document.getElementById('attachmentsListBody').innerHTML = filesHtml;
     document.getElementById('viewAttachmentsModal').classList.add('show');
 }
-
 function downloadMailAttachment(fileData, fileName) {
     if (!fileData) return showToast('File data is missing', 'error');
     
@@ -6058,26 +6034,16 @@ function downloadMailAttachment(fileData, fileName) {
     
     showToast('⬇️ Downloading ' + fileName, 'info');
 }
-
-// ================================================================
-// 17. POLLING — CHECK FOR NEW MESSAGES
-// ================================================================
 setInterval(() => {
     if (document.getElementById('tab-mail-center')?.classList.contains('active')) {
         loadMailBadges();
     }
 }, 30000);
-// ================================================================
-// 18. INIT MAIL BADGES ON LOAD
-// ================================================================
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadMailBadges().catch(() => {});
     }, 3000);
 });
-// ================================================================
-// 🆕 SEND REPORT TO CEO — AUTO-FILL + NARRATIVE
-// ================================================================
 async function openSubmitReportModal() {
     let modal = document.getElementById('submitReportModal');
     if (!modal) {
