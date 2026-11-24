@@ -3,30 +3,40 @@ const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ================================================================
-// HEADER YA KAMPUNI (Letterhead Style)
+// HEADER YA KAMPUNI (Blue + Gold Theme)
 // ================================================================
 const companyHeader = `
-    <div style="background-color: #ffffff; padding: 10px 20px 20px 20px; border-bottom: 4px solid #01579B; text-align: center;">
-        <!-- Nimeongeza width na kuondoa margin ya juu ili nembo ionekane kubwa -->
-        <img src="https://makdcinvestments.co.tz/logo.png" alt="MAK DC Investment" style="width: 100%; max-width: 280px; height: auto; margin: 0 auto 10px auto; display: block;">
+    <div style="background-color: #01579B; padding: 25px 20px 15px 20px; text-align: center; border-top: 6px solid #FFC107;">
         
-        <h1 style="color: #01579B; margin: 0 0 5px 0; font-size: 20px; letter-spacing: 1px;">MAK DC INVESTMENT COMPANY LIMITED</h1>
+        <!-- Background nyeupe inayozunguka nembo ili ionekane vizuri -->
+        <div style="background-color: #ffffff; display: inline-block; padding: 10px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            <!-- Badilisha link hii iendane na mahali picha yako ilipo hasa -->
+            <img src="https://makdcinvestments.co.tz/makdc-logo.jpg" alt="MAK DC Investment" style="max-width: 180px; height: auto; display: block;">
+        </div>
         
-        <p style="color: #333; margin: 0 0 3px 0; font-size: 13px;">
+        <!-- Jina la Kampuni kwa Rangi ya Dhahabu -->
+        <h1 style="color: #FFC107; margin: 0 0 5px 0; font-size: 22px; letter-spacing: 1px; font-weight: bold;">MAK DC INVESTMENT COMPANY LIMITED</h1>
+        
+        <!-- Maelezo kwa Rangi Nyeupe -->
+        <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;">
             <strong>Simu Na:</strong> +255 796 220 796 / +255 796 220 795
         </p>
-        <p style="color: #333; margin: 0 0 3px 0; font-size: 13px;">
-            <strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #01579B; text-decoration: none;">ceo@makdcic.co.tz</a>
+        <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;">
+            <strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #FFC107; text-decoration: none;">ceo@makdcic.co.tz</a>
         </p>
-        <p style="color: #333; margin: 0 0 10px 0; font-size: 13px;">
-            <strong>Tovuti:</strong> <a href="https://makdcinvestments.co.tz/" style="color: #01579B; text-decoration: none;">https://makdcinvestments.co.tz/</a>
+        <p style="color: #ffffff; margin: 0 0 10px 0; font-size: 13px;">
+            <strong>Tovuti:</strong> <a href="https://makdcinvestments.co.tz/" style="color: #FFC107; text-decoration: none;">https://makdcinvestments.co.tz/</a>
         </p>
 
-        <p style="color: #555; margin: 0; font-size: 12px; line-height: 1.4;">
+        <!-- Anwani -->
+        <p style="color: #e1f5fe; margin: 0; font-size: 12px; line-height: 1.4;">
             Ofisi ya Mtendaji Mkuu, Mak DC Investment Co. LTD,<br>
             2 Barabara ya Mahakama 3-Ngiu, 59501 IWAWA, MAKETE, S.L. P 88, <strong>MAKETE</strong>.
         </p>
     </div>
+    
+    <!-- Mstari wa kutenganisha (Gold) -->
+    <div style="height: 4px; background-color: #FFC107;"></div>
 `;
 
 // ================================================================
