@@ -1,9 +1,3 @@
-// ================================================================
-// MAK DC INVESTMENT — ORDER CONTROLLER (KAMILI)
-// ================================================================
-// Handles: Full Order Flow (Customer → Sales → Finance → Delivery)
-// ================================================================
-
 const { prisma } = require('../config/database');
 const marketingController = require('./marketing.controller');
 // ================================================================
@@ -14,7 +8,6 @@ function generateOrderId() {
     const random = Math.floor(Math.random() * 900000) + 100000;
     return `MAK-${year}-${random}`;
 }
-
 // ================================================================
 // HELPER: Generate Receipt Number
 // Format: RCPT-MAKDC-YYYYMM-XXXX
@@ -45,11 +38,6 @@ async function generateReceiptNumber() {
 
     return `${prefix}${String(nextNumber).padStart(4, '0')}`;
 }
-// ================================================================
-// CREATE ORDER — Customer/Sales anaunda
-// POST /api/orders
-// PUBLIC (Customer Portal) au AUTH (Sales)
-// ================================================================
 async function createOrder(req, res) {
     try {
         const {
@@ -62,46 +50,26 @@ async function createOrder(req, res) {
         if (!customerName || !phone || !items || items.length === 0) {
             return res.status(400).json({ error: 'Name, phone, and items are required.' });
         }
-
-        // 2. 🆕 ANGALIA ROLE YA MTUMIAJI
-        // (req.user inakuwepo tu kama ame-login, mfano Sales au Superadmin)
         const userRole = (req.user?.role || '').toLowerCase();
         const isSuperAdminOrSales = userRole.includes('superadmin') || userRole.includes('sales');
-
-        // 3. Tafuta bidhaa zote zilizotajwa kwenye order
         const productNames = items.map(item => item.productName || item.product);
         
         const products = await prisma.product.findMany({
             where: { 
                 name: { in: productNames },
                 isActive: true
-                // ❌ Tumeondoa availableForSale: true hapa ili Waruhusu wote kuagiza
             }
         });
-
-        // 4. Unda map ya product kwa jina kwa ajili ya ukaguzi wa haraka
         const productMap = {};
         products.forEach(p => { productMap[p.name] = p; });
-
-        // 5. Kagua kila item
         const stockErrors = [];
         for (const item of items) {
             const productName = item.productName || item.product;
             const product = productMap[productName];
-            
-            // 5a. Kama bidhaa haipo kabisa kwenye database
             if (!product) {
                 stockErrors.push(`❌ "${productName}" haipo kwenye mfumo.`);
                 continue;
             }
-            
-            // 5b. Kama ni MTUMIAJI WA KAWAIDA (sio Sales/Superadmin), LAZIMA bidhaa iwe availableForSale
-            if (!isSuperAdminOrSales && !product.availableForSale) {
-                stockErrors.push(`❌ "${productName}" haipo kwenye Production bado. Tafadhali wasiliana na Sales.`);
-                continue;
-            }
-            
-            // 5c. Angalia kama stock inatosha
             if (product.stock < item.quantity) {
                 stockErrors.push(
                     `❌ "${productName}" haitoshi. Iliyopo: ${product.stock}, inahitajika: ${item.quantity}`
