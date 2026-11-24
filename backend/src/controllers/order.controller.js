@@ -1,5 +1,13 @@
+// ================================================================
+// MAK DC INVESTMENT — ORDER CONTROLLER (CLEAN & FIXED)
+// ================================================================
+// Handles: Full Order Flow (Customer → Sales → Finance → Delivery)
+// ================================================================
+
 const { prisma } = require('../config/database');
 const marketingController = require('./marketing.controller');
+const { sendAdminOrderAlert, sendCustomerReceipt } = require('../services/email.service');
+
 // ================================================================
 // HELPER: Generate Order ID
 // ================================================================
@@ -8,6 +16,7 @@ function generateOrderId() {
     const random = Math.floor(Math.random() * 900000) + 100000;
     return `MAK-${year}-${random}`;
 }
+
 // ================================================================
 // HELPER: Generate Receipt Number
 // Format: RCPT-MAKDC-YYYYMM-XXXX
@@ -18,7 +27,6 @@ async function generateReceiptNumber() {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const prefix = `RCPT-MAKDC-${year}${month}-`;
 
-    // Find last receipt for this month
     const lastOrder = await prisma.order.findFirst({
         where: {
             receiptNumber: {
@@ -38,6 +46,11 @@ async function generateReceiptNumber() {
 
     return `${prefix}${String(nextNumber).padStart(4, '0')}`;
 }
+
+// ================================================================
+// CREATE ORDER — Customer/Sales anaunda
+// POST /api/orders
+// ================================================================
 async function createOrder(req, res) {
     try {
         const {
@@ -50,8 +63,8 @@ async function createOrder(req, res) {
         if (!customerName || !phone || !items || items.length === 0) {
             return res.status(400).json({ error: 'Name, phone, and items are required.' });
         }
-        const userRole = (req.user?.role || '').toLowerCase();
-        const isSuperAdminOrSales = userRole.includes('superadmin') || userRole.includes('sales');
+
+        // 2. Tafuta bidhaa zote zilizotajwa kwenye order
         const productNames = items.map(item => item.productName || item.product);
         
         const products = await prisma.product.findMany({
@@ -60,16 +73,22 @@ async function createOrder(req, res) {
                 isActive: true
             }
         });
+
+        // 3. Unda map ya product kwa jina kwa ajili ya ukaguzi wa haraka
         const productMap = {};
         products.forEach(p => { productMap[p.name] = p; });
+
+        // 4. Kagua kila item (Stock & Existence)
         const stockErrors = [];
         for (const item of items) {
             const productName = item.productName || item.product;
             const product = productMap[productName];
+            
             if (!product) {
                 stockErrors.push(`❌ "${productName}" haipo kwenye mfumo.`);
                 continue;
             }
+            
             if (product.stock < item.quantity) {
                 stockErrors.push(
                     `❌ "${productName}" haitoshi. Iliyopo: ${product.stock}, inahitajika: ${item.quantity}`
@@ -84,17 +103,17 @@ async function createOrder(req, res) {
             });
         }
 
-        // 6. Calculate totals
+        // 5. Calculate totals
         const totalItems = items.length;
         const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
         const totalAmount = items.reduce((sum, item) => sum + ((item.unitPrice || 0) * (item.quantity || 0)), 0);
 
-        // 7. Generate order ID
+        // 6. Generate order ID
         const orderId = generateOrderId();
 
-        // 8. 🆕 TRANSACTION: CREATE ORDER + DEDUCT STOCK
+        // 7. TRANSACTION: CREATE ORDER + DEDUCT STOCK
         const order = await prisma.$transaction(async (tx) => {
-            // 8a. Unda order
+            // 7a. Unda order
             const newOrder = await tx.order.create({
                 data: {
                     orderId,
@@ -129,7 +148,7 @@ async function createOrder(req, res) {
                 }
             });
 
-            // 8b. Punguza stock ya kila bidhaa
+            // 7b. Punguza stock ya kila bidhaa
             for (const item of items) {
                 const productName = item.productName || item.product;
                 const product = productMap[productName];
@@ -148,7 +167,7 @@ async function createOrder(req, res) {
             timeout: 15000
         });
 
-        // 9. Audit log
+        // 8. Audit log
         if (req.user?.userId) {
             await prisma.auditLog.create({
                 data: {
@@ -162,7 +181,7 @@ async function createOrder(req, res) {
             });
         }
 
-        // 10. Recalculate Marketing KPI (Kama ipo)
+        // 9. Recalculate Marketing KPI (Kama ipo)
         if (marketingPlanId) {
             try {
                 await marketingController.recalculateKpiFromOrders(marketingPlanId);
@@ -172,6 +191,13 @@ async function createOrder(req, res) {
             }
         }
 
+        // 10. TUMA EMAIL (Admin & Customer)
+        if (order.email) {
+            sendCustomerReceipt(order).catch(err => console.error('Email Error (Customer):', err));
+        }
+        sendAdminOrderAlert(order).catch(err => console.error('Email Error (Admin):', err));
+
+        // 11. Response
         res.status(201).json({
             message: 'Order created successfully! Stock has been reduced.',
             order
@@ -182,6 +208,7 @@ async function createOrder(req, res) {
         res.status(500).json({ error: 'Failed to create order.' });
     }
 }
+
 // ================================================================
 // LIST ALL ORDERS
 // GET /api/orders
@@ -199,21 +226,11 @@ async function listOrders(req, res) {
             include: {
                 items: true,
                 payments: true,
-                creator: {
-                    select: { id: true, fullName: true, email: true, role: true }
-                },
-                salesReviewer: {
-                    select: { id: true, fullName: true }
-                },
-                paymentVerifier: {
-                    select: { id: true, fullName: true }
-                },
-                deliverer: {
-                    select: { id: true, fullName: true }
-                },
-                receiptIssuer: {
-                    select: { id: true, fullName: true }
-                },
+                creator: { select: { id: true, fullName: true, email: true, role: true } },
+                salesReviewer: { select: { id: true, fullName: true } },
+                paymentVerifier: { select: { id: true, fullName: true } },
+                deliverer: { select: { id: true, fullName: true } },
+                receiptIssuer: { select: { id: true, fullName: true } },
                 paymentAccount: true
             },
             orderBy: { createdAt: 'desc' }
@@ -226,8 +243,9 @@ async function listOrders(req, res) {
         res.status(500).json({ error: 'Failed to fetch orders.' });
     }
 }
+
 // ================================================================
-// GET ORDER BY ID (OPTIMIZED — faster)
+// GET ORDER BY ID
 // GET /api/orders/:orderId
 // ================================================================
 async function getOrder(req, res) {
@@ -238,18 +256,9 @@ async function getOrder(req, res) {
             where: { orderId },
             include: {
                 items: true,
-                // Only needed fields, sio relations zote
-                salesReviewer: {
-                    select: { id: true, fullName: true }
-                },
-                paymentVerifier: {
-                    select: { id: true, fullName: true }
-                },
-                deliverer: {
-                    select: { id: true, fullName: true }
-                }
-                // ❌ TUNAONDOA: payments, creator, receiptIssuer, paymentAccount
-                // Kwa Sales view, hazihitajiki
+                salesReviewer: { select: { id: true, fullName: true } },
+                paymentVerifier: { select: { id: true, fullName: true } },
+                deliverer: { select: { id: true, fullName: true } }
             }
         });
 
@@ -257,18 +266,11 @@ async function getOrder(req, res) {
             return res.status(404).json({ error: 'Order not found.' });
         }
 
-        // Add paymentAccount info kama inahitajika (pekee)
         let paymentAccount = null;
         if (order.paymentAccountId) {
             paymentAccount = await prisma.companyAccount.findUnique({
                 where: { id: order.paymentAccountId },
-                select: {
-                    id: true,
-                    name: true,
-                    type: true,
-                    accountNumber: true,
-                    accountName: true
-                }
+                select: { id: true, name: true, type: true, accountNumber: true, accountName: true }
             });
         }
 
@@ -282,28 +284,22 @@ async function getOrder(req, res) {
         res.status(500).json({ error: 'Failed to fetch order.' });
     }
 }
+
 // ================================================================
-// TRACK ORDER BY TRACKING ID (PUBLIC — Customer Portal)
+// TRACK ORDER BY TRACKING ID (PUBLIC)
 // GET /api/orders/track/:orderId
 // ================================================================
 async function trackOrder(req, res) {
     try {
         const { orderId } = req.params;
-        const { phone } = req.query; // Optional — kama mteja anataka security zaidi
+        const { phone } = req.query;
 
         const order = await prisma.order.findUnique({
             where: { orderId },
             include: {
                 items: true,
                 paymentAccount: {
-                    select: {
-                        name: true,
-                        type: true,
-                        accountNumber: true,
-                        accountName: true,
-                        branch: true,
-                        instructions: true
-                    }
+                    select: { name: true, type: true, accountNumber: true, accountName: true, branch: true, instructions: true }
                 }
             }
         });
@@ -312,7 +308,6 @@ async function trackOrder(req, res) {
             return res.status(404).json({ error: 'Order not found.' });
         }
 
-        // Kama phone imetolewa, verify. Kama haikutolewa, ruka.
         if (phone) {
             const normalizePhone = (p) => (p || '').replace(/\s+/g, '').replace(/^\+?255/, '0');
             if (normalizePhone(order.phone) !== normalizePhone(phone)) {
@@ -327,10 +322,10 @@ async function trackOrder(req, res) {
         res.status(500).json({ error: 'Failed to track order.' });
     }
 }
+
 // ================================================================
 // SALES REVIEW — Send to Finance
 // PUT /api/orders/:orderId/send-to-finance
-// Role: Sales
 // ================================================================
 async function sendToFinance(req, res) {
     try {
@@ -347,7 +342,6 @@ async function sendToFinance(req, res) {
             }
         });
 
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -366,9 +360,7 @@ async function sendToFinance(req, res) {
 
     } catch (err) {
         console.error('❌ Send to finance error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to send order.' });
     }
 }
@@ -376,7 +368,6 @@ async function sendToFinance(req, res) {
 // ================================================================
 // FINANCE SETUP PAYMENT (Prepaid au Postpaid)
 // PUT /api/orders/:orderId/setup-payment
-// Role: Finance
 // ================================================================
 async function setupPayment(req, res) {
     try {
@@ -387,7 +378,6 @@ async function setupPayment(req, res) {
             return res.status(400).json({ error: 'Payment type must be "prepaid" or "postpaid".' });
         }
 
-        // Kama prepaid, account inahitajika
         if (paymentType === 'prepaid' && !paymentAccountId) {
             return res.status(400).json({ error: 'Payment account is required for prepaid orders.' });
         }
@@ -403,7 +393,6 @@ async function setupPayment(req, res) {
             }
         });
 
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -422,19 +411,20 @@ async function setupPayment(req, res) {
 
     } catch (err) {
         console.error('❌ Setup payment error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to setup payment.' });
     }
 }
 
+// ================================================================
+// FINANCE VERIFY PAYMENT
+// PUT /api/orders/:orderId/verify-payment
+// ================================================================
 async function verifyPayment(req, res) {
     try {
         const { orderId } = req.params;
         const { paymentReference } = req.body;
 
-        // 1. Pata order
         const existingOrder = await prisma.order.findUnique({
             where: { orderId }
         });
@@ -443,25 +433,19 @@ async function verifyPayment(req, res) {
             return res.status(404).json({ error: 'Order not found.' });
         }
 
-        // 🆕 2. ANGALIA COLLECTION ACCOUNT
         if (existingOrder.paymentAccountId) {
             const account = await prisma.companyAccount.findUnique({
                 where: { id: existingOrder.paymentAccountId }
             });
 
             if (!account) {
-                return res.status(400).json({ 
-                    error: 'Payment account not found.' 
-                });
+                return res.status(400).json({ error: 'Payment account not found.' });
             }
 
             if (account.purpose !== 'collections') {
-                return res.status(400).json({ 
-                    error: 'Payment must be received into a Collections account.' 
-                });
+                return res.status(400).json({ error: 'Payment must be received into a Collections account.' });
             }
 
-            // 🆕 Ongeza balance ya collection account
             const newBalance = Number(account.balance || 0) + Number(existingOrder.totalAmount || 0);
             
             await prisma.companyAccount.update({
@@ -469,7 +453,6 @@ async function verifyPayment(req, res) {
                 data: { balance: newBalance }
             });
 
-            // Update FinancialResource pia
             const resource = await prisma.financialResource.findUnique({
                 where: { accountId: account.id }
             });
@@ -481,14 +464,11 @@ async function verifyPayment(req, res) {
                     data: { amount: newResourceBalance }
                 });
             }
-
             console.log(`💰 Collection account "${account.name}" updated: +${existingOrder.totalAmount}`);
         }
 
-        // 3. Generate receipt
         const receiptNumber = await generateReceiptNumber();
 
-        // 4. Update order
         const order = await prisma.order.update({
             where: { orderId },
             data: {
@@ -502,7 +482,6 @@ async function verifyPayment(req, res) {
             }
         });
 
-        // 5. Unda Payment record
         await prisma.payment.create({
             data: {
                 orderId,
@@ -518,7 +497,6 @@ async function verifyPayment(req, res) {
             }
         });
 
-        // 6. Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -530,7 +508,7 @@ async function verifyPayment(req, res) {
             }
         });
 
-        // 7. Ledger INFLOW
+        // Ledger INFLOW
         try {
             const { recordTransaction } = require('../services/ledger.service');
             const resource = order.paymentAccountId ? await prisma.financialResource.findUnique({
@@ -563,12 +541,15 @@ async function verifyPayment(req, res) {
 
     } catch (err) {
         console.error('❌ Verify payment error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to verify payment.' });
     }
 }
+
+// ================================================================
+// SALES SET DELIVERY INFO
+// PUT /api/orders/:orderId/delivery
+// ================================================================
 async function setDelivery(req, res) {
     try {
         const { orderId } = req.params;
@@ -589,40 +570,14 @@ async function setDelivery(req, res) {
 
     } catch (err) {
         console.error('❌ Set delivery error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to update delivery.' });
     }
-    const ledgerService = require('../services/ledger.service');
-
-// Baada ya order.update() na payment.create(), ongeza:
-try {
-    const mainCash = await ledgerService.getMainCashResource();
-    if (mainCash) {
-        await ledgerService.recordTransaction({
-            resourceId: mainCash.id,
-            type: 'INFLOW',
-            amount: order.totalAmount,
-            source: 'SALES',
-            sourceId: order.id,
-            sourceModel: 'Order',
-            reference: order.orderId,
-            description: `Payment from ${order.customerName || 'Customer'} — Receipt ${receiptNumber}`,
-            createdBy: req.user.fullName || 'Finance'
-        });
-        console.log(`💰 INFLOW recorded: TSh ${order.totalAmount}`);
-    }
-} catch (ledgerErr) {
-    console.error('⚠️ Ledger error (order still saved):', ledgerErr.message);
-    // Don't fail the payment if ledger fails
-}
 }
 
 // ================================================================
 // SALES MARK DELIVERED
 // PUT /api/orders/:orderId/mark-delivered
-// Role: Sales
 // ================================================================
 async function markDelivered(req, res) {
     try {
@@ -637,7 +592,6 @@ async function markDelivered(req, res) {
             }
         });
 
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -655,17 +609,14 @@ async function markDelivered(req, res) {
 
     } catch (err) {
         console.error('❌ Mark delivered error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to mark delivered.' });
     }
 }
 
 // ================================================================
-// MARK ORDER AS COMPLETED (Finance — Final Step)
+// MARK ORDER AS COMPLETED (Finance)
 // PUT /api/orders/:orderId/complete
-// Role: Finance
 // ================================================================
 async function completeOrder(req, res) {
     try {
@@ -683,9 +634,7 @@ async function completeOrder(req, res) {
 
     } catch (err) {
         console.error('❌ Complete order error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to complete order.' });
     }
 }
@@ -693,7 +642,6 @@ async function completeOrder(req, res) {
 // ================================================================
 // REJECT ORDER
 // PUT /api/orders/:orderId/reject
-// Role: Sales, Finance, CEO
 // ================================================================
 async function rejectOrder(req, res) {
     try {
@@ -704,11 +652,10 @@ async function rejectOrder(req, res) {
             where: { orderId },
             data: {
                 status: 'rejected',
-                notes: reason ? `[REJECTED] ${reason}` : order?.notes
+                notes: reason ? `[REJECTED] ${reason}` : undefined
             }
         });
 
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -720,7 +667,6 @@ async function rejectOrder(req, res) {
             }
         });
 
-                // Recalculate marketing KPI kama order ilikuwa tagged
         if (order.marketingPlanId) {
             try {
                 await marketingController.recalculateKpiFromOrders(order.marketingPlanId);
@@ -737,16 +683,14 @@ async function rejectOrder(req, res) {
 
     } catch (err) {
         console.error('❌ Reject order error:', err);
-        if (err.code === 'P2025') {
-            return res.status(404).json({ error: 'Order not found.' });
-        }
+        if (err.code === 'P2025') return res.status(404).json({ error: 'Order not found.' });
         res.status(500).json({ error: 'Failed to reject order.' });
     }
 }
+
 // ================================================================
-// SALES EDIT ORDER — Sales anaweza ku-edit bidhaa, bei, quantity
+// SALES EDIT ORDER
 // PUT /api/orders/:orderId/sales-edit
-// Role: Sales, SuperAdmin
 // ================================================================
 async function salesEditOrder(req, res) {
     try {
@@ -757,7 +701,6 @@ async function salesEditOrder(req, res) {
             return res.status(400).json({ error: 'At least one item is required.' });
         }
 
-        // Check kama order ipo
         const existing = await prisma.order.findUnique({
             where: { orderId },
             include: { items: true }
@@ -767,26 +710,21 @@ async function salesEditOrder(req, res) {
             return res.status(404).json({ error: 'Order not found.' });
         }
 
-        // Ruhusa tu kwa status "pending"
         if (existing.status !== 'pending') {
             return res.status(400).json({
                 error: `Cannot edit order with status "${existing.status}". Only pending orders can be edited.`
             });
         }
 
-        // Calculate totals
         const totalItems = items.length;
         const totalQuantity = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
         const totalAmount = items.reduce((sum, item) => sum + ((item.unitPrice || 0) * (item.quantity || 0)), 0);
 
-        // Update order + items (delete zote kisha create mpya)
         const order = await prisma.$transaction(async (prisma) => {
-            // Delete old items
             await prisma.orderItem.deleteMany({
                 where: { orderId: existing.id }
             });
 
-            // Update order
             const updated = await prisma.order.update({
                 where: { orderId },
                 data: {
@@ -818,7 +756,6 @@ async function salesEditOrder(req, res) {
             return updated;
         });
 
-        // Audit log
         await prisma.auditLog.create({
             data: {
                 userId: req.user.userId,
@@ -840,30 +777,26 @@ async function salesEditOrder(req, res) {
         res.status(500).json({ error: 'Failed to update order.' });
     }    
 }
+
 // ================================================================
-// 🆕 CONFIRM DELIVERY — Customer anathibitisha amepokea mzigo
+// CONFIRM DELIVERY — Customer anathibitisha amepokea mzigo
 // PUBLIC — haihitaji token
 // ================================================================
-async function confirmDelivery(req, res){
+async function confirmDelivery(req, res) {
     try {
         const { orderId } = req.params;
         const { confirmedBy, confirmedAt } = req.body || {};
 
         console.log(`📦 Confirm delivery request for: ${orderId}`);
 
-        // 1. Tafuta order
         const order = await prisma.order.findUnique({
             where: { orderId: orderId }
         });
 
         if (!order) {
-            return res.status(404).json({
-                error: 'Order not found',
-                orderId: orderId
-            });
+            return res.status(404).json({ error: 'Order not found', orderId: orderId });
         }
 
-        // 2. Angalia status
         const allowedStatuses = ['delivered', 'paid', 'completed'];
         if (!allowedStatuses.includes(order.status)) {
             return res.status(400).json({
@@ -872,7 +805,6 @@ async function confirmDelivery(req, res){
             });
         }
 
-        // 3. Angalia kama imekwisha confirm
         if (order.deliveryConfirmed === true) {
             return res.status(400).json({
                 error: 'Delivery already confirmed',
@@ -880,7 +812,6 @@ async function confirmDelivery(req, res){
             });
         }
 
-        // 4. Update order
         const updatedOrder = await prisma.order.update({
             where: { orderId: orderId },
             data: {
@@ -894,7 +825,6 @@ async function confirmDelivery(req, res){
 
         console.log(`✅ Delivery confirmed for ${orderId}`);
 
-        // 5. Response
         return res.json({
             success: true,
             message: 'Delivery confirmed successfully. Order is now completed.',
@@ -911,12 +841,13 @@ async function confirmDelivery(req, res){
 
     } catch (err) {
         console.error('❌ Confirm delivery error:', err);
-        return res.status(500).json({
-            error: err.message || 'Server error while confirming delivery'
-        });
+        return res.status(500).json({ error: err.message || 'Server error while confirming delivery' });
     }
-};
+}
 
+// ================================================================
+// EXPORTS
+// ================================================================
 module.exports = {
     createOrder,
     listOrders,
