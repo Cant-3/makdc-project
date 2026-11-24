@@ -6,9 +6,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // HEADER YA KAMPUNI (Letterhead Style)
 // ================================================================
 const companyHeader = `
-    <div style="background-color: #ffffff; padding: 20px; border-bottom: 4px solid #01579B; text-align: center;">
-        <!-- Badilisha link ya picha hapa kama ipo sehemu nyingine -->
-        <img src="https://makdcinvestments.co.tz/logo.png" alt="MAK DC Investment" style="max-height: 80px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
+    <div style="background-color: #ffffff; padding: 10px 20px 20px 20px; border-bottom: 4px solid #01579B; text-align: center;">
+        <!-- Nimeongeza width na kuondoa margin ya juu ili nembo ionekane kubwa -->
+        <img src="https://makdcinvestments.co.tz/logo.png" alt="MAK DC Investment" style="width: 100%; max-width: 280px; height: auto; margin: 0 auto 10px auto; display: block;">
         
         <h1 style="color: #01579B; margin: 0 0 5px 0; font-size: 20px; letter-spacing: 1px;">MAK DC INVESTMENT COMPANY LIMITED</h1>
         
@@ -19,7 +19,7 @@ const companyHeader = `
             <strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #01579B; text-decoration: none;">ceo@makdcic.co.tz</a>
         </p>
         <p style="color: #333; margin: 0 0 10px 0; font-size: 13px;">
-            <strong>Tovuti:</strong> <a href="http://www.makdcic.co.tz" style="color: #01579B; text-decoration: none;">http://www.makdcic.co.tz</a>
+            <strong>Tovuti:</strong> <a href="https://makdcinvestments.co.tz/" style="color: #01579B; text-decoration: none;">https://makdcinvestments.co.tz/</a>
         </p>
 
         <p style="color: #555; margin: 0; font-size: 12px; line-height: 1.4;">
