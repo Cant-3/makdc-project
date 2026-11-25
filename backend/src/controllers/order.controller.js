@@ -886,6 +886,7 @@ module.exports = {
     ceoApprove,      // Mpya
     setDelivery,
     markDelivered,
+    sendAdminOrderAlert,
     completeOrder,
     rejectOrder,
     confirmDelivery
