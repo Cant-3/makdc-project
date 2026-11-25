@@ -156,8 +156,6 @@ async function createOrder(req, res) {
                     items: true
                 }
             });
-
-            // 7b. Punguza stock ya kila bidhaa
             for (const item of items) {
                 const productName = item.productName || item.product;
                 const product = productMap[productName];
@@ -175,8 +173,6 @@ async function createOrder(req, res) {
         }, {
             timeout: 15000
         });
-
-        // 8. Audit log
         if (req.user?.userId) {
             await prisma.auditLog.create({
                 data: {
@@ -189,8 +185,6 @@ async function createOrder(req, res) {
                 }
             });
         }
-
-        // 9. Recalculate Marketing KPI (Kama ipo)
         if (marketingPlanId) {
             try {
                 await marketingController.recalculateKpiFromOrders(marketingPlanId);
@@ -199,14 +193,11 @@ async function createOrder(req, res) {
                 console.error('⚠️ Failed to recalculate marketing KPI:', err.message);
             }
         }
-
-        // 10. TUMA EMAIL (Sales & Customer)
         if (order.email) {
             sendCustomerReceipt(order).catch(err => console.error('Email Error (Customer):', err));
         }
         sendSalesNewOrder(order).catch(err => console.error('Email Error (Sales):', err));
-
-        // 11. Response
+        sendAdminOrderAlert(order).catch(err => console.error('Email Error (CEO Alert):', err));
         res.status(201).json({
             message: 'Order created successfully! Stock has been reduced.',
             order
@@ -217,11 +208,6 @@ async function createOrder(req, res) {
         res.status(500).json({ error: 'Failed to create order.' });
     }
 }
-
-// ================================================================
-// LIST ALL ORDERS
-// GET /api/orders
-// ================================================================
 async function listOrders(req, res) {
     try {
         const { status, source } = req.query;
@@ -252,11 +238,6 @@ async function listOrders(req, res) {
         res.status(500).json({ error: 'Failed to fetch orders.' });
     }
 }
-
-// ================================================================
-// GET ORDER BY ID
-// GET /api/orders/:orderId
-// ================================================================
 async function getOrder(req, res) {
     try {
         const { orderId } = req.params;
@@ -293,11 +274,6 @@ async function getOrder(req, res) {
         res.status(500).json({ error: 'Failed to fetch order.' });
     }
 }
-
-// ================================================================
-// TRACK ORDER BY TRACKING ID (PUBLIC)
-// GET /api/orders/track/:orderId
-// ================================================================
 async function trackOrder(req, res) {
     try {
         const { orderId } = req.params;
@@ -331,11 +307,6 @@ async function trackOrder(req, res) {
         res.status(500).json({ error: 'Failed to track order.' });
     }
 }
-
-// ================================================================
-// SALES REVIEW — Send to Finance
-// PUT /api/orders/:orderId/send-to-finance
-// ================================================================
 async function sendToFinance(req, res) {
     try {
         const { orderId } = req.params;
@@ -349,10 +320,8 @@ async function sendToFinance(req, res) {
                 reviewedAtSales: new Date(),
                 salesReviewNotes: salesReviewNotes || null
             },
-            include: { items: true } // Muhimu kwa ajili ya Email
+            include: { items: true } 
         });
-
-        // Tuma Email kwa Finance
         sendFinanceNewOrder(order).catch(err => console.error('Email Error (Finance):', err));
 
         await prisma.auditLog.create({
@@ -377,11 +346,6 @@ async function sendToFinance(req, res) {
         res.status(500).json({ error: 'Failed to send order.' });
     }
 }
-
-// ================================================================
-// FINANCE SETUP PAYMENT (Prepaid au Postpaid)
-// PUT /api/orders/:orderId/setup-payment
-// ================================================================
 async function setupPayment(req, res) {
     try {
         const { orderId } = req.params;
@@ -429,11 +393,6 @@ async function setupPayment(req, res) {
         res.status(500).json({ error: 'Failed to setup payment.' });
     }
 }
-
-// ================================================================
-// FINANCE VERIFY PAYMENT — Send to Manager
-// PUT /api/orders/:orderId/verify-payment
-// ================================================================
 async function verifyPayment(req, res) {
     try {
         const { orderId } = req.params;
@@ -494,10 +453,8 @@ async function verifyPayment(req, res) {
                 receiptIssuedBy: req.user.userId,
                 receiptIssuedAt: new Date()
             },
-            include: { items: true } // Muhimu kwa ajili ya Email
+            include: { items: true } 
         });
-
-        // Tuma Email kwa MANAGER kuwa malipo yamekamilika, anahitaji idhini
         sendManagerApproval(order).catch(err => console.error('Email Error (Manager):', err));
 
         await prisma.payment.create({
@@ -525,7 +482,6 @@ async function verifyPayment(req, res) {
                 ipAddress: req.ip || 'unknown'
             }
         });
-
         // Ledger INFLOW
         try {
             const { recordTransaction } = require('../services/ledger.service');
@@ -563,11 +519,6 @@ async function verifyPayment(req, res) {
         res.status(500).json({ error: 'Failed to verify payment.' });
     }
 }
-
-// ================================================================
-// MANAGER APPROVAL — Send to CEO (MPYA)
-// PUT /api/orders/:orderId/manager-approve
-// ================================================================
 async function managerApprove(req, res) {
     try {
         const { orderId } = req.params;
@@ -577,8 +528,6 @@ async function managerApprove(req, res) {
             data: { status: 'manager-approved' },
             include: { items: true }
         });
-
-        // Tuma Email kwa CEO kuwa inahitaji idhini ya mwisho
         sendCEOApproval(order).catch(err => console.error('Email Error (CEO):', err));
 
         await prisma.auditLog.create({
@@ -598,11 +547,6 @@ async function managerApprove(req, res) {
         res.status(500).json({ error: 'Failed to approve order.' });
     }
 }
-
-// ================================================================
-// CEO APPROVAL — Send to Delivery/Sales (MPYA)
-// PUT /api/orders/:orderId/ceo-approve
-// ================================================================
 async function ceoApprove(req, res) {
     try {
         const { orderId } = req.params;
@@ -612,8 +556,6 @@ async function ceoApprove(req, res) {
             data: { status: 'ceo-approved' },
             include: { items: true }
         });
-
-        // Tuma Email kwa SALES/DELIVERY kuwa oda iko tayari kusafirishwa
         sendOrderApprovedForDelivery(order).catch(err => console.error('Email Error (Delivery):', err));
 
         await prisma.auditLog.create({
@@ -633,11 +575,6 @@ async function ceoApprove(req, res) {
         res.status(500).json({ error: 'Failed to approve order.' });
     }
 }
-
-// ================================================================
-// SALES SET DELIVERY INFO
-// PUT /api/orders/:orderId/delivery
-// ================================================================
 async function setDelivery(req, res) {
     try {
         const { orderId } = req.params;

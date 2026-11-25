@@ -49,44 +49,437 @@
             display: flex;
             flex-direction: row;
         }
-
-        /* ===== SIDEBAR ===== */
+        /* ================================================================
+        SIDEBAR MAIN STYLES (SAFI & MODERN)
+        ================================================================ */
         .sidebar {
-            width: 290px; min-width: 290px; height: 100vh;
-            background: linear-gradient(180deg, #3d5a3d 0%, #2a3d2a 100%);
-            color: white; padding: 20px 16px;
-            display: flex; flex-direction: column; flex-shrink: 0;
-            position: sticky; top: 0;
-            overflow-y: auto; overflow-x: visible;
+            width: 280px;
+            min-width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2a3d2a 0%, #1a261a 100%);
+            color: #ffffff;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
             z-index: 9000;
             transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease;
-            border-right: 3px solid var(--gold);
+            border-right: 3px solid #c9a227; /* Gold border */
         }
-        .sidebar.collapsed { width: 78px; min-width: 78px; padding: 20px 8px; overflow: visible !important; }
+
+        /* Scrollbar ndani ya Sidebar */
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(201, 162, 39, 0.3); border-radius: 4px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(201, 162, 39, 0.6); }
+
+        /* ================================================================
+        SIDEBAR COLLAPSED STATE (Wakati imefungwa)
+        ================================================================ */
+        .sidebar.collapsed {
+            width: 80px;
+            min-width: 80px;
+            padding: 20px 8px;
+        }
+
+        /* Ficha vitu visivyohitajika wakati imefungwa */
         .sidebar.collapsed .brand-name,
         .sidebar.collapsed .brand-motto,
         .sidebar.collapsed .sidebar-section-label,
         .sidebar.collapsed .sidebar-rule,
         .sidebar.collapsed .sidebar-user .user-info,
         .sidebar.collapsed .sidebar-bottom,
-        .sidebar.collapsed .nav-text { display: none !important; }
-        .sidebar.collapsed .sidebar-brand { padding: 0 0 16px 0; border: none; }
-        .sidebar.collapsed .sidebar-brand .logo-img { width: 50px; height: 50px; border-width: 2px; padding: 2px; margin: 0 auto; }
-        .sidebar.collapsed .sidebar-nav { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .nav-arrow,
+        .sidebar.collapsed .sub-count {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .sidebar-brand {
+            padding: 0 0 16px 0;
+            border-bottom: none;
+        }
+
+        .sidebar.collapsed .sidebar-brand .logo-img {
+            width: 50px;
+            height: 50px;
+            border-width: 2px;
+            padding: 2px;
+            margin: 0 auto;
+        }
+
+        .sidebar.collapsed .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
         .sidebar.collapsed .sidebar-nav-parent {
-            width: 52px; height: 52px; padding: 0;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 12px; border-left: none;
+            width: 52px;
+            height: 52px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border-left: none;
             background: rgba(255, 255, 255, 0.05);
             margin: 0 auto;
         }
-        .sidebar.collapsed .sidebar-nav-parent:hover { background: rgba(201, 162, 39, 0.25); border-left: none; }
-        .sidebar.collapsed .sidebar-nav-parent > span:first-child { font-size: 24px; width: auto; }
-        .sidebar.collapsed .sidebar-nav-parent .nav-arrow,
-        .sidebar.collapsed .sidebar-submenu { display: none !important; }
-        .sidebar.collapsed .sidebar-user { display: flex; justify-content: center; padding: 8px 0; background: transparent; border: none; margin-top: 10px; }
-        .sidebar.collapsed .sidebar-user .user-avatar { width: 46px; height: 46px; font-size: 15px; }
 
+        .sidebar.collapsed .sidebar-nav-parent:hover {
+            background: rgba(201, 162, 39, 0.25);
+            border-left: none;
+        }
+
+        .sidebar.collapsed .sidebar-nav-parent > span:first-child {
+            font-size: 24px;
+            width: auto;
+        }
+
+        .sidebar.collapsed .sidebar-submenu {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .sidebar-user {
+            display: flex;
+            justify-content: center;
+            padding: 8px 0;
+            background: transparent;
+            border: none;
+            margin-top: 10px;
+        }
+
+        .sidebar.collapsed .sidebar-user .user-avatar {
+            width: 46px;
+            height: 46px;
+            font-size: 15px;
+        }
+
+        /* ================================================================
+        SIDEBAR BRAND (Logo & Jina)
+        ================================================================ */
+        .sidebar-brand {
+            text-align: center;
+            padding: 4px 0 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand .logo-img {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #c9a227;
+            padding: 3px;
+            background: #ffffff;
+            margin: 0 auto 10px auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand .brand-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .sidebar-brand .brand-name span {
+            color: #c9a227;
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .sidebar-brand .brand-motto {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        .sidebar-rule {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 12px 0;
+        }
+
+        /* ================================================================
+        SIDEBAR NAVIGATION (Links)
+        ================================================================ */
+        .sidebar-section-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 14px 14px 8px 14px;
+            display: block;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .sidebar-nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .sidebar-nav-parent {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            user-select: none;
+        }
+
+        .sidebar-nav-parent:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            border-left-color: #c9a227;
+        }
+
+        .sidebar-nav-parent.open {
+            background: rgba(201, 162, 39, 0.12);
+            color: #ffffff;
+            border-left-color: #c9a227;
+            font-weight: 700;
+        }
+
+        .sidebar-nav-parent > span:first-child {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-nav-parent:hover > span:first-child {
+            transform: scale(1.15);
+        }
+
+        .sidebar-nav-parent .nav-text {
+            flex: 1;
+            white-space: normal; /* Inaruhusu maneno kuvunjika vizuri kama nafasi ni ndogo */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+
+        .sidebar-nav-parent .nav-arrow {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav-parent.open .nav-arrow {
+            transform: rotate(180deg);
+            color: #c9a227;
+        }
+
+        /* ================================================================
+        SIDEBAR SUBMENU
+        ================================================================ */
+        .sidebar-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 8px 8px;
+            margin: 0 4px;
+        }
+
+        .sidebar-submenu.open {
+            max-height: 500px;
+            padding: 6px 0;
+        }
+
+        .sidebar-submenu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px 10px 45px;
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .sidebar-submenu a::before {
+            content: '';
+            position: absolute;
+            left: 26px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+        }
+
+        .sidebar-submenu a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: #c9a227;
+            padding-left: 48px;
+        }
+
+        .sidebar-submenu a:hover::before {
+            background: #c9a227;
+            box-shadow: 0 0 8px #c9a227;
+        }
+
+        .sidebar-submenu a.active {
+            color: #ffffff;
+            background: linear-gradient(90deg, rgba(201, 162, 39, 0.20) 0%, rgba(201, 162, 39, 0.03) 100%);
+            border-left-color: #c9a227;
+            font-weight: 700;
+        }
+
+        .sidebar-submenu a.active::before {
+            background: #c9a227;
+            box-shadow: 0 0 10px #c9a227;
+            width: 8px;
+            height: 8px;
+        }
+
+        .sidebar-submenu a .sub-count {
+            background: #c9a227;
+            color: #1a261a;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* ================================================================
+        SIDEBAR USER PROFILE (Chini)
+        ================================================================ */
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-user .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #c9a227;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: #1a261a;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-user .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .sidebar-user .user-info .user-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .sidebar-user .user-info .user-role {
+            font-size: 10px;
+            color: #c9a227;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-bottom span {
+            display: block;
+            font-weight: 600;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .sidebar-bottom small {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 10px;
+        }
+
+        /* ================================================================
+        SIDEBAR TOOLTIP (Wakati imefungwa)
+        ================================================================ */
+        .sidebar.collapsed .sidebar-nav-parent::after {
+            content: attr(data-tooltip);
+            position: fixed;
+            left: 90px;
+            margin-top: 0;
+            transform: translateY(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.15s, visibility 0.15s;
+            z-index: 99999;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar.collapsed .sidebar-nav-parent:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+      
         /* Tooltip */
         .sidebar.collapsed .sidebar-nav-parent::after {
             content: attr(data-tooltip);

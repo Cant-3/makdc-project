@@ -17,10 +17,6 @@ const companyHeader = `
         <!-- Jina la Kampuni kwa Rangi ya Dhahabu -->
         <h1 style="color: #FFC107; margin: 0 0 5px 0; font-size: 22px; letter-spacing: 1px; font-weight: bold;">MAK DC INVESTMENT COMPANY LIMITED</h1>
         
-        <!-- Maelezo kwa Rangi Nyeupe -->
-        <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;">
-            <strong>Simu Na:</strong> +255 796 220 796 / +255 796 220 795
-        </p>
         <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;">
             <strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #FFC107; text-decoration: none;">ceo@makdcic.co.tz</a>
         </p>
@@ -44,7 +40,7 @@ const companyHeader = `
 // ================================================================
 const companyFooter = `
     <div style="background-color: #f1f1f1; padding: 15px 20px; text-align: center; border-top: 2px solid #01579B; font-size: 12px; color: #777;">
-        <p style="margin: 0;">Ujumbe huu umetumwa kiotomatiki na Mfumo wa MAK DC Investment.</p>
+        <p style="margin: 0;">Huduma Bora ndio kipaumbele chetu.</p>
         <p style="margin: 5px 0 0 0;">Quality Service is Our Priority</p>
     </div>
 `;
@@ -211,14 +207,16 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
         const { data, error } = await resend.emails.send({
             from: 'MAK DC System <orders@makdcinvestments.co.tz>',
             to: [to],
+            cc: [process.env.CEO_EMAIL], // 🆕 CEO anapokea nakala ya kila kitu!
             subject: subject,
             html: `
                 <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     ${companyHeader}
                     
                     <div style="padding: 30px 20px;">
+                        <!-- ... HTML yako ilivyokuwa ... -->
                         <span style="background-color: ${badgeColor}; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">${title}</span>
-                        <h2 style="color: #01579B; margin-top: 15px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Habari,</h2>
+                        <h2 style="color: #333; margin-top: 15px;">Habari,</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">${message}</p>
                         
                         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -249,7 +247,7 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
         });
 
         if (error) console.error(`❌ Email Error (${to}):`, error);
-        else console.log(`✅ Email imetumwa kwa ${to}`, data.id);
+        else console.log(`✅ Email imetumwa kwa ${to} (CC: CEO)`, data.id);
     } catch (error) {
         console.error('❌ Kosa la mfumo (Workflow Email):', error.message);
     }
