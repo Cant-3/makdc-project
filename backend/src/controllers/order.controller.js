@@ -1,9 +1,3 @@
-// ================================================================
-// MAK DC INVESTMENT — ORDER CONTROLLER (WITH WORKFLOW EMAILS)
-// ================================================================
-// Handles: Full Order Flow (Customer → Sales → Finance → Manager → CEO → Delivery)
-// ================================================================
-
 const { prisma } = require('../config/database');
 const marketingController = require('./marketing.controller');
 const { 
@@ -13,7 +7,7 @@ const {
     sendCEOApproval, 
     sendOrderApprovedForDelivery,
     sendCustomerReceipt,
-    sendAdminOrderAlert // 🆕 Ongeza hii hapa
+    sendCEOAlert 
 } = require('../services/email.service');
 
 // ================================================================
@@ -196,7 +190,7 @@ async function createOrder(req, res) {
             sendCustomerReceipt(order).catch(err => console.error('Email Error (Customer):', err));
         }
         sendSalesNewOrder(order).catch(err => console.error('Email Error (Sales):', err));
-        sendAdminOrderAlert(order).catch(err => console.error('Email Error (CEO Alert):', err));
+        sendCEOAlert(order).catch(err => console.error('Email Error (CEO):', err));
         res.status(201).json({
             message: 'Order created successfully! Stock has been reduced.',
             order

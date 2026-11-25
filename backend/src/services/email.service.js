@@ -7,88 +7,68 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ================================================================
 const companyHeader = `
     <div style="background-color: #01579B; padding: 25px 20px 15px 20px; text-align: center; border-top: 6px solid #FFC107;">
-        
-        <!-- Background nyeupe inayozunguka nembo ili ionekane vizuri -->
         <div style="background-color: #ffffff; display: inline-block; padding: 10px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-            <!-- Badilisha link hii iendane na mahali picha yako ilipo hasa -->
-            <img src="https://makdcinvestments.co.tz/makdc-logo.jpg" alt="MAK DC Investment" style="max-width: 180px; height: auto; display: block;">
+            <img src="https://makdcinvestments.co.tz/logo.png" alt="MAK DC Investment" style="max-width: 180px; height: auto; display: block;">
         </div>
-        
-        <!-- Jina la Kampuni kwa Rangi ya Dhahabu -->
         <h1 style="color: #FFC107; margin: 0 0 5px 0; font-size: 22px; letter-spacing: 1px; font-weight: bold;">MAK DC INVESTMENT COMPANY LIMITED</h1>
-        
-        <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;">
-            <strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #FFC107; text-decoration: none;">ceo@makdcic.co.tz</a>
-        </p>
-        <p style="color: #ffffff; margin: 0 0 10px 0; font-size: 13px;">
-            <strong>Tovuti:</strong> <a href="https://makdcinvestments.co.tz/" style="color: #FFC107; text-decoration: none;">https://makdcinvestments.co.tz/</a>
-        </p>
-
-        <!-- Anwani -->
-        <p style="color: #e1f5fe; margin: 0; font-size: 12px; line-height: 1.4;">
-            Ofisi ya Mtendaji Mkuu, Mak DC Investment Co. LTD,<br>
-            2 Barabara ya Mahakama 3-Ngiu, 59501 IWAWA, MAKETE, S.L. P 88, <strong>MAKETE</strong>.
-        </p>
+        <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;"><strong>Simu Na:</strong> +255 796 220 796 / +255 796 220 795</p>
+        <p style="color: #ffffff; margin: 0 0 3px 0; font-size: 13px;"><strong>Barua Pepe:</strong> <a href="mailto:ceo@makdcic.co.tz" style="color: #FFC107; text-decoration: none;">ceo@makdcic.co.tz</a></p>
+        <p style="color: #ffffff; margin: 0 0 10px 0; font-size: 13px;"><strong>Tovuti:</strong> <a href="http://www.makdcic.co.tz" style="color: #FFC107; text-decoration: none;">http://www.makdcic.co.tz</a></p>
+        <p style="color: #e1f5fe; margin: 0; font-size: 12px; line-height: 1.4;">Ofisi ya Mtendaji Mkuu, Mak DC Investment Co. LTD,<br>2 Barabara ya Mahakama 3-Ngiu, 59501 IWAWA, MAKETE, S.L. P 88, <strong>MAKETE</strong>.</p>
     </div>
-    
-    <!-- Mstari wa kutenganisha (Gold) -->
     <div style="height: 4px; background-color: #FFC107;"></div>
 `;
 
-// ================================================================
-// FOOTER YA KAMPUNI (Kwa ajili ya maelezo ya ziada)
-// ================================================================
 const companyFooter = `
     <div style="background-color: #f1f1f1; padding: 15px 20px; text-align: center; border-top: 2px solid #01579B; font-size: 12px; color: #777;">
-        <p style="margin: 0;">Huduma Bora ndio kipaumbele chetu.</p>
+        <p style="margin: 0;">Ujumbe huu umetumwa kiotomatiki na Mfumo wa MAK DC Investment.</p>
         <p style="margin: 5px 0 0 0;">Quality Service is Our Priority</p>
     </div>
 `;
 
 // ================================================================
-// 1. EMAIL KWA AJILI YA ADMIN (Wewe)
+// 1. EMAIL KWA AJILI YA CEO (Executive Alert)
 // ================================================================
-async function sendAdminOrderAlert(order) {
+async function sendCEOAlert(order) {
     try {
         const items = order.items || [];
         const itemsList = items.map(item => 
             `<tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333;">${item.productName}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: center; color: #333;">${item.quantity}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right; color: #333;">TSh ${Number(item.subtotal).toLocaleString()}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">${item.productName}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: center;">${item.quantity}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right;">TSh ${Number(item.subtotal).toLocaleString()}</td>
             </tr>`
         ).join('');
 
         const { data, error } = await resend.emails.send({
             from: 'MAK DC System <orders@makdcinvestments.co.tz>', 
-            to: [process.env.ADMIN_EMAIL],
-            subject: `🚨 ODA MPYA: ${order.orderId} - ${order.customerName}`,
+            to: [process.env.CEO_EMAIL],
+            subject: `👑 TAARIFA YA CEO: Oda Mpya #${order.orderId} imeingia`,
             html: `
-                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 2px solid #FFC107; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     ${companyHeader}
                     
-                    <div style="padding: 30px 20px; background-color: #ffffff;">
-                        <h2 style="color: #01579B; margin-top: 0; font-size: 20px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Habari Admin,</h2>
-                        <p style="color: #555; line-height: 1.6; font-size: 15px;">Mteja ameweka oda mpya kupitia mfumo. Tafadhali pitia taarifa zifuatazo ili kuendelea na mchakato wa ukaguzi:</p>
+                    <div style="padding: 30px 20px;">
+                        <!-- Heshima kwa CEO -->
+                        <h2 style="color: #01579B; margin-top: 0; font-size: 22px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Kwa Heshima, Mkurugenzi Mkuu (CEO),</h2>
+                        <p style="color: #555; line-height: 1.6; font-size: 15px;">Tunapenda kukutaarifu kuwa kuna <strong>Oda Mpya</strong> imeingia kupitia mfumo. Hapa kuna muhtasari wa haraka kwa ajili ya uangalizi wako:</p>
                         
-                        <table style="width: 100%; margin-bottom: 25px; border-collapse: collapse; background-color: #f9f9f9; border-radius: 8px;">
-                            <tr>
-                                <td style="padding: 12px; color: #555; width: 40%;"><strong>Namba ya Oda:</strong></td>
-                                <td style="padding: 12px; color: #01579B; font-weight: bold;">${order.orderId}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; color: #555;"><strong>Jina la Mteja:</strong></td>
-                                <td style="padding: 12px; color: #333;">${order.customerName}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; color: #555;"><strong>Namba ya Simu:</strong></td>
-                                <td style="padding: 12px; color: #333;">${order.phone}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 12px; color: #555;"><strong>Mahali:</strong></td>
-                                <td style="padding: 12px; color: #333;">${order.district || ''}, ${order.region || ''}</td>
-                            </tr>
-                        </table>
+                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 5px solid #FFC107;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555; width: 40%;"><strong>Namba ya Oda:</strong></td>
+                                    <td style="padding: 8px 0; color: #01579B; font-weight: bold; font-size: 16px;">${order.orderId}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555;"><strong>Mteja:</strong></td>
+                                    <td style="padding: 8px 0; color: #333;">${order.customerName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555;"><strong>Jumla ya Kiasi:</strong></td>
+                                    <td style="padding: 8px 0; color: #D84315; font-weight: bold; font-size: 18px;">TSh ${Number(order.totalAmount).toLocaleString()}</td>
+                                </tr>
+                            </table>
+                        </div>
 
                         <h3 style="color: #01579B; border-bottom: 2px solid #01579B; padding-bottom: 8px; margin-bottom: 15px;">Bidhaa Zilizoagizwa</h3>
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
@@ -104,17 +84,8 @@ async function sendAdminOrderAlert(order) {
                             </tbody>
                         </table>
 
-                        <div style="background-color: #fff8e1; border-left: 5px solid #FFC107; padding: 15px; border-radius: 4px; margin-bottom: 30px;">
-                            <table style="width: 100%;">
-                                <tr>
-                                    <td style="color: #333; font-size: 16px; font-weight: bold;">JUMLA KUU:</td>
-                                    <td style="text-align: right; color: #D84315; font-size: 20px; font-weight: bold;">TSh ${Number(order.totalAmount).toLocaleString()}</td>
-                                </tr>
-                            </table>
-                        </div>
-
                         <div style="text-align: center;">
-                            <a href="https://makdcinvestments.co.tz/super-admin-dashboard.html" style="background-color: #01579B; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 15px; display: inline-block;">Ingia Kwenye Dashboard</a>
+                            <a href="https://makdcinvestments.co.tz/super-admin-dashboard.html" style="background-color: #FFC107; color: #01579B; padding: 14px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Fungua Dashboard ya CEO</a>
                         </div>
                     </div>
                     
@@ -123,10 +94,10 @@ async function sendAdminOrderAlert(order) {
             `
         });
 
-        if (error) console.error('❌ Admin Email Error:', error);
-        else console.log(`✅ Email ya Admin imetumwa:`, data.id);
+        if (error) console.error('❌ CEO Email Error:', error);
+        else console.log(`✅ Email ya CEO imetumwa:`, data.id);
     } catch (error) {
-        console.error('❌ Kosa la mfumo (Admin):', error.message);
+        console.error('❌ Kosa la mfumo (CEO):', error.message);
     }
 }
 
@@ -184,9 +155,8 @@ async function sendCustomerReceipt(order) {
         console.error(`❌ Kosa la mfumo (Customer):`, error.message);
     }
 }
-
 // ================================================================
-// 3. WORKFLOW EMAILS (Sales, Finance, Manager, CEO)
+// 3. WORKFLOW EMAILS (Kwa heshima kwa kila Idara)
 // ================================================================
 async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl, actionText, badgeColor }) {
     try {
@@ -207,16 +177,17 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
         const { data, error } = await resend.emails.send({
             from: 'MAK DC System <orders@makdcinvestments.co.tz>',
             to: [to],
-            cc: [process.env.CEO_EMAIL], // 🆕 CEO anapokea nakala ya kila kitu!
+            cc: [process.env.CEO_EMAIL], // CEO anapokea CC
             subject: subject,
             html: `
                 <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     ${companyHeader}
                     
                     <div style="padding: 30px 20px;">
-                        <!-- ... HTML yako ilivyokuwa ... -->
                         <span style="background-color: ${badgeColor}; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">${title}</span>
-                        <h2 style="color: #333; margin-top: 15px;">Habari,</h2>
+                        
+                        <!-- Heshima kwa mpokeaji -->
+                        <h2 style="color: #333; margin-top: 15px;">Kwa Heshima, ${title},</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">${message}</p>
                         
                         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -253,12 +224,16 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
     }
 }
 
+// ================================================================
+// 4. FUNCTIONS ZENYE HESHIMA KWA KILA IDARA
+// ================================================================
+
 async function sendSalesNewOrder(order) {
     await sendWorkflowEmail({
         to: process.env.SALES_EMAIL,
         subject: `🔔 ODA MPYA: ${order.orderId}`,
-        title: 'Oda Mpya Inasubiri Ukaguzi',
-        message: 'Habari timu ya Sales, kuna oda mpya imeingia kupitia mfumo. Tafadhali kagua taarifa za mteja na bidhaa, kisha uwasilishe kwa Finance.',
+        title: 'Mkuu wa Kitengo cha Mauzo',
+        message: 'Kuna oda mpya imeingia kupitia mfumo. Tafadhali kagua taarifa za mteja na bidhaa, kisha uwasilishe kwa Idara ya Fedha kwa ajili ya ukaguzi wa malipo.',
         order, actionUrl: 'https://makdcinvestments.co.tz/sales-dashboard.html',
         actionText: 'Nenda Kwenye Sales Dashboard', badgeColor: '#F57F17'
     });
@@ -268,8 +243,8 @@ async function sendFinanceNewOrder(order) {
     await sendWorkflowEmail({
         to: process.env.FINANCE_EMAIL,
         subject: `💰 ODA IMETHIBITISHWA: ${order.orderId}`,
-        title: 'Inasubiri Ukaguzi wa Malipo',
-        message: 'Habari Finance, oda hii imekaguliwa na kuwasilishwa na timu ya Sales. Tafadhali kagua malipo na uthibitishe ili iende kwa Manager.',
+        title: 'Mkuu wa Idara ya Fedha',
+        message: 'Oda hii imekaguliwa na kuwasilishwa na timu ya Mauzo. Tafadhali kagua malipo na uthibitishe ili iende kwa Meneja Uendeshaji.',
         order, actionUrl: 'https://makdcinvestments.co.tz/finance-dashboard.html',
         actionText: 'Nenda Kwenye Finance Dashboard', badgeColor: '#D32F2F'
     });
@@ -279,21 +254,10 @@ async function sendManagerApproval(order) {
     await sendWorkflowEmail({
         to: process.env.MANAGER_EMAIL,
         subject: `📝 ODA INAHITAJI IDHINI: ${order.orderId}`,
-        title: 'Inasubiri Idhini ya Manager',
-        message: 'Habari Manager, malipo ya oda hii yamethibitishwa na Finance. Tafadhali pitia taarifa na upe idhini ili iende kwa CEO kwa idhini ya mwisho.',
+        title: 'Meneja Uendeshaji',
+        message: 'Malipo ya oda hii yamethibitishwa na Idara ya Fedha. Tafadhali pitia taarifa na upe idhini ili iende kwa CEO kwa idhini ya mwisho.',
         order, actionUrl: 'https://makdcinvestments.co.tz/manager-dashboard.html',
         actionText: 'Nenda Kwenye Manager Dashboard', badgeColor: '#7B1FA2'
-    });
-}
-
-async function sendCEOApproval(order) {
-    await sendWorkflowEmail({
-        to: process.env.CEO_EMAIL,
-        subject: `👑 IDHINI YA MWISHO: ${order.orderId}`,
-        title: 'Inasubiri Idhini ya CEO',
-        message: 'Habari CEO, oda hii imekamilika kikaguzi na imethibitishwa na Manager. Tafadhali toa idhini ya mwisho ili mzigo uanze kusafirishwa.',
-        order, actionUrl: 'https://makdcinvestments.co.tz/ceo-dashboard.html',
-        actionText: 'Nenda Kwenye CEO Dashboard', badgeColor: '#2E7D32'
     });
 }
 
@@ -301,19 +265,18 @@ async function sendOrderApprovedForDelivery(order) {
     await sendWorkflowEmail({
         to: process.env.SALES_EMAIL,
         subject: `📦 ODA TAYARI KUSAFIRISHWA: ${order.orderId}`,
-        title: 'Oda Imeidhinishwa',
-        message: 'Habari, CEO ameidhinisha oda hii. Mzigo uko tayari kwa ajili ya usafirishaji. Tafadhali wasiliana na mteja kwa maelekezo ya usafirishaji.',
+        title: 'Timu ya Usafirishaji (Delivery)',
+        message: 'CEO ameidhinisha oda hii. Mzigo uko tayari kwa ajili ya usafirishaji. Tafadhali wasiliana na mteja kwa maelekezo ya usafirishaji.',
         order, actionUrl: 'https://makdcinvestments.co.tz/delivery-dashboard.html',
         actionText: 'Nenda Kwenye Delivery Dashboard', badgeColor: '#0288D1'
     });
 }
 
 module.exports = {
-    sendAdminOrderAlert,
+    sendCEOAlert,
     sendCustomerReceipt,
     sendSalesNewOrder,
     sendFinanceNewOrder,
     sendManagerApproval,
-    sendCEOApproval,
     sendOrderApprovedForDelivery
 };
