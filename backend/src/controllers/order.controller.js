@@ -6,15 +6,14 @@
 
 const { prisma } = require('../config/database');
 const marketingController = require('./marketing.controller');
-
-// Ingiza functions zote za email kutoka email.service.js
 const { 
     sendSalesNewOrder, 
     sendFinanceNewOrder, 
     sendManagerApproval, 
     sendCEOApproval, 
     sendOrderApprovedForDelivery,
-    sendCustomerReceipt 
+    sendCustomerReceipt,
+    sendAdminOrderAlert // 🆕 Ongeza hii hapa
 } = require('../services/email.service');
 
 // ================================================================
@@ -886,7 +885,6 @@ module.exports = {
     ceoApprove,      // Mpya
     setDelivery,
     markDelivered,
-    sendAdminOrderAlert,
     completeOrder,
     rejectOrder,
     confirmDelivery
