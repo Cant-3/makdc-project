@@ -1,5 +1,5 @@
 // ================================================================
-// MAK DC INVESTMENT — PROCUREMENT ROUTES
+// MAK DC INVESTMENT — PROCUREMENT ROUTES (CLEAN & FIXED)
 // ================================================================
 
 const express = require('express');
@@ -22,20 +22,18 @@ router.get('/paid', controller.listPaidProcurements);
 // ================================================================
 // 2. STOCK ENDPOINTS
 // ================================================================
-// 🔴 Weka hizi maalum kwanza kabla ya :id
 router.get('/stock', controller.listStockItems);
 router.get('/stock/summary', controller.getStockSummary);
 router.get('/stock/low-stock', controller.getLowStockItems);
 router.get('/stock/movements', controller.listStockMovements); 
-router.get('/stock/pending-receives', controller.getPendingReceives); // 🆕 Hii iwe hapa
+router.get('/stock/pending-receives', controller.getPendingReceives);
 
 router.post('/stock', controller.addStockItem);
 router.post('/stock/adjust', controller.adjustStockItem);
 router.post('/stock/receive/:requestId', controller.receiveStockFromProcurement);
 router.post('/stock/out', controller.stockOut);
-router.post('/stock/confirm-receive/:id', controller.confirmReceive);// 🆕 Badilisha jina lisigongane
+router.post('/stock/confirm-receive/:id', controller.confirmReceive);
 
-// 🟢 Hii iwe mwisho kabisa kwa stock
 router.get('/stock/:id', controller.getStockItemById); 
 
 // Suppliers & POs
@@ -43,18 +41,25 @@ router.get('/suppliers', controller.listSuppliers);
 router.post('/suppliers', controller.createSupplier);
 router.get('/purchase-orders', controller.listPurchaseOrders);
 router.post('/purchase-orders', controller.createPurchaseOrder);
+
 // ================================================================
-// 3. CREATE REQUEST
+// 3. FUEL ENDPOINTS (Lazima ziwe KABLA ya /:id)
+// ================================================================
+router.get('/fuel/logs', controller.getFuelLogs);
+router.post('/fuel/issue', controller.issueFuel);
+
+// ================================================================
+// 4. CREATE REQUEST
 // ================================================================
 router.post('/', controller.createRequest);
 
 // ================================================================
-// 4. UPDATE STATUS (Legacy)
+// 5. UPDATE STATUS (Legacy)
 // ================================================================
 router.put('/:id/status', controller.updateStatus);
 
 // ================================================================
-// 5. MESSAGES & FOLLOW-UP
+// 6. MESSAGES & FOLLOW-UP
 // ================================================================
 router.get('/:id/messages', controller.getRequestMessages);
 router.post('/:id/messages', controller.sendRequestMessage);
@@ -64,7 +69,7 @@ router.post('/:id/typing', controller.setTypingStatus);
 router.get('/:id/typing', controller.getTypingStatus);
 
 // ================================================================
-// 6. WORKFLOW (Procurement → Manager → CEO → Procurement)
+// 7. WORKFLOW (Procurement → Manager → CEO → Procurement)
 // ================================================================
 router.put('/:id/forward-to-manager', controller.procurementForwardToManager);
 router.put('/:id/manager-approve', controller.managerApproveRequest);
@@ -74,7 +79,7 @@ router.put('/:id/ceo-reject', controller.ceoRejectRequest);
 router.put('/:id/purchaser-details', controller.submitPurchaserDetails);
 
 // ================================================================
-// 7. PAYMENT WORKFLOW (Finance → Manager → CEO → Finance)
+// 8. PAYMENT WORKFLOW (Finance → Manager → CEO → Finance)
 // ================================================================
 router.put('/:id/finance-verify', controller.financeVerifyAndSendToManager);
 router.put('/:id/manager-approve-payment', controller.managerApprovePayment);
@@ -84,23 +89,16 @@ router.put('/:id/ceo-reject-payment', controller.ceoRejectPayment);
 router.put('/:id/mark-paid', controller.financeMarkAsPaid);
 
 // ================================================================
-// 8. IMPREST + HISTORY
+// 9. IMPREST + HISTORY
 // ================================================================
 router.get('/:id/imprest/pdf', controller.downloadImprestPDF);
 router.get('/:id/payment', controller.getPaymentDetails);
 router.get('/:id/history', controller.getStatusHistory);
 
 // ================================================================
-// 9. SINGLE REQUEST (MWISHO KABISA)
+// 10. SINGLE REQUEST (MWISHO KABISA)
 // ================================================================
 router.get('/:id', controller.getRequestById);
 router.put('/:id/receive-as-asset', controller.receiveAsAsset);
-// ================================================================
-// FUEL MANAGEMENT ROUTES
-// ================================================================
-router.get('/fuel/logs', controller.getFuelLogs);
-router.post('/fuel/issue', controller.issueFuel);
 
-router.get('/stock/pending-receives', controller.getPendingReceives);
-router.post('/stock/receive/:id', controller.confirmReceive); // Angalia hii haigongani na nyingine
 module.exports = router;

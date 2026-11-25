@@ -1,14 +1,48 @@
 // ================================================================
-// MAK DC INVESTMENT — PROCUREMENT CONTROLLER (PATCHED)
+// MAK DC INVESTMENT — PROCUREMENT CONTROLLER (CLEAN & EMAIL-INTEGRATED)
 // ================================================================
-// Inatumia: pg (raw SQL) — sio Prisma
-// JWT payload: { userId, email, role, fullName }
-// ================================================================
-
 const { query } = require('../db');
 const stockService = require('../services/stock.service');
 const stockMovementService = require('../services/stockMovement.service');
+const imprestService = require('../services/imprest.service');
 const QRCode = require('qrcode');
+const path = require('path');
+const fs = require('fs');
+
+// 🆕 Ingiza Email Service
+const { 
+    sendProcurementNewRequest, 
+    sendProcurementToManager, 
+    sendProcurementToCEO 
+} = require('../services/email.service');
+
+// ================================================================
+// HELPER: Log status change
+// ================================================================
+async function logStatusChange(query, requestId, fromStatus, toStatus, user, notes = null) {
+  try {
+    await query(
+      `INSERT INTO procurement_status_history 
+       (request_id, from_status, to_status, changed_by, changed_by_id, changed_by_role, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [requestId, fromStatus, toStatus, user.fullName, user.userId, user.role, notes]
+    );
+  } catch (e) { console.error('History log error:', e); }
+}
+
+// ================================================================
+// HELPER: Send notification
+// ================================================================
+async function notify(query, userId, type, title, message, link = null) {
+  try {
+    if (!userId) return;
+    await query(
+      `INSERT INTO notifications (user_id, type, title, message, link)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, type, title, message, link]
+    );
+  } catch (e) { console.error('Notification error:', e); }
+}
 
 // ================================================================
 // 1. LIST ALL REQUESTS
@@ -29,7 +63,7 @@ async function listAllRequests(req, res) {
 }
 
 // ================================================================
-// 2. LIST INCOMING REQUESTS (Status: pending)
+// 2. LIST INCOMING REQUESTS
 // ================================================================
 async function listIncomingRequests(req, res) {
     try {
@@ -47,7 +81,7 @@ async function listIncomingRequests(req, res) {
 }
 
 // ================================================================
-// 3. LIST REMEDIAL REQUESTS (Returned / Rejected)
+// 3. LIST REMEDIAL REQUESTS
 // ================================================================
 async function listRemedialRequests(req, res) {
     try {
@@ -65,7 +99,7 @@ async function listRemedialRequests(req, res) {
 }
 
 // ================================================================
-// 4. LIST PENDING REQUESTS (Manager, CEO, Finance)
+// 4. LIST PENDING REQUESTS
 // ================================================================
 async function listPendingRequests(req, res) {
     try {
@@ -127,7 +161,7 @@ async function listPaidProcurements(req, res) {
 }
 
 // ================================================================
-// 7. GET SINGLE REQUEST (Pamoja na Items)
+// 7. GET SINGLE REQUEST
 // ================================================================
 async function getRequestById(req, res) {
     try {
@@ -140,11 +174,9 @@ async function getRequestById(req, res) {
         
         const items = await query(`SELECT * FROM procurement_items WHERE request_id = $1`, [id]);
         
-        // 🆕 Rejesha kila kitu pamoja na imprest_number na purchaser_details
         res.json({ 
             ...requests[0], 
             items,
-            // Hizi zinahakikisha Finance anaona details za Purchaser
             supplier_name: requests[0].supplier_name || null,
             invoice_number: requests[0].invoice_number || null,
             purchaser_details: requests[0].purchaser_details || null, 
@@ -154,8 +186,9 @@ async function getRequestById(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
 // ================================================================
-// 8. CREATE REQUEST
+// 8. CREATE REQUEST (+ EMAIL)
 // ================================================================
 async function createRequest(req, res) {
     try {
@@ -174,7 +207,6 @@ async function createRequest(req, res) {
         const totalAmount = items.reduce((sum, item) => 
             sum + (parseFloat(item.estimatedPrice) || 0) * (parseInt(item.quantity) || 0), 0);
 
-        // 🆕 Fix: Tumia user.userId (sio user.id)
         const requestResult = await query(`
             INSERT INTO procurement_requests 
             (request_number, department, requested_by, requested_by_id, status, total_amount, notes, title, urgency, required_by, attachments, item_count, created_at, updated_at)
@@ -205,7 +237,13 @@ async function createRequest(req, res) {
             ]);
         }
 
-        res.json({ ...request, items });
+        // 🆕 Pata items kwa ajili ya email
+        request.items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [request.id]);
+
+        // 🆕 TUMA EMAIL KWA PROCUREMENT OFFICER
+        sendProcurementNewRequest(request).catch(err => console.error('Email Error (Procurement):', err));
+
+        res.json({ ...request, items: request.items });
 
     } catch (err) {
         console.error('Create request error:', err);
@@ -214,7 +252,7 @@ async function createRequest(req, res) {
 }
 
 // ================================================================
-// 9. UPDATE STATUS
+// 9. UPDATE STATUS (Legacy)
 // ================================================================
 async function updateStatus(req, res) {
     try {
@@ -266,8 +304,9 @@ async function updateStatus(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
 // ================================================================
-// 1. LIST STOCK ITEMS (Inatumia Stock Service)
+// 10. STOCK MANAGEMENT
 // ================================================================
 async function listStockItems(req, res) {
   try {
@@ -286,9 +325,6 @@ async function listStockItems(req, res) {
   }
 }
 
-// ================================================================
-// 2. GET STOCK SUMMARY (Inatumia Stock Service)
-// ================================================================
 async function getStockSummary(req, res) {
   try {
     const data = await stockService.getStockSummary(query);
@@ -299,9 +335,6 @@ async function getStockSummary(req, res) {
   }
 }
 
-// ================================================================
-// 3. GET LOW STOCK ITEMS (Inatumia Stock Service)
-// ================================================================
 async function getLowStockItems(req, res) {
   try {
     const items = await stockService.listStockItems(query, { lowStock: true });
@@ -312,9 +345,6 @@ async function getLowStockItems(req, res) {
   }
 }
 
-// ================================================================
-// 4. GET SINGLE STOCK ITEM (Mpya)
-// ================================================================
 async function getStockItemById(req, res) {
   try {
     const item = await stockService.getStockItem(query, req.params.id);
@@ -324,113 +354,7 @@ async function getStockItemById(req, res) {
     res.status(err.message.includes('haipo') ? 404 : 500).json({ error: err.message });
   }
 }
-// ================================================================
-// GET FUEL LOGS (Kutoka Database)
-// ================================================================
-async function getFuelLogs(req, res) {
-    try {
-        const logs = await query(`
-            SELECT 
-                f.*, 
-                a.name AS asset_name, 
-                a.serial_number AS asset_plate
-            FROM fuel_logs f
-            LEFT JOIN assets a ON f.asset_id = a.id
-            ORDER BY f.created_at DESC
-        `);
-        res.json(logs);
-    } catch (err) {
-        console.error('getFuelLogs error:', err);
-        res.status(500).json({ error: err.message });
-    }
-}
 
-// ================================================================
-// ISSUE FUEL (Inaingiza kwenye Database na Kupunguza Stock)
-// ================================================================
-async function issueFuel(req, res) {
-    try {
-        const { 
-            fuelType, 
-            assetId, 
-            liters, 
-            driverName, 
-            purpose, 
-            stockItemId 
-        } = req.body;
-        const user = req.user;
-
-        // 1. Validation
-        if (!fuelType || !assetId || !liters || !driverName) {
-            return res.status(400).json({ error: 'Tafadhali jaza taarifa zote muhimu.' });
-        }
-
-        // 2. Punguza Stock (Tumia service ya stock)
-        if (stockItemId) {
-            // Pata stock item ya sasa
-            const stockItems = await query('SELECT * FROM stock_items WHERE id = $1', [stockItemId]);
-            if (stockItems.length === 0) throw new Error('Stock item haipo.');
-            
-            const currentStock = Number(stockItems[0].quantity);
-            const newQuantity = currentStock - Number(liters);
-            
-            if (newQuantity < 0) throw new Error('Mafuta yaliyopo store hayatoshi.');
-
-            // Sasisha stock
-            await query(
-                'UPDATE stock_items SET quantity = $1, updated_at = NOW() WHERE id = $2',
-                [newQuantity, stockItemId]
-            );
-
-            // Rekodi movement
-            await query(`
-                INSERT INTO stock_movements 
-                (stock_item_id, movement_type, quantity, balance_before, balance_after, reason, notes, performed_by, created_at)
-                VALUES ($1, 'out', $2, $3, $4, 'Fuel Issued', $5, $6, NOW())
-            `, [
-                stockItemId, liters, currentStock, newQuantity,
-                `Fuel issued to ${driverName} for vehicle ${assetId}`,
-                user.fullName
-            ]);
-        }
-
-        // 3. Tengeneza Permit Number
-        const permitNumber = `FP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
-
-        // 4. Ingiza kwenye fuel_logs table
-        const result = await query(`
-            INSERT INTO fuel_logs 
-            (permit_number, fuel_type, asset_id, liters, driver_name, purpose, issued_by, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-            RETURNING *
-        `, [
-            permitNumber, fuelType, assetId, liters, driverName, purpose, user.fullName
-        ]);
-
-        const newLog = result[0];
-
-        // 5. Pata taarifa za gari kwa ajili ya PDF
-        const assets = await query('SELECT * FROM assets WHERE id = $1', [assetId]);
-        const asset = assets.length > 0 ? assets[0] : { name: 'Unknown', serial_number: 'N/A' };
-
-        res.json({
-            success: true,
-            message: 'Mafuta yametolewa na stock imepunguzwa.',
-            log: {
-                ...newLog,
-                asset_name: asset.name,
-                asset_plate: asset.serial_number
-            }
-        });
-
-    } catch (err) {
-        console.error('issueFuel error:', err);
-        res.status(400).json({ error: err.message });
-    }
-}
-// ================================================================
-// 5. CREATE STOCK ITEM (Inatumia Stock Service)
-// ================================================================
 async function addStockItem(req, res) {
   try {
     const item = await stockService.createStockItem(query, req.body, req.user);
@@ -440,17 +364,15 @@ async function addStockItem(req, res) {
     res.status(400).json({ error: err.message });
   }
 }
+
 async function adjustStockItem(req, res) {
   try {
-    // 1. Chukua data zote kutoka kwa Frontend
     const { stockItemId, newQuantity, reason, notes } = req.body;
     
-    // 2. Validation ya Msingi
     if (!stockItemId) throw new Error("stockItemId ni lazima.");
     if (newQuantity === undefined || newQuantity < 0) throw new Error("newQuantity ni lazima na isiwe chini ya 0.");
     if (!reason) throw new Error("Sababu (reason) ni lazima.");
 
-    // 3. Tuma kwa stockService (Hii inashughulikia database)
     const result = await stockService.adjustStock(query, {
       stockItemId: parseInt(stockItemId),
       newQuantity: parseFloat(newQuantity),
@@ -458,7 +380,6 @@ async function adjustStockItem(req, res) {
       notes: notes || ''
     }, req.user);
 
-    // 4. Rudisha majibu kwa Frontend
     res.json({
       success: true,
       message: 'Stock adjusted successfully',
@@ -471,9 +392,6 @@ async function adjustStockItem(req, res) {
   }
 }
 
-// ================================================================
-// 7. STOCK OUT / ISSUE TO DEPARTMENT (Inatumia Movement Service)
-// ================================================================
 async function stockOut(req, res) {
   try {
     const { stockItemId, quantity, department, notes, issuedTo } = req.body;
@@ -504,9 +422,6 @@ async function stockOut(req, res) {
   }
 }
 
-// ================================================================
-// 8. LIST MOVEMENTS (Inatumia Stock Service)
-// ================================================================
 async function listStockMovements(req, res) {
   try {
     const movements = await stockService.listMovements(query, {
@@ -523,6 +438,7 @@ async function listStockMovements(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 async function receiveStockFromProcurement(req, res) {
   try {
     const { requestId } = req.params;
@@ -542,19 +458,15 @@ async function receiveStockFromProcurement(req, res) {
     const items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [requestId]);
 
     for (const item of items) {
-      // 🆕 1. TAMBUA KAMA NI MAFUTA NA UPE JINA SAHIHI
       let itemName = item.item_name;
       let category = 'Procurement';
       
-      // Kama jina lina "petrol" au "diesel", weka category kuwa "Fuel"
       if (itemName.toLowerCase().includes('petrol') || itemName.toLowerCase().includes('diesel')) {
           category = 'Fuel';
-          // Hakikisha jina ni "Petrol" au "Diesel" safi
           if (itemName.toLowerCase().includes('petrol')) itemName = 'Petrol';
           if (itemName.toLowerCase().includes('diesel')) itemName = 'Diesel';
       }
 
-      // 2. Angalia kama Item ipo kwenye Stock (Tumia jina lililosafishwa)
       const existing = await query(
         `SELECT id FROM stock_items 
          WHERE LOWER(item_name) = LOWER($1) 
@@ -566,10 +478,9 @@ async function receiveStockFromProcurement(req, res) {
       if (existing.length > 0) {
         stockItemId = existing[0].id;
       } else {
-        // 3. Unda mpya kwenye Stock
         const newItem = await stockService.createStockItem(query, {
-          itemName: itemName,      // 🆕 Tumia jina lililosafishwa
-          category: category,      // 🆕 Weka category kuwa 'Fuel' kama ni mafuta
+          itemName: itemName,
+          category: category,
           specification: item.specification,
           quantity: 0, 
           unit: item.unit,
@@ -579,7 +490,6 @@ async function receiveStockFromProcurement(req, res) {
         stockItemId = newItem.id;
       }
 
-      // 4. Rekodi Movement ya 'IN'
       await stockMovementService.createMovement(query, {
         stockItemId: stockItemId,
         movementType: 'in',
@@ -593,7 +503,6 @@ async function receiveStockFromProcurement(req, res) {
       }, user);
     }
 
-    // 5. Update Request kuwa 'completed'
     await query(`
       UPDATE procurement_requests 
       SET status = 'completed', 
@@ -609,29 +518,19 @@ async function receiveStockFromProcurement(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// 🆕 MESSAGES
+// 11. MESSAGES & FOLLOW-UP
 // ================================================================
 async function getRequestMessages(req, res) {
     try {
         const { id } = req.params;
-        // 🆕 Hakikisha tunarudisha sender_id na is_read
         const messages = await query(`
-            SELECT 
-                id, 
-                request_id, 
-                sender_id, 
-                sender_name, 
-                sender_role, 
-                subject, 
-                body, 
-                is_read, 
-                created_at
+            SELECT id, request_id, sender_id, sender_name, sender_role, subject, body, is_read, created_at
             FROM procurement_request_messages 
             WHERE request_id = $1 
             ORDER BY created_at ASC
         `, [id]);
-        
         res.json(messages);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -661,9 +560,6 @@ async function sendRequestMessage(req, res) {
     }
 }
 
-// ================================================================
-// 🆕 FOLLOW-UP
-// ================================================================
 async function saveRequestFollowUp(req, res) {
     try {
         const { id } = req.params;
@@ -674,7 +570,6 @@ async function saveRequestFollowUp(req, res) {
             return res.status(400).json({ error: 'Follow-up note is required' });
         }
 
-        // Pata status ya sasa
         const reqRow = await query('SELECT status FROM procurement_requests WHERE id = $1', [id]);
         const statusAtTime = reqRow.length > 0 ? reqRow[0].status : null;
 
@@ -690,15 +585,12 @@ async function saveRequestFollowUp(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-// ================================================================
-// 🆕 MARK MESSAGES AS READ
-// ================================================================
+
 async function markMessagesAsRead(req, res) {
     try {
         const { id } = req.params;
         const user = req.user;
         
-        // Update messages ambazo si zake kuwa "read"
         await query(`
             UPDATE procurement_request_messages 
             SET is_read = TRUE 
@@ -714,14 +606,12 @@ async function markMessagesAsRead(req, res) {
     }
 }
 
-// 🆕 TYPING STATUS
 async function setTypingStatus(req, res) {
     try {
         const { id } = req.params;
         const { isTyping } = req.body;
         const user = req.user;
         
-        // Hifadhi kwenye memory (kwa production tumia Redis)
         if (!global.typingStatus) global.typingStatus = {};
         if (!global.typingStatus[id]) global.typingStatus[id] = {};
         
@@ -737,7 +627,6 @@ async function setTypingStatus(req, res) {
     }
 }
 
-// 🆕 CHECK IF ANYONE IS TYPING
 async function getTypingStatus(req, res) {
     try {
         const { id } = req.params;
@@ -751,7 +640,6 @@ async function getTypingStatus(req, res) {
         const typingUsers = [];
         
         Object.entries(global.typingStatus[id]).forEach(([userId, data]) => {
-            // Ignore kama ni mimi au imepita sekunde 5
             if (Number(userId) === user.userId) return;
             if (now - data.timestamp > 5000) return;
             if (data.isTyping) {
@@ -764,44 +652,9 @@ async function getTypingStatus(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-// ================================================================
-// ONGEZA HIZI KWENYE procurement.controller.js ILIYOPO
-// ================================================================
-
-const imprestService = require('../services/imprest.service');
-const path = require('path');
-const fs = require('fs');
 
 // ================================================================
-// HELPER: Log status change
-// ================================================================
-async function logStatusChange(query, requestId, fromStatus, toStatus, user, notes = null) {
-  try {
-    await query(
-      `INSERT INTO procurement_status_history 
-       (request_id, from_status, to_status, changed_by, changed_by_id, changed_by_role, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [requestId, fromStatus, toStatus, user.fullName, user.userId, user.role, notes]
-    );
-  } catch (e) { console.error('History log error:', e); }
-}
-
-// ================================================================
-// HELPER: Send notification
-// ================================================================
-async function notify(query, userId, type, title, message, link = null) {
-  try {
-    if (!userId) return;
-    await query(
-      `INSERT INTO notifications (user_id, type, title, message, link)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [userId, type, title, message, link]
-    );
-  } catch (e) { console.error('Notification error:', e); }
-}
-
-// ================================================================
-// 1. PROCUREMENT FORWARD TO MANAGER
+// 12. WORKFLOW: PROCUREMENT → MANAGER
 // ================================================================
 async function procurementForwardToManager(req, res) {
   try {
@@ -816,7 +669,7 @@ async function procurementForwardToManager(req, res) {
     if (rows.length === 0) return res.status(404).json({ error: 'Request not found' });
 
     const request = rows[0];
-    if (request.status !== 'pending-procurement') {
+    if (request.status !== 'pending' && request.status !== 'pending-procurement') {
       return res.status(400).json({ error: `Request iko kwenye status "${request.status}", haiwezi kupitishwa.` });
     }
 
@@ -825,7 +678,11 @@ async function procurementForwardToManager(req, res) {
       [id]
     );
 
-    await logStatusChange(query, id, 'pending-procurement', 'pending-manager', user, 'Procurement amepitisha kwa Manager');
+    await logStatusChange(query, id, request.status, 'pending-manager', user, 'Procurement amepitisha kwa Manager');
+
+    // 🆕 TUMA EMAIL KWA MANAGER
+    request.items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [id]);
+    sendProcurementToManager(request).catch(err => console.error('Email Error (Manager):', err));
 
     // Notify managers
     const managers = await query(`SELECT id FROM users WHERE role = 'Manager' AND status = 'Active'`);
@@ -842,7 +699,7 @@ async function procurementForwardToManager(req, res) {
 }
 
 // ================================================================
-// 2. MANAGER APPROVE / REJECT
+// 13. MANAGER → CEO
 // ================================================================
 async function managerApproveRequest(req, res) {
   try {
@@ -870,6 +727,10 @@ async function managerApproveRequest(req, res) {
     );
 
     await logStatusChange(query, id, 'pending-manager', 'pending-ceo', user, notes);
+
+    // 🆕 TUMA EMAIL KWA CEO
+    request.items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [id]);
+    sendProcurementToCEO(request).catch(err => console.error('Email Error (CEO):', err));
 
     // Notify CEO
     const ceos = await query(`SELECT id FROM users WHERE role = 'CEO' AND status = 'Active'`);
@@ -921,7 +782,7 @@ async function managerRejectRequest(req, res) {
 }
 
 // ================================================================
-// 3. CEO APPROVE → GENERATE IMPREST PDF
+// 14. CEO APPROVE → GENERATE IMPREST PDF
 // ================================================================
 async function ceoApproveRequest(req, res) {
   try {
@@ -941,17 +802,13 @@ async function ceoApproveRequest(req, res) {
       return res.status(400).json({ error: `Request iko kwenye status "${request.status}".` });
     }
 
-    // Pata items
     const items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [id]);
 
-    // Tengeneza imprest number
     const imprestNumber = await imprestService.generateImprestNumber(query);
 
-    // QR code data (verification URL)
     const qrText = `MAKDC-IMP-${imprestNumber}-${request.request_number}-${Date.now()}`;
     const qrCodeData = await imprestService.generateQRCode(qrText);
 
-    // Tengeneza PDF
     const itemsForPDF = items.map(it => ({
       itemName: it.item_name,
       specification: it.specification,
@@ -973,7 +830,6 @@ async function ceoApproveRequest(req, res) {
       qrCodeData,
     });
 
-    // Hifadhi imprest kwenye DB
     const imprestResult = await query(
       `INSERT INTO procurement_imprests 
        (imprest_number, request_id, request_number, department, requested_by, title,
@@ -989,7 +845,6 @@ async function ceoApproveRequest(req, res) {
 
     const imprest = imprestResult[0];
 
-    // Update request
     await query(
       `UPDATE procurement_requests 
        SET status = 'pending-purchaser-details', ceo_approved_at = NOW(),
@@ -1001,7 +856,6 @@ async function ceoApproveRequest(req, res) {
 
     await logStatusChange(query, id, 'pending-ceo', 'pending-purchaser-details', user, `Imprest ${imprestNumber} imetengenezwa`);
 
-    // Notify procurement
     const procs = await query(`SELECT id FROM users WHERE role = 'Procurement' AND status = 'Active'`);
     for (const p of procs) {
       await notify(query, p.id, 'procurement', '✅ Imprest Imetengenezwa',
@@ -1055,7 +909,7 @@ async function ceoRejectRequest(req, res) {
 }
 
 // ================================================================
-// 4. SUBMIT PURCHASER DETAILS + IMPREST ATTACHMENT
+// 15. SUBMIT PURCHASER DETAILS + IMPREST ATTACHMENT
 // ================================================================
 async function submitPurchaserDetails(req, res) {
   try {
@@ -1065,7 +919,7 @@ async function submitPurchaserDetails(req, res) {
       supplierName, supplierContact, supplierTin,
       invoiceNumber, invoiceDate, actualTotal,
       paymentTerms, expectedDeliveryDate, procurementNotes,
-      imprestAttachment, // base64 au filename
+      imprestAttachment,
     } = req.body;
 
     if (user.role !== 'Procurement' && user.role !== 'SuperAdmin') {
@@ -1109,7 +963,6 @@ async function submitPurchaserDetails(req, res) {
 
     await logStatusChange(query, id, 'pending-purchaser-details', 'pending-finance', user, `Supplier: ${supplierName}, Invoice: ${invoiceNumber}`);
 
-    // Notify finance
     const fins = await query(`SELECT id FROM users WHERE role = 'Finance' AND status = 'Active'`);
     for (const f of fins) {
       await notify(query, f.id, 'procurement', '💰 Request Inahitaji Malipo',
@@ -1122,8 +975,9 @@ async function submitPurchaserDetails(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// 5. FINANCE VERIFY → SEND PAYMENT TO MANAGER (Through Company Payments)
+// 16. FINANCE → MANAGER (Payment)
 // ================================================================
 async function financeVerifyAndSendToManager(req, res) {
   try {
@@ -1141,7 +995,6 @@ async function financeVerifyAndSendToManager(req, res) {
     if (request.status !== 'pending-finance') {
       return res.status(400).json({ error: `Request iko kwenye status "${request.status}".` });
     }
-    // Kabla ya INSERT
     if (request.payment_reference) {
       const existing = await query(
         'SELECT id FROM company_payments WHERE reference = $1',
@@ -1155,14 +1008,12 @@ async function financeVerifyAndSendToManager(req, res) {
     const details = request.purchaser_details || {};
     const year = new Date().getFullYear();
     
-    // Tengeneza reference ya Company Payment
     const payCount = await query(
       `SELECT COUNT(*) as c FROM company_payments WHERE reference LIKE $1`,
       [`PAY-${year}-%`]
     );
     const payRef = `PAY-${year}-${String(parseInt(payCount[0].c) + 1).padStart(3, '0')}`;
 
-    // Unda Company Payment record
     const payResult = await query(
       `INSERT INTO company_payments 
        (type, reference, vendor, amount, description, status, created_by, 
@@ -1180,7 +1031,6 @@ async function financeVerifyAndSendToManager(req, res) {
 
     const payment = payResult[0];
 
-    // Update request kuwa inasubiri malipo
     await query(
       `UPDATE procurement_requests 
        SET status = 'pending-payment-approval', 
@@ -1192,7 +1042,6 @@ async function financeVerifyAndSendToManager(req, res) {
 
     await logStatusChange(query, id, 'pending-finance', 'pending-payment-approval', user, `Payment ${payRef} created`);
 
-    // Notify managers
     const managers = await query(`SELECT id FROM users WHERE role = 'Manager' AND status = 'Active'`);
     for (const m of managers) {
       await notify(query, m.id, 'payment', '💸 Malipo ya Manunuzi',
@@ -1210,8 +1059,9 @@ async function financeVerifyAndSendToManager(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// 6a. MANAGER APPROVE PAYMENT (Through Company Payments)
+// 17. MANAGER APPROVE PAYMENT → CEO
 // ================================================================
 async function managerApprovePayment(req, res) {
   try {
@@ -1237,7 +1087,6 @@ async function managerApprovePayment(req, res) {
       return res.status(400).json({ error: 'Request haina payment reference. Finance hajaunda malipo.' });
     }
 
-    // ✅ Update company_payments (sio procurement_payments)
     const updateResult = await query(`
       UPDATE company_payments 
       SET status = 'pending-ceo',
@@ -1254,7 +1103,6 @@ async function managerApprovePayment(req, res) {
       });
     }
 
-    // Update procurement request status — inasubiri CEO
     await query(`
       UPDATE procurement_requests 
       SET status = 'payment-pending-ceo', updated_at = NOW()
@@ -1266,7 +1114,6 @@ async function managerApprovePayment(req, res) {
       user, notes || 'Manager ameidhinisha malipo'
     );
 
-    // Notify CEO
     const ceos = await query(`SELECT id FROM users WHERE role = 'CEO' AND status = 'Active'`);
     for (const c of ceos) {
       await notify(
@@ -1287,9 +1134,7 @@ async function managerApprovePayment(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
-// ================================================================
-// 6b. MANAGER REJECT PAYMENT
-// ================================================================
+
 async function managerRejectPayment(req, res) {
   try {
     const { id } = req.params;
@@ -1318,7 +1163,6 @@ async function managerRejectPayment(req, res) {
       return res.status(400).json({ error: 'Request haina payment reference.' });
     }
 
-    // ✅ Update company_payments
     const updateResult = await query(`
       UPDATE company_payments 
       SET status = 'rejected',
@@ -1336,7 +1180,6 @@ async function managerRejectPayment(req, res) {
       });
     }
 
-    // Update request — rudi kwa Finance
     await query(`
       UPDATE procurement_requests 
       SET status = 'payment-returned',
@@ -1351,7 +1194,6 @@ async function managerRejectPayment(req, res) {
       user, reason.trim()
     );
 
-    // Notify Finance
     const fins = await query(`SELECT id FROM users WHERE role = 'Finance' AND status = 'Active'`);
     for (const f of fins) {
       await notify(
@@ -1372,8 +1214,9 @@ async function managerRejectPayment(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// 7a. CEO APPROVE PAYMENT
+// 18. CEO APPROVE PAYMENT
 // ================================================================
 async function ceoApprovePayment(req, res) {
   try {
@@ -1399,7 +1242,6 @@ async function ceoApprovePayment(req, res) {
       return res.status(400).json({ error: 'Request haina payment reference.' });
     }
 
-    // ✅ Update company_payments
     const updateResult = await query(`
       UPDATE company_payments 
       SET status = 'approved',
@@ -1416,7 +1258,6 @@ async function ceoApprovePayment(req, res) {
       });
     }
 
-    // Update request — tayari kulipwa na Finance
     await query(`
       UPDATE procurement_requests 
       SET status = 'payment-approved',
@@ -1431,7 +1272,6 @@ async function ceoApprovePayment(req, res) {
       user, notes || 'CEO ameidhinisha malipo'
     );
 
-    // Notify Finance — waweze kulipa
     const fins = await query(`SELECT id FROM users WHERE role = 'Finance' AND status = 'Active'`);
     for (const f of fins) {
       await notify(
@@ -1452,9 +1292,7 @@ async function ceoApprovePayment(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
-// ================================================================
-// 7b. CEO REJECT PAYMENT
-// ================================================================
+
 async function ceoRejectPayment(req, res) {
   try {
     const { id } = req.params;
@@ -1483,7 +1321,6 @@ async function ceoRejectPayment(req, res) {
       return res.status(400).json({ error: 'Request haina payment reference.' });
     }
 
-    // ✅ Update company_payments
     const updateResult = await query(`
       UPDATE company_payments 
       SET status = 'rejected',
@@ -1501,7 +1338,6 @@ async function ceoRejectPayment(req, res) {
       });
     }
 
-    // Update request — rudi kwa Finance
     await query(`
       UPDATE procurement_requests 
       SET status = 'payment-returned',
@@ -1516,7 +1352,6 @@ async function ceoRejectPayment(req, res) {
       user, reason.trim()
     );
 
-    // Notify Finance
     const fins = await query(`SELECT id FROM users WHERE role = 'Finance' AND status = 'Active'`);
     for (const f of fins) {
       await notify(
@@ -1537,8 +1372,9 @@ async function ceoRejectPayment(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// 8. FINANCE MARK AS PAID
+// 19. FINANCE MARK AS PAID
 // ================================================================
 async function financeMarkAsPaid(req, res) {
   try {
@@ -1568,7 +1404,6 @@ async function financeMarkAsPaid(req, res) {
       return res.status(400).json({ error: 'Request haina payment reference.' });
     }
 
-    // ✅ Update company_payments — weka kama paid
     const updateResult = await query(`
       UPDATE company_payments 
       SET status = 'paid',
@@ -1585,7 +1420,6 @@ async function financeMarkAsPaid(req, res) {
       });
     }
 
-    // Update request — tayari paid
     await query(`
       UPDATE procurement_requests 
       SET status = 'paid',
@@ -1600,7 +1434,6 @@ async function financeMarkAsPaid(req, res) {
       user, `Ref: ${paymentReference.trim()}${notes ? ' | ' + notes.trim() : ''}`
     );
 
-    // Notify Procurement — wapokee stock/asset
     const procs = await query(`SELECT id FROM users WHERE role = 'Procurement' AND status = 'Active'`);
     for (const p of procs) {
       await notify(
@@ -1622,8 +1455,9 @@ async function financeMarkAsPaid(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// 9. DOWNLOAD IMPREST PDF
+// 20. DOWNLOAD IMPREST PDF
 // ================================================================
 async function downloadImprestPDF(req, res) {
   try {
@@ -1644,7 +1478,7 @@ async function downloadImprestPDF(req, res) {
 }
 
 // ================================================================
-// 10. GET PAYMENT DETAILS
+// 21. GET PAYMENT DETAILS
 // ================================================================
 async function getPaymentDetails(req, res) {
   try {
@@ -1661,7 +1495,7 @@ async function getPaymentDetails(req, res) {
 }
 
 // ================================================================
-// 11. GET STATUS HISTORY
+// 22. GET STATUS HISTORY
 // ================================================================
 async function getStatusHistory(req, res) {
   try {
@@ -1675,232 +1509,9 @@ async function getStatusHistory(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
-// ================================================================
-// 12. HOOK: UPDATE PROCUREMENT WHEN PAYMENT IS APPROVED
-// ================================================================
-async function onPaymentApprovedByCeo(paymentId) {
-  try {
-    // Tafuta payment
-    const rows = await query('SELECT * FROM company_payments WHERE id = $1', [paymentId]);
-    if (rows.length === 0) return;
-    const p = rows[0];
-
-    if (p.type === 'procurement' && p.reference) {
-      // Tafuta request inayohusiana
-      const reqs = await query('SELECT id FROM procurement_requests WHERE payment_reference = $1', [p.reference]);
-      
-      if (reqs.length > 0) {
-        const reqId = reqs[0].id;
-        // Badilisha status kuwa payment-approved
-        await query(
-          `UPDATE procurement_requests 
-           SET status = 'payment-approved', 
-               payment_approved_at = NOW(), 
-               payment_approved_by = (SELECT full_name FROM users WHERE id = $2),
-               updated_at = NOW()
-           WHERE id = $1`,
-          [reqId, p.ceo_approved_by ? p.ceo_approved_by : null]
-        );
-        
-        await logStatusChange(query, reqId, 'pending-payment-approval', 'payment-approved', { fullName: 'System', userId: 0, role: 'System' }, 'CEO Approved Payment');
-
-        // Notify Finance
-        const fins = await query(`SELECT id FROM users WHERE role = 'Finance' AND status = 'Active'`);
-        for (const f of fins) {
-          await notify(query, f.id, 'procurement', '✅ Malipo Yameidhinishwa',
-            `Malipo ${p.reference} yameidhinishwa na CEO. Unaweza kulipa.`, `/finance#tab-company-payments`);
-        }
-      }
-    }
-  } catch (e) { console.error('onPaymentApprovedByCeo hook error:', e); }
-}
-// ================================================================
-// 1. PROCUREMENT → MANAGER
-// ================================================================
-async function procurementForwardToManager(req, res) {
-  try {
-    const { id } = req.params;
-    const user = req.user;
-
-    if (user.role !== 'Procurement' && user.role !== 'SuperAdmin') {
-      return res.status(403).json({ error: 'Procurement pekee anaweza kupitisha.' });
-    }
-
-    const rows = await query('SELECT * FROM procurement_requests WHERE id = $1', [id]);
-    if (rows.length === 0) return res.status(404).json({ error: 'Request not found' });
-
-    const request = rows[0];
-    // Ruhusu ikiwa pending au pending-procurement
-    if (request.status !== 'pending' && request.status !== 'pending-procurement') {
-      return res.status(400).json({ error: `Request iko kwenye status "${request.status}", haiwezi kupitishwa.` });
-    }
-
-    await query(
-      `UPDATE procurement_requests SET status = 'pending-manager', updated_at = NOW() WHERE id = $1`,
-      [id]
-    );
-
-    await logStatusChange(query, id, request.status, 'pending-manager', user, 'Procurement amepitisha kwa Manager');
-
-    // Notify managers
-    const managers = await query(`SELECT id FROM users WHERE role = 'Manager' AND status = 'Active'`);
-    for (const m of managers) {
-      await notify(query, m.id, 'procurement', '📋 Request Mpya',
-        `Request ${request.request_number} inahitaji idhini yako.`, `/procurement/${id}`);
-    }
-
-    res.json({ success: true, message: 'Request imepitishwa kwa Manager.' });
-  } catch (err) {
-    console.error('procurementForwardToManager:', err);
-    res.status(500).json({ error: err.message });
-  }
-}
 
 // ================================================================
-// 2. MANAGER → CEO
-// ================================================================
-async function managerApproveRequest(req, res) {
-  try {
-    const { id } = req.params;
-    const { notes } = req.body;
-    const user = req.user;
-
-    if (user.role !== 'Manager' && user.role !== 'SuperAdmin') {
-      return res.status(403).json({ error: 'Manager pekee anaweza kuidhinisha.' });
-    }
-
-    const rows = await query('SELECT * FROM procurement_requests WHERE id = $1', [id]);
-    if (rows.length === 0) return res.status(404).json({ error: 'Request not found' });
-
-    const request = rows[0];
-    if (request.status !== 'pending-manager') {
-      return res.status(400).json({ error: `Request iko kwenye status "${request.status}".` });
-    }
-
-    await query(
-      `UPDATE procurement_requests 
-       SET status = 'pending-ceo', manager_approved_at = NOW(), manager_notes = $2, updated_at = NOW()
-       WHERE id = $1`,
-      [id, notes || null]
-    );
-
-    await logStatusChange(query, id, 'pending-manager', 'pending-ceo', user, notes);
-
-    // Notify CEO
-    const ceos = await query(`SELECT id FROM users WHERE role = 'CEO' AND status = 'Active'`);
-    for (const c of ceos) {
-      await notify(query, c.id, 'procurement', '🏢 Request Inahitaji Idhini',
-        `Request ${request.request_number} imepitishwa na Manager.`, `/procurement/${id}`);
-    }
-
-    res.json({ success: true, message: 'Request imepitishwa kwa CEO.' });
-  } catch (err) {
-    console.error('managerApproveRequest:', err);
-    res.status(500).json({ error: err.message });
-  }
-}
-
-// ================================================================
-// 3. CEO → PROCUREMENT (RUDI KWA DETAILS)
-// ================================================================
-async function ceoApproveRequest(req, res) {
-  try {
-    const { id } = req.params;
-    const { notes } = req.body;
-    const user = req.user;
-
-    if (user.role !== 'CEO' && user.role !== 'SuperAdmin') {
-      return res.status(403).json({ error: 'CEO pekee anaweza kuidhinisha mwisho.' });
-    }
-
-    const rows = await query('SELECT * FROM procurement_requests WHERE id = $1', [id]);
-    if (rows.length === 0) return res.status(404).json({ error: 'Request not found' });
-
-    const request = rows[0];
-    if (request.status !== 'pending-ceo') {
-      return res.status(400).json({ error: `Request iko kwenye status "${request.status}".` });
-    }
-
-    // Pata items
-    const items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [id]);
-
-    // Tengeneza imprest number
-    const imprestNumber = await imprestService.generateImprestNumber(query);
-
-    // QR code data (verification URL)
-    const qrText = `MAKDC-IMP-${imprestNumber}-${request.request_number}-${Date.now()}`;
-    const qrCodeData = await imprestService.generateQRCode(qrText);
-
-    // Tengeneza PDF
-    const itemsForPDF = items.map(it => ({
-      itemName: it.item_name,
-      specification: it.specification,
-      quantity: it.quantity,
-      unit: it.unit,
-      estimatedPrice: it.estimated_price,
-    }));
-
-    const pdfResult = await imprestService.generateImprestPDF({
-      imprestNumber,
-      requestNumber: request.request_number,
-      department: request.department,
-      requestedBy: request.requested_by,
-      title: request.title,
-      items: itemsForPDF,
-      totalAmount: request.total_amount,
-      approvedByCeo: user.fullName,
-      approvedAt: new Date(),
-      qrCodeData,
-    });
-
-    // Hifadhi imprest kwenye DB
-    const imprestResult = await query(
-      `INSERT INTO procurement_imprests 
-       (imprest_number, request_id, request_number, department, requested_by, title,
-        items, total_amount, approved_by_ceo, approved_by_ceo_id, qr_code_data, pdf_path)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-       RETURNING *`,
-      [
-        imprestNumber, id, request.request_number, request.department,
-        request.requested_by, request.title, JSON.stringify(itemsForPDF),
-        request.total_amount, user.fullName, user.userId, qrCodeData, pdfResult.filename,
-      ]
-    );
-
-    const imprest = imprestResult[0];
-
-    // Update request — RUDI KWA PROCUREMENT
-    await query(
-      `UPDATE procurement_requests 
-       SET status = 'pending-purchaser-details', ceo_approved_at = NOW(),
-           ceo_notes = $2, imprest_id = $3, imprest_number = $4,
-           imprest_generated_at = NOW(), updated_at = NOW()
-       WHERE id = $1`,
-      [id, notes || null, imprest.id, imprestNumber]
-    );
-
-    await logStatusChange(query, id, 'pending-ceo', 'pending-purchaser-details', user, `Imprest ${imprestNumber} imetengenezwa`);
-
-    // Notify procurement
-    const procs = await query(`SELECT id FROM users WHERE role = 'Procurement' AND status = 'Active'`);
-    for (const p of procs) {
-      await notify(query, p.id, 'procurement', '✅ Imprest Imetengenezwa',
-        `Request ${request.request_number} imeidhinishwa. Imprest: ${imprestNumber}. Jaza details za manunuzi.`,
-        `/procurement/${id}`);
-    }
-
-    res.json({
-      success: true,
-      message: 'Request imeidhinishwa. Imprest imetengenezwa.',
-      imprest: { id: imprest.id, number: imprestNumber, pdf: pdfResult.filename },
-    });
-  } catch (err) {
-    console.error('ceoApproveRequest:', err);
-    res.status(500).json({ error: err.message });
-  }
-}
-// ================================================================
-// 🆕 RECEIVE PROCUREMENT AS ASSET (Badala ya Stock)
+// 23. RECEIVE AS ASSET
 // ================================================================
 async function receiveAsAsset(req, res) {
   try {
@@ -1923,7 +1534,6 @@ async function receiveAsAsset(req, res) {
       return res.status(400).json({ error: 'Request hii tayari imesajiliwa kama Asset.' });
     }
     
-    // Generate asset tag (AST-YYYY-NNNN)
     const year = new Date().getFullYear();
     const count = await query(
       `SELECT COUNT(*) as c FROM assets WHERE asset_tag LIKE $1`,
@@ -1931,11 +1541,9 @@ async function receiveAsAsset(req, res) {
     );
     const assetTag = `AST-${year}-${String(parseInt(count[0].c) + 1).padStart(4, '0')}`;
     
-    // Pata items zote za procurement hii kwa ajili ya description
     const items = await query('SELECT * FROM procurement_items WHERE request_id = $1', [requestId]);
     const itemNames = items.map(i => `${i.item_name} x${i.quantity}`).join(', ');
     
-    // Unda Asset mpya
     const assetResult = await query(`
       INSERT INTO assets 
       (asset_tag, name, category, description, purchase_date, purchase_value, current_value,
@@ -1950,7 +1558,7 @@ async function receiveAsAsset(req, res) {
       itemNames,
       request.total_amount,
       usefulLifeYears || 5,
-      (100 / (usefulLifeYears || 5)).toFixed(2),  // Straight-line rate
+      (100 / (usefulLifeYears || 5)).toFixed(2),
       location || request.department,
       serialNumber || null,
       request.id,
@@ -1960,7 +1568,6 @@ async function receiveAsAsset(req, res) {
     
     const asset = assetResult[0];
     
-    // Update procurement request kuwa completed na ku-link asset
     await query(`
       UPDATE procurement_requests 
       SET status = 'completed', received_as_asset = TRUE, asset_id = $1, updated_at = NOW()
@@ -1978,8 +1585,9 @@ async function receiveAsAsset(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+
 // ================================================================
-// SUPPLIERS & PURCHASE ORDERS (Zilizokosekana)
+// 24. SUPPLIERS & PURCHASE ORDERS
 // ================================================================
 async function listSuppliers(req, res) {
     try {
@@ -2074,8 +1682,9 @@ async function createPurchaseOrder(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
+
 // ================================================================
-// 🆕 RECEIVE STOCK (Department)
+// 25. PENDING RECEIVES
 // ================================================================
 async function getPendingReceives(req, res) {
     try {
@@ -2097,7 +1706,6 @@ async function confirmReceive(req, res) {
         const { id } = req.params;
         const user = req.user;
 
-        // Badilisha status ya movement
         const result = await query(`
             UPDATE stock_transactions 
             SET is_received = true, received_at = NOW(), received_by = $1 
@@ -2115,11 +1723,10 @@ async function confirmReceive(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-// ================================================================
-// ASSET MAINTENANCE & RETIREMENT
-// ================================================================
 
-// 1. GET ALL MAINTENANCE LOGS
+// ================================================================
+// 26. ASSET MAINTENANCE & RETIREMENT
+// ================================================================
 async function getAllMaintenance(req, res) {
     try {
         const logs = await query(`
@@ -2133,14 +1740,13 @@ async function getAllMaintenance(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-// 2. ADD MAINTENANCE RECORD
+
 async function createMaintenance(req, res) {
     try {
-        const { id } = req.params; // assetId
+        const { id } = req.params;
         const { type, description, cost, performedBy, scheduledDate, status, notes } = req.body;
         const user = req.user;
 
-        // 🆕 Nimeongeza created_at na updated_at hapa
         const result = await query(`
             INSERT INTO asset_maintenance 
             (asset_id, type, description, cost, performed_by, scheduled_date, status, notes, created_by_id, created_by_name, created_at, updated_at)
@@ -2148,7 +1754,6 @@ async function createMaintenance(req, res) {
             RETURNING *
         `, [id, type || 'routine', description, cost || 0, performedBy, scheduledDate || null, status || 'pending', notes || null, user.userId, user.fullName]);
 
-        // Kama maintenance inaendelea, badilisha status ya Asset
         if (status === 'in-progress') {
             await query(`UPDATE assets SET status = 'In Maintenance', updated_at = NOW() WHERE id = $1`, [id]);
         }
@@ -2159,7 +1764,7 @@ async function createMaintenance(req, res) {
         res.status(500).json({ error: err.message });
     }
 }
-// 3. RETIRE ASSET
+
 async function retireAsset(req, res) {
     try {
         const { id } = req.params;
@@ -2180,6 +1785,109 @@ async function retireAsset(req, res) {
 }
 
 // ================================================================
+// 27. FUEL MANAGEMENT
+// ================================================================
+async function getFuelLogs(req, res) {
+    try {
+        const logs = await query(`
+            SELECT 
+                f.*, 
+                a.name AS asset_name, 
+                a.serial_number AS asset_plate
+            FROM fuel_logs f
+            LEFT JOIN assets a ON f.asset_id = a.id
+            ORDER BY f.created_at DESC
+        `);
+        res.json(logs);
+    } catch (err) {
+        console.error('getFuelLogs error:', err);
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function issueFuel(req, res) {
+    try {
+        const { 
+            fuelType, 
+            assetId, 
+            liters, 
+            driverName, 
+            purpose, 
+            stockItemId 
+        } = req.body;
+        const user = req.user;
+
+        if (!fuelType || !assetId || !liters || !driverName) {
+            return res.status(400).json({ error: 'Tafadhali jaza taarifa zote muhimu.' });
+        }
+
+        if (stockItemId) {
+            const stockItems = await query('SELECT * FROM stock_items WHERE id = $1', [stockItemId]);
+            if (stockItems.length === 0) throw new Error('Stock item haipo.');
+            
+            const currentStock = Number(stockItems[0].quantity);
+            const newQuantity = currentStock - Number(liters);
+            
+            if (newQuantity < 0) throw new Error('Mafuta yaliyopo store hayatoshi.');
+
+            await query(
+                'UPDATE stock_items SET quantity = $1, updated_at = NOW() WHERE id = $2',
+                [newQuantity, stockItemId]
+            );
+
+            await query(`
+                INSERT INTO stock_movements 
+                (stock_item_id, movement_type, quantity, balance_before, balance_after, reason, notes, performed_by, created_at)
+                VALUES ($1, 'out', $2, $3, $4, 'Fuel Issued', $5, $6, NOW())
+            `, [
+                stockItemId, liters, currentStock, newQuantity,
+                `Fuel issued to ${driverName} for vehicle ${assetId}`,
+                user.fullName
+            ]);
+        }
+
+        const permitNumber = `FP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+
+        const result = await query(`
+            INSERT INTO fuel_logs 
+            (permit_number, fuel_type, asset_id, liters, driver_name, purpose, issued_by, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+            RETURNING *
+        `, [
+            permitNumber, fuelType, assetId, liters, driverName, purpose, user.fullName
+        ]);
+
+        const newLog = result[0];
+
+        // 🆕 TUMA EMAIL KWA CEO
+        const assets = await query('SELECT * FROM assets WHERE id = $1', [assetId]);
+        const asset = assets.length > 0 ? assets[0] : { name: 'Unknown', serial_number: 'N/A' };
+
+        sendFuelIssuedAlert({
+            fuelType: newLog.fuel_type,
+            quantity: newLog.liters,
+            vehicle: asset.name || assetId,
+            receiver: newLog.driver_name,
+            permitNumber: newLog.permit_number
+        }).catch(err => console.error('Email Error (Fuel):', err));
+
+        res.json({
+            success: true,
+            message: 'Mafuta yametolewa na stock imepunguzwa.',
+            log: {
+                ...newLog,
+                asset_name: asset.name,
+                asset_plate: asset.serial_number
+            }
+        });
+
+    } catch (err) {
+        console.error('issueFuel error:', err);
+        res.status(400).json({ error: err.message });
+    }
+}
+
+// ================================================================
 // EXPORTS
 // ================================================================
 module.exports = {
@@ -2189,12 +1897,12 @@ module.exports = {
     listPendingRequests,
     listApprovedRequests,
     listPaidProcurements,
-    getRequestById, // <--- Hii ni muhimu sana
+    getRequestById,
     createRequest,
     updateStatus,
     listStockItems,
     addStockItem,
-     getPendingReceives,
+    getPendingReceives,
     confirmReceive,
     getStockSummary,
     getLowStockItems,
@@ -2211,7 +1919,6 @@ module.exports = {
     markMessagesAsRead,
     setTypingStatus,
     getTypingStatus,
-    // Workflow
     procurementForwardToManager,
     managerApproveRequest,
     managerRejectRequest,
@@ -2220,23 +1927,19 @@ module.exports = {
     listStockMovements,
     ceoRejectRequest,
     submitPurchaserDetails,
-    // Payment
     financeVerifyAndSendToManager,
     managerApprovePayment,
     managerRejectPayment,
     ceoApprovePayment,
     ceoRejectPayment,
     financeMarkAsPaid,
-    // Imprest
     downloadImprestPDF,
     getPaymentDetails,
     receiveAsAsset,
     getStatusHistory,
-
     getAllMaintenance,
     createMaintenance,
     retireAsset,
     getFuelLogs,
     issueFuel
-
 };

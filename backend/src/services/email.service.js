@@ -34,9 +34,9 @@ async function sendCEOAlert(order) {
         const items = order.items || [];
         const itemsList = items.map(item => 
             `<tr>
-                <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">${item.productName}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eeeeee;">${item.productName || item.item_name}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: center;">${item.quantity}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right;">TSh ${Number(item.subtotal).toLocaleString()}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right;">TSh ${Number(item.subtotal || (item.estimated_price * item.quantity) || 0).toLocaleString()}</td>
             </tr>`
         ).join('');
 
@@ -49,7 +49,6 @@ async function sendCEOAlert(order) {
                     ${companyHeader}
                     
                     <div style="padding: 30px 20px;">
-                        <!-- Heshima kwa CEO -->
                         <h2 style="color: #01579B; margin-top: 0; font-size: 22px; border-bottom: 2px solid #e1f5fe; padding-bottom: 10px;">Kwa Heshima, Mkurugenzi Mkuu (CEO),</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">Tunapenda kukutaarifu kuwa kuna <strong>Oda Mpya</strong> imeingia kupitia mfumo. Hapa kuna muhtasari wa haraka kwa ajili ya uangalizi wako:</p>
                         
@@ -155,6 +154,7 @@ async function sendCustomerReceipt(order) {
         console.error(`❌ Kosa la mfumo (Customer):`, error.message);
     }
 }
+
 // ================================================================
 // 3. WORKFLOW EMAILS (Kwa heshima kwa kila Idara)
 // ================================================================
@@ -166,18 +166,24 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
         }
 
         const items = order.items || [];
-        const itemsList = items.map(item => 
-            `<tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.productName}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">TSh ${Number(item.subtotal).toLocaleString()}</td>
-            </tr>`
-        ).join('');
+        
+        // 🆕 Tunarekebisha hapa ili ikubali data za Procurement (item_name, estimated_price) na Sales (productName, subtotal)
+        const itemsList = items.map(item => {
+            const productName = item.productName || item.item_name || item.name || 'Item';
+            const quantity = item.quantity || 0;
+            const subtotal = item.subtotal || (item.estimated_price ? item.estimated_price * quantity : 0) || 0;
+            
+            return `<tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${productName}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${quantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">TSh ${Number(subtotal).toLocaleString()}</td>
+            </tr>`;
+        }).join('');
 
         const { data, error } = await resend.emails.send({
             from: 'MAK DC System <orders@makdcinvestments.co.tz>',
             to: [to],
-            cc: [process.env.CEO_EMAIL], // CEO anapokea CC
+            cc: [process.env.CEO_EMAIL], 
             subject: subject,
             html: `
                 <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
@@ -186,13 +192,12 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
                     <div style="padding: 30px 20px;">
                         <span style="background-color: ${badgeColor}; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">${title}</span>
                         
-                        <!-- Heshima kwa mpokeaji -->
                         <h2 style="color: #333; margin-top: 15px;">Kwa Heshima, ${title},</h2>
                         <p style="color: #555; line-height: 1.6; font-size: 15px;">${message}</p>
                         
                         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                            <p style="margin: 5px 0;"><strong>Oda Namba:</strong> <span style="color: #01579B; font-weight: bold;">${order.orderId}</span></p>
-                            <p style="margin: 5px 0;"><strong>Mteja:</strong> ${order.customerName}</p>
+                            <p style="margin: 5px 0;"><strong>Namba ya Kumbukumbu:</strong> <span style="color: #01579B; font-weight: bold;">${order.orderId}</span></p>
+                            <p style="margin: 5px 0;"><strong>Mhusika:</strong> ${order.customerName}</p>
                             <p style="margin: 5px 0;"><strong>Jumla:</strong> TSh ${Number(order.totalAmount).toLocaleString()}</p>
                         </div>
 
@@ -225,9 +230,8 @@ async function sendWorkflowEmail({ to, subject, title, message, order, actionUrl
 }
 
 // ================================================================
-// 4. FUNCTIONS ZENYE HESHIMA KWA KILA IDARA
+// 4. FUNCTIONS ZA SALES NA FINANCE
 // ================================================================
-
 async function sendSalesNewOrder(order) {
     await sendWorkflowEmail({
         to: process.env.SALES_EMAIL,
@@ -272,11 +276,135 @@ async function sendOrderApprovedForDelivery(order) {
     });
 }
 
+// ================================================================
+// 5. EMAIL ZA MANUNUZI (PROCUREMENT)
+// ================================================================
+async function sendProcurementNewRequest(procurement) {
+    await sendWorkflowEmail({
+        to: process.env.PROCUREMENT_EMAIL,
+        cc: [process.env.CEO_EMAIL],
+        subject: `📥 OMBI JIPYA LA UNUNUZI: ${procurement.requestNumber || procurement.request_number}`,
+        title: 'Procurement Officer',
+        message: `Kuna ombi jipya la ununuzi limewasilishwa na idara ya ${procurement.department}. Tafadhali lipitie na ulipeleke kwa Manager kwa idhini.`,
+        order: {
+            orderId: procurement.requestNumber || procurement.request_number,
+            customerName: procurement.requestedBy || procurement.requested_by,
+            totalAmount: procurement.totalAmount || procurement.total_amount || 0,
+            items: procurement.items || []
+        },
+        actionUrl: 'https://makdcinvestments.co.tz/procurement-dashboard.html',
+        actionText: 'Nenda Kwenye Procurement Dashboard',
+        badgeColor: '#f59e0b'
+    });
+}
+
+async function sendProcurementToManager(procurement) {
+    await sendWorkflowEmail({
+        to: process.env.MANAGER_EMAIL,
+        cc: [process.env.CEO_EMAIL],
+        subject: `📝 IDHINI YA OMBI LA UNUNUZI: ${procurement.requestNumber || procurement.request_number}`,
+        title: 'Meneja Uendeshaji',
+        message: `Ombi la ununuzi kutoka idara ya ${procurement.department} limekaguliwa na Procurement. Tafadhali lipitie na upe idhini ili liende kwa CEO.`,
+        order: {
+            orderId: procurement.requestNumber || procurement.request_number,
+            customerName: procurement.requestedBy || procurement.requested_by,
+            totalAmount: procurement.totalAmount || procurement.total_amount || 0,
+            items: procurement.items || []
+        },
+        actionUrl: 'https://makdcinvestments.co.tz/manager-dashboard.html',
+        actionText: 'Nenda Kwenye Manager Dashboard',
+        badgeColor: '#3b82f6'
+    });
+}
+
+async function sendProcurementToCEO(procurement) {
+    await sendWorkflowEmail({
+        to: process.env.CEO_EMAIL,
+        subject: `👑 IDHINI YA MWISHO YA UNUNUZI: ${procurement.requestNumber || procurement.request_number}`,
+        title: 'Mkurugenzi Mkuu (CEO)',
+        message: `Meneja Uendeshaji amethibitisha ombi la ununuzi kutoka idara ya ${procurement.department}. Tafadhali toa idhini ya mwisho ili Procurements ianze mchakato wa manunuzi.`,
+        order: {
+            orderId: procurement.requestNumber || procurement.request_number,
+            customerName: procurement.requestedBy || procurement.requested_by,
+            totalAmount: procurement.totalAmount || procurement.total_amount || 0,
+            items: procurement.items || []
+        },
+        actionUrl: 'https://makdcinvestments.co.tz/ceo-dashboard.html',
+        actionText: 'Nenda Kwenye CEO Dashboard',
+        badgeColor: '#22c55e'
+    });
+}
+
+// ================================================================
+// 6. EMAIL ZA MAFUTA (FUEL)
+// ================================================================
+async function sendFuelIssuedAlert(fuelData) {
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'MAK DC System <orders@makdcinvestments.co.tz>',
+            to: [process.env.CEO_EMAIL],
+            subject: `⛽ TAARIFA YA MAFUTA: ${fuelData.fuelType} imetolewa`,
+            html: `
+                <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    ${companyHeader}
+                    
+                    <div style="padding: 30px 20px;">
+                        <span style="background-color: #ea580c; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">Taarifa ya Mafuta</span>
+                        
+                        <h2 style="color: #333; margin-top: 15px;">Kwa Heshima, Mkurugenzi Mkuu,</h2>
+                        <p style="color: #555; line-height: 1.6; font-size: 15px;">Tunapenda kukutaarifu kuwa kuna mafuta yametolewa (Fuel Issued) leo. Hapa kuna muhtasari wa haraka:</p>
+                        
+                        <div style="background-color: #fff7ed; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 5px solid #ea580c;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555; width: 40%;"><strong>Aina ya Mafuta:</strong></td>
+                                    <td style="padding: 8px 0; color: #ea580c; font-weight: bold; font-size: 16px;">${fuelData.fuelType}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555;"><strong>Kiasi (Lita):</strong></td>
+                                    <td style="padding: 8px 0; color: #333; font-weight: bold;">${fuelData.quantity} L</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555;"><strong>Gari / Asset:</strong></td>
+                                    <td style="padding: 8px 0; color: #333;">${fuelData.vehicle}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555;"><strong>Aliyepokea (Dereva):</strong></td>
+                                    <td style="padding: 8px 0; color: #333;">${fuelData.receiver}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #555;"><strong>Kibali (Permit):</strong></td>
+                                    <td style="padding: 8px 0; color: #333;">${fuelData.permitNumber}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <a href="https://makdcinvestments.co.tz/ceo-dashboard.html" style="background-color: #ea580c; color: white; padding: 14px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Fungua Dashboard ya CEO</a>
+                        </div>
+                    </div>
+                    
+                    ${companyFooter}
+                </div>
+            `
+        });
+
+        if (error) console.error('❌ Fuel Alert Email Error:', error);
+        else console.log(`✅ Fuel Alert Email imetumwa kwa CEO:`, data.id);
+    } catch (error) {
+        console.error('❌ Kosa la mfumo (Fuel Alert):', error.message);
+    }
+}
+
 module.exports = {
     sendCEOAlert,
     sendCustomerReceipt,
     sendSalesNewOrder,
     sendFinanceNewOrder,
     sendManagerApproval,
-    sendOrderApprovedForDelivery
+    sendOrderApprovedForDelivery,
+    sendProcurementNewRequest,
+    sendProcurementToManager,
+    sendProcurementToCEO,
+    sendFuelIssuedAlert
 };
